@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+
+# Logs
+logs/
+*.log
+
+# Environment files
+.env
+
+# Dataset / large files
+*.zip
+data/
+
+# OS/editor files
+.DS_Store
+.vscode/
+.idea/
+
+# Testing cache
+.pytest_cache/
+
+# Coverage
+.coverage
+htmlcov/

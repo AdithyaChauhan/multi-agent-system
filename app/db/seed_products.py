@@ -1,0 +1,182 @@
+from sqlalchemy.orm import Session as DBSession
+from app.db.database import SessionLocal
+from app.models.product import Product
+from app.core.logger import get_logger
+
+logger = get_logger("app.db.seed_products")
+
+
+DEMO_PRODUCTS = [
+    # ---------- CLOTHES (12) ----------
+    {"product_id": "CLO-001", "type": "clothes", "name": "Classic Cotton T-Shirt", "brand": "Levi's", "price": 1499, "rating": 4.3,
+     "description": "Comfortable everyday cotton t-shirt for men.",
+     "attributes": {"gender": "male", "section": "top", "size": "M"}},
+
+    {"product_id": "CLO-002", "type": "clothes", "name": "Classic Cotton T-Shirt", "brand": "Levi's", "price": 1499, "rating": 4.3,
+     "description": "Comfortable everyday cotton t-shirt for men.",
+     "attributes": {"gender": "male", "section": "top", "size": "L"}},
+
+    {"product_id": "CLO-003", "type": "clothes", "name": "Slim Fit Denim Jeans", "brand": "Levi's", "price": 3299, "rating": 4.5,
+     "description": "Slim fit denim jeans for everyday wear.",
+     "attributes": {"gender": "male", "section": "bottom", "size": "L"}},
+
+    {"product_id": "CLO-004", "type": "clothes", "name": "Slim Fit Denim Jeans", "brand": "Levi's", "price": 3299, "rating": 4.5,
+     "description": "Slim fit denim jeans for everyday wear.",
+     "attributes": {"gender": "male", "section": "bottom", "size": "XL"}},
+
+    {"product_id": "CLO-005", "type": "clothes", "name": "Floral Print Blouse", "brand": "H&M", "price": 1999, "rating": 4.2,
+     "description": "Lightweight floral blouse, ideal for spring and summer.",
+     "attributes": {"gender": "female", "section": "top", "size": "S"}},
+
+    {"product_id": "CLO-006", "type": "clothes", "name": "Floral Print Blouse", "brand": "H&M", "price": 1999, "rating": 4.2,
+     "description": "Lightweight floral blouse, ideal for spring and summer.",
+     "attributes": {"gender": "female", "section": "top", "size": "M"}},
+
+    {"product_id": "CLO-007", "type": "clothes", "name": "High Waist Jeans", "brand": "Zara", "price": 3499, "rating": 4.4,
+     "description": "High waist jeans with a tapered fit.",
+     "attributes": {"gender": "female", "section": "bottom", "size": "M"}},
+
+    {"product_id": "CLO-008", "type": "clothes", "name": "High Waist Jeans", "brand": "Zara", "price": 3499, "rating": 4.4,
+     "description": "High waist jeans with a tapered fit.",
+     "attributes": {"gender": "female", "section": "bottom", "size": "L"}},
+
+    {"product_id": "CLO-009", "type": "clothes", "name": "Unisex Oversized Hoodie", "brand": "Uniqlo", "price": 2499, "rating": 4.6,
+     "description": "Comfortable oversized hoodie suitable for everyone.",
+     "attributes": {"gender": "unisex", "section": "top", "size": "L"}},
+
+    {"product_id": "CLO-010", "type": "clothes", "name": "Unisex Oversized Hoodie", "brand": "Uniqlo", "price": 2499, "rating": 4.6,
+     "description": "Comfortable oversized hoodie suitable for everyone.",
+     "attributes": {"gender": "unisex", "section": "top", "size": "XL"}},
+
+    {"product_id": "CLO-011", "type": "clothes", "name": "Joggers", "brand": "Adidas", "price": 2199, "rating": 4.3,
+     "description": "Soft cotton joggers for daily wear and gym.",
+     "attributes": {"gender": "unisex", "section": "bottom", "size": "M"}},
+
+    {"product_id": "CLO-012", "type": "clothes", "name": "Joggers", "brand": "Adidas", "price": 2199, "rating": 4.3,
+     "description": "Soft cotton joggers for daily wear and gym.",
+     "attributes": {"gender": "unisex", "section": "bottom", "size": "XXL"}},
+
+    # ---------- LAPTOPS (12) ----------
+    {"product_id": "LAP-001", "type": "laptop", "name": "MacBook Air M3", "brand": "Apple", "price": 124999, "rating": 4.8,
+     "description": "Apple MacBook Air with M3 chip, thin and lightweight.",
+     "attributes": {"storage_gb": 256, "ram_gb": 8}},
+
+    {"product_id": "LAP-002", "type": "laptop", "name": "MacBook Pro 14 M3", "brand": "Apple", "price": 194999, "rating": 4.9,
+     "description": "Pro-grade laptop for creators and developers.",
+     "attributes": {"storage_gb": 512, "ram_gb": 16}},
+
+    {"product_id": "LAP-003", "type": "laptop", "name": "XPS 13", "brand": "Dell", "price": 109999, "rating": 4.5,
+     "description": "Premium ultrabook with InfinityEdge display.",
+     "attributes": {"storage_gb": 512, "ram_gb": 16}},
+
+    {"product_id": "LAP-004", "type": "laptop", "name": "Inspiron 15", "brand": "Dell", "price": 64999, "rating": 4.1,
+     "description": "Reliable everyday laptop for students and professionals.",
+     "attributes": {"storage_gb": 512, "ram_gb": 8}},
+
+    {"product_id": "LAP-005", "type": "laptop", "name": "ThinkPad X1 Carbon", "brand": "Lenovo", "price": 154999, "rating": 4.7,
+     "description": "Business-class laptop with premium build quality.",
+     "attributes": {"storage_gb": 1024, "ram_gb": 16}},
+
+    {"product_id": "LAP-006", "type": "laptop", "name": "IdeaPad Slim 5", "brand": "Lenovo", "price": 54999, "rating": 4.2,
+     "description": "Slim everyday laptop with good battery life.",
+     "attributes": {"storage_gb": 512, "ram_gb": 16}},
+
+    {"product_id": "LAP-007", "type": "laptop", "name": "Pavilion 14", "brand": "HP", "price": 59999, "rating": 4.0,
+     "description": "Mid-range laptop for productivity and light gaming.",
+     "attributes": {"storage_gb": 512, "ram_gb": 8}},
+
+    {"product_id": "LAP-008", "type": "laptop", "name": "Spectre x360", "brand": "HP", "price": 134999, "rating": 4.6,
+     "description": "2-in-1 convertible with OLED display.",
+     "attributes": {"storage_gb": 1024, "ram_gb": 16}},
+
+    {"product_id": "LAP-009", "type": "laptop", "name": "ZenBook 14", "brand": "Asus", "price": 89999, "rating": 4.4,
+     "description": "Lightweight laptop with a high-resolution display.",
+     "attributes": {"storage_gb": 512, "ram_gb": 16}},
+
+    {"product_id": "LAP-010", "type": "laptop", "name": "ROG Strix G16", "brand": "Asus", "price": 149999, "rating": 4.6,
+     "description": "Gaming laptop with discrete graphics and high refresh display.",
+     "attributes": {"storage_gb": 1024, "ram_gb": 32}},
+
+    {"product_id": "LAP-011", "type": "laptop", "name": "Predator Helios 16", "brand": "Acer", "price": 169999, "rating": 4.5,
+     "description": "Powerful gaming laptop with RGB keyboard.",
+     "attributes": {"storage_gb": 1024, "ram_gb": 32}},
+
+    {"product_id": "LAP-012", "type": "laptop", "name": "Aspire 5", "brand": "Acer", "price": 49999, "rating": 4.0,
+     "description": "Budget-friendly laptop for everyday work.",
+     "attributes": {"storage_gb": 512, "ram_gb": 8}},
+
+    # ---------- HEADPHONES (12) ----------
+    {"product_id": "HPH-001", "type": "headphones", "name": "WH-1000XM5", "brand": "Sony", "price": 29990, "rating": 4.8,
+     "description": "Industry-leading noise cancelling over-ear headphones.",
+     "attributes": {"form_factor": "over-ear", "wireless": True}},
+
+    {"product_id": "HPH-002", "type": "headphones", "name": "WF-1000XM5", "brand": "Sony", "price": 24990, "rating": 4.7,
+     "description": "Premium noise-cancelling true wireless earbuds.",
+     "attributes": {"form_factor": "earbuds", "wireless": True}},
+
+    {"product_id": "HPH-003", "type": "headphones", "name": "AirPods Pro 2", "brand": "Apple", "price": 24900, "rating": 4.7,
+     "description": "Active noise cancelling earbuds with spatial audio.",
+     "attributes": {"form_factor": "earbuds", "wireless": True}},
+
+    {"product_id": "HPH-004", "type": "headphones", "name": "AirPods Max", "brand": "Apple", "price": 59900, "rating": 4.6,
+     "description": "Premium over-ear headphones with computational audio.",
+     "attributes": {"form_factor": "over-ear", "wireless": True}},
+
+    {"product_id": "HPH-005", "type": "headphones", "name": "QuietComfort 45", "brand": "Bose", "price": 26990, "rating": 4.6,
+     "description": "Comfortable over-ear headphones with excellent ANC.",
+     "attributes": {"form_factor": "over-ear", "wireless": True}},
+
+    {"product_id": "HPH-006", "type": "headphones", "name": "QuietComfort Earbuds II", "brand": "Bose", "price": 23990, "rating": 4.5,
+     "description": "Wireless earbuds with adaptive noise cancellation.",
+     "attributes": {"form_factor": "earbuds", "wireless": True}},
+
+    {"product_id": "HPH-007", "type": "headphones", "name": "Momentum 4", "brand": "Sennheiser", "price": 27990, "rating": 4.7,
+     "description": "Audiophile-grade over-ear wireless headphones.",
+     "attributes": {"form_factor": "over-ear", "wireless": True}},
+
+    {"product_id": "HPH-008", "type": "headphones", "name": "HD 560S", "brand": "Sennheiser", "price": 13990, "rating": 4.6,
+     "description": "Reference-class open-back wired headphones.",
+     "attributes": {"form_factor": "over-ear", "wireless": False}},
+
+    {"product_id": "HPH-009", "type": "headphones", "name": "Galaxy Buds3 Pro", "brand": "Samsung", "price": 18990, "rating": 4.4,
+     "description": "True wireless earbuds with ANC and 360 audio.",
+     "attributes": {"form_factor": "earbuds", "wireless": True}},
+
+    {"product_id": "HPH-010", "type": "headphones", "name": "Soundcore Q35", "brand": "Anker", "price": 9999, "rating": 4.3,
+     "description": "Budget-friendly ANC over-ear wireless headphones.",
+     "attributes": {"form_factor": "over-ear", "wireless": True}},
+
+    {"product_id": "HPH-011", "type": "headphones", "name": "ATH-M50x", "brand": "Audio-Technica", "price": 12999, "rating": 4.7,
+     "description": "Studio-grade wired over-ear headphones.",
+     "attributes": {"form_factor": "over-ear", "wireless": False}},
+
+    {"product_id": "HPH-012", "type": "headphones", "name": "Nothing Ear (2)", "brand": "Nothing", "price": 9999, "rating": 4.3,
+     "description": "Stylish ANC earbuds with transparent design.",
+     "attributes": {"form_factor": "earbuds", "wireless": True}},
+]
+
+
+def seed_demo_products():
+    db: DBSession = SessionLocal()
+
+    try:
+        seeded = 0
+        for product_data in DEMO_PRODUCTS:
+            existing = db.query(Product).filter(Product.product_id == product_data["product_id"]).first()
+            if not existing:
+                db.add(Product(**product_data))
+                seeded += 1
+
+        db.commit()
+
+        if seeded == 0:
+            logger.info("Products already seeded — skipping")
+        else:
+            logger.info(f"Seeded {seeded} products")
+
+    except Exception as e:
+        logger.error(f"Product seed failed | {str(e)}")
+        db.rollback()
+        raise
+    finally:
+        db.close()

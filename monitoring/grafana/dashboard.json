@@ -1,0 +1,69 @@
+{
+  "title": "Multi-Agent E-commerce Dashboard",
+  "panels": [
+    {
+      "title": "Request Volume Over Time",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "targets": [{
+        "datasource": {"type": "loki"},
+        "expr": "sum(count_over_time({job=\"multiagent-app\"} |= \"REQUEST RECEIVED\" [1m]))",
+        "legendFormat": "Requests/min"
+      }]
+    },
+    {
+      "title": "Agent Selection Distribution",
+      "type": "piechart",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "targets": [
+        {
+          "datasource": {"type": "loki"},
+          "expr": "sum(count_over_time({job=\"multiagent-app\"} |= \"intent=order\" [1h]))",
+          "legendFormat": "Order Agent"
+        },
+        {
+          "datasource": {"type": "loki"},
+          "expr": "sum(count_over_time({job=\"multiagent-app\"} |= \"intent=product\" [1h]))",
+          "legendFormat": "Product Agent"
+        },
+        {
+          "datasource": {"type": "loki"},
+          "expr": "sum(count_over_time({job=\"multiagent-app\"} |= \"intent=support\" [1h]))",
+          "legendFormat": "Support Agent"
+        }
+      ]
+    },
+    {
+      "title": "Error Rate Over Time",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "targets": [{
+        "datasource": {"type": "loki"},
+        "expr": "sum(count_over_time({job=\"multiagent-app\"} |= \"ERROR\" [1m]))",
+        "legendFormat": "Errors/min"
+      }]
+    },
+    {
+      "title": "Application Logs",
+      "type": "logs",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "targets": [{
+        "datasource": {"type": "loki"},
+        "expr": "{job=\"multiagent-app\"}",
+        "legendFormat": ""
+      }]
+    },
+    {
+      "title": "Average Response Time",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16},
+      "targets": [{
+        "datasource": {"type": "loki"},
+        "expr": "sum(count_over_time({job=\"multiagent-app\"} |= \"RESPONSE RETURNED\" [1m]))",
+        "legendFormat": "Responses/min"
+      }]
+    }
+  ],
+  "time": {"from": "now-6h", "to": "now"},
+  "refresh": "30s"
+}
