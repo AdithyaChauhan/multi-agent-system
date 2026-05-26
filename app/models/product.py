@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, JSON
 from sqlalchemy.sql import func
 from app.db.database import Base
-
+from sqlalchemy.dialects.postgresql import JSONB
 
 class Product(Base):
     __tablename__ = "products"
@@ -14,7 +14,7 @@ class Product(Base):
     type        = Column(String, nullable=True, index=True)         # Product type (3rd level)
     category    = Column(String, nullable=True, index=True)         # Top-level category
     subcategory = Column(String, nullable=True, index=True)         # 2nd level category
-    
+    tags = Column(JSONB, nullable=True)
     brand       = Column(String, nullable=True)
     price       = Column(Integer, nullable=False)                   # in cents/paise
     description = Column(String, nullable=True)
