@@ -66,104 +66,31 @@ RELAXATION_ORDER = [
     "keywords",
 ]
 
-EXTRACTION_SYSTEM_PROMPT = """You are a product preference extraction system for an e-commerce catalog.
+EXTRACTION_SYSTEM_PROMPT = """Extract product search preferences. Return JSON only.
 
-Our catalog has these categories and subcategories:
+Catalog (use exact subcategory names):
+Electronics: HomeTheater,TV & Video | Headphones,Earbuds & Accessories | WearableTechnology | HomeAudio | Mobiles & Accessories | GeneralPurposeBatteries & BatteryChargers
+Computers & Accessories: Accessories & Peripherals | NetworkingDevices | ExternalDevices & DataStorage | Monitors | Printers,Inks & Accessories
+Home & Kitchen: Kitchen & HomeAppliances | Heating,Cooling & AirQuality | HomeStorage & Organization
+Office Products (no subcategory)
 
-Electronics:
-- HomeTheater,TV & Video
-- Headphones,Earbuds & Accessories
-- WearableTechnology
-- HomeAudio  ← Bluetooth speakers, portable speakers, soundbars, multimedia speakers
-- Mobiles & Accessories
-- Cameras & Photography
-- GeneralPurposeBatteries & BatteryChargers
+Output schema: {"category": str|null, "subcategory": str|null, "type": str|null, "brand": str|null, "max_price": int|null, "min_price": int|null, "keywords": [str], "unavailable_request": bool}
 
-Computers & Accessories:
-- Accessories & Peripherals
-- NetworkingDevices
-- ExternalDevices & DataStorage
-- Monitors
-- Printers,Inks & Accessories
+Rules:
+- Use exact subcategory name from the list above
+- Set type for: air purifier, ceiling fan, room heater, geyser, mixer grinder (within their subcategory)
+- Bluetooth/portable speakers, soundbars → HomeAudio (NOT Headphones,Earbuds & Accessories)
+- keywords: only product-specific features not covered by category/type (e.g. "wireless", "calling", "noise cancellation")
+- wired/wireless is a keyword for headphones; normalize: mice→mouse, telly→TV, adaptor→adapter
+- Never output string "null" — use JSON null
+- unavailable_request TRUE: laptops, desktop PCs, tablets (devices), smartphones (devices), clothing, shoes, furniture, food
+- unavailable_request FALSE: all appliances, accessories, peripherals, fans, air purifiers, geysers
 
-Home & Kitchen:
-- Kitchen & HomeAppliances
-- Heating,Cooling & AirQuality
-- HomeStorage & Organization
-
-Office Products (no subcategories)
-
-Extract user preferences and return JSON:
-{
-  "category": "string or null",
-  "subcategory": "string or null",
-  "type": "string or null",
-  "brand": "string or null",
-  "max_price": integer or null,
-  "min_price": integer or null,
-  "keywords": ["list of strings"],
-  "unavailable_request": false
-}
-
-RULES:
-- Match user query to the most appropriate category and subcategory from the list above
-- Set subcategory whenever you can confidently identify it — it filters more precisely than keywords
-- Set `type` for specific product types within a subcategory (e.g. "air purifier", "ceiling fan", "geyser", "mixer grinder", "room heater", "inverter AC")
-- Bluetooth speakers, portable speakers, soundbars → subcategory: HomeAudio (NOT Headphones,Earbuds & Accessories)
-- Keywords should only contain product-specific terms not covered by category/subcategory/type (e.g. specific features like "calling", "noise cancellation", "wireless")
-- Keep wired/wireless distinction as a keyword for headphones — it is product-distinguishing
-- Normalize keywords to standard English (adaptor→adapter, mice→mouse, telly→TV)
-- Rating/review score is NOT a searchable field — ignore rating mentions in keywords
-- Strip noise words from keywords (feature, support, mode, enabled, compatible)
-- NEVER output the string "null" — use actual JSON null (no quotes) for fields with no value
-
-NOTE: Set unavailable_request TRUE for:
-- Laptops, desktop computers, tablets (accessories only, NOT the devices)
-- Smartphones, mobile phones as devices (accessories like cases, chargers are fine)
-- Cameras (NOT in catalog)
-- Clothing, shoes, toys, food, furniture, books
-
-CRITICAL — Set unavailable_request FALSE for ALL of these (they ARE in catalog):
-- Ceiling fans, pedestal fans, table fans, exhaust fans → category: Home & Kitchen, subcategory: Heating,Cooling & AirQuality, type: ceiling fan
-- Room heaters, geysers, water heaters, immersion rods → category: Home & Kitchen, subcategory: Heating,Cooling & AirQuality
-- Air purifiers, humidifiers → category: Home & Kitchen, subcategory: Heating,Cooling & AirQuality, type: air purifier
-- Mixer grinders, irons, kettles, vacuum cleaners, air fryers → category: Home & Kitchen, subcategory: Kitchen & HomeAppliances
-- All home appliances and kitchen appliances
-- All accessories and peripherals
-
-EXAMPLES:
-Input: "show me boAt headphones under 2000"
-Output: {"category": "Electronics", "subcategory": "Headphones,Earbuds & Accessories", "type": null, "brand": "boAt", "max_price": 2000, "min_price": null, "keywords": [], "unavailable_request": false}
-
-Input: "wireless headphones under 2000"
-Output: {"category": "Electronics", "subcategory": "Headphones,Earbuds & Accessories", "type": null, "brand": null, "max_price": 2000, "min_price": null, "keywords": ["wireless"], "unavailable_request": false}
-
-Input: "USB Type-C cable"
-Output: {"category": "Computers & Accessories", "subcategory": "Accessories & Peripherals", "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": ["USB", "Type-C", "cable"], "unavailable_request": false}
-
-Input: "smart TV under 15000"
-Output: {"category": "Electronics", "subcategory": "HomeTheater,TV & Video", "type": null, "brand": null, "max_price": 15000, "min_price": null, "keywords": [], "unavailable_request": false}
-
-Input: "air purifier under 10000"
-Output: {"category": "Home & Kitchen", "subcategory": "Heating,Cooling & AirQuality", "type": "air purifier", "brand": null, "max_price": 10000, "min_price": null, "keywords": [], "unavailable_request": false}
-
-Input: "ceiling fan under 3000"
-Output: {"category": "Home & Kitchen", "subcategory": "Heating,Cooling & AirQuality", "type": "ceiling fan", "brand": null, "max_price": 3000, "min_price": null, "keywords": [], "unavailable_request": false}
-
-Input: "football shoes"
-Output: {"category": null, "subcategory": null, "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": ["football", "shoes"], "unavailable_request": true}
-
-Input: "laptop under 50000"
-Output: {"category": null, "subcategory": null, "type": null, "brand": null, "max_price": 50000, "min_price": null, "keywords": ["laptop"], "unavailable_request": true}
-
-Input: "smartwatch with calling feature"
-Output: {"category": "Electronics", "subcategory": "WearableTechnology", "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": ["calling"], "unavailable_request": false}
-
-Input: "JBL bluetooth speaker under 2000"
-Output: {"category": "Electronics", "subcategory": "HomeAudio", "type": null, "brand": "JBL", "max_price": 2000, "min_price": null, "keywords": [], "unavailable_request": false}
-
-Input: "wireless portable speaker"
-Output: {"category": "Electronics", "subcategory": "HomeAudio", "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": ["wireless", "portable"], "unavailable_request": false}
+Examples:
+"air purifier under 10000" → {"category": "Home & Kitchen", "subcategory": "Heating,Cooling & AirQuality", "type": "air purifier", "brand": null, "max_price": 10000, "min_price": null, "keywords": [], "unavailable_request": false}
+"ceiling fan under 3000" → {"category": "Home & Kitchen", "subcategory": "Heating,Cooling & AirQuality", "type": "ceiling fan", "brand": null, "max_price": 3000, "min_price": null, "keywords": [], "unavailable_request": false}
+"JBL bluetooth speaker under 2000" → {"category": "Electronics", "subcategory": "HomeAudio", "type": null, "brand": "JBL", "max_price": 2000, "min_price": null, "keywords": [], "unavailable_request": false}
+"laptop under 50000" → {"category": null, "subcategory": null, "type": null, "brand": null, "max_price": 50000, "min_price": null, "keywords": ["laptop"], "unavailable_request": true}
 
 Respond ONLY with valid JSON."""
 
@@ -182,33 +109,12 @@ def extract_preferences(state: AgentState) -> dict:
             for msg in recent
         ])
 
-    # Include history in prompt for follow-up understanding
     if history_context:
         full_prompt = (
             f"Recent conversation:\n{history_context}\n\n"
             f"Current message: {user_message}\n\n"
-            f"IMPORTANT: If current message is a follow-up, preserve context from history:\n"
-            f"- 'cheaper ones', 'under 1000', 'more affordable' → keep category+subcategory+type+brand, lower max_price\n"
-            f"- 'what about Sony/Samsung/Bajaj' → keep category+subcategory+type+price from history, change brand only\n"
-            f"- 'ones with X feature', 'with calling feature' → keep category+subcategory+price+brand, add X as keyword\n"
-            f"- 'show more', 'other options' → keep all same filters\n"
-            f"- price ONLY message ('under 2000', 'below 5000', '5000 to 8000') → copy category/subcategory/type/brand/keywords EXACTLY from history; only change max_price/min_price. NEVER output null for these fields when history shows a product search.\n\n"
-            f"Example: history has 'headphones under 2000', user says 'what about Sony'\n"
-            f"→ category='Electronics', subcategory='Headphones,Earbuds & Accessories', brand='Sony', max_price=2000\n\n"
-            f"Example: history has 'smart TV under 15000', user says 'what about Samsung'\n"
-            f"→ category='Electronics', subcategory='HomeTheater,TV & Video', brand='Samsung', max_price=15000\n"
-            f"(NOT headphones — subcategory must stay TV because history was about TVs)\n\n"
-            f"Example: history has 'smartwatches under 3000', user says 'under 2000'\n"
-            f"→ category='Electronics', subcategory='WearableTechnology', max_price=2000\n\n"
-            f"Example: history has 'mixer grinder under 2000', user says 'what about Bajaj'\n"
-            f"→ category='Home & Kitchen', subcategory='Kitchen & HomeAppliances', type='mixer grinder', brand='Bajaj', max_price=2000\n\n"
-            f"Example: history has 'air purifier under 10000' + 'what about Philips', user says 'under 8000'\n"
-            f"→ category='Home & Kitchen', subcategory='Heating,Cooling & AirQuality', type='air purifier', brand='Philips', max_price=8000\n"
-            f"(NOT null for category — copy everything from history, just update the price)\n\n"
-            f"Example: history has 'air purifier under 10000', user says 'what about Philips'\n"
-            f"→ category='Home & Kitchen', subcategory='Heating,Cooling & AirQuality', type='air purifier', brand='Philips', max_price=10000\n\n"
-            f"CRITICAL RULE: When user says 'what about [brand]', ALWAYS keep the subcategory from history. "
-            f"Do NOT infer subcategory from brand — the brand makes many products, but the user is asking within the current product context."
+            f"If this is a follow-up, preserve all fields from history and only update what the user explicitly changed.\n"
+            f"CRITICAL: When user says 'what about [Brand]', keep the same subcategory from history — do NOT infer subcategory from brand name."
         )
     else:
         full_prompt = user_message

@@ -23,140 +23,35 @@ logger = get_logger("app.agents.router")
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=os.getenv("OPENAI_API_KEY"))
 
 
-ROUTER_SYSTEM_PROMPT = """You are an intent classification system for a customer service application.
+ROUTER_SYSTEM_PROMPT = """Classify user intent for a customer service app. Use conversation history to resolve references and follow-ups.
 
-You receive conversation history to understand context. Use it to interpret references, pronouns, and follow-up messages.
+Intents:
+- "order" — order status, tracking, delivery, shipping. If assistant asked for order ID and user provides one → "order"
+- "product" — ANY shopping, browsing, recommendations, or refinement of a previous product search
+- "support" — complaints, refunds, returns, defective items, broken products
+- "unclear" — truly off-topic (geography, general knowledge) or pure pronoun with no referent
 
-## CRITICAL: Understanding Conversation Context
+Product follow-up rules (if history shows a product search, ALWAYS classify as "product"):
+- Price only: "under 2000", "cheaper", "between 1000 and 2000"
+- Brand only: "what about Sony", "show me Bajaj"
+- Feature: "ones with calling feature", "wireless ones", "show more"
+- Any refinement of prior search → "product", confidence >= 0.9
 
-When conversation history is provided, CAREFULLY READ IT to understand:
-1. What was just asked or shown to the user
-2. What the user is referring to with pronouns or references
-3. The current topic of conversation
+Order ID: extract if present (ORD-1234, order #1234, "the first one", "the shipped one").
+"list/show my orders" → order_id: null.
 
-### Examples of Context Understanding:
+Examples:
+History: "You have ORD-2002 (delivered), ORD-2001 (shipped). Which one?" | Message: "the first one"
+→ {"intent": "order", "confidence": 1.0, "order_id": "ORD-2002"}
 
-**Example 1 - Reference Resolution:**
-History:
-- Assistant: "You have 2 orders: ORD-2002 (delivered), ORD-2001 (shipped). Which one?"
-Current message: "the first one"
+History: "Here are smartwatches under 3000..." | Message: "under 2000"
+→ {"intent": "product", "confidence": 0.95, "order_id": null}
 
-Analysis: User is answering the question. "the first one" = ORD-2002 (first in the list).
-Output: {"intent": "order", "confidence": 1.0, "order_id": "ORD-2002"}
-
-**Example 2 - Pronoun Resolution:**
-History:
-- Assistant: "You have 2 orders: ORD-2002, ORD-2001. Which one?"
-Current message: "the shipped one"
-
-Analysis: User is specifying which order. "shipped one" = ORD-2001 (shown as shipped).
-Output: {"intent": "order", "confidence": 1.0, "order_id": "ORD-2001"}
-
-**Example 3 - Topic Continuation:**
-History:
-- Assistant: "Here are some headphones..."
-Current message: "what about for older kids?"
-
-Analysis: User is continuing the product search topic, just refining criteria.
-Output: {"intent": "product", "confidence": 0.95, "order_id": null}
-
-**Example 4 - Pure Pronoun:**
-History:
-- Assistant: "You have 2 orders: ORD-2002, ORD-2001. Which one?"
-Current message: "it"
-
-Analysis: "it" is too vague - need to ask for clarification.
-Output: {"intent": "unclear", "confidence": 0.3, "order_id": null}
-
-**Example 5 - Price Refinement:**
-History:
-- Assistant: "Here are smartwatches under 3000..."
-Current message: "under 2000"
-
-Analysis: Price refinement of ongoing product search. Always product intent.
-Output: {"intent": "product", "confidence": 0.95, "order_id": null}
-
-**Example 6 - Brand Switch:**
-History:
-- Assistant: "Here are headphones under 2000..."
-Current message: "what about Sony"
-
-Analysis: Brand switch in ongoing product search. Always product intent.
-Output: {"intent": "product", "confidence": 0.95, "order_id": null}
-
-**Example 7 - Feature Refinement:**
-History:
-- Assistant: "Here are wireless mice..."
-Current message: "ones with long battery life"
-
-Analysis: Feature refinement of ongoing product search. Always product intent.
-Output: {"intent": "product", "confidence": 0.95, "order_id": null}
-
-**Example 8 - Out of Scope:**
-Current message: "what is the capital of France?"
-
-Analysis: Not related to shopping, orders, or support.
-Output: {"intent": "unclear", "confidence": 0.9, "order_id": null}
-
-**Example 9 - Show More:**
-History:
-- Assistant: "Here are mixer grinders under 2000..."
-Current message: "show me more"
-
-Analysis: Continuation of product search.
-Output: {"intent": "product", "confidence": 0.95, "order_id": null}
-
-## Intent Classification Rules:
-
-Classify the user's message into ONE of these intents:
-
-**"order"** — Questions about order status, shipping, tracking, delivery
-- Examples: "where is my order", "track my package", "order status"
-- IMPORTANT: If conversation shows assistant asked for order ID and user provides one → "order"
-
-**"product"** — ANYTHING related to shopping, products, browsing, recommendations
-- Examples: "laptops", "headphones", "show me shoes", "I need a gift"
-- Price-only follow-ups: "under 2000", "cheaper", "5000 to 8000" → ALWAYS "product" if history shows product search
-- Brand-only follow-ups: "what about Sony", "show Bajaj" → ALWAYS "product" if history shows product search
-- Feature follow-ups: "ones with calling feature", "wireless ones" → ALWAYS "product"
-- Price range: "between 1000 and 2000" → ALWAYS "product" if history shows product search
-- Any refinement of previous product search → "product" with confidence >= 0.9
-
-**"support"** — Complaints, refunds, returns, defective items, issues
-- Examples: "this is broken", "I want a refund", "complaint"
-
-**"unclear"** — ONLY use this if:
-- Message is completely ambiguous with NO conversation history
-- Truly off-topic (weather, geography, general knowledge questions)
-- Pure pronouns without clear referent
-
-## Order ID Extraction:
-
-Extract order ID if present:
-- Direct formats: ORD-1234, ORD1234, order #1234
-- Contextual references: "the first one", "the delivered one"
-
-## Important: List Intent
-If user says "show my orders", "list my orders" → set order_id to null. User wants a list.
-
-## Response Format:
+Message: "it" (no clear referent in history)
+→ {"intent": "unclear", "confidence": 0.3, "order_id": null}
 
 Respond ONLY with valid JSON:
-{
-  "intent": "order" | "product" | "support" | "unclear",
-  "confidence": 0.0 to 1.0,
-  "order_id": "ORD-1234" or null
-}
-
-## Reasoning Process:
-
-1. Read conversation history carefully
-2. Identify what was just discussed
-3. Understand what user is referring to
-4. Classify intent based on context
-5. Extract order_id if applicable
-
-Do not include any text outside the JSON."""
+{"intent": "order"|"product"|"support"|"unclear", "confidence": 0.0-1.0, "order_id": "ORD-1234"|null}"""
 
 def classify_intent_and_extract(state: AgentState) -> dict:
     """LLM node — classifies intent using prompt from LangSmith Hub"""
