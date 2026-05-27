@@ -71,24 +71,25 @@ EXTRACTION_SYSTEM_PROMPT = """Extract product search preferences. Return JSON on
 Catalog (use exact subcategory names):
 Electronics: HomeTheater,TV & Video | Headphones,Earbuds & Accessories | WearableTechnology | HomeAudio | Mobiles & Accessories | GeneralPurposeBatteries & BatteryChargers
 Computers & Accessories: Accessories & Peripherals | NetworkingDevices | ExternalDevices & DataStorage | Monitors | Printers,Inks & Accessories
-Home & Kitchen: Kitchen & HomeAppliances | Heating,Cooling & AirQuality | HomeStorage & Organization
+Home & Kitchen (subcategory = the appliance, type = null): iron | mixer grinder | blender | electric kettle | air fryer | vacuum cleaner | induction | sandwich maker | toaster | rice cooker | juicer | egg boiler | water purifier | water filter | frother | chopper | hand mixer | garment steamer | kitchen scale | lint remover | coffee maker | room heater | ceiling fan | air purifier | water heater | pedestal fan | humidifier | air conditioner | HomeStorage & Organization
 Office Products (no subcategory)
 
 Output schema: {"category": str|null, "subcategory": str|null, "type": str|null, "brand": str|null, "max_price": int|null, "min_price": int|null, "keywords": [str], "unavailable_request": bool}
 
 Rules:
 - Use exact subcategory name from the list above
-- Set type for: air purifier, ceiling fan, room heater, geyser, mixer grinder (within their subcategory)
+- For Home & Kitchen: subcategory = specific appliance from list, type = null
+- For Electronics: type = specific product (smart tv, tws earbuds, neckband, over-ear headphones, wired earphones, smartwatch, bluetooth speaker, soundbar, projector, streaming device, router, pen drive, keyboard, mouse, webcam)
 - Bluetooth/portable speakers, soundbars → HomeAudio (NOT Headphones,Earbuds & Accessories)
-- keywords: only product-specific features not covered by category/type (e.g. "wireless", "calling", "noise cancellation")
+- keywords: only product-specific features not covered by subcategory/type (e.g. "wireless", "calling", "noise cancellation")
 - wired/wireless is a keyword for headphones; normalize: mice→mouse, telly→TV, adaptor→adapter
 - Never output string "null" — use JSON null
 - unavailable_request TRUE: laptops, desktop PCs, tablets (devices), smartphones (devices), clothing, shoes, furniture, food
 - unavailable_request FALSE: all appliances, accessories, peripherals, fans, air purifiers, geysers
 
 Examples:
-"air purifier under 10000" → {"category": "Home & Kitchen", "subcategory": "Heating,Cooling & AirQuality", "type": "air purifier", "brand": null, "max_price": 10000, "min_price": null, "keywords": [], "unavailable_request": false}
-"ceiling fan under 3000" → {"category": "Home & Kitchen", "subcategory": "Heating,Cooling & AirQuality", "type": "ceiling fan", "brand": null, "max_price": 3000, "min_price": null, "keywords": [], "unavailable_request": false}
+"mixer grinder under 3000" → {"category": "Home & Kitchen", "subcategory": "mixer grinder", "type": null, "brand": null, "max_price": 3000, "min_price": null, "keywords": [], "unavailable_request": false}
+"air purifier under 10000" → {"category": "Home & Kitchen", "subcategory": "air purifier", "type": null, "brand": null, "max_price": 10000, "min_price": null, "keywords": [], "unavailable_request": false}
 "JBL bluetooth speaker under 2000" → {"category": "Electronics", "subcategory": "HomeAudio", "type": null, "brand": "JBL", "max_price": 2000, "min_price": null, "keywords": [], "unavailable_request": false}
 "laptop under 50000" → {"category": null, "subcategory": null, "type": null, "brand": null, "max_price": 50000, "min_price": null, "keywords": ["laptop"], "unavailable_request": true}
 
