@@ -53,12 +53,13 @@ def search_products(
         if min_price is not None:
             query = query.filter(Product.price >= min_price)
         
-        # Keyword search across name, description, and attributes
+        # Keyword search in name, brand, and tags
         if keywords:
             for keyword in keywords:
                 keyword_filter = or_(
                     Product.name.ilike(f"%{keyword}%"),
                     Product.brand.ilike(f"%{keyword}%"),
+                    cast(Product.tags, String).ilike(f"%{keyword}%"),
                 )
                 query = query.filter(keyword_filter)
         

@@ -22,6 +22,41 @@ llm = ChatOpenAI(
     api_key=os.getenv("OPENAI_API_KEY")
 )
 
+def get_catalog_structure() -> str:
+    """Load category/subcategory structure from DB dynamically"""
+    from app.db.database import SessionLocal
+    from app.models.product import Product
+    from sqlalchemy import distinct
+
+    db = SessionLocal()
+    try:
+        rows = db.query(
+            Product.category,
+            Product.subcategory
+        ).distinct().filter(
+            Product.category.isnot(None)
+        ).order_by(Product.category, Product.subcategory).all()
+
+        structure = {}
+        for category, subcategory in rows:
+            if category not in structure:
+                structure[category] = set()
+            if subcategory:
+                structure[category].add(subcategory)
+
+        lines = []
+        for cat, subs in sorted(structure.items()):
+            lines.append(f"{cat}:")
+            for sub in sorted(subs):
+                lines.append(f"  - {sub}")
+
+        return "\n".join(lines)
+    finally:
+        db.close()
+
+# Load once at startup
+CATALOG_STRUCTURE = get_catalog_structure()
+
 # Generic relaxation order for all categories
 RELAXATION_ORDER = [
     "subcategory",
@@ -74,10 +109,11 @@ RULES:
 - Keywords should only contain product-specific terms not covered by category/subcategory (e.g. brand features, specific model types)
 - Normalize keywords to standard English (adaptor→adapter, mice→mouse, telly→TV)
 - Rating/review score is NOT a searchable field — ignore rating mentions in keywords
+- Strip noise words from keywords (feature, support, mode, enabled, compatible)
 
 NOTE: Set unavailable_request TRUE for:
 - Laptops, desktop computers, tablets (accessories only, NOT the devices)
-- Smartphones, mobile phones (accessories only, NOT phones)
+- Smartphones, mobile phones as devices (accessories like cases, chargers are fine)
 - Cameras (NOT in catalog)
 - Clothing, shoes, toys, food, furniture, books
 
@@ -98,6 +134,9 @@ Output: {"category": null, "subcategory": null, "brand": null, "max_price": null
 
 Input: "laptop under 50000"
 Output: {"category": null, "subcategory": null, "brand": null, "max_price": 50000, "min_price": null, "keywords": ["laptop"], "unavailable_request": true}
+
+Input: "smartwatch with calling feature"
+Output: {"category": "Electronics", "subcategory": "WearableTechnology", "brand": null, "max_price": null, "min_price": null, "keywords": ["calling"], "unavailable_request": false}
 
 Respond ONLY with valid JSON."""
 

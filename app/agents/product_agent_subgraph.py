@@ -8,10 +8,13 @@ logger = get_logger("app.agents.product_subgraph")
 
 # ---------- Scoring weights ----------
 
-WEIGHT_RATING          = 0.45
-WEIGHT_REVIEW_RATING   = 0.30
+WEIGHT_RATING          = 0.30
+WEIGHT_REVIEW_RATING   = 0.20
 WEIGHT_PRICE           = 0.15
 WEIGHT_SPEC_MATCH      = 0.10
+WEIGHT_BRAND_MATCH     = 0.15
+WEIGHT_TAG_MATCH       = 0.07
+WEIGHT_TITLE_MATCH     = 0.03
 
 
 # ---------- Nodes ----------
@@ -141,21 +144,56 @@ def compute_score(state: AgentState) -> dict:
             )
             spec_match_score = matched / len(keywords)
 
+        # 5. brand match score (0 or 1)
+        brand_match_score = 0.0
+        user_brand = (prefs.get("brand") or "").lower()
+        product_brand = (product.get("brand") or "").lower()
+        if user_brand and user_brand in product_brand:
+            brand_match_score = 1.0
+
+        # 6. tag match score (0 to 1)
+        tag_match_score = 0.0
+        if keywords:
+            tags = product.get("tags") or []
+            tags_text = " ".join(tags).lower() if isinstance(tags, list) else str(tags).lower()
+            tag_matched = sum(
+                1 for kw in keywords
+                if kw.lower() in tags_text
+            )
+            tag_match_score = tag_matched / len(keywords)
+
+        # 7. title match score (0 to 1)
+        title_match_score = 0.0
+        if keywords:
+            title = (product.get("name") or "").lower()
+            title_matched = sum(
+                1 for kw in keywords
+                if kw.lower() in title
+            )
+            title_match_score = title_matched / len(keywords)
+        
         # combine all scores
+
         final_score = (
-            WEIGHT_RATING        * rating_score  +
-            WEIGHT_REVIEW_RATING * review_score  +
-            WEIGHT_PRICE         * price_score   +
-            WEIGHT_SPEC_MATCH    * spec_match_score
+            WEIGHT_RATING        * rating_score      +
+            WEIGHT_REVIEW_RATING * review_score      +
+            WEIGHT_PRICE         * price_score       +
+            WEIGHT_SPEC_MATCH    * spec_match_score  +
+            WEIGHT_BRAND_MATCH   * brand_match_score +
+            WEIGHT_TAG_MATCH     * tag_match_score   +
+            WEIGHT_TITLE_MATCH   * title_match_score
         )
 
         scored.append({
             **product,
-            "rating_score":     round(rating_score, 3),
-            "review_score":     round(review_score, 3),
-            "price_score":      round(price_score, 3),
-            "spec_match_score": round(spec_match_score, 3),
-            "final_score":      round(final_score, 3),
+            "rating_score":      round(rating_score, 3),
+            "review_score":      round(review_score, 3),
+            "price_score":       round(price_score, 3),
+            "spec_match_score":  round(spec_match_score, 3),
+            "brand_match_score": round(brand_match_score, 3),
+            "tag_match_score":   round(tag_match_score, 3),
+            "title_match_score": round(title_match_score, 3),
+            "final_score":       round(final_score, 3),
         })
 
     # sort by final score descending
