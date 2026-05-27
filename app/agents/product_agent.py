@@ -96,6 +96,7 @@ Extract user preferences and return JSON:
 {
   "category": "string or null",
   "subcategory": "string or null",
+  "type": "string or null",
   "brand": "string or null",
   "max_price": integer or null,
   "min_price": integer or null,
@@ -253,6 +254,7 @@ def do_search_products(state: AgentState) -> dict:
     results = search_products(
         category=category,
         subcategory=subcategory,
+        product_type=prefs.get("type"),
         brand=prefs.get("brand"),
         max_price=prefs.get("max_price"),
         min_price=prefs.get("min_price"),

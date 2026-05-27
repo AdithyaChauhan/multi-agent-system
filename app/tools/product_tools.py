@@ -10,6 +10,7 @@ logger = get_logger("app.tools.product_tools")
 def search_products(
     category: Optional[str] = None,
     subcategory: Optional[str] = None,
+    product_type: Optional[str] = None,
     brand: Optional[str] = None,
     max_price: Optional[int] = None,
     min_price: Optional[int] = None,
@@ -22,6 +23,7 @@ def search_products(
     Args:
         category: Product category (e.g., "Toys & Games", "Sports & Outdoors")
         subcategory: Product subcategory (e.g., "Learning & Education")
+        product_type: Product type (e.g., "smartphone", "laptop")
         brand: Brand name
         max_price: Maximum price in paise/cents
         min_price: Minimum price in paise/cents
@@ -39,7 +41,9 @@ def search_products(
         # Filter by subcategory
         if subcategory:
             query = query.filter(Product.subcategory.ilike(f"%{subcategory}%"))
-        
+        # Filter by type (product-level classifier)
+        if product_type:
+            query = query.filter(Product.type.ilike(f"%{product_type}%"))
         # Filter by brand
         # Filter by brand — use first meaningful word to handle truncated brand names
         if brand:
