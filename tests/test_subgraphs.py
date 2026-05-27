@@ -124,7 +124,7 @@ class TestSupportSubgraph:
 class TestProductSubgraph:
 
     def test_fetch_reviews_node(self):
-        """fetch_reviews_node fetches reviews for products"""
+        """fetch_reviews_node fetches reviews for ranked products"""
         mock_reviews = [{"rating": 4.5, "text": "Great!"}]
 
         with patch("app.agents.product_agent_subgraph.fetch_reviews", return_value=mock_reviews):
@@ -134,15 +134,16 @@ class TestProductSubgraph:
                 user_message="show me toys",
                 user_id="test-user",
                 session_id="test-session",
-                search_results=[{"product_id": "TOY-001", "name": "Toy"}],
+                ranked_products=[{"product_id": "TOY-001", "name": "Toy"}],
                 conversation_history=[]
             )
             result = fetch_reviews_node(state)
 
-        assert "search_results" in result
+        assert "ranked_products" in result
+        assert len(result["ranked_products"]) == 1
 
     def test_fetch_specs_node(self):
-        """fetch_specs_node fetches specs for products"""
+        """fetch_specs_node fetches specs for ranked products"""
         with patch("app.agents.product_agent_subgraph.fetch_specs", return_value=[]):
             from app.agents.product_agent_subgraph import fetch_specs_node
 
@@ -150,12 +151,13 @@ class TestProductSubgraph:
                 user_message="show me toys",
                 user_id="test-user",
                 session_id="test-session",
-                search_results=[{"product_id": "TOY-001", "name": "Toy", "reviews": []}],
+                ranked_products=[{"product_id": "TOY-001", "name": "Toy", "reviews": []}],
                 conversation_history=[]
             )
             result = fetch_specs_node(state)
 
-        assert "search_results" in result
+        assert "ranked_products" in result
+        assert len(result["ranked_products"]) == 1
 
     def test_compute_score(self):
         """compute_score ranks products"""
@@ -165,9 +167,9 @@ class TestProductSubgraph:
             user_message="show me toys",
             user_id="test-user",
             session_id="test-session",
-            search_results=[
-                {"product_id": "TOY-001", "name": "Toy A", "rating": 4.5, "reviews": [], "specs": []},
-                {"product_id": "TOY-002", "name": "Toy B", "rating": 3.0, "reviews": [], "specs": []},
+            ranked_products=[
+                {"product_id": "TOY-001", "name": "Toy A", "rating": 4.5, "avg_review_rating": 4.5, "price": 500, "specs_dict": {}, "description": "", "tags": [], "brand": ""},
+                {"product_id": "TOY-002", "name": "Toy B", "rating": 3.0, "avg_review_rating": 3.0, "price": 300, "specs_dict": {}, "description": "", "tags": [], "brand": ""},
             ],
             preferences={"category": "Toys & Games"},
             conversation_history=[]

@@ -228,25 +228,21 @@ class TestProductAgentCompleteFlow:
         assert len(result["search_results"]) == 0
 
     def test_flow_broaden_relaxes_filters(self):
-        """Broaden search relaxes filters progressively"""
-        mock_resp = MagicMock()
-        mock_resp.content = '{"category": "Toys & Games", "keywords": ["toy"], "brand": null, "min_price": null, "max_price": null, "subcategory": null}'
+        """Broaden search relaxes subcategory first, leaving brand/keywords as specificity"""
+        from app.agents.product_agent import broaden_search
 
-        with patch("app.agents.product_agent.llm") as mock_llm:
-            mock_llm.invoke.return_value = mock_resp
-            from app.agents.product_agent import broaden_search
-
-            state = AgentState(
-                user_message="toys", user_id="u1", session_id="s1",
-                preferences={"category": "Toys & Games", "brand": "Lego", "min_price": 5000, "max_price": 10000},
-                original_preferences={"category": "Toys & Games", "brand": "Lego", "min_price": 5000, "max_price": 10000},
-                broaden_attempt=0,
-                conversation_history=[]
-            )
-            result = broaden_search(state)
+        state = AgentState(
+            user_message="toys", user_id="u1", session_id="s1",
+            preferences={"category": "Toys & Games", "subcategory": "BoardGames", "brand": "Lego", "min_price": 5000, "max_price": 10000},
+            original_preferences={"category": "Toys & Games", "subcategory": "BoardGames", "brand": "Lego", "min_price": 5000, "max_price": 10000},
+            broaden_attempt=0,
+            conversation_history=[]
+        )
+        result = broaden_search(state)
 
         assert "preferences" in result
         assert result["broaden_attempt"] >= 1
+        assert result["preferences"]["subcategory"] is None
 
     def test_flow_unavailable_product_response(self):
         """Unavailable products get redirect message"""
