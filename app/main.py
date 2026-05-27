@@ -144,8 +144,11 @@ def get_or_create_session(db, session_id: Optional[str], user_id: str) -> Sessio
     if session_id:
         session = db.query(Session).filter(Session.session_id == session_id).first()
         if not session:
-            logger.warning(f"request_id={get_request_id()} | Session not found | session_id={session_id}")
-            raise HTTPException(status_code=404, detail="Session not found")
+            logger.info(f"request_id={get_request_id()} | Creating new session with provided id | session_id={session_id}")
+            session = Session(session_id=session_id, user_id=user_id)
+            db.add(session)
+            db.flush()
+            return session
 
         expiry_cutoff = datetime.now(timezone.utc) - timedelta(minutes=SESSION_EXPIRY_MINUTES)
         if session.last_active_at < expiry_cutoff:
@@ -203,7 +206,7 @@ def chat(
 
     try:
         user = get_or_create_user(db, user_id)
-        session = get_or_create_session(db, x_session_id, user_id)
+        session = get_or_create_session(db, x_session_id or chat_request.session_id, user_id)
 
         new_message = Message(
             session_id=session.session_id,

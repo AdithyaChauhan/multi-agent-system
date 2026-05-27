@@ -297,7 +297,7 @@ class TestProductSubgraphDeep:
 
             state = AgentState(
                 user_message="toys", user_id="u1", session_id="s1",
-                search_results=[
+                ranked_products=[
                     {"product_id": "P1", "name": "Toy A"},
                     {"product_id": "P2", "name": "Toy B"},
                 ],
@@ -305,7 +305,7 @@ class TestProductSubgraphDeep:
             )
             result = fetch_reviews_node(state)
 
-        assert len(result["search_results"]) == 2
+        assert len(result["ranked_products"]) == 2
 
     def test_subgraph_compute_score_ranks_by_rating(self):
         """compute_score ranks products by combined score"""
@@ -313,9 +313,9 @@ class TestProductSubgraphDeep:
 
         state = AgentState(
             user_message="toys", user_id="u1", session_id="s1",
-            search_results=[
-                {"product_id": "P1", "name": "Low Rated", "rating": 2.0, "reviews": [], "specs": []},
-                {"product_id": "P2", "name": "High Rated", "rating": 4.8, "reviews": [], "specs": []},
+            ranked_products=[
+                {"product_id": "P1", "name": "Low Rated", "rating": 2.0, "avg_review_rating": 2.0, "price": 500, "specs_dict": {}, "description": "", "tags": [], "brand": "", "name": "Low Rated"},
+                {"product_id": "P2", "name": "High Rated", "rating": 4.8, "avg_review_rating": 4.8, "price": 800, "specs_dict": {}, "description": "", "tags": [], "brand": "", "name": "High Rated"},
             ],
             preferences={"category": "Toys & Games"},
             conversation_history=[]

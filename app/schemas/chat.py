@@ -1,9 +1,10 @@
 from pydantic import BaseModel, ConfigDict
-from typing import List
+from typing import List, Optional
 from datetime import datetime
 
 class ChatRequest(BaseModel):
     message: str
+    session_id: Optional[str] = None
 
 class MessageResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)

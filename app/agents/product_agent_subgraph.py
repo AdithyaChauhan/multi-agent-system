@@ -23,10 +23,10 @@ WEIGHT_TYPE_MATCH      = 0.07
 
 def fetch_reviews_node(state: AgentState) -> dict:
     """
-    Tool node — fetches reviews for each product
-    in the ranked list from the DB.
+    Tool node — fetches reviews for each product in the LLM-ranked list.
+    Reads from ranked_products (set by rank_and_filter) and writes back to it.
     """
-    products = state.get("search_results") or []
+    products = state.get("ranked_products") or []
 
     enriched = []
     for product in products:
@@ -50,23 +50,21 @@ def fetch_reviews_node(state: AgentState) -> dict:
         f"Reviews fetched for {len(enriched)} products"
     )
 
-    return {"search_results": enriched}
+    return {"ranked_products": enriched}
 
 
 def fetch_specs_node(state: AgentState) -> dict:
     """
-    Tool node — fetches specs for each product
-    in the enriched list from the DB.
+    Tool node — fetches specs for each product in the LLM-ranked list.
+    Reads from ranked_products and writes back to it.
     """
-    products = state.get("search_results") or []
+    products = state.get("ranked_products") or []
 
     enriched = []
     for product in products:
         product_id = product.get("product_id")
         specs      = fetch_specs(product_id)
 
-        # convert specs list into a clean dict for easy access
-        # e.g. {"battery_life": "18 hours", "weight": "1.24 kg"}
         specs_dict = {
             s["spec_key"]: s["spec_value"]
             for s in specs
@@ -83,7 +81,7 @@ def fetch_specs_node(state: AgentState) -> dict:
         f"Specs fetched for {len(enriched)} products"
     )
 
-    return {"search_results": enriched}
+    return {"ranked_products": enriched}
 
 
 def compute_score(state: AgentState) -> dict:
@@ -91,7 +89,7 @@ def compute_score(state: AgentState) -> dict:
     Deterministic node — computes a final enriched score
     combining product rating, review rating, price, and spec match.
     """
-    products  = state.get("search_results") or []
+    products  = state.get("ranked_products") or []
     prefs     = state.get("preferences") or {}
     max_price = prefs.get("max_price")
     keywords  = prefs.get("keywords") or []
