@@ -55,8 +55,39 @@ def get_catalog_structure() -> str:
     finally:
         db.close()
 
+CATEGORY_DESCRIPTIONS = {
+    "Electronics": "TVs, headphones, smartwatches, cameras",
+    "Computers & Accessories": "Cables, chargers, keyboards, mice",
+    "Home & Kitchen": "Appliances, fans, air purifiers, room heaters",
+    "Office Products": "Stationery, paper products",
+}
+
+def get_catalog_summary() -> str:
+    from app.db.database import SessionLocal
+    from app.models.product import Product
+    from sqlalchemy import func
+    db = SessionLocal()
+    try:
+        rows = db.query(
+            Product.category,
+            func.count(Product.id).label("count")
+        ).filter(
+            Product.category.isnot(None)
+        ).group_by(Product.category).having(
+            func.count(Product.id) >= 10
+        ).order_by(func.count(Product.id).desc()).all()
+        lines = []
+        for cat, cnt in rows:
+            desc = CATEGORY_DESCRIPTIONS.get(cat, "")
+            suffix = f" — {desc}" if desc else ""
+            lines.append(f"• {cat} ({cnt} products){suffix}")
+        return "\n".join(lines)
+    finally:
+        db.close()
+
 # Load once at startup
 CATALOG_STRUCTURE = get_catalog_structure()
+CATALOG_SUMMARY = get_catalog_summary()
 
 # Generic relaxation order for all categories
 RELAXATION_ORDER = [
@@ -72,7 +103,7 @@ Catalog (use exact subcategory names):
 Electronics: HomeTheater,TV & Video | Headphones,Earbuds & Accessories | WearableTechnology | HomeAudio | Mobiles & Accessories | GeneralPurposeBatteries & BatteryChargers
 Computers & Accessories: Accessories & Peripherals | NetworkingDevices | ExternalDevices & DataStorage | Monitors | Printers,Inks & Accessories
 Home & Kitchen (subcategory = the appliance, type = null): iron | mixer grinder | blender | electric kettle | air fryer | vacuum cleaner | induction | sandwich maker | toaster | rice cooker | juicer | egg boiler | water purifier | water filter | frother | chopper | hand mixer | garment steamer | kitchen scale | lint remover | coffee maker | room heater | ceiling fan | air purifier | water heater | pedestal fan | humidifier | air conditioner | HomeStorage & Organization
-Office Products (no subcategory)
+Office Products: OfficePaperProducts | OfficeElectronics
 
 Output schema: {"category": str|null, "subcategory": str|null, "type": str|null, "brand": str|null, "max_price": int|null, "min_price": int|null, "keywords": [str], "unavailable_request": bool}
 
@@ -191,12 +222,7 @@ def extract_preferences(state: AgentState) -> dict:
 def ask_for_preferences(state: AgentState) -> dict:
     logger.info(f"request_id={get_request_id()} | Asking for preferences")
     return {
-        "final_response": (
-            f"• Electronics (490 products) — TVs, headphones, smartwatches, cameras\n"
-            f"• Computers & Accessories (375 products) — Cables, chargers, keyboards, mice\n"
-            f"• Home & Kitchen (447 products) — Appliances, cookware, fans, air purifiers\n"
-            f"• Office Products (31 products) — Stationery, paper products\n\n"
-        )
+        "final_response": f"What are you looking for? Here's what we carry:\n\n{CATALOG_SUMMARY}"
     }
 
 
@@ -208,10 +234,7 @@ def handle_unavailable_products(state: AgentState) -> dict:
         "final_response": (
             f"I'm sorry, we don't carry that item in our catalog. "
             f"However, we have a great selection in other categories:\n\n"
-            f"• Electronics (490 products) - TVs, headphones, cameras, wearables\n"
-            f"• Computers & Accessories (375 products) - Cables, chargers, keyboards\n"
-            f"• Home & Kitchen (447 products) - Appliances, cookware, fans\n"
-            f"• Office Products (31 products) - Stationery, paper products\n\n"
+            f"{CATALOG_SUMMARY}\n\n"
             f"Would you like to explore any of these categories?"
         )
     }
@@ -336,11 +359,7 @@ def format_recommendations(state: AgentState) -> dict:
                         "final_response": (
                             f"I couldn't find '{original_query}' in our catalog. "
                             f"Our inventory may not carry this specific item.\n\n"
-                            f"We carry:\n"
-                            f"• Electronics (490 products) — TVs, headphones, smartwatches, cameras\n"
-                            f"• Computers & Accessories (375 products) — Cables, chargers, keyboards, mice\n"
-                            f"• Home & Kitchen (447 products) — Appliances, cookware, fans, air purifiers\n"
-                            f"• Office Products (31 products) — Stationery, paper products\n\n"
+                            f"We carry:\n{CATALOG_SUMMARY}\n\n"
                             f"Would you like to explore any of these categories?"
                         )
                     }

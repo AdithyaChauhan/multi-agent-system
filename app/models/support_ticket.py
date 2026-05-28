@@ -37,6 +37,7 @@ class SupportTicket(Base):
     category = Column(SQLEnum(IssueCategory, values_callable=lambda x: [e.value for e in x]), nullable=False)
     
     description = Column(String, nullable=False)
+    priority = Column(String, nullable=True)
     resolution = Column(String, nullable=True)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())

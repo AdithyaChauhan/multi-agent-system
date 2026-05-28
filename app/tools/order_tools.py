@@ -34,6 +34,7 @@ def fetch_order_from_db(order_id: str, user_id: str) -> Optional[dict]:
             "status": order.status,
             "carrier": order.carrier,
             "tracking_id": order.tracking_id,
+            "order_value": order.order_value or 0,
         }
 
     finally:

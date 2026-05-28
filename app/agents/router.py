@@ -167,8 +167,8 @@ def route_after_auth_gate(state: AgentState) -> Literal["order_agent", "product_
     intent = state.get("intent", "")
     is_anonymous = user_id.startswith("anon-")
 
-    # Only orders require authentication
-    if intent == "order" and is_anonymous:
+    # Orders and support require authentication; product is open to all
+    if intent in ("order", "support") and is_anonymous:
         return "sign_in"
 
     if intent == "order":
