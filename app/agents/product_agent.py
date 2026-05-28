@@ -132,24 +132,9 @@ def extract_preferences(state: AgentState) -> dict:
     user_message = state.get("user_message", "")
     conversation_history = state.get("conversation_history", [])
 
-    # Build context from history for follow-up understanding
-    history_context = ""
-    if conversation_history:
-        recent = conversation_history[-4:]
-        history_context = "\n".join([
-            f"{msg['role'].title()}: {msg['content']}"
-            for msg in recent
-        ])
-
-    if history_context:
-        full_prompt = (
-            f"Recent conversation:\n{history_context}\n\n"
-            f"Current message: {user_message}\n\n"
-            f"If this is a follow-up, preserve all fields from history and only update what the user explicitly changed.\n"
-            f"CRITICAL: When user says 'what about [Brand]', keep the same subcategory from history — do NOT infer subcategory from brand name."
-        )
-    else:
-        full_prompt = user_message
+    # Preferences cache already carries category/subcategory/price/keywords across turns.
+    # Sending raw history adds large product-list responses with no extraction benefit.
+    full_prompt = user_message
 
     messages = [
         SystemMessage(content=EXTRACTION_SYSTEM_PROMPT),

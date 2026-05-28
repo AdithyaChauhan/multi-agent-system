@@ -68,14 +68,18 @@ def classify_intent_and_extract(state: AgentState) -> dict:
         system_prompt = ROUTER_SYSTEM_PROMPT
         commit_hash = "fallback"
     
-    # Build conversation context
+    # Truncate assistant replies to 150 chars — product list responses are large and the router
+    # only needs topic context, not the full list content
     history_context = ""
     if conversation_history:
         recent = conversation_history[-4:]
-        history_context = "\n".join([
-            f"{msg['role'].title()}: {msg['content']}"
-            for msg in recent
-        ])
+        lines = []
+        for msg in recent:
+            content = msg["content"]
+            if msg["role"] == "assistant" and len(content) > 150:
+                content = content[:150] + "..."
+            lines.append(f"{msg['role'].title()}: {content}")
+        history_context = "\n".join(lines)
     
     prompt = user_message
     if history_context:

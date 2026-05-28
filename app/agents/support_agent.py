@@ -85,12 +85,12 @@ def classify_issue(state: AgentState) -> dict:
         system_prompt = CLASSIFICATION_SYSTEM_PROMPT
         commit_hash = "fallback"
 
+    # Only user turns needed for classification — assistant replies are large ticket/product dumps
     history_context = ""
     if conversation_history:
-        recent = conversation_history[-4:]
-        history_context = "\n".join([
-            f"{msg['role'].title()}: {msg['content']}" for msg in recent
-        ])
+        user_turns = [m for m in conversation_history if m["role"] == "user"][-2:]
+        if user_turns:
+            history_context = "\n".join([f"User: {m['content']}" for m in user_turns])
 
     full_prompt = (
         f"Recent conversation:\n{history_context}\n\nCurrent message: {user_message}\n\n"
