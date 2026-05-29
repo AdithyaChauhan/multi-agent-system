@@ -18,7 +18,7 @@ def fetch_order_from_db(order_id: str, user_id: str) -> Optional[dict]:
     try:
         order = (
             db.query(Order)
-            .filter(Order.order_id == order_id, Order.user_id == user_id)
+            .filter(Order.order_id == order_id.upper(), Order.user_id == user_id)
             .first()
         )
 

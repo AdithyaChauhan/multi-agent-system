@@ -211,6 +211,15 @@ def extract_preferences(state: AgentState) -> dict:
         ):
             new_subcategory = prev_subcategory
 
+        # Only carry keywords forward if subcategory hasn't changed — switching product
+        # type means old feature keywords (e.g. "wireless" from keyboards) are irrelevant
+        same_subcategory = (new_subcategory or prev_subcategory) == prev_subcategory
+        carried_keywords = (
+            preferences.get("keywords") or previous_prefs.get("keywords")
+            if same_subcategory
+            else preferences.get("keywords") or []
+        )
+
         preferences = {
             "category":    new_category,
             "subcategory": new_subcategory or prev_subcategory,
@@ -218,7 +227,7 @@ def extract_preferences(state: AgentState) -> dict:
             "brand":       preferences.get("brand"),
             "max_price":   preferences.get("max_price")   or previous_prefs.get("max_price"),
             "min_price":   preferences.get("min_price")   or previous_prefs.get("min_price"),
-            "keywords":    preferences.get("keywords")    or previous_prefs.get("keywords"),
+            "keywords":    carried_keywords,
             "unavailable_request": preferences.get("unavailable_request", False),
         }
 

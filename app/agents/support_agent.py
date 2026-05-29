@@ -1,6 +1,5 @@
 import json
 import os
-import re
 from typing import Literal
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
@@ -134,13 +133,20 @@ def fetch_order_for_support(state: AgentState) -> dict:
     if issue.get("category") == "general_query":
         return {"support_order": None, "user_orders": []}
 
-    # Scan history if LLM didn't extract an order_id
+    # Resolve order_id from DB context when LLM didn't extract one
     if not order_id:
-        for msg in reversed((state.get("conversation_history") or [])[-6:]):
-            match = re.search(r'\bORD-\d+\b', msg.get("content", ""), re.IGNORECASE)
-            if match:
-                order_id = match.group().upper()
-                break
+        open_tickets = [
+            t for t in get_user_ticket_history(user_id, limit=10)
+            if t.get("status") in ("open", "in_progress") and t.get("order_id")
+        ]
+        if len(open_tickets) == 1:
+            order_id = open_tickets[0]["order_id"]
+            logger.info(f"request_id={get_request_id()} | Resolved order from open ticket | order_id={order_id}")
+        else:
+            user_orders_all = fetch_user_orders(user_id)
+            if len(user_orders_all) == 1:
+                order_id = user_orders_all[0]["order_id"]
+                logger.info(f"request_id={get_request_id()} | Resolved order from single user order | order_id={order_id}")
 
     if order_id:
         order = fetch_order_from_db(order_id, user_id)
