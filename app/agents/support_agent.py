@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 from app.agents.state import AgentState
 from app.agents.support_agent_subgraph import escalation_handler_subgraph
-from app.tools.support_tools import lookup_support_policy
+from app.tools.support_tools import lookup_support_policy, get_user_ticket_history
 from app.tools.order_tools import fetch_order_from_db, fetch_user_orders
 from app.core.logger import get_logger, get_request_id
 from app.core.prompt_loader import load_prompt, PROMPT_VERSIONS
