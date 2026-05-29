@@ -4,7 +4,8 @@ from app.core.logger import get_logger, get_request_id
 
 logger = get_logger("app.tools.shipment_tools")
 
-CARRIER_API_BASE = "http://localhost:9000"
+import os
+CARRIER_API_BASE = os.getenv("CARRIER_API_URL", "http://mock-carrier-api:9000")
 
 
 def fetch_tracking_info(tracking_id: str) -> Optional[dict]:
