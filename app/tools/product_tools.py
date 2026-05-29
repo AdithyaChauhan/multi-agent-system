@@ -41,9 +41,15 @@ def search_products(
         # Filter by subcategory
         if subcategory:
             query = query.filter(Product.subcategory.ilike(f"%{subcategory}%"))
-        # Filter by type (product-level classifier)
+        # Match type column OR product name — many products have type=None even
+        # though the product type appears in the name (e.g. "HP Wired USB Mouse").
         if product_type:
-            query = query.filter(Product.type.ilike(f"%{product_type}%"))
+            query = query.filter(
+                or_(
+                    Product.type.ilike(f"%{product_type}%"),
+                    Product.name.ilike(f"%{product_type}%"),
+                )
+            )
         # Filter by brand
         # Filter by brand — use first meaningful word to handle truncated brand names
         if brand:
