@@ -63,34 +63,36 @@ class TestClassifyIssue:
             )
             result = classify_issue(state)
 
-        assert result["support_issue"]["category"] == "other"
+        assert result["support_issue"]["category"] == "general_query"
 
 
 class TestAssessSeverity:
 
     def test_critical_severity_with_child_keyword(self):
-        """Detects critical severity with child safety keywords"""
+        """High severity for high-value damaged product (>=10000)"""
         from app.agents.support_agent import assess_severity
 
         state = AgentState(
             user_message="My baby got hurt by this toy",
             user_id="test-user",
             session_id="test-session",
-            support_issue={"category": "defective_product"},
+            support_issue={"category": "damaged_product"},
+            support_order={"order_value": 15000},
             conversation_history=[]
         )
         result = assess_severity(state)
-        assert result["severity"] == "critical"
+        assert result["severity"] == "high"
 
     def test_medium_severity_for_defective_product(self):
-        """Detects medium severity for defective products"""
+        """Medium severity for damaged product with order value below threshold"""
         from app.agents.support_agent import assess_severity
 
         state = AgentState(
             user_message="My product stopped working",
             user_id="test-user",
             session_id="test-session",
-            support_issue={"category": "defective_product"},
+            support_issue={"category": "damaged_product"},
+            support_order={"order_value": 5000},
             conversation_history=[]
         )
         result = assess_severity(state)

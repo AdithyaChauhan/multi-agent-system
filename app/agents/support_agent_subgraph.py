@@ -102,7 +102,7 @@ def create_ticket_node(state: AgentState) -> dict:
                 "final_response": (
                     f"You already have an open ticket **{existing['ticket_id']}** for this order.\n\n"
                     f"**Status:** {existing['status'].replace('_', ' ').title()}\n"
-                    f"**Priority:** {existing.get('priority', 'MEDIUM')}\n\n"
+                    f"**Priority:** {existing.get('priority') or 'MEDIUM'}\n\n"
                     f"Our team is already working on it. "
                     f"You'll be contacted within {policy.get('response_time', '24-48 hours')}."
                 )

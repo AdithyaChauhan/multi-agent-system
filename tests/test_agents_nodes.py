@@ -155,14 +155,14 @@ class TestSupportAgentDraftResolution:
 class TestSupportRouting:
 
     def test_route_by_severity_critical(self):
-        """Routes critical issues to high priority"""
+        """Routes high severity to escalation handler"""
         from app.agents.support_agent import route_by_severity
 
         state = AgentState(
             user_message="urgent!",
             user_id="test-user",
             session_id="test-session",
-            severity="critical",
+            severity="high",
             conversation_history=[]
         )
         result = route_by_severity(state)

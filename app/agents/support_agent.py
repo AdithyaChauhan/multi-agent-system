@@ -235,10 +235,16 @@ def draft_resolution(state: AgentState) -> dict:
         f"Draft a helpful response. No ticket will be created for this issue."
     )
 
-    response = llm.invoke([
-        SystemMessage(content=RESOLUTION_SYSTEM_PROMPT),
-        HumanMessage(content=prompt),
-    ])
+    version = PROMPT_VERSIONS.get("support-resolution-prompt", "latest")
+    resolution_prompt, commit_hash = load_prompt("support-resolution-prompt", version)
+    if not resolution_prompt:
+        resolution_prompt = RESOLUTION_SYSTEM_PROMPT
+        commit_hash = "fallback"
+
+    response = llm.invoke(
+        [SystemMessage(content=resolution_prompt), HumanMessage(content=prompt)],
+        config={"metadata": {"prompt_name": "support-resolution-prompt", "prompt_version": commit_hash}}
+    )
     logger.info(f"request_id={get_request_id()} | Drafted LOW-severity resolution")
     return {"final_response": response.content.strip()}
 

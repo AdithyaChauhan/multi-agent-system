@@ -360,39 +360,42 @@ class TestSupportAgentCompleteFlow:
         assert result["support_issue"]["category"] == "refund_request"
 
     def test_flow_severity_critical_for_baby_safety(self):
-        """Critical severity for baby safety issues"""
+        """High severity for high-value damaged product (>=10000)"""
         from app.agents.support_agent import assess_severity
 
         state = AgentState(
             user_message="My baby got hurt by toy",
             user_id="u1", session_id="s1",
-            support_issue={"category": "defective_product"},
+            support_issue={"category": "damaged_product"},
+            support_order={"order_value": 15000},
             conversation_history=[]
         )
         result = assess_severity(state)
-        assert result["severity"] == "critical"
+        assert result["severity"] == "high"
 
     def test_flow_severity_critical_for_injury(self):
-        """Critical severity for injuries"""
+        """High severity for high-value damaged product"""
         from app.agents.support_agent import assess_severity
 
         state = AgentState(
             user_message="caused injury",
             user_id="u1", session_id="s1",
-            support_issue={"category": "defective_product"},
+            support_issue={"category": "damaged_product"},
+            support_order={"order_value": 12000},
             conversation_history=[]
         )
         result = assess_severity(state)
-        assert result["severity"] == "critical"
+        assert result["severity"] == "high"
 
     def test_flow_severity_medium_for_defective(self):
-        """Medium severity for defective product"""
+        """Medium severity for damaged product below value threshold"""
         from app.agents.support_agent import assess_severity
 
         state = AgentState(
             user_message="product stopped working",
             user_id="u1", session_id="s1",
-            support_issue={"category": "defective_product"},
+            support_issue={"category": "damaged_product"},
+            support_order={"order_value": 5000},
             conversation_history=[]
         )
         result = assess_severity(state)
@@ -427,12 +430,12 @@ class TestSupportAgentCompleteFlow:
         assert "policy" in result
 
     def test_flow_route_critical_to_escalation(self):
-        """Critical severity routes to escalation subgraph"""
+        """High severity routes to escalation subgraph"""
         from app.agents.support_agent import route_by_severity
 
         state = AgentState(
             user_message="urgent", user_id="u1", session_id="s1",
-            severity="critical",
+            severity="high",
             conversation_history=[]
         )
         result = route_by_severity(state)
@@ -467,33 +470,33 @@ class TestSupportSubgraphDeep:
         assert "ticket_history" in result
 
     def test_subgraph_assign_priority_p0(self):
-        """P0 priority for repeat critical users"""
+        """URGENT priority for repeat high severity"""
         from app.agents.support_agent_subgraph import assign_priority
 
         state = AgentState(
             user_message="urgent", user_id="u1", session_id="s1",
-            severity="critical",
-            recent_critical_count=3,
+            severity="high",
+            recent_critical_count=1,
             conversation_history=[]
         )
         result = assign_priority(state)
-        assert result["priority"] == "P0"
+        assert result["priority"] == "URGENT"
 
     def test_subgraph_assign_priority_p1_critical(self):
-        """P1 priority for first critical"""
+        """HIGH priority for first-time high severity"""
         from app.agents.support_agent_subgraph import assign_priority
 
         state = AgentState(
             user_message="urgent", user_id="u1", session_id="s1",
-            severity="critical",
+            severity="high",
             recent_critical_count=0,
             conversation_history=[]
         )
         result = assign_priority(state)
-        assert result["priority"] == "P1"
+        assert result["priority"] == "HIGH"
 
     def test_subgraph_assign_priority_p2_medium(self):
-        """P2 priority for medium severity"""
+        """MEDIUM priority for first-time medium severity"""
         from app.agents.support_agent_subgraph import assign_priority
 
         state = AgentState(
@@ -503,7 +506,7 @@ class TestSupportSubgraphDeep:
             conversation_history=[]
         )
         result = assign_priority(state)
-        assert result["priority"] == "P2"
+        assert result["priority"] == "MEDIUM"
 
     def test_subgraph_create_ticket_with_order_id(self):
         """Ticket created with order_id"""

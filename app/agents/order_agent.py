@@ -10,6 +10,7 @@ from app.agents.state import AgentState
 from app.agents.order_agent_subgraph import shipment_tracking_subgraph
 from app.tools.order_tools import fetch_order_from_db, fetch_user_orders
 from app.core.logger import get_logger, get_request_id
+from app.core.prompt_loader import load_prompt, PROMPT_VERSIONS
 
 load_dotenv()
 
@@ -187,12 +188,21 @@ Order details:
 
 User asked: {state.get('user_message')}"""
 
+    version = PROMPT_VERSIONS.get("order-response-prompt", "latest")
+    system_prompt, commit_hash = load_prompt("order-response-prompt", version)
+    if not system_prompt:
+        system_prompt = RESPONSE_SYSTEM_PROMPT
+        commit_hash = "fallback"
+
     messages = [
-        SystemMessage(content=RESPONSE_SYSTEM_PROMPT),
+        SystemMessage(content=system_prompt),
         HumanMessage(content=context),
     ]
 
-    response = llm.invoke(messages)
+    response = llm.invoke(
+        messages,
+        config={"metadata": {"prompt_name": "order-response-prompt", "prompt_version": commit_hash}}
+    )
     final_response = response.content.strip()
 
     logger.info(f"request_id={get_request_id()} | Response generated")

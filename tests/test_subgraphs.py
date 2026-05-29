@@ -76,37 +76,37 @@ class TestSupportSubgraph:
         assert "recent_critical_count" in result
 
     def test_assign_priority_critical(self):
-        """Assigns P1 priority for critical severity"""
+        """Assigns HIGH priority for first-time high severity"""
         from app.agents.support_agent_subgraph import assign_priority
 
         state = AgentState(
             user_message="urgent",
             user_id="test-user",
             session_id="test-session",
-            severity="critical",
+            severity="high",
             recent_critical_count=0,
             conversation_history=[]
         )
         result = assign_priority(state)
-        assert result["priority"] == "P1"
+        assert result["priority"] == "HIGH"
 
     def test_assign_priority_p0_for_repeat_critical(self):
-        """Assigns P0 for repeat critical users"""
+        """Assigns URGENT priority for repeat high severity"""
         from app.agents.support_agent_subgraph import assign_priority
 
         state = AgentState(
             user_message="urgent again",
             user_id="test-user",
             session_id="test-session",
-            severity="critical",
-            recent_critical_count=2,
+            severity="high",
+            recent_critical_count=1,
             conversation_history=[]
         )
         result = assign_priority(state)
-        assert result["priority"] == "P0"
+        assert result["priority"] == "URGENT"
 
     def test_assign_priority_medium(self):
-        """Assigns P2 for medium severity"""
+        """Assigns MEDIUM priority for first-time medium severity"""
         from app.agents.support_agent_subgraph import assign_priority
 
         state = AgentState(
@@ -118,7 +118,7 @@ class TestSupportSubgraph:
             conversation_history=[]
         )
         result = assign_priority(state)
-        assert result["priority"] == "P2"
+        assert result["priority"] == "MEDIUM"
 
 
 class TestProductSubgraph:

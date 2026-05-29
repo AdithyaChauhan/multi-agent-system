@@ -12,6 +12,7 @@ from app.agents.state import AgentState
 from app.agents.product_agent_subgraph import product_enrichment_subgraph
 from app.tools.product_tools import search_products
 from app.core.logger import get_logger, get_request_id
+from app.core.prompt_loader import load_prompt, PROMPT_VERSIONS
 
 load_dotenv()
 
@@ -112,11 +113,13 @@ Rules:
 - For Home & Kitchen: subcategory = specific appliance from list, type = null
 - For Electronics: type = specific product (smart tv, tws earbuds, neckband, over-ear headphones, wired earphones, smartwatch, bluetooth speaker, soundbar, projector, streaming device, router, pen drive, keyboard, mouse, webcam)
 - Bluetooth/portable speakers, soundbars → HomeAudio (NOT Headphones,Earbuds & Accessories)
-- keywords: only product-specific features not covered by subcategory/type (e.g. "wireless", "calling", "noise cancellation")
-- wired/wireless is a keyword for headphones; normalize: mice→mouse, telly→TV, adaptor→adapter
+- keywords: only specific features NOT already implied by subcategory/type (e.g. "calling", "noise cancellation", "portable", "waterproof")
+- NEVER add the product type name as a keyword if subcategory is already set (e.g. HomeAudio → do NOT add "bluetooth" or "speaker")
+- Normalize spelling before using as keyword: mice→mouse, telly→TV, adaptor→adapter, blutooth→bluetooth
+- wired/wireless is a valid keyword for headphones/earphones only
 - Never output string "null" — use JSON null
 - unavailable_request TRUE: laptops, desktop PCs, tablets (devices), smartphones (devices), clothing, shoes, furniture, food
-- unavailable_request FALSE: all appliances, accessories, peripherals, fans, air purifiers, geysers
+- unavailable_request FALSE: all appliances, accessories, peripherals, fans, air purifiers, geysers, webcams
 
 Examples:
 "mixer grinder under 3000" → {"category": "Home & Kitchen", "subcategory": "mixer grinder", "type": null, "brand": null, "max_price": 3000, "min_price": null, "keywords": [], "unavailable_request": false}
@@ -132,16 +135,43 @@ def extract_preferences(state: AgentState) -> dict:
     user_message = state.get("user_message", "")
     conversation_history = state.get("conversation_history", [])
 
-    # Preferences cache already carries category/subcategory/price/keywords across turns.
-    # Sending raw history adds large product-list responses with no extraction benefit.
-    full_prompt = user_message
+    # Keep history so the LLM can resolve follow-up references ("ones", "what about X").
+    # Truncate assistant replies to 150 chars — product lists are large and irrelevant for extraction.
+    history_context = ""
+    if conversation_history:
+        recent = conversation_history[-4:]
+        history_context = "\n".join([
+            f"{msg['role'].title()}: {msg['content'][:150]}..."
+            if msg['role'] == 'assistant' and len(msg['content']) > 150
+            else f"{msg['role'].title()}: {msg['content']}"
+            for msg in recent
+        ])
+
+    if history_context:
+        full_prompt = (
+            f"Recent conversation:\n{history_context}\n\n"
+            f"Current message: {user_message}\n\n"
+            f"If this is a follow-up, preserve all fields from history and only update what the user explicitly changed.\n"
+            f"CRITICAL: When user says 'what about [Brand]', keep the same subcategory from history — do NOT infer subcategory from brand name."
+        )
+    else:
+        full_prompt = user_message
+
+    version = PROMPT_VERSIONS.get("product-extraction-prompt", "latest")
+    system_prompt, commit_hash = load_prompt("product-extraction-prompt", version)
+    if not system_prompt:
+        system_prompt = EXTRACTION_SYSTEM_PROMPT
+        commit_hash = "fallback"
 
     messages = [
-        SystemMessage(content=EXTRACTION_SYSTEM_PROMPT),
+        SystemMessage(content=system_prompt),
         HumanMessage(content=full_prompt),
     ]
 
-    response = llm.invoke(messages)
+    response = llm.invoke(
+        messages,
+        config={"metadata": {"prompt_name": "product-extraction-prompt", "prompt_version": commit_hash}}
+    )
     raw = response.content.strip()
 
     if raw.startswith("```"):

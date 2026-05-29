@@ -70,7 +70,8 @@ class TestSupportTools:
                 user_id="test-user",
                 severity="medium",
                 category="defective_product",
-                description="Product broken"
+                description="Product broken",
+                priority="MEDIUM"
             )
 
         assert "ticket_id" in result
@@ -113,7 +114,8 @@ class TestSupportTools:
                 user_id="test-user",
                 severity="medium",
                 category="defective_product",
-                description="Product broken"
+                description="Product broken",
+                priority="MEDIUM"
             )
 
         assert "ticket_id" in result
@@ -206,7 +208,8 @@ class TestSupportTools:
                 user_id="test-user",
                 severity="medium",
                 category="defective_product",
-                description="Product broken"
+                description="Product broken",
+                priority="MEDIUM"
             )
 
         assert "ticket_id" in result
