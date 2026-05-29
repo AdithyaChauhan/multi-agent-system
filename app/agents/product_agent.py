@@ -149,7 +149,12 @@ def extract_preferences(state: AgentState) -> dict:
                 intro = []
                 for line in msg["content"].split("\n"):
                     stripped = line.strip()
-                    if stripped and stripped[0].isdigit() and ". " in stripped:
+                    # Stop at numbered product entries ("1. Product name...")
+                    # or bullet catalog/order lists ("• Electronics...", "• ORD-...")
+                    if stripped and (
+                        (stripped[0].isdigit() and ". " in stripped)
+                        or stripped.startswith("•")
+                    ):
                         break
                     intro.append(line)
                 content = "\n".join(intro).strip() or msg["content"][:80]
