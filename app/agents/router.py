@@ -27,9 +27,9 @@ ROUTER_SYSTEM_PROMPT = """Classify user intent for a customer service app. Use c
 
 Intents:
 - "order" — order status, tracking, delivery, shipping. If assistant asked for order ID and user provides one → "order"
-- "product" — ANY shopping, browsing, recommendations, or refinement of a previous product search
-- "support" — complaints, refunds, returns, defective items, broken products
-- "unclear" — truly off-topic (geography, general knowledge) or pure pronoun with no referent
+- "product" — ANY shopping, browsing, recommendations, refinement of a previous search, or product name (even misspelled)
+- "support" — ONLY when the message itself contains problem language (damaged, broken, refund, cancel, wrong item, not working). Never route to support based on session history alone
+- "unclear" — truly off-topic or pure pronoun with no referent
 
 Product follow-up rules (if history shows a product search, ALWAYS classify as "product"):
 - Price only: "under 2000", "cheaper", "between 1000 and 2000"

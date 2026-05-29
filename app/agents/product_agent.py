@@ -118,7 +118,7 @@ Rules:
 - Normalize spelling before using as keyword: mice→mouse, telly→TV, adaptor→adapter, blutooth→bluetooth
 - wired/wireless is a valid keyword for headphones/earphones only
 - Never output string "null" — use JSON null
-- unavailable_request TRUE: laptops, desktop PCs, tablets (devices), smartphones (devices), clothing, shoes, furniture, food
+- unavailable_request TRUE (judge on product type only — price/brand/feature alone never makes a request unavailable): laptops, desktop PCs, tablets (devices), smartphones (devices), clothing, shoes, furniture, food
 - unavailable_request FALSE: all appliances, accessories, peripherals, fans, air purifiers, geysers, webcams
 
 Examples:
@@ -151,8 +151,10 @@ def extract_preferences(state: AgentState) -> dict:
         full_prompt = (
             f"Recent conversation:\n{history_context}\n\n"
             f"Current message: {user_message}\n\n"
-            f"If this is a follow-up, preserve all fields from history and only update what the user explicitly changed.\n"
-            f"CRITICAL: When user says 'what about [Brand]', keep the same subcategory from history — do NOT infer subcategory from brand name."
+            f"Carry over subcategory from history ONLY if the current message is a pure refinement "
+            f"(price only, brand only, or feature qualifier like 'ones with X', 'cheaper', 'under 2000'). "
+            f"If the current message names a DIFFERENT product type, extract it FRESH — ignore history subcategory entirely. "
+            f"unavailable_request: judge from the current message only, not from history."
         )
     else:
         full_prompt = user_message
