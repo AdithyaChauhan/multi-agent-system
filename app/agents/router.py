@@ -68,16 +68,24 @@ def classify_intent_and_extract(state: AgentState) -> dict:
         system_prompt = ROUTER_SYSTEM_PROMPT
         commit_hash = "fallback"
     
-    # Truncate assistant replies to 150 chars — product list responses are large and the router
-    # only needs topic context, not the full list content
+    # For assistant replies: strip numbered product list entries, keep only intro/outcome lines.
+    # Char-truncation cuts product names mid-word (e.g. "Bluetooth Call" from a watch name)
+    # which bleeds into the router's intent classification on follow-up turns.
     history_context = ""
     if conversation_history:
         recent = conversation_history[-4:]
         lines = []
         for msg in recent:
-            content = msg["content"]
-            if msg["role"] == "assistant" and len(content) > 150:
-                content = content[:150] + "..."
+            if msg["role"] == "assistant":
+                intro = []
+                for line in msg["content"].split("\n"):
+                    stripped = line.strip()
+                    if stripped and stripped[0].isdigit() and ". " in stripped:
+                        break
+                    intro.append(line)
+                content = "\n".join(intro).strip() or msg["content"][:80]
+            else:
+                content = msg["content"]
             lines.append(f"{msg['role'].title()}: {content}")
         history_context = "\n".join(lines)
     

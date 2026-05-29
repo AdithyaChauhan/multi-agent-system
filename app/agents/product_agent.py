@@ -136,16 +136,27 @@ def extract_preferences(state: AgentState) -> dict:
     conversation_history = state.get("conversation_history", [])
 
     # Keep history so the LLM can resolve follow-up references ("ones", "what about X").
-    # Truncate assistant replies to 150 chars — product lists are large and irrelevant for extraction.
+    # For assistant replies: strip the numbered product list, keep only the intro/outcome lines
+    # (e.g. "Here are my top recommendations for you:"). Arbitrary char-truncation cuts product
+    # names mid-word, leaving misleading keywords like "Bluetooth Call" from a watch name that
+    # cause the LLM to infer the wrong subcategory on the next turn.
     history_context = ""
     if conversation_history:
         recent = conversation_history[-4:]
-        history_context = "\n".join([
-            f"{msg['role'].title()}: {msg['content'][:150]}..."
-            if msg['role'] == 'assistant' and len(msg['content']) > 150
-            else f"{msg['role'].title()}: {msg['content']}"
-            for msg in recent
-        ])
+        lines = []
+        for msg in recent:
+            if msg["role"] == "assistant":
+                intro = []
+                for line in msg["content"].split("\n"):
+                    stripped = line.strip()
+                    if stripped and stripped[0].isdigit() and ". " in stripped:
+                        break
+                    intro.append(line)
+                content = "\n".join(intro).strip() or msg["content"][:80]
+            else:
+                content = msg["content"]
+            lines.append(f"{msg['role'].title()}: {content}")
+        history_context = "\n".join(lines)
 
     if history_context:
         full_prompt = (
