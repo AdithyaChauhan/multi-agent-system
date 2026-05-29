@@ -152,8 +152,11 @@ def get_or_create_session(db, session_id: Optional[str], user_id: str) -> Sessio
 
         expiry_cutoff = datetime.now(timezone.utc) - timedelta(minutes=SESSION_EXPIRY_MINUTES)
         if session.last_active_at < expiry_cutoff:
-            logger.warning(f"request_id={get_request_id()} | Session expired | session_id={session_id} | last_active_at={session.last_active_at}")
-            raise HTTPException(status_code=410, detail=f"Session expired. Last activity was more than {SESSION_EXPIRY_MINUTES} minutes ago. Start a new session.")
+            logger.warning(f"request_id={get_request_id()} | Session expired, starting fresh | session_id={session_id}")
+            new_session = Session(session_id=str(uuid.uuid4()), user_id=user_id)
+            db.add(new_session)
+            db.flush()
+            return new_session
 
         session.last_active_at = datetime.now(timezone.utc)
         db.flush()
