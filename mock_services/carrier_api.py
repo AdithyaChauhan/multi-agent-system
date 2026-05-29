@@ -41,6 +41,35 @@ TRACKING_DATA = {
         "last_update": "2026-05-15 16:20:00",
         "estimated_delivery": "2026-05-15",
     },
+    # test-user-99 orders
+    "TRK-9901": {
+        "carrier": "FakeExpress",
+        "status": "In Transit",
+        "current_location": "Delhi Sorting Facility",
+        "last_update": "2026-05-28 09:15:00",
+        "estimated_delivery": "2026-05-31",
+    },
+    "TRK-9902": {
+        "carrier": "DTDC",
+        "status": "Delivered",
+        "current_location": "Customer Address",
+        "last_update": "2026-05-24 14:30:00",
+        "estimated_delivery": "2026-05-24",
+    },
+    "TRK-9903": {
+        "carrier": "BlueDart",
+        "status": "Delivered",
+        "current_location": "Customer Address",
+        "last_update": "2026-05-22 11:00:00",
+        "estimated_delivery": "2026-05-22",
+    },
+    "TRK-9904": {
+        "carrier": "FakeExpress",
+        "status": "Out for Delivery",
+        "current_location": "Hyderabad Local Hub",
+        "last_update": "2026-05-29 08:00:00",
+        "estimated_delivery": "2026-05-29",
+    },
 }
 
 
