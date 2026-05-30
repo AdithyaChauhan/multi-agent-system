@@ -534,13 +534,6 @@ def route_after_broaden(state: AgentState) -> Literal["retry_search", "no_result
     return "no_results" if state.get("filters_exhausted") else "retry_search"
 
 
-def route_after_rank(state: AgentState) -> Literal["enrich", "format"]:
-    # Skip enrichment (review/spec fetching + re-scoring) for broadened results.
-    # When filters were relaxed, products are already "closest match" — the extra
-    # DB round-trips and review bloat in state aren't worth it.
-    if state.get("relaxed_filters"):
-        return "format"
-    return "enrich"
 
 
 # GRAPH
@@ -578,11 +571,7 @@ def build_product_agent_graph():
         {"retry_search": "search_products", "no_results": "respond_no_results"}
     )
 
-    graph.add_conditional_edges(
-        "rank_and_filter",
-        route_after_rank,
-        {"enrich": "product_enrichment", "format": "format_recommendations"}
-    )
+    graph.add_edge("rank_and_filter", "product_enrichment")
     graph.add_edge("product_enrichment", "format_recommendations")
     graph.add_edge("ask_for_preferences", END)
     graph.add_edge("handle_unavailable", END)
