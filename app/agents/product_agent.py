@@ -143,6 +143,34 @@ History: "User: boAt headphones under 1500" | Message: "under 1000"
 Respond ONLY with valid JSON."""
 
 
+def _find_product_anchor(conversation_history: list, recent_user_texts: set) -> str | None:
+    """
+    Scan full conversation history for the most recent user message that preceded
+    a product recommendations response, but has since scrolled out of the [-6:] window.
+    Returns that user message so it can be injected as context for the extraction LLM.
+    """
+    for i in range(len(conversation_history) - 1, -1, -1):
+        msg = conversation_history[i]
+        if msg["role"] != "assistant":
+            continue
+        content = msg["content"]
+        if not any(phrase in content for phrase in (
+            "Here are my top recommendations",
+            "I could not find an exact match",
+            "Here are the closest options",
+        )):
+            continue
+        # Find the user message immediately before this assistant turn
+        for j in range(i - 1, -1, -1):
+            if conversation_history[j]["role"] == "user":
+                user_msg = conversation_history[j]["content"]
+                if user_msg not in recent_user_texts:
+                    return user_msg
+                # Already in window — no need to inject
+                return None
+    return None
+
+
 def extract_preferences(state: AgentState) -> dict:
     """LLM node — extracts structured preferences from user message."""
     user_message = state.get("user_message", "")
@@ -156,14 +184,14 @@ def extract_preferences(state: AgentState) -> dict:
     history_context = ""
     if conversation_history:
         recent = conversation_history[-6:]
+        recent_user_texts = {m["content"] for m in recent if m["role"] == "user"}
+
         lines = []
         for msg in recent:
             if msg["role"] == "assistant":
                 intro = []
                 for line in msg["content"].split("\n"):
                     stripped = line.strip()
-                    # Stop at numbered product entries ("1. Product name...")
-                    # or bullet catalog/order lists ("• Electronics...", "• ORD-...")
                     if stripped and (
                         (stripped[0].isdigit() and ". " in stripped)
                         or stripped.startswith("•")
@@ -175,6 +203,14 @@ def extract_preferences(state: AgentState) -> dict:
                 content = msg["content"]
             lines.append(f"{msg['role'].title()}: {content}")
         history_context = "\n".join(lines)
+
+        # Anchor: when the original product-establishing message has scrolled past
+        # the [-6:] window (e.g. 4+ consecutive price refinements), the LLM loses
+        # the subcategory entirely. Scan the full history for the last user message
+        # that was followed by a product recommendations response and inject it.
+        anchor = _find_product_anchor(conversation_history, recent_user_texts)
+        if anchor:
+            history_context = f"User (prior search): {anchor}\n\n" + history_context
 
     if history_context:
         full_prompt = f"Recent conversation:\n{history_context}\n\nCurrent message: {user_message}"
