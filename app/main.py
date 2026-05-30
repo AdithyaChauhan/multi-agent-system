@@ -172,7 +172,7 @@ def get_or_create_session(db, session_id: Optional[str], user_id: str) -> Sessio
     logger.info(f"request_id={get_request_id()} | New session created | session_id={session.session_id}")
     return session
 
-def load_conversation_history(db, session_id: str, limit: int = 20) -> list:
+def load_conversation_history(db, session_id: str, limit: int = 12) -> list:
     """Load the most recent conversation messages for a session."""
     messages = (
         db.query(Message)
