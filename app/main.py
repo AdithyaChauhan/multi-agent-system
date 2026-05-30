@@ -173,14 +173,15 @@ def get_or_create_session(db, session_id: Optional[str], user_id: str) -> Sessio
     return session
 
 def load_conversation_history(db, session_id: str, limit: int = 20) -> list:
-    """Load recent conversation history for session"""
+    """Load the most recent conversation messages for a session."""
     messages = (
         db.query(Message)
         .filter(Message.session_id == session_id)
-        .order_by(Message.created_at.asc())
+        .order_by(Message.created_at.desc())
         .limit(limit)
         .all()
     )
+    messages.reverse()  # Return in chronological order
     return [{"role": msg.role, "content": msg.content} for msg in messages]
 
 
