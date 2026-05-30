@@ -256,7 +256,47 @@ History: "User: boAt headphones under 1500 / Assistant: Here are my top recommen
 
 Respond ONLY with valid JSON."""
 
-for version, text in [("v1", V1), ("v2", V2), ("v3", V3), ("v4", V4), ("v5", V5), ("v6", V6)]:
+V7 = """Extract product search preferences. Return JSON only, omit null/empty fields.
+
+Catalog (EXACT subcategory names):
+Electronics: headphones(neckband|tws earbuds|wired earphones|over-ear) · speakers(bluetooth speaker|soundbar|home theatre) · tv(smart tv) · smartwatch · tv remote · set top box · projector · streaming device · Mobiles & Accessories · GeneralPurposeBatteries & BatteryChargers
+Computers & Accessories: mouse · keyboard · cable · adapter · drawing tablet · external hdd · external ssd · pen drive · usb hub · webcam · router · wifi adapter · wifi range extender · laptop bag · monitor stand · mouse pad · gamepad · microphone · screen protector · speakers · printer · ink cartridge · monitor · ups
+Home & Kitchen(type=null): iron · mixer grinder · blender · electric kettle · air fryer · vacuum cleaner · induction · sandwich maker · toaster · rice cooker · juicer · egg boiler · water purifier · water filter · frother · chopper · hand mixer · garment steamer · kitchen scale · lint remover · coffee maker · room heater · ceiling fan · air purifier · water heater · pedestal fan · humidifier · air conditioner · HomeStorage & Organization
+Office Products: OfficePaperProducts · OfficeElectronics
+
+Output fields: category, subcategory, type, brand, max_price, min_price, keywords(list), unavailable_request(bool)
+
+Rules:
+- Electronics: subcategory=product class, type=variant from parentheses above
+- Computers: subcategory=specific product; mouse/keyboard type: wired|wireless|gaming|mechanical; wifi dongles→wifi adapter; laptop stands/desks/cooling pads→monitor stand; USB chargers/dongles→adapter; external drives→external hdd; flash drives→pen drive
+- Home & Kitchen: subcategory=appliance name from list above, type=null
+- keywords: features NOT implied by subcategory/type (e.g. "calling", "noise cancellation", "HDMI"). Normalize: blutooth→bluetooth, speker→speaker, mice→mouse
+- unavailable_request=true for: laptops, desktop PCs, tablets(devices), smartphones(devices), clothing, shoes, furniture, food. Price/brand/feature alone NEVER makes unavailable.
+
+Follow-up rules:
+- "what about [Brand]" → keep EXACT prior subcategory, set brand only — never infer subcategory from brand
+- "under [price]"/"cheaper"/"ones with [X]" → keep all prior fields, change only relevant one, unavailable_request=false
+- New product mentioned → extract fresh
+
+Examples:
+"wireless mouse" → {"category":"Computers & Accessories","subcategory":"mouse","keywords":["wireless"],"unavailable_request":false}
+"neckband under 2000" → {"category":"Electronics","subcategory":"headphones","type":"neckband","max_price":2000,"unavailable_request":false}
+"Samsung smart TV under 15000" → {"category":"Electronics","subcategory":"tv","type":"smart tv","brand":"Samsung","max_price":15000,"unavailable_request":false}
+"mixer grinder under 3000" → {"category":"Home & Kitchen","subcategory":"mixer grinder","max_price":3000,"unavailable_request":false}
+"laptop under 50000" → {"keywords":["laptop"],"unavailable_request":true}
+
+History: "User: mixer grinder under 2000" | Message: "what about Bajaj"
+→ {"category":"Home & Kitchen","subcategory":"mixer grinder","brand":"Bajaj","max_price":2000,"unavailable_request":false}
+
+History: "User: room heater under 2000" | Message: "what about Bajaj"
+→ {"category":"Home & Kitchen","subcategory":"room heater","brand":"Bajaj","max_price":2000,"unavailable_request":false}
+
+History: "User: boAt headphones under 1500" | Message: "under 1000"
+→ {"category":"Electronics","subcategory":"headphones","brand":"boAt","max_price":1000,"unavailable_request":false}
+
+Respond ONLY with valid JSON."""
+
+for version, text in [("v1", V1), ("v2", V2), ("v3", V3), ("v4", V4), ("v5", V5), ("v6", V6), ("v7", V7)]:
     prompt = ChatPromptTemplate.from_messages([("system", text), ("human", "{input}")])
     try:
         client.push_prompt("product-extraction-prompt", object=prompt)

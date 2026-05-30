@@ -102,78 +102,43 @@ RELAXATION_ORDER = [
     "subcategory",
 ]
 
-EXTRACTION_SYSTEM_PROMPT = """Extract product search preferences. Return JSON only.
+EXTRACTION_SYSTEM_PROMPT = """Extract product search preferences. Return JSON only, omit null/empty fields.
 
-Catalog — use EXACT subcategory names:
+Catalog (EXACT subcategory names):
+Electronics: headphones(neckband|tws earbuds|wired earphones|over-ear) · speakers(bluetooth speaker|soundbar|home theatre) · tv(smart tv) · smartwatch · tv remote · set top box · projector · streaming device · Mobiles & Accessories · GeneralPurposeBatteries & BatteryChargers
+Computers & Accessories: mouse · keyboard · cable · adapter · drawing tablet · external hdd · external ssd · pen drive · usb hub · webcam · router · wifi adapter · wifi range extender · laptop bag · monitor stand · mouse pad · gamepad · microphone · screen protector · speakers · printer · ink cartridge · monitor · ups
+Home & Kitchen(type=null): iron · mixer grinder · blender · electric kettle · air fryer · vacuum cleaner · induction · sandwich maker · toaster · rice cooker · juicer · egg boiler · water purifier · water filter · frother · chopper · hand mixer · garment steamer · kitchen scale · lint remover · coffee maker · room heater · ceiling fan · air purifier · water heater · pedestal fan · humidifier · air conditioner · HomeStorage & Organization
+Office Products: OfficePaperProducts · OfficeElectronics
 
-Electronics:
-  headphones → type: neckband | tws earbuds | wired earphones | over-ear headphones
-  speakers → type: bluetooth speaker | soundbar | home theatre
-  tv → type: smart tv
-  smartwatch
-  tv remote
-  set top box
-  projector
-  streaming device
-  Mobiles & Accessories (smartphones, power banks, phone cases, chargers, selfie sticks, screen guards)
-  GeneralPurposeBatteries & BatteryChargers
-
-Computers & Accessories:
-  mouse | keyboard | cable | adapter | drawing tablet | external hdd | external ssd
-  pen drive | usb hub | webcam | router | wifi adapter | wifi range extender
-  laptop bag | monitor stand | mouse pad | gamepad | microphone | screen protector
-  speakers | printer | ink cartridge | monitor | ups
-
-Home & Kitchen (subcategory = the appliance, type = null):
-  iron | mixer grinder | blender | electric kettle | air fryer | vacuum cleaner | induction
-  sandwich maker | toaster | rice cooker | juicer | egg boiler | water purifier | water filter
-  frother | chopper | hand mixer | garment steamer | kitchen scale | lint remover | coffee maker
-  room heater | ceiling fan | air purifier | water heater | pedestal fan | humidifier | air conditioner
-  HomeStorage & Organization
-
-Office Products: OfficePaperProducts | OfficeElectronics
-
-Output schema: {"category": str|null, "subcategory": str|null, "type": str|null, "brand": str|null, "max_price": int|null, "min_price": int|null, "keywords": [str], "unavailable_request": bool}
+Output fields: category, subcategory, type, brand, max_price, min_price, keywords(list), unavailable_request(bool)
 
 Rules:
-- For Electronics: subcategory = product class (headphones/speakers/tv/smartwatch etc.), type = variant
-- For Computers & Accessories: subcategory = specific product; type = variant where applicable:
-    mouse/keyboard type: wired | wireless | gaming | mechanical | bluetooth
-    cable/adapter: type = null (use keywords for specifics like "HDMI", "USB-C")
-    laptop stands, tables, desks, cooling pads → subcategory="monitor stand"
-    USB chargers, laptop chargers, Bluetooth dongles → subcategory="adapter"
-    wifi dongles → subcategory="wifi adapter"
-    external hard drives → subcategory="external hdd"
-    pen drives / USB flash drives → subcategory="pen drive"
-- For Home & Kitchen: subcategory = specific appliance, type = null
-- keywords: only features NOT implied by subcategory/type (e.g. "calling", "noise cancellation", "HDMI")
-- NEVER add product name as keyword if subcategory is already set
-- Normalize: blutooth→bluetooth, speker→speaker, mice→mouse, telly→TV
-- Never output string "null" — use JSON null
-- unavailable_request TRUE (product TYPE only — price/brand/feature NEVER makes unavailable): laptops, desktop PCs, tablets (devices), smartphones (devices), clothing, shoes, furniture, food
-- unavailable_request FALSE: all appliances, accessories, peripherals, fans, purifiers, webcams
+- Electronics: subcategory=product class, type=variant from parentheses above
+- Computers: subcategory=specific product; mouse/keyboard type: wired|wireless|gaming|mechanical; wifi dongles→wifi adapter; laptop stands/desks/cooling pads→monitor stand; USB chargers/dongles→adapter; external drives→external hdd; flash drives→pen drive
+- Home & Kitchen: subcategory=appliance name from list above, type=null
+- keywords: features NOT implied by subcategory/type (e.g. "calling", "noise cancellation", "HDMI"). Normalize: blutooth→bluetooth, speker→speaker, mice→mouse
+- unavailable_request=true for: laptops, desktop PCs, tablets(devices), smartphones(devices), clothing, shoes, furniture, food. Price/brand/feature alone NEVER makes unavailable.
 
-Follow-up rules (when history shows a prior search):
-- "what about [Brand]" → ALWAYS keep the EXACT subcategory from the user's prior message — do NOT guess a new subcategory from the brand name. Set brand field only.
-- "under [price]" / "cheaper" / "ones with [feature]" → keep ALL fields from prior search (subcategory, brand, type, keywords), change only the relevant field. unavailable_request MUST be false for price/feature refinements.
-- "show me [different product]" → extract fresh, ignore history subcategory
+Follow-up rules:
+- "what about [Brand]" → keep EXACT prior subcategory, set brand only — never infer subcategory from brand
+- "under [price]"/"cheaper"/"ones with [X]" → keep all prior fields, change only relevant one, unavailable_request=false
+- New product mentioned → extract fresh
 
 Examples:
-"wireless mouse" → {"category": "Computers & Accessories", "subcategory": "mouse", "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": ["wireless"], "unavailable_request": false}
-"neckband under 2000" → {"category": "Electronics", "subcategory": "headphones", "type": "neckband", "brand": null, "max_price": 2000, "min_price": null, "keywords": [], "unavailable_request": false}
-"bluetooth speaker under 2000" → {"category": "Electronics", "subcategory": "speakers", "type": "bluetooth speaker", "brand": null, "max_price": 2000, "min_price": null, "keywords": [], "unavailable_request": false}
-"Samsung smart TV" → {"category": "Electronics", "subcategory": "tv", "type": "smart tv", "brand": "Samsung", "max_price": null, "min_price": null, "keywords": [], "unavailable_request": false}
-"mixer grinder under 3000" → {"category": "Home & Kitchen", "subcategory": "mixer grinder", "type": null, "brand": null, "max_price": 3000, "min_price": null, "keywords": [], "unavailable_request": false}
-"laptop under 50000" → {"category": null, "subcategory": null, "type": null, "brand": null, "max_price": 50000, "min_price": null, "keywords": ["laptop"], "unavailable_request": true}
+"wireless mouse" → {"category":"Computers & Accessories","subcategory":"mouse","keywords":["wireless"],"unavailable_request":false}
+"neckband under 2000" → {"category":"Electronics","subcategory":"headphones","type":"neckband","max_price":2000,"unavailable_request":false}
+"Samsung smart TV under 15000" → {"category":"Electronics","subcategory":"tv","type":"smart tv","brand":"Samsung","max_price":15000,"unavailable_request":false}
+"mixer grinder under 3000" → {"category":"Home & Kitchen","subcategory":"mixer grinder","max_price":3000,"unavailable_request":false}
+"laptop under 50000" → {"keywords":["laptop"],"unavailable_request":true}
 
-History: "User: mixer grinder under 2000 / Assistant: Here are my top recommendations:" | Message: "what about Bajaj"
-→ {"category": "Home & Kitchen", "subcategory": "mixer grinder", "type": null, "brand": "Bajaj", "max_price": 2000, "min_price": null, "keywords": [], "unavailable_request": false}
+History: "User: mixer grinder under 2000" | Message: "what about Bajaj"
+→ {"category":"Home & Kitchen","subcategory":"mixer grinder","brand":"Bajaj","max_price":2000,"unavailable_request":false}
 
-History: "User: room heater under 2000 / Assistant: Here are my top recommendations:" | Message: "what about Bajaj"
-→ {"category": "Home & Kitchen", "subcategory": "room heater", "type": null, "brand": "Bajaj", "max_price": 2000, "min_price": null, "keywords": [], "unavailable_request": false}
+History: "User: room heater under 2000" | Message: "what about Bajaj"
+→ {"category":"Home & Kitchen","subcategory":"room heater","brand":"Bajaj","max_price":2000,"unavailable_request":false}
 
-History: "User: boAt headphones under 1500 / Assistant: Here are my top recommendations:" | Message: "under 1000"
-→ {"category": "Electronics", "subcategory": "headphones", "type": null, "brand": "boAt", "max_price": 1000, "min_price": null, "keywords": [], "unavailable_request": false}
+History: "User: boAt headphones under 1500" | Message: "under 1000"
+→ {"category":"Electronics","subcategory":"headphones","brand":"boAt","max_price":1000,"unavailable_request":false}
 
 Respond ONLY with valid JSON."""
 
@@ -299,6 +264,11 @@ def extract_preferences(state: AgentState) -> dict:
             "keywords":    carried_keywords,
             "unavailable_request": preferences.get("unavailable_request", False),
         }
+
+    # Remove null/empty fields — downstream code uses .get() so missing == None.
+    # Keeps state small and LangSmith traces readable.
+    preferences = {k: v for k, v in preferences.items()
+                   if v is not None and v != [] and v != ""}
 
     logger.info(
         f"request_id={get_request_id()} | "
@@ -564,6 +534,15 @@ def route_after_broaden(state: AgentState) -> Literal["retry_search", "no_result
     return "no_results" if state.get("filters_exhausted") else "retry_search"
 
 
+def route_after_rank(state: AgentState) -> Literal["enrich", "format"]:
+    # Skip enrichment (review/spec fetching + re-scoring) for broadened results.
+    # When filters were relaxed, products are already "closest match" — the extra
+    # DB round-trips and review bloat in state aren't worth it.
+    if state.get("relaxed_filters"):
+        return "format"
+    return "enrich"
+
+
 # GRAPH
 
 def build_product_agent_graph():
@@ -599,7 +578,11 @@ def build_product_agent_graph():
         {"retry_search": "search_products", "no_results": "respond_no_results"}
     )
 
-    graph.add_edge("rank_and_filter", "product_enrichment")
+    graph.add_conditional_edges(
+        "rank_and_filter",
+        route_after_rank,
+        {"enrich": "product_enrichment", "format": "format_recommendations"}
+    )
     graph.add_edge("product_enrichment", "format_recommendations")
     graph.add_edge("ask_for_preferences", END)
     graph.add_edge("handle_unavailable", END)
