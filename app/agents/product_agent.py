@@ -190,7 +190,7 @@ def extract_preferences(state: AgentState) -> dict:
     # cause the LLM to infer the wrong subcategory on the next turn.
     history_context = ""
     if conversation_history:
-        recent = conversation_history[-4:]
+        recent = conversation_history[-6:]
         lines = []
         for msg in recent:
             if msg["role"] == "assistant":
