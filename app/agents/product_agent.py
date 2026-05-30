@@ -90,12 +90,16 @@ def get_catalog_summary() -> str:
 CATALOG_STRUCTURE = get_catalog_structure()
 CATALOG_SUMMARY = get_catalog_summary()
 
-# Generic relaxation order for all categories
+# Relaxation order: keep the product category as long as possible.
+# Relax brand first (try any brand), then specific features/keywords,
+# then type variant (e.g. neckband → any headphone), then price,
+# and only as a last resort drop the subcategory.
 RELAXATION_ORDER = [
-    "subcategory",
     "brand",
-    "price_increase",
     "keywords",
+    "type",
+    "price_increase",
+    "subcategory",
 ]
 
 EXTRACTION_SYSTEM_PROMPT = """Extract product search preferences. Return JSON only.

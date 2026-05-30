@@ -228,7 +228,7 @@ class TestProductAgentCompleteFlow:
         assert len(result["search_results"]) == 0
 
     def test_flow_broaden_relaxes_filters(self):
-        """Broaden search relaxes subcategory first, leaving brand/keywords as specificity"""
+        """Broaden search relaxes brand first, keeping subcategory as the primary specificity"""
         from app.agents.product_agent import broaden_search
 
         state = AgentState(
@@ -242,7 +242,9 @@ class TestProductAgentCompleteFlow:
 
         assert "preferences" in result
         assert result["broaden_attempt"] >= 1
-        assert result["preferences"]["subcategory"] is None
+        # Brand is relaxed first — subcategory is preserved so we don't return random products
+        assert result["preferences"]["brand"] is None
+        assert result["preferences"]["subcategory"] == "BoardGames"
 
     def test_flow_unavailable_product_response(self):
         """Unavailable products get redirect message"""
