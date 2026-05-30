@@ -571,7 +571,11 @@ def build_product_agent_graph():
         {"retry_search": "search_products", "no_results": "respond_no_results"}
     )
 
-    graph.add_edge("rank_and_filter", "product_enrichment")
+    graph.add_conditional_edges(
+        "rank_and_filter",
+        lambda s: "format" if not s.get("ranked_products") else "enrich",
+        {"enrich": "product_enrichment", "format": "format_recommendations"}
+    )
     graph.add_edge("product_enrichment", "format_recommendations")
     graph.add_edge("ask_for_preferences", END)
     graph.add_edge("handle_unavailable", END)
