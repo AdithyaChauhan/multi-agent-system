@@ -268,32 +268,42 @@ def extract_preferences(state: AgentState) -> dict:
         prev_subcategory = previous_prefs.get("subcategory")
         new_subcategory = preferences.get("subcategory")
 
-        # If category is unchanged and only brand differs, the LLM may infer the wrong
-        # subcategory from the brand name (e.g. Samsung → earphones when context is TVs).
-        # Keep the previous subcategory in that case.
-        if (
-            new_category == prev_category
-            and prev_subcategory
+        # Subcategory persistence: keep the active subcategory unless the user's current
+        # message explicitly names a new product type. Prevents brand names that span
+        # multiple categories (e.g. "Noise" makes both watches and earbuds) from
+        # flipping subcategory on a message like "what about Noise".
+        subcategory_changed = bool(
+            prev_subcategory
             and new_subcategory
             and new_subcategory != prev_subcategory
-            and not preferences.get("type")       # no explicit type change
-            and preferences.get("brand") is not None  # only brand was specified
-        ):
-            new_subcategory = prev_subcategory
-
-        # Only carry keywords forward if subcategory hasn't changed — switching product
-        # type means old feature keywords (e.g. "wireless" from keyboards) are irrelevant
-        same_subcategory = (new_subcategory or prev_subcategory) == prev_subcategory
-        carried_keywords = (
-            preferences.get("keywords") or previous_prefs.get("keywords")
-            if same_subcategory
-            else preferences.get("keywords") or []
         )
+        if subcategory_changed:
+            msg_lower = user_message.lower()
+            subcat_words = [
+                w for w in new_subcategory.lower().replace("-", " ").split()
+                if len(w) > 3
+            ]
+            explicitly_mentioned = any(w in msg_lower for w in subcat_words)
+            if not explicitly_mentioned:
+                new_subcategory = prev_subcategory
+                subcategory_changed = False
+
+        # When subcategory genuinely changes, drop type and keywords from the old
+        # product class entirely — they described a different product type.
+        # When subcategory is stable, carry type and keywords forward across turns.
+        if subcategory_changed:
+            carried_type     = preferences.get("type")
+            carried_keywords = preferences.get("keywords") or []
+        else:
+            carried_type     = preferences.get("type") or previous_prefs.get("type")
+            carried_keywords = (
+                preferences.get("keywords") or previous_prefs.get("keywords") or []
+            )
 
         preferences = {
             "category":    new_category,
             "subcategory": new_subcategory or prev_subcategory,
-            "type":        preferences.get("type")        or previous_prefs.get("type"),
+            "type":        carried_type,
             "brand":       preferences.get("brand"),
             "max_price":   preferences.get("max_price")   or previous_prefs.get("max_price"),
             "min_price":   preferences.get("min_price")   or previous_prefs.get("min_price"),
