@@ -149,6 +149,11 @@ Rules:
 - unavailable_request TRUE (product TYPE only — price/brand/feature NEVER makes unavailable): laptops, desktop PCs, tablets (devices), smartphones (devices), clothing, shoes, furniture, food
 - unavailable_request FALSE: all appliances, accessories, peripherals, fans, purifiers, webcams
 
+Follow-up rules (when history shows a prior search):
+- "what about [Brand]" → ALWAYS keep the EXACT subcategory from the user's prior message — do NOT guess a new subcategory from the brand name. Set brand field only.
+- "under [price]" / "cheaper" / "ones with [feature]" → keep ALL fields from prior search (subcategory, brand, type, keywords), change only the relevant field. unavailable_request MUST be false for price/feature refinements.
+- "show me [different product]" → extract fresh, ignore history subcategory
+
 Examples:
 "wireless mouse" → {"category": "Computers & Accessories", "subcategory": "mouse", "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": ["wireless"], "unavailable_request": false}
 "neckband under 2000" → {"category": "Electronics", "subcategory": "headphones", "type": "neckband", "brand": null, "max_price": 2000, "min_price": null, "keywords": [], "unavailable_request": false}
@@ -156,6 +161,15 @@ Examples:
 "Samsung smart TV" → {"category": "Electronics", "subcategory": "tv", "type": "smart tv", "brand": "Samsung", "max_price": null, "min_price": null, "keywords": [], "unavailable_request": false}
 "mixer grinder under 3000" → {"category": "Home & Kitchen", "subcategory": "mixer grinder", "type": null, "brand": null, "max_price": 3000, "min_price": null, "keywords": [], "unavailable_request": false}
 "laptop under 50000" → {"category": null, "subcategory": null, "type": null, "brand": null, "max_price": 50000, "min_price": null, "keywords": ["laptop"], "unavailable_request": true}
+
+History: "User: mixer grinder under 2000 / Assistant: Here are my top recommendations:" | Message: "what about Bajaj"
+→ {"category": "Home & Kitchen", "subcategory": "mixer grinder", "type": null, "brand": "Bajaj", "max_price": 2000, "min_price": null, "keywords": [], "unavailable_request": false}
+
+History: "User: room heater under 2000 / Assistant: Here are my top recommendations:" | Message: "what about Bajaj"
+→ {"category": "Home & Kitchen", "subcategory": "room heater", "type": null, "brand": "Bajaj", "max_price": 2000, "min_price": null, "keywords": [], "unavailable_request": false}
+
+History: "User: boAt headphones under 1500 / Assistant: Here are my top recommendations:" | Message: "under 1000"
+→ {"category": "Electronics", "subcategory": "headphones", "type": null, "brand": "boAt", "max_price": 1000, "min_price": null, "keywords": [], "unavailable_request": false}
 
 Respond ONLY with valid JSON."""
 
@@ -235,6 +249,18 @@ def extract_preferences(state: AgentState) -> dict:
             f"Preference parse error | raw={raw} | error={str(e)}"
         )
         preferences = {"category": None, "keywords": [], "unavailable_request": False}
+
+    # Safety: a pure price refinement ("under 1000", "cheaper") with no category
+    # extracted should never be marked unavailable — the LLM occasionally does this
+    # when conversation context includes a support turn before the product turn.
+    # Clear unavailable_request so routing falls through to "ask" at worst.
+    if (preferences.get("unavailable_request")
+            and not preferences.get("category")
+            and not preferences.get("subcategory")
+            and preferences.get("max_price") is not None
+            and conversation_history):
+        preferences["unavailable_request"] = False
+        logger.info(f"request_id={get_request_id()} | Cleared false-positive unavailable_request on price refinement")
 
     # Merge with previous preferences — preserve context across turns
     previous_prefs = state.get("preferences") or {}

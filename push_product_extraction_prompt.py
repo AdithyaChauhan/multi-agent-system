@@ -223,8 +223,8 @@ Rules:
 - unavailable_request FALSE: all appliances, accessories, peripherals, fans, purifiers, webcams
 
 Follow-up rules (when history shows a prior search):
-- "what about [Brand]" → keep subcategory from user's prior message, set brand only
-- "ones with [feature]" / "under [price]" → keep subcategory, adjust the relevant field
+- "what about [Brand]" → ALWAYS keep the EXACT subcategory from the user's prior message — do NOT guess a new subcategory from the brand name. Set brand field only.
+- "under [price]" / "cheaper" / "ones with [feature]" → keep ALL fields from the prior search (subcategory, brand, type, keywords), change only the relevant field. unavailable_request MUST be false for pure price/feature refinements.
 - "show me [different product]" → extract fresh, ignore history subcategory
 - "calling feature" after smartwatches → subcategory=smartwatch, keywords=["calling"]
 
@@ -244,6 +244,15 @@ History: "User: smartwatches under 3000 / Assistant: Here are my top recommendat
 
 History: "User: show me neckbands / Assistant: Here are my top recommendations:" | Message: "what about boAt"
 → {"category": "Electronics", "subcategory": "headphones", "type": "neckband", "brand": "boAt", "max_price": null, "min_price": null, "keywords": [], "unavailable_request": false}
+
+History: "User: mixer grinder under 2000 / Assistant: Here are my top recommendations:" | Message: "what about Bajaj"
+→ {"category": "Home & Kitchen", "subcategory": "mixer grinder", "type": null, "brand": "Bajaj", "max_price": 2000, "min_price": null, "keywords": [], "unavailable_request": false}
+
+History: "User: room heater under 2000 / Assistant: Here are my top recommendations:" | Message: "what about Bajaj"
+→ {"category": "Home & Kitchen", "subcategory": "room heater", "type": null, "brand": "Bajaj", "max_price": 2000, "min_price": null, "keywords": [], "unavailable_request": false}
+
+History: "User: boAt headphones under 1500 / Assistant: Here are my top recommendations:" | Message: "under 1000"
+→ {"category": "Electronics", "subcategory": "headphones", "type": null, "brand": "boAt", "max_price": 1000, "min_price": null, "keywords": [], "unavailable_request": false}
 
 Respond ONLY with valid JSON."""
 
