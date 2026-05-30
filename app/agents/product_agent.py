@@ -100,31 +100,61 @@ RELAXATION_ORDER = [
 
 EXTRACTION_SYSTEM_PROMPT = """Extract product search preferences. Return JSON only.
 
-Catalog (use exact subcategory names):
-Electronics: HomeTheater,TV & Video | Headphones,Earbuds & Accessories | WearableTechnology | HomeAudio | Mobiles & Accessories | GeneralPurposeBatteries & BatteryChargers
-Computers & Accessories: Accessories & Peripherals | NetworkingDevices | ExternalDevices & DataStorage | Monitors | Printers,Inks & Accessories
-Home & Kitchen (subcategory = the appliance, type = null): iron | mixer grinder | blender | electric kettle | air fryer | vacuum cleaner | induction | sandwich maker | toaster | rice cooker | juicer | egg boiler | water purifier | water filter | frother | chopper | hand mixer | garment steamer | kitchen scale | lint remover | coffee maker | room heater | ceiling fan | air purifier | water heater | pedestal fan | humidifier | air conditioner | HomeStorage & Organization
+Catalog — use EXACT subcategory names:
+
+Electronics:
+  headphones → type: neckband | tws earbuds | wired earphones | over-ear headphones
+  speakers → type: bluetooth speaker | soundbar | home theatre
+  tv → type: smart tv
+  smartwatch
+  tv remote
+  set top box
+  projector
+  streaming device
+  Mobiles & Accessories (smartphones, power banks, phone cases, chargers, selfie sticks, screen guards)
+  GeneralPurposeBatteries & BatteryChargers
+
+Computers & Accessories:
+  mouse | keyboard | cable | adapter | drawing tablet | external hdd | external ssd
+  pen drive | usb hub | webcam | router | wifi adapter | wifi range extender
+  laptop bag | monitor stand | mouse pad | gamepad | microphone | screen protector
+  speakers | printer | ink cartridge | monitor | ups
+
+Home & Kitchen (subcategory = the appliance, type = null):
+  iron | mixer grinder | blender | electric kettle | air fryer | vacuum cleaner | induction
+  sandwich maker | toaster | rice cooker | juicer | egg boiler | water purifier | water filter
+  frother | chopper | hand mixer | garment steamer | kitchen scale | lint remover | coffee maker
+  room heater | ceiling fan | air purifier | water heater | pedestal fan | humidifier | air conditioner
+  HomeStorage & Organization
+
 Office Products: OfficePaperProducts | OfficeElectronics
 
 Output schema: {"category": str|null, "subcategory": str|null, "type": str|null, "brand": str|null, "max_price": int|null, "min_price": int|null, "keywords": [str], "unavailable_request": bool}
 
 Rules:
-- Use exact subcategory name from the list above
-- For Home & Kitchen: subcategory = specific appliance from list, type = null
-- For Electronics: type = specific product (smart tv, tws earbuds, neckband, over-ear headphones, wired earphones, smartwatch, bluetooth speaker, soundbar, projector, streaming device, router, pen drive, keyboard, mouse, webcam)
-- Bluetooth/portable speakers, soundbars → HomeAudio (NOT Headphones,Earbuds & Accessories)
-- keywords: only specific features NOT already implied by subcategory/type (e.g. "calling", "noise cancellation", "portable", "waterproof")
-- NEVER add the product type name as a keyword if subcategory is already set (e.g. HomeAudio → do NOT add "bluetooth" or "speaker")
-- Normalize spelling before using as keyword: mice→mouse, telly→TV, adaptor→adapter, blutooth→bluetooth
-- wired/wireless is a valid keyword for headphones/earphones only
+- For Electronics: subcategory = product class (headphones/speakers/tv/smartwatch etc.), type = variant
+- For Computers & Accessories: subcategory = specific product; type = variant where applicable:
+    mouse/keyboard type: wired | wireless | gaming | mechanical | bluetooth
+    cable/adapter: type = null (use keywords for specifics like "HDMI", "USB-C")
+    laptop stands, tables, desks, cooling pads → subcategory="monitor stand"
+    USB chargers, laptop chargers, Bluetooth dongles → subcategory="adapter"
+    wifi dongles → subcategory="wifi adapter"
+    external hard drives → subcategory="external hdd"
+    pen drives / USB flash drives → subcategory="pen drive"
+- For Home & Kitchen: subcategory = specific appliance, type = null
+- keywords: only features NOT implied by subcategory/type (e.g. "calling", "noise cancellation", "HDMI")
+- NEVER add product name as keyword if subcategory is already set
+- Normalize: blutooth→bluetooth, speker→speaker, mice→mouse, telly→TV
 - Never output string "null" — use JSON null
-- unavailable_request TRUE (judge on product type only — price/brand/feature alone never makes a request unavailable): laptops, desktop PCs, tablets (devices), smartphones (devices), clothing, shoes, furniture, food
-- unavailable_request FALSE: all appliances, accessories, peripherals, fans, air purifiers, geysers, webcams
+- unavailable_request TRUE (product TYPE only — price/brand/feature NEVER makes unavailable): laptops, desktop PCs, tablets (devices), smartphones (devices), clothing, shoes, furniture, food
+- unavailable_request FALSE: all appliances, accessories, peripherals, fans, purifiers, webcams
 
 Examples:
+"wireless mouse" → {"category": "Computers & Accessories", "subcategory": "mouse", "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": ["wireless"], "unavailable_request": false}
+"neckband under 2000" → {"category": "Electronics", "subcategory": "headphones", "type": "neckband", "brand": null, "max_price": 2000, "min_price": null, "keywords": [], "unavailable_request": false}
+"bluetooth speaker under 2000" → {"category": "Electronics", "subcategory": "speakers", "type": "bluetooth speaker", "brand": null, "max_price": 2000, "min_price": null, "keywords": [], "unavailable_request": false}
+"Samsung smart TV" → {"category": "Electronics", "subcategory": "tv", "type": "smart tv", "brand": "Samsung", "max_price": null, "min_price": null, "keywords": [], "unavailable_request": false}
 "mixer grinder under 3000" → {"category": "Home & Kitchen", "subcategory": "mixer grinder", "type": null, "brand": null, "max_price": 3000, "min_price": null, "keywords": [], "unavailable_request": false}
-"air purifier under 10000" → {"category": "Home & Kitchen", "subcategory": "air purifier", "type": null, "brand": null, "max_price": 10000, "min_price": null, "keywords": [], "unavailable_request": false}
-"JBL bluetooth speaker under 2000" → {"category": "Electronics", "subcategory": "HomeAudio", "type": null, "brand": "JBL", "max_price": 2000, "min_price": null, "keywords": [], "unavailable_request": false}
 "laptop under 50000" → {"category": null, "subcategory": null, "type": null, "brand": null, "max_price": 50000, "min_price": null, "keywords": ["laptop"], "unavailable_request": true}
 
 Respond ONLY with valid JSON."""
