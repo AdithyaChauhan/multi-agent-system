@@ -80,10 +80,13 @@ def classify_intent_and_extract(state: AgentState) -> dict:
                 intro = []
                 for line in msg["content"].split("\n"):
                     stripped = line.strip()
-                    if stripped and (
-                        (stripped[0].isdigit() and ". " in stripped)
-                        or stripped.startswith("•")
-                    ):
+                    # Strip numbered product entries ("1. Product name...")
+                    if stripped and stripped[0].isdigit() and ". " in stripped:
+                        break
+                    # Strip catalog-overview bullets ("• Electronics (494 products) — ...")
+                    # but KEEP order-list bullets ("• ORD-9901 - iPhone...") — the router
+                    # needs order context to classify follow-ups like "track the TV"
+                    if stripped.startswith("•") and "products)" in stripped and "—" in stripped:
                         break
                     intro.append(line)
                 content = "\n".join(intro).strip() or msg["content"][:80]

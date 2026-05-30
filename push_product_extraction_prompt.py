@@ -166,7 +166,12 @@ History: "User: air purifier under 10000 / Assistant: Here are my top recommenda
 
 Respond ONLY with valid JSON."""
 
-for version, text in [("v1", V1), ("v2", V2), ("v3", V3), ("v4", V4)]:
+V5 = V4.replace(
+    "- unavailable_request TRUE: laptops, desktop PCs, tablets (devices), smartphones (devices), clothing, shoes, furniture, food",
+    "- unavailable_request TRUE (judge on product TYPE only — price/brand/feature alone NEVER makes a request unavailable): laptops, desktop PCs, tablets (devices), smartphones (devices), clothing, shoes, furniture, food"
+)
+
+for version, text in [("v1", V1), ("v2", V2), ("v3", V3), ("v4", V4), ("v5", V5)]:
     prompt = ChatPromptTemplate.from_messages([("system", text), ("human", "{input}")])
     try:
         client.push_prompt("product-extraction-prompt", object=prompt)
