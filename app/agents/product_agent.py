@@ -212,14 +212,7 @@ def extract_preferences(state: AgentState) -> dict:
         history_context = "\n".join(lines)
 
     if history_context:
-        full_prompt = (
-            f"Recent conversation:\n{history_context}\n\n"
-            f"Current message: {user_message}\n\n"
-            f"Carry over subcategory from history ONLY if the current message is a pure refinement "
-            f"(price only, brand only, or feature qualifier like 'ones with X', 'cheaper', 'under 2000'). "
-            f"If the current message names a DIFFERENT product type, extract it FRESH — ignore history subcategory entirely. "
-            f"unavailable_request: judge from the current message only, not from history."
-        )
+        full_prompt = f"Recent conversation:\n{history_context}\n\nCurrent message: {user_message}"
     else:
         full_prompt = user_message
 
@@ -362,7 +355,7 @@ def do_search_products(state: AgentState) -> dict:
         max_price=prefs.get("max_price"),
         min_price=prefs.get("min_price"),
         keywords=keywords,
-        limit=20,
+        limit=10,
     )
 
     logger.info(f"request_id={get_request_id()} | Found {len(results)} products")
@@ -516,25 +509,19 @@ def rank_and_filter(state: AgentState) -> dict:
     if not search_results:
         return {"ranked_products": []}
 
-    candidates = search_results[:20]
+    candidates = search_results[:10]
     product_list = "\n".join([
-        f"{i+1}. {p['name'][:70]} | Price: ₹{p['price']} | Rating: {p['rating']} | Brand: {p.get('brand', 'N/A')}"
+        f"{i+1}. {p['name'][:60]} | ₹{p['price']} | {p['rating']}★ | {p.get('brand', '')}"
         for i, p in enumerate(candidates)
     ])
 
     messages = [
-        SystemMessage(content="You are a product ranking expert. Return only valid JSON arrays. No explanation."),
+        SystemMessage(content="Rank products by relevance. Return a JSON array of 1-based indices only."),
         HumanMessage(content=(
-            f"Rank these products by relevance to the user's request.\n\n"
-            f"User request: \"{user_message}\"\n\n"
+            f"Request: \"{user_message}\"\n\n"
             f"Products:\n{product_list}\n\n"
-            f"Rules:\n"
-            f"- For feature requests (e.g. 'best battery', 'calling feature', 'noise cancellation'), "
-            f"rank products that match those features first.\n"
-            f"- Include any product that is a direct or close match.\n"
-            f"- Return [] only if the products are entirely unrelated to the request.\n\n"
-            f"Return ONLY a JSON array of 1-based indices, most relevant first. Max 5 products.\n"
-            f"Example: [3, 1, 7, 2, 5]"
+            f"Return indices most-relevant-first, max 5. [] only if entirely unrelated.\n"
+            f"Example: [3, 1, 2]"
         )),
     ]
 

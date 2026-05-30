@@ -73,7 +73,7 @@ def classify_intent_and_extract(state: AgentState) -> dict:
     # which bleeds into the router's intent classification on follow-up turns.
     history_context = ""
     if conversation_history:
-        recent = conversation_history[-6:]
+        recent = conversation_history[-4:]
         lines = []
         for msg in recent:
             if msg["role"] == "assistant":
