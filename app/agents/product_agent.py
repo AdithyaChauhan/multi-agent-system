@@ -116,47 +116,67 @@ RELAXATION_ORDER = [
 
 EXTRACTION_SYSTEM_PROMPT = """Extract product search preferences. Return JSON only.
 
-Catalog (use exact subcategory names):
-Electronics: HomeTheater,TV & Video | Headphones,Earbuds & Accessories | WearableTechnology | HomeAudio | Mobiles & Accessories | GeneralPurposeBatteries & BatteryChargers
-Computers & Accessories: Accessories & Peripherals | NetworkingDevices | ExternalDevices & DataStorage | Monitors | Printers,Inks & Accessories
-Home & Kitchen (subcategory = the appliance, type = null): iron | mixer grinder | blender | electric kettle | air fryer | vacuum cleaner | induction | sandwich maker | toaster | rice cooker | juicer | egg boiler | water purifier | water filter | frother | chopper | hand mixer | garment steamer | kitchen scale | lint remover | coffee maker | room heater | ceiling fan | air purifier | water heater | pedestal fan | humidifier | air conditioner | HomeStorage & Organization
+Catalog — use EXACT subcategory names:
+Electronics:
+  headphones → type: neckband | tws earbuds | wired earphones | over-ear headphones
+  speakers → type: bluetooth speaker | soundbar | home theatre
+  tv → type: smart tv
+  smartwatch | tv remote | set top box | projector | streaming device
+  Mobiles & Accessories | GeneralPurposeBatteries & BatteryChargers | Cameras & Photography
+
+Computers & Accessories (subcategory = specific product):
+  mouse | keyboard | cable | adapter | drawing tablet | monitor stand | mouse pad
+  pen drive | usb hub | webcam | router | wifi adapter | wifi range extender
+  laptop bag | screen protector | microphone | external hdd | external ssd
+  printer | ink cartridge | monitor | ups | gamepad
+  (mouse/keyboard type: wired | wireless | gaming | mechanical | bluetooth — null if unspecified)
+  (cable/adapter: type = null; use keywords for specifics like "HDMI", "USB-C", "lightning")
+
+Home & Kitchen (subcategory = the appliance, type = null):
+  iron | mixer grinder | blender | electric kettle | air fryer | vacuum cleaner | induction
+  sandwich maker | toaster | rice cooker | juicer | egg boiler | water purifier | water filter
+  frother | chopper | hand mixer | garment steamer | kitchen scale | lint remover | coffee maker
+  room heater | ceiling fan | air purifier | water heater | pedestal fan | humidifier | air conditioner
+  HomeStorage & Organization
+
 Office Products (no subcategory)
 
 Output schema: {"category": str|null, "subcategory": str|null, "type": str|null, "brand": str|null, "max_price": int|null, "min_price": int|null, "keywords": [str], "unavailable_request": bool}
 
 Rules:
-- Use exact subcategory name from the list above
-- For Home & Kitchen: subcategory = specific appliance from list, type = null
-- For Electronics: type = specific product (smart tv, tws earbuds, neckband, over-ear headphones, wired earphones, smartwatch, bluetooth speaker, soundbar, projector, streaming device, router, pen drive, keyboard, mouse, webcam)
-- Bluetooth/portable speakers, soundbars → HomeAudio (NOT Headphones,Earbuds & Accessories)
-- keywords: only product-specific features not covered by subcategory/type (e.g. "wireless", "calling", "noise cancellation")
-- wired/wireless is a keyword for headphones; normalize: mice→mouse, telly→TV, adaptor→adapter
+- Use exact subcategory name from the catalog above
+- Electronics headphones: subcategory="headphones", type=variant; all earphones/earbuds/neckbands → headphones
+- Electronics speakers: subcategory="speakers", type=variant; bluetooth/portable speakers, soundbars → speakers
+- Electronics tv: subcategory="tv", type="smart tv"
+- Computers mouse/keyboard: subcategory=product, type=variant or null; "wireless" is a keyword not a type
+- Computers cables: subcategory="cable", keywords=["HDMI"] / ["lightning"] / ["USB-C"] etc.
+- Home & Kitchen: subcategory = specific appliance, type = null
+- keywords: only features NOT covered by subcategory/type (e.g. "calling", "noise cancellation", "4K", "fast charging")
+- Normalize: mice→mouse, earphones/earbuds→headphones, telly→tv, adaptor→adapter, geyser→water heater, AC→air conditioner
 - Never output string "null" — use JSON null
-- "notebook" or "notebooks" alone = paper/stationery notebooks → category: "Office Products", subcategory: null, unavailable_request: false. Only "laptop" or "laptop notebook" = unavailable.
-- Indian colloquial terms: "geyser"/"geysers" → subcategory: "water heater"; "AC"/"ACs" → subcategory: "air conditioner"; "cooler" → subcategory: "air purifier" (if no room cooler subcategory exists)
-- Generic category browsing (user names a category or synonym, no specific product): set category only, subcategory: null, keywords: []
-  - "electronics", "gadgets", "electronic items" → category: "Electronics"
-  - "appliances", "home appliances", "kitchen appliances", "kitchen items" → category: "Home & Kitchen"
-  - "computers", "computer accessories", "peripherals", "computer items" → category: "Computers & Accessories"
-  - "office", "office products", "stationery", "office supplies" → category: "Office Products"
-- Vague browsing with no category intent ("give me a list", "show me products", "product list", "browse", "what do you have", "show everything", "show me something") → category: null, subcategory: null, keywords: [], unavailable_request: false
-- unavailable_request TRUE: laptops, desktop PCs, tablets (devices), smartphones (devices), clothing, shoes, furniture, food, books, novels, magazines, toys, sports equipment, automotive parts, garden supplies, pet supplies, beauty products, medicines
-- unavailable_request FALSE: all appliances, accessories, peripherals, fans, air purifiers, geysers, paper notebooks, stationery
+- "notebooks"/"notebook" alone → category: "Office Products", unavailable_request: false. Only "laptop"/"laptop notebook" = unavailable.
+- Generic category browsing (no specific product named): category only, subcategory: null, keywords: []
+  "electronics"/"gadgets" → "Electronics" | "appliances"/"home appliances" → "Home & Kitchen"
+  "computers"/"peripherals" → "Computers & Accessories" | "office"/"stationery" → "Office Products"
+- Vague browsing ("product list", "show me products", "show everything", "what do you have") → category: null, keywords: [], unavailable_request: false
+- unavailable_request TRUE: laptops, desktop PCs, tablets (devices), smartphones (devices), clothing, shoes, furniture, food, books, novels, magazines, sports equipment, toys, pet supplies, beauty products, medicines
+- unavailable_request FALSE: all appliances, accessories, peripherals, fans, purifiers, webcams, paper notebooks, stationery
 
 Examples:
 "mixer grinder under 3000" → {"category": "Home & Kitchen", "subcategory": "mixer grinder", "type": null, "brand": null, "max_price": 3000, "min_price": null, "keywords": [], "unavailable_request": false}
-"air purifier under 10000" → {"category": "Home & Kitchen", "subcategory": "air purifier", "type": null, "brand": null, "max_price": 10000, "min_price": null, "keywords": [], "unavailable_request": false}
-"JBL bluetooth speaker under 2000" → {"category": "Electronics", "subcategory": "HomeAudio", "type": null, "brand": "JBL", "max_price": 2000, "min_price": null, "keywords": [], "unavailable_request": false}
+"JBL bluetooth speaker under 2000" → {"category": "Electronics", "subcategory": "speakers", "type": "bluetooth speaker", "brand": "JBL", "max_price": 2000, "min_price": null, "keywords": [], "unavailable_request": false}
+"neckband under 2000" → {"category": "Electronics", "subcategory": "headphones", "type": "neckband", "brand": null, "max_price": 2000, "min_price": null, "keywords": [], "unavailable_request": false}
+"headphones under 2000" → {"category": "Electronics", "subcategory": "headphones", "type": null, "brand": null, "max_price": 2000, "min_price": null, "keywords": [], "unavailable_request": false}
+"Samsung smart TV" → {"category": "Electronics", "subcategory": "tv", "type": "smart tv", "brand": "Samsung", "max_price": null, "min_price": null, "keywords": [], "unavailable_request": false}
+"wireless mouse" → {"category": "Computers & Accessories", "subcategory": "mouse", "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": ["wireless"], "unavailable_request": false}
+"iphone cable" → {"category": "Computers & Accessories", "subcategory": "cable", "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": ["lightning"], "unavailable_request": false}
+"HDMI cable" → {"category": "Computers & Accessories", "subcategory": "cable", "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": ["HDMI"], "unavailable_request": false}
 "laptop under 50000" → {"category": null, "subcategory": null, "type": null, "brand": null, "max_price": 50000, "min_price": null, "keywords": ["laptop"], "unavailable_request": true}
 "notebooks" → {"category": "Office Products", "subcategory": null, "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": [], "unavailable_request": false}
 "books" → {"category": null, "subcategory": null, "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": ["books"], "unavailable_request": true}
 "geyser under 5000" → {"category": "Home & Kitchen", "subcategory": "water heater", "type": null, "brand": null, "max_price": 5000, "min_price": null, "keywords": [], "unavailable_request": false}
-"AC under 30000" → {"category": "Home & Kitchen", "subcategory": "air conditioner", "type": null, "brand": null, "max_price": 30000, "min_price": null, "keywords": [], "unavailable_request": false}
-"give me product list" → {"category": null, "subcategory": null, "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": [], "unavailable_request": false}
-"show me everything" → {"category": null, "subcategory": null, "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": [], "unavailable_request": false}
 "appliances" → {"category": "Home & Kitchen", "subcategory": null, "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": [], "unavailable_request": false}
-"electronics" → {"category": "Electronics", "subcategory": null, "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": [], "unavailable_request": false}
-"stationery" → {"category": "Office Products", "subcategory": null, "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": [], "unavailable_request": false}
+"give me product list" → {"category": null, "subcategory": null, "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": [], "unavailable_request": false}
 
 Respond ONLY with valid JSON."""
 
