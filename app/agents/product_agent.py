@@ -317,27 +317,28 @@ def broaden_search(state: AgentState) -> dict:
     attempt = state.get("broaden_attempt", 0)
     relaxed = list(state.get("relaxed_filters") or [])
 
-    if attempt >= len(RELAXATION_ORDER):
-        return {"broaden_attempt": attempt + 1, "filters_exhausted": True}
+    # Walk forward through the relaxation order until we find a filter we can actually relax.
+    # Using a loop instead of recursion so each graph invocation does one unit of work
+    # and the graph edge (broaden → search_products) handles the retry — traceable in LangSmith.
+    while attempt < len(RELAXATION_ORDER):
+        filter_to_relax = RELAXATION_ORDER[attempt]
+        attempt += 1
 
-    filter_to_relax = RELAXATION_ORDER[attempt]
-
-    if filter_to_relax == "price_increase":
-        if prefs.get("max_price"):
-            old_price = prefs["max_price"]
-            prefs["max_price"] = int(old_price * 1.25)
-            relaxed.append(f"price increased from {old_price} to {prefs['max_price']}")
+        if filter_to_relax == "price_increase":
+            if prefs.get("max_price"):
+                old_price = prefs["max_price"]
+                prefs["max_price"] = int(old_price * 1.25)
+                relaxed.append(f"price increased from {old_price} to {prefs['max_price']}")
+                break
         else:
-            return broaden_search({**state, "broaden_attempt": attempt + 1})
+            if prefs.get(filter_to_relax):
+                relaxed.append(filter_to_relax)
+                prefs[filter_to_relax] = None
+                break
     else:
-        if prefs.get(filter_to_relax):
-            relaxed.append(filter_to_relax)
-            prefs[filter_to_relax] = None
-        else:
-            return broaden_search({**state, "broaden_attempt": attempt + 1})
+        return {"broaden_attempt": attempt, "filters_exhausted": True}
 
-    # Guard: if after relaxation no specificity remains beyond category alone,
-    # the search would return anything in the category — treat as exhausted.
+    # Guard: if no specificity remains beyond category, treat as exhausted.
     has_specificity = (
         prefs.get("subcategory") or
         prefs.get("brand") or
@@ -345,11 +346,11 @@ def broaden_search(state: AgentState) -> dict:
         prefs.get("keywords")
     )
     if not has_specificity:
-        return {"broaden_attempt": attempt + 1, "filters_exhausted": True}
+        return {"broaden_attempt": attempt, "filters_exhausted": True}
 
     return {
         "preferences": prefs,
-        "broaden_attempt": attempt + 1,
+        "broaden_attempt": attempt,
         "relaxed_filters": relaxed,
         "filters_exhausted": False,
     }
