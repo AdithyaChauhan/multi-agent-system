@@ -60,6 +60,7 @@ CATALOG_STRUCTURE = get_catalog_structure()
 
 # Generic relaxation order for all categories
 RELAXATION_ORDER = [
+    "type",
     "subcategory",
     "brand",
     "price_increase",
@@ -84,14 +85,23 @@ Rules:
 - keywords: only product-specific features not covered by subcategory/type (e.g. "wireless", "calling", "noise cancellation")
 - wired/wireless is a keyword for headphones; normalize: mice→mouse, telly→TV, adaptor→adapter
 - Never output string "null" — use JSON null
-- unavailable_request TRUE: laptops, desktop PCs, tablets (devices), smartphones (devices), clothing, shoes, furniture, food
-- unavailable_request FALSE: all appliances, accessories, peripherals, fans, air purifiers, geysers
+- "notebook" or "notebooks" alone = paper/stationery notebooks → category: "Office Products", subcategory: null, unavailable_request: false. Only "laptop" or "laptop notebook" = unavailable.
+- Indian colloquial terms: "geyser"/"geysers" → subcategory: "water heater"; "AC"/"ACs" → subcategory: "air conditioner"; "cooler" → subcategory: "air purifier" (if no room cooler subcategory exists)
+- Vague browsing ("give me a list", "show me products", "product list", "browse", "what do you have", "show everything") → category: null, subcategory: null, keywords: [], unavailable_request: false
+- unavailable_request TRUE: laptops, desktop PCs, tablets (devices), smartphones (devices), clothing, shoes, furniture, food, books, novels, magazines, toys, sports equipment, automotive parts, garden supplies, pet supplies, beauty products, medicines
+- unavailable_request FALSE: all appliances, accessories, peripherals, fans, air purifiers, geysers, paper notebooks, stationery
 
 Examples:
 "mixer grinder under 3000" → {"category": "Home & Kitchen", "subcategory": "mixer grinder", "type": null, "brand": null, "max_price": 3000, "min_price": null, "keywords": [], "unavailable_request": false}
 "air purifier under 10000" → {"category": "Home & Kitchen", "subcategory": "air purifier", "type": null, "brand": null, "max_price": 10000, "min_price": null, "keywords": [], "unavailable_request": false}
 "JBL bluetooth speaker under 2000" → {"category": "Electronics", "subcategory": "HomeAudio", "type": null, "brand": "JBL", "max_price": 2000, "min_price": null, "keywords": [], "unavailable_request": false}
 "laptop under 50000" → {"category": null, "subcategory": null, "type": null, "brand": null, "max_price": 50000, "min_price": null, "keywords": ["laptop"], "unavailable_request": true}
+"notebooks" → {"category": "Office Products", "subcategory": null, "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": [], "unavailable_request": false}
+"books" → {"category": null, "subcategory": null, "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": ["books"], "unavailable_request": true}
+"geyser under 5000" → {"category": "Home & Kitchen", "subcategory": "water heater", "type": null, "brand": null, "max_price": 5000, "min_price": null, "keywords": [], "unavailable_request": false}
+"AC under 30000" → {"category": "Home & Kitchen", "subcategory": "air conditioner", "type": null, "brand": null, "max_price": 30000, "min_price": null, "keywords": [], "unavailable_request": false}
+"give me product list" → {"category": null, "subcategory": null, "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": [], "unavailable_request": false}
+"show me everything" → {"category": null, "subcategory": null, "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": [], "unavailable_request": false}
 
 Respond ONLY with valid JSON."""
 
@@ -114,7 +124,9 @@ def extract_preferences(state: AgentState) -> dict:
         full_prompt = (
             f"Recent conversation:\n{history_context}\n\n"
             f"Current message: {user_message}\n\n"
-            f"If this is a follow-up, preserve all fields from history and only update what the user explicitly changed.\n"
+            f"Follow-up rules:\n"
+            f"- If the user is refining the SAME product (e.g. changing price, brand, or adding a feature), preserve subcategory from history.\n"
+            f"- If the user mentions a DIFFERENT product type, extract fresh preferences — do NOT carry over subcategory from history.\n"
             f"CRITICAL: When user says 'what about [Brand]', keep the same subcategory from history — do NOT infer subcategory from brand name."
         )
     else:
@@ -372,13 +384,16 @@ def format_recommendations(state: AgentState) -> dict:
 
 def route_after_extraction(state: AgentState) -> Literal["search", "ask", "unavailable"]:
     prefs = state.get("preferences") or {}
-    
+
     if prefs.get("unavailable_request"):
         return "unavailable"
-    
+
     if not prefs.get("category"):
+        # Specific request with no matching category = not in catalog
+        if prefs.get("keywords"):
+            return "unavailable"
         return "ask"
-    
+
     return "search"
 
 
