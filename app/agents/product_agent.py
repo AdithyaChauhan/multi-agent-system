@@ -122,7 +122,8 @@ Electronics:
   speakers → type: bluetooth speaker | soundbar | home theatre
   tv → type: smart tv
   smartwatch | tv remote | set top box | projector | streaming device
-  Mobiles & Accessories | GeneralPurposeBatteries & BatteryChargers | Cameras & Photography
+  power bank | phone stand | phone case | selfie stick | charger | screen protector
+  GeneralPurposeBatteries & BatteryChargers | Cameras & Photography
 
 Computers & Accessories (subcategory = specific product):
   mouse | keyboard | cable | adapter | drawing tablet | monitor stand | mouse pad
@@ -159,8 +160,8 @@ Rules:
   "electronics"/"gadgets" → "Electronics" | "appliances"/"home appliances" → "Home & Kitchen"
   "computers"/"peripherals" → "Computers & Accessories" | "office"/"stationery" → "Office Products"
 - Vague browsing ("product list", "show me products", "show everything", "what do you have") → category: null, keywords: [], unavailable_request: false
-- unavailable_request TRUE: laptops, desktop PCs, tablets (devices), smartphones (devices), clothing, shoes, furniture, food, books, novels, magazines, sports equipment, toys, pet supplies, beauty products, medicines
-- unavailable_request FALSE: all appliances, accessories, peripherals, fans, purifiers, webcams, paper notebooks, stationery
+- unavailable_request TRUE: laptops, desktop PCs, tablets (devices), smartphones/mobile phones (devices), clothing, shoes, furniture, food, books, novels, magazines, sports equipment, toys, pet supplies, beauty products, medicines
+- unavailable_request FALSE: all appliances, accessories, peripherals, fans, purifiers, webcams, paper notebooks, stationery, power banks, phone cases, phone stands, chargers
 
 Examples:
 "mixer grinder under 3000" → {"category": "Home & Kitchen", "subcategory": "mixer grinder", "type": null, "brand": null, "max_price": 3000, "min_price": null, "keywords": [], "unavailable_request": false}
