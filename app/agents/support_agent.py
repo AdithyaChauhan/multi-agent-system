@@ -26,6 +26,15 @@ llm = ChatOpenAI(
 # Order value threshold (in rupees) for HIGH vs MEDIUM severity
 HIGH_VALUE_THRESHOLD = 10000
 
+# Cancellation eligibility — status strings verbatim from the DB
+_NON_CANCELLABLE = {'shipped', 'in transit', 'out_for_delivery', 'delivered'}
+_CANCELLATION_PHRASES = {
+    'shipped':          'has already shipped',
+    'in transit':       'is already in transit',
+    'out_for_delivery': 'is out for delivery',
+    'delivered':        'has already been delivered',
+}
+
 CLASSIFICATION_SYSTEM_PROMPT = """You are a support issue classification system.
 
 Analyze the user's message and classify into exactly one category.
@@ -262,12 +271,56 @@ def draft_resolution(state: AgentState) -> dict:
     return {"final_response": response.content.strip()}
 
 
+def check_cancellation_eligibility(state: AgentState) -> dict:
+    """
+    Guard node — runs only when category='cancellation' and support_order is resolved.
+    Refuses inline (no ticket) for shipped/in-transit/out_for_delivery/delivered/canceled.
+    Returns {} for placed/processing so the normal cancellation-ticket flow continues.
+    """
+    support_order = state.get("support_order") or {}
+    order_id     = support_order.get("order_id", "")
+    product_name = support_order.get("product_name", "your product")
+    status       = (support_order.get("status") or "").lower()
+
+    logger.info(
+        f"request_id={get_request_id()} | "
+        f"Cancellation eligibility | order_id={order_id} | status={status}"
+    )
+
+    if status == 'canceled':
+        return {
+            "final_response": (
+                f"Order **{order_id}** is already cancelled — nothing more needed on it. "
+                f"Anything else I can help with?"
+            )
+        }
+
+    if status in _NON_CANCELLABLE:
+        phrase = _CANCELLATION_PHRASES.get(status, 'can no longer be cancelled')
+        return {
+            "final_response": (
+                f"Order **{order_id}** ({product_name}) {phrase}, so it can't be cancelled now. "
+                f"Once it arrives you can return it within 30 days if it's unused and in "
+                f"original packaging — want me to help start a return instead?"
+            )
+        }
+
+    # 'placed' or 'processing' — eligible, proceed to existing cancellation-ticket flow
+    return {}
+
+
 # ==================== ROUTING ====================
 
-def route_after_order_fetch(state: AgentState) -> Literal["found", "not_found"]:
-    issue = state.get("support_issue", {})
-    # general_query passes through even without an order
-    if state.get("support_order") or issue.get("category") == "general_query":
+def route_after_order_fetch(state: AgentState) -> Literal["found", "not_found", "cancellation_check"]:
+    issue         = state.get("support_issue", {})
+    support_order = state.get("support_order")
+    category      = issue.get("category")
+
+    # Resolved order + cancellation → eligibility guard (must run before dup-check)
+    if support_order and category == "cancellation":
+        return "cancellation_check"
+    # general_query passes through without an order; all other resolved orders proceed
+    if support_order or category == "general_query":
         return "found"
     return "not_found"
 
@@ -281,13 +334,14 @@ def route_by_severity(state: AgentState) -> Literal["high", "low"]:
 def build_support_agent_graph():
     graph = StateGraph(AgentState)
 
-    graph.add_node("classify_issue",          classify_issue)
-    graph.add_node("fetch_order_for_support", fetch_order_for_support)
-    graph.add_node("ask_for_order",           ask_for_order)
-    graph.add_node("assess_severity",         assess_severity)
-    graph.add_node("lookup_policy",           lookup_policy)
-    graph.add_node("escalation_handler",      escalation_handler_subgraph)
-    graph.add_node("draft_resolution",        draft_resolution)
+    graph.add_node("classify_issue",                 classify_issue)
+    graph.add_node("fetch_order_for_support",        fetch_order_for_support)
+    graph.add_node("ask_for_order",                  ask_for_order)
+    graph.add_node("check_cancellation_eligibility", check_cancellation_eligibility)
+    graph.add_node("assess_severity",                assess_severity)
+    graph.add_node("lookup_policy",                  lookup_policy)
+    graph.add_node("escalation_handler",             escalation_handler_subgraph)
+    graph.add_node("draft_resolution",               draft_resolution)
 
     graph.set_entry_point("classify_issue")
     graph.add_edge("classify_issue", "fetch_order_for_support")
@@ -295,7 +349,13 @@ def build_support_agent_graph():
     graph.add_conditional_edges(
         "fetch_order_for_support",
         route_after_order_fetch,
-        {"found": "assess_severity", "not_found": "ask_for_order"},
+        {"found": "assess_severity", "not_found": "ask_for_order", "cancellation_check": "check_cancellation_eligibility"},
+    )
+
+    graph.add_conditional_edges(
+        "check_cancellation_eligibility",
+        lambda s: "refused" if s.get("final_response") else "proceed",
+        {"refused": END, "proceed": "assess_severity"},
     )
 
     graph.add_edge("assess_severity", "lookup_policy")
