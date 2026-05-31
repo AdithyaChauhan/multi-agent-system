@@ -27,7 +27,7 @@ ROUTER_SYSTEM_PROMPT = """Classify user intent for a customer service app. Use c
 
 Intents:
 - "order" — order status, tracking, delivery, shipping, listing orders ("my orders", "show my orders", "order history"). If assistant asked for order ID and user provides one → "order"
-- "product" — ANY shopping, browsing, recommendations, refinement of a previous product search, or vague catalog browsing ("product list", "show products", "what do you have", "appliances", "electronics")
+- "product" — ANY shopping, browsing, recommendations, refinement of a previous product search, vague catalog browsing ("product list", "show products", "what do you have", "appliances", "electronics"), or a bare product name ("tv", "fan", "mouse", "heater", "headphones", "speaker")
 - "support" — complaints, refunds, returns, defective items, broken products
 - "unclear" — truly off-topic (geography, general knowledge) or pure pronoun with no referent
 
@@ -79,6 +79,9 @@ History: "You have multiple orders: • ORD-9902 boAt Rockerz 450... Please prov
 
 History: "I've created a support ticket TKT-XXXX for your damaged Samsung TV..." | Message: "what about my iphone order"
 → {"intent": "order", "confidence": 0.9, "order_id": null}
+
+Message: "tv"
+→ {"intent": "product", "confidence": 0.95, "order_id": null}
 
 Message: "products list"
 → {"intent": "product", "confidence": 0.95, "order_id": null}
