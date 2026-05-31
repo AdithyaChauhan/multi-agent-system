@@ -74,18 +74,15 @@ def check_order_id(state: AgentState) -> dict:
                     assistant_asked = True
                     break
         
-        # If asked, try to extract from current message again
+        # If asked, try to extract from current message
         if assistant_asked:
             order_id = extract_order_id_from_text(user_message)
-            
-            # Check if entire message looks like order_id
+
+            # Bare 4-digit number anywhere in message (e.g. "9905 status", "what about 9901")
             if not order_id:
-                cleaned = user_message.strip().upper().replace(" ", "")
-                if re.match(r'^(ORD-?)?\d{4}$', cleaned):
-                    if cleaned.startswith("ORD"):
-                        order_id = cleaned if "-" in cleaned else f"ORD-{cleaned[3:]}"
-                    else:
-                        order_id = f"ORD-{cleaned}"
+                match = re.search(r'\b(\d{4})\b', user_message)
+                if match:
+                    order_id = f"ORD-{match.group(1)}"
     
     # If we have order_id, return it
     if order_id:
@@ -94,21 +91,24 @@ def check_order_id(state: AgentState) -> dict:
     
     # Otherwise, fetch user's orders from database
     user_orders = fetch_user_orders(user_id)
-    
-    logger.info(
-        f"request_id={get_request_id()} | "
-        f"User has {len(user_orders)} orders"
-    )
-    
+
+    logger.info(f"request_id={get_request_id()} | User has {len(user_orders)} orders")
+
     if len(user_orders) == 0:
         return {"order_id": None, "user_orders": []}
     elif len(user_orders) == 1:
-        # Auto-select the only order
         logger.info(f"request_id={get_request_id()} | Auto-selected order: {user_orders[0]['order_id']}")
         return {"order_id": user_orders[0]["order_id"], "user_orders": user_orders}
-    else:
-        # Multiple orders
-        return {"order_id": None, "user_orders": user_orders}
+
+    # Try matching product name from message against order list
+    msg_lower = user_message.lower()
+    for order in user_orders:
+        product_words = [w for w in order.get("product_name", "").lower().split() if len(w) > 3]
+        if product_words and any(w in msg_lower for w in product_words):
+            logger.info(f"request_id={get_request_id()} | Matched order by product name: {order['order_id']}")
+            return {"order_id": order["order_id"], "user_orders": user_orders}
+
+    return {"order_id": None, "user_orders": user_orders}
 
 
 def respond_no_orders(state: AgentState) -> dict:

@@ -32,7 +32,8 @@ Intents:
 - "unclear" — truly off-topic (geography, general knowledge) or pure pronoun with no referent
 
 CONTEXT PRIORITY — check the last assistant message first:
-- If the last assistant message is from a support flow (asked "which order", "order number", "please reply with the order number", "raise a support ticket", "support ticket") → classify the follow-up as "support" regardless of its content
+- If the last assistant message is from a SUPPORT flow (contains "please reply with the order number", "raise a support ticket", "support ticket", or "for your support ticket") → classify the follow-up as "support" regardless of its content
+- If the last assistant message is from the ORDER agent (listed orders with ORD-XXXX numbers AND said "Please provide the order ID") → classify the follow-up as "order" regardless of its content
 - If the last assistant message showed product recommendations → classify refinements as "product"
 - "support" context beats product keyword matching — a product name reply to a support question is "support", not "product"
 
@@ -68,6 +69,12 @@ History: "Which order is this regarding? Here are your recent orders: 1. ORD-990
 
 Message: "my orders"
 → {"intent": "order", "confidence": 0.95, "order_id": null}
+
+History: "You have multiple orders: • ORD-9901 iPhone... • ORD-9905 Bajaj Mixer... Please provide the order ID." | Message: "9905 status"
+→ {"intent": "order", "confidence": 0.95, "order_id": "ORD-9905"}
+
+History: "You have multiple orders: • ORD-9902 boAt Rockerz 450... Please provide the order ID." | Message: "boAt Rockerz 450 status"
+→ {"intent": "order", "confidence": 0.95, "order_id": "ORD-9902"}
 
 Message: "products list"
 → {"intent": "product", "confidence": 0.95, "order_id": null}
