@@ -58,6 +58,53 @@ def get_catalog_structure() -> str:
 # Load once at startup
 CATALOG_STRUCTURE = get_catalog_structure()
 
+
+def build_catalog_blurb() -> str:
+    """Build an honest catalog blurb from real DB data — only shows what actually exists."""
+    from app.db.database import SessionLocal
+    from app.models.product import Product
+    from sqlalchemy import func
+
+    db = SessionLocal()
+    try:
+        counts = db.query(
+            Product.category,
+            func.count(Product.product_id).label("cnt")
+        ).filter(Product.category.isnot(None)).group_by(
+            Product.category
+        ).order_by(func.count(Product.product_id).desc()).all()
+
+        sub_rows = db.query(
+            Product.category,
+            Product.subcategory,
+            func.count(Product.product_id).label("cnt")
+        ).filter(
+            Product.category.isnot(None),
+            Product.subcategory.isnot(None)
+        ).group_by(Product.category, Product.subcategory).order_by(
+            Product.category, func.count(Product.product_id).desc()
+        ).all()
+
+        subcat_map: dict = {}
+        for cat, sub, _ in sub_rows:
+            if cat not in subcat_map:
+                subcat_map[cat] = []
+            if len(subcat_map[cat]) < 3:
+                subcat_map[cat].append(sub)
+
+        lines = []
+        for cat, cnt in counts:
+            subs = subcat_map.get(cat, [])
+            suffix = f" — {', '.join(subs)}" if subs else ""
+            lines.append(f"• {cat} ({cnt} products){suffix}")
+
+        return "\n".join(lines)
+    finally:
+        db.close()
+
+
+CATALOG_BLURB = build_catalog_blurb()
+
 # Generic relaxation order for all categories
 RELAXATION_ORDER = [
     "type",
@@ -203,28 +250,17 @@ def extract_preferences(state: AgentState) -> dict:
 def ask_for_preferences(state: AgentState) -> dict:
     logger.info(f"request_id={get_request_id()} | Asking for preferences")
     return {
-        "final_response": (
-            f"• Electronics (490 products) — TVs, headphones, smartwatches, cameras\n"
-            f"• Computers & Accessories (375 products) — Cables, chargers, keyboards, mice\n"
-            f"• Home & Kitchen (447 products) — Appliances, cookware, fans, air purifiers\n"
-            f"• Office Products (31 products) — Stationery, paper products\n\n"
-        )
+        "final_response": f"What are you looking for? Here's what we carry:\n\n{CATALOG_BLURB}"
     }
 
 
 def handle_unavailable_products(state: AgentState) -> dict:
-    user_message = state.get("user_message", "")
     logger.info(f"request_id={get_request_id()} | Unavailable category requested")
-    
     return {
         "final_response": (
             f"I'm sorry, we don't carry that item in our catalog. "
-            f"However, we have a great selection in other categories:\n\n"
-            f"• Electronics (490 products) - TVs, headphones, cameras, wearables\n"
-            f"• Computers & Accessories (375 products) - Cables, chargers, keyboards\n"
-            f"• Home & Kitchen (447 products) - Appliances, cookware, fans\n"
-            f"• Office Products (31 products) - Stationery, paper products\n\n"
-            f"Would you like to explore any of these categories?"
+            f"Here's what we do have:\n\n{CATALOG_BLURB}\n\n"
+            f"Would you like to explore any of these?"
         )
     }
 
@@ -348,11 +384,7 @@ def format_recommendations(state: AgentState) -> dict:
                         "final_response": (
                             f"I couldn't find '{original_query}' in our catalog. "
                             f"Our inventory may not carry this specific item.\n\n"
-                            f"We carry:\n"
-                            f"• Electronics (490 products) — TVs, headphones, smartwatches, cameras\n"
-                            f"• Computers & Accessories (375 products) — Cables, chargers, keyboards, mice\n"
-                            f"• Home & Kitchen (447 products) — Appliances, cookware, fans, air purifiers\n"
-                            f"• Office Products (31 products) — Stationery, paper products\n\n"
+                            f"Here's what we do carry:\n{CATALOG_BLURB}\n\n"
                             f"Would you like to explore any of these categories?"
                         )
                     }
