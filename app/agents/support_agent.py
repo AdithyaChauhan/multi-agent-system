@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from typing import Literal
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
@@ -138,10 +139,17 @@ def classify_issue(state: AgentState) -> dict:
 def fetch_order_for_support(state: AgentState) -> dict:
     """
     Fetches and validates the order the user is raising a ticket about.
-    Falls back to scanning conversation history for ORD-XXXX if LLM missed it.
+    Resolution priority:
+      1. Explicit ORD-XXXX in the current message
+      2. Product-name keywords from the current message matched against user's orders
+      3. LLM/router-extracted order_id (may be from history — normalised to ORD-XXXX)
+      4. Single open support ticket
+      5. Single user order (auto-select)
+      6. Ask the user
     general_query doesn't need an order — passes through with support_order=None.
     """
     user_id = state.get("user_id", "")
+    user_message = state.get("user_message", "")
     issue = state.get("support_issue", {})
     order_id = issue.get("order_id")
 
@@ -149,29 +157,62 @@ def fetch_order_for_support(state: AgentState) -> dict:
     if issue.get("category") == "general_query":
         return {"support_order": None, "user_orders": []}
 
-    # Resolve order_id from DB context when LLM didn't extract one
-    if not order_id:
-        open_tickets = [
-            t for t in get_user_ticket_history(user_id, limit=10)
-            if t.get("status") in ("open", "in_progress") and t.get("order_id")
-        ]
-        if len(open_tickets) == 1:
-            order_id = open_tickets[0]["order_id"]
-            logger.info(f"request_id={get_request_id()} | Resolved order from open ticket | order_id={order_id}")
-        else:
-            user_orders_all = fetch_user_orders(user_id)
-            if len(user_orders_all) == 1:
-                order_id = user_orders_all[0]["order_id"]
-                logger.info(f"request_id={get_request_id()} | Resolved order from single user order | order_id={order_id}")
+    # Step 1: explicit ORD-XXXX in the current message takes top priority
+    msg_explicit = re.search(r'\b(ORD-?\d{4})\b', user_message, re.IGNORECASE)
+    if msg_explicit:
+        explicit_id = msg_explicit.group(1).upper()
+        if not explicit_id.startswith("ORD-"):
+            explicit_id = f"ORD-{explicit_id[3:]}"
+        order = fetch_order_from_db(explicit_id, user_id)
+        if order:
+            logger.info(f"request_id={get_request_id()} | Support order fetched from message | order_id={explicit_id}")
+            return {"support_order": order}
 
+    # Fetch once for steps 2, 5, and the fallback listing
+    user_orders = fetch_user_orders(user_id)
+
+    # Step 2: product-name matching — more reliable than history-sourced order_id
+    if user_orders and user_message:
+        msg_lower = user_message.lower()
+        for o in user_orders:
+            words = [w for w in re.findall(r'\w+', o.get('product_name', '').lower()) if len(w) > 3]
+            if words and any(w in msg_lower for w in words):
+                order = fetch_order_from_db(o['order_id'], user_id)
+                if order:
+                    logger.info(f"request_id={get_request_id()} | Order matched by product name | order_id={o['order_id']}")
+                    return {"support_order": order}
+
+    # Step 3: LLM/router-extracted order_id (may come from history context)
     if order_id:
+        # Normalise bare 4-digit IDs (e.g. "9903" extracted from history text → "ORD-9903")
+        if re.match(r'^\d{4}$', str(order_id).strip()):
+            order_id = f"ORD-{order_id.strip()}"
         order = fetch_order_from_db(order_id, user_id)
         if order:
             logger.info(f"request_id={get_request_id()} | Support order fetched | order_id={order_id}")
             return {"support_order": order}
         logger.info(f"request_id={get_request_id()} | Order not found or not owned | order_id={order_id}")
 
-    user_orders = fetch_user_orders(user_id)
+    # Step 4: single open ticket
+    open_tickets = [
+        t for t in get_user_ticket_history(user_id, limit=10)
+        if t.get("status") in ("open", "in_progress") and t.get("order_id")
+    ]
+    if len(open_tickets) == 1:
+        tid = open_tickets[0]["order_id"]
+        order = fetch_order_from_db(tid, user_id)
+        if order:
+            logger.info(f"request_id={get_request_id()} | Resolved order from open ticket | order_id={tid}")
+            return {"support_order": order}
+
+    # Step 5: single user order — auto-select
+    if len(user_orders) == 1:
+        tid = user_orders[0]["order_id"]
+        order = fetch_order_from_db(tid, user_id)
+        if order:
+            logger.info(f"request_id={get_request_id()} | Resolved order from single user order | order_id={tid}")
+            return {"support_order": order}
+
     logger.info(f"request_id={get_request_id()} | No valid order | user has {len(user_orders)} orders")
     return {"support_order": None, "user_orders": user_orders}
 

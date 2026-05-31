@@ -280,6 +280,9 @@ def extract_preferences(state: AgentState) -> dict:
         # message explicitly names a new product type. Prevents brand names that span
         # multiple categories (e.g. "Noise" makes both watches and earbuds) from
         # flipping subcategory on a message like "what about Noise".
+        category_changed = bool(
+            new_category and prev_category and new_category != prev_category
+        )
         subcategory_changed = bool(
             prev_subcategory
             and new_subcategory
@@ -288,10 +291,7 @@ def extract_preferences(state: AgentState) -> dict:
         if subcategory_changed:
             msg_lower = user_message.lower()
             # Words from the subcategory name itself ("headphones" → {"headphones"})
-            subcat_words = {
-                w for w in new_subcategory.lower().replace("-", " ").split()
-                if len(w) > 3
-            }
+            subcat_words = set(new_subcategory.lower().replace("-", " ").split())
             # Words from the newly-extracted type ("tws earbuds" → {"tws", "earbuds"})
             new_type_raw = preferences.get("type") or ""
             type_words = {
@@ -312,7 +312,7 @@ def extract_preferences(state: AgentState) -> dict:
         # from anchor-injected history (e.g. "bluetooth calling" from a prior watch
         # turn leaking into an earbuds query), so we filter to message-present words.
         # When subcategory is stable, carry type and keywords forward across turns.
-        if subcategory_changed:
+        if subcategory_changed or category_changed:
             carried_type = preferences.get("type")
             msg_lower_kw = user_message.lower()
             carried_keywords = [
@@ -325,13 +325,28 @@ def extract_preferences(state: AgentState) -> dict:
                 preferences.get("keywords") or previous_prefs.get("keywords") or []
             )
 
+                # ─────────────────────────────────────────────────────────────
+        # FORCE CLEAR PRICE on any category or subcategory change
+        if subcategory_changed or category_changed:
+            preferences["max_price"] = None
+            preferences["min_price"] = None
+        # ─────────────────────────────────────────────────────────────
+
+        # Price: no fallback on category/subcategory change — old filters don't apply to new product class
+        if subcategory_changed or category_changed:
+            carried_max_price = preferences.get("max_price")
+            carried_min_price = preferences.get("min_price")
+        else:
+            carried_max_price = preferences.get("max_price") or previous_prefs.get("max_price")
+            carried_min_price = preferences.get("min_price") or previous_prefs.get("min_price")
+
         preferences = {
             "category":    new_category,
             "subcategory": new_subcategory or prev_subcategory,
             "type":        carried_type,
             "brand":       preferences.get("brand"),
-            "max_price":   preferences.get("max_price")   or previous_prefs.get("max_price"),
-            "min_price":   preferences.get("min_price")   or previous_prefs.get("min_price"),
+            "max_price":   carried_max_price,
+            "min_price":   carried_min_price,
             "keywords":    carried_keywords,
             "unavailable_request": preferences.get("unavailable_request", False),
         }

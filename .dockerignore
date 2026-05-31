@@ -10,3 +10,9 @@ logs/
 dist/
 build/
 .pytest_cache/
+backups/
+tests/
+products_dump.txt
+taxonomy_audit.txt
+taxonomy_audit_v2.txt
+zech.txt
