@@ -40,6 +40,12 @@ from fastapi.staticfiles import StaticFiles
 
 from langchain_core.tracers.context import collect_runs
 
+# Per-session product preference store (in-memory, single-process).
+# Persists the last extracted product subcategory across turns so the
+# subcategory-persistence guard in extract_preferences has something to compare
+# against. Order/support turns don't overwrite it — only product turns with a
+# real subcategory update the store.
+_session_prefs: dict[str, dict] = {}
 
 Base.metadata.create_all(bind=engine)
 
@@ -233,14 +239,20 @@ def chat(
         conversation_history = load_conversation_history(db, session.session_id)
         logger.info(f"request_id={get_request_id()} | Loaded {len(conversation_history)} history messages")
 
+        invoke_state: dict = {
+            "user_message": chat_request.message,
+            "user_id": user_id,
+            "session_id": session.session_id,
+            "conversation_history": conversation_history,
+        }
+        prior_prefs = _session_prefs.get(session.session_id)
+        if prior_prefs:
+            invoke_state["preferences"] = prior_prefs
+            logger.info(f"request_id={get_request_id()} | Injecting prior prefs | subcategory={prior_prefs.get('subcategory')}")
+
         with collect_runs() as cb:
             graph_result = router_graph.invoke(
-                {
-                    "user_message": chat_request.message,
-                    "user_id": user_id,
-                    "session_id": session.session_id,
-                    "conversation_history": conversation_history,
-                },
+                invoke_state,
                 config={
                     "tags": [f"user:{user_id}", f"session:{session.session_id}"],
                     "metadata": {
@@ -258,6 +270,13 @@ def chat(
         
         final_response = graph_result.get("final_response", "Something went wrong.")
         logger.info(f"request_id={get_request_id()} | Graph completed | final_response_preview={final_response[:80]}")
+
+        # Persist product preferences for next turn — only when a real subcategory was extracted.
+        # Order/support turns return no preferences, so prior product context is preserved.
+        new_prefs = graph_result.get("preferences")
+        if new_prefs and new_prefs.get("subcategory"):
+            _session_prefs[session.session_id] = new_prefs
+            logger.info(f"request_id={get_request_id()} | Stored prefs | subcategory={new_prefs.get('subcategory')}")
 
         # Store the assistant response
         assistant_message = Message(

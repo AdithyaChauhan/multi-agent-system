@@ -102,6 +102,14 @@ RELAXATION_ORDER = [
     "subcategory",
 ]
 
+# Words users say that colloquially name a subcategory without using the subcategory
+# name itself. Used by the subcategory-persistence guard so "show me tws earbuds"
+# is recognised as an explicit switch to 'headphones', not a revert-trigger.
+_SUBCATEGORY_SYNONYMS: dict = {
+    "headphones": {"earbuds", "earphone", "earphones", "buds", "airdopes", "tws"},
+    "speakers":   {"soundbar", "speaker", "speakers"},
+}
+
 EXTRACTION_SYSTEM_PROMPT = """Extract product search preferences. Return JSON only, omit null/empty fields.
 
 Catalog (EXACT subcategory names):
@@ -279,21 +287,38 @@ def extract_preferences(state: AgentState) -> dict:
         )
         if subcategory_changed:
             msg_lower = user_message.lower()
-            subcat_words = [
+            # Words from the subcategory name itself ("headphones" → {"headphones"})
+            subcat_words = {
                 w for w in new_subcategory.lower().replace("-", " ").split()
                 if len(w) > 3
-            ]
-            explicitly_mentioned = any(w in msg_lower for w in subcat_words)
+            }
+            # Words from the newly-extracted type ("tws earbuds" → {"tws", "earbuds"})
+            new_type_raw = preferences.get("type") or ""
+            type_words = {
+                w for w in new_type_raw.lower().replace("-", " ").split()
+                if len(w) > 2
+            }
+            # Colloquial synonyms users write instead of the subcategory name
+            synonym_words = _SUBCATEGORY_SYNONYMS.get(new_subcategory.lower(), set())
+            explicitly_mentioned = any(
+                w in msg_lower for w in subcat_words | type_words | synonym_words
+            )
             if not explicitly_mentioned:
                 new_subcategory = prev_subcategory
                 subcategory_changed = False
 
-        # When subcategory genuinely changes, drop type and keywords from the old
-        # product class entirely — they described a different product type.
+        # When subcategory genuinely changes, carry only the type and keywords the
+        # user actually said in the current message. The LLM can inherit keywords
+        # from anchor-injected history (e.g. "bluetooth calling" from a prior watch
+        # turn leaking into an earbuds query), so we filter to message-present words.
         # When subcategory is stable, carry type and keywords forward across turns.
         if subcategory_changed:
-            carried_type     = preferences.get("type")
-            carried_keywords = preferences.get("keywords") or []
+            carried_type = preferences.get("type")
+            msg_lower_kw = user_message.lower()
+            carried_keywords = [
+                kw for kw in (preferences.get("keywords") or [])
+                if kw.lower() in msg_lower_kw
+            ]
         else:
             carried_type     = preferences.get("type") or previous_prefs.get("type")
             carried_keywords = (
