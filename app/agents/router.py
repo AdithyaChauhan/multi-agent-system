@@ -26,7 +26,7 @@ llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=os.getenv("OPENAI_A
 ROUTER_SYSTEM_PROMPT = """Classify user intent for a customer service app. Use conversation history to resolve references and follow-ups.
 
 Intents:
-- "order" — order status, tracking, delivery, shipping. If assistant asked for order ID and user provides one → "order"
+- "order" — order status, tracking, delivery, shipping, listing orders ("my orders", "show my orders", "order history"). If assistant asked for order ID and user provides one → "order"
 - "product" — ANY shopping, browsing, recommendations, refinement of a previous product search, or vague catalog browsing ("product list", "show products", "what do you have", "appliances", "electronics")
 - "support" — complaints, refunds, returns, defective items, broken products
 - "unclear" — truly off-topic (geography, general knowledge) or pure pronoun with no referent
@@ -65,6 +65,9 @@ History: "I couldn't find that order. Here are your orders: 1. ORD-9904 Samsung 
 
 History: "Which order is this regarding? Here are your recent orders: 1. ORD-9901 iPhone..." | Message: "9901"
 → {"intent": "support", "confidence": 0.95, "order_id": "ORD-9901"}
+
+Message: "my orders"
+→ {"intent": "order", "confidence": 0.95, "order_id": null}
 
 Message: "products list"
 → {"intent": "product", "confidence": 0.95, "order_id": null}
