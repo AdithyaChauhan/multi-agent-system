@@ -59,8 +59,11 @@ def get_catalog_structure() -> str:
 CATALOG_STRUCTURE = get_catalog_structure()
 
 
+SERVED_CATEGORIES = {"Electronics", "Computers & Accessories", "Home & Kitchen", "Office Products"}
+
+
 def build_catalog_blurb() -> str:
-    """Build an honest catalog blurb from real DB data — only shows what actually exists."""
+    """Build catalog blurb from DB — only the 4 categories the system can actually serve."""
     from app.db.database import SessionLocal
     from app.models.product import Product
     from sqlalchemy import func
@@ -70,7 +73,9 @@ def build_catalog_blurb() -> str:
         counts = db.query(
             Product.category,
             func.count(Product.product_id).label("cnt")
-        ).filter(Product.category.isnot(None)).group_by(
+        ).filter(
+            Product.category.in_(SERVED_CATEGORIES)
+        ).group_by(
             Product.category
         ).order_by(func.count(Product.product_id).desc()).all()
 
@@ -79,7 +84,7 @@ def build_catalog_blurb() -> str:
             Product.subcategory,
             func.count(Product.product_id).label("cnt")
         ).filter(
-            Product.category.isnot(None),
+            Product.category.in_(SERVED_CATEGORIES),
             Product.subcategory.isnot(None)
         ).group_by(Product.category, Product.subcategory).order_by(
             Product.category, func.count(Product.product_id).desc()

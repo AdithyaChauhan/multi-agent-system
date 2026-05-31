@@ -179,7 +179,7 @@ def respond_sign_in(state: AgentState) -> dict:
 
 def route_after_classification(state: AgentState) -> Literal["auth_gate", "clarify"]:
     """Conditional edge function — after classification, route to auth gate or clarify."""
-    if state.get("confidence", 0) < 0.8:
+    if state.get("confidence", 0) < 0.7:
         return "clarify"
     if state.get("intent") not in ("order", "product", "support"):
         return "clarify"
