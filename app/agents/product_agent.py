@@ -106,35 +106,27 @@ def build_catalog_blurb() -> str:
 CATALOG_BLURB = build_catalog_blurb()
 
 
-def build_catalog_for_prompt() -> str:
-    """One compact line per category, subcategories pipe-separated. Loaded from DB — always in sync."""
-    from app.db.database import SessionLocal
-    from app.models.product import Product
-
-    CATEGORY_ORDER = ["Electronics", "Computers & Accessories", "Home & Kitchen", "Office Products"]
-    # Exclude unavailable or catch-all buckets that would confuse the LLM
-    EXCLUDE = {"smartphone", "Laptops", "Tablets", "Components", "Accessories"}
-
-    db = SessionLocal()
-    try:
-        rows = db.query(Product.category, Product.subcategory).filter(
-            Product.category.in_(CATEGORY_ORDER),
-            Product.subcategory.isnot(None),
-        ).distinct().all()
-
-        structure: dict = {}
-        for cat, sub in rows:
-            if sub not in EXCLUDE:
-                structure.setdefault(cat, set()).add(sub)
-
-        return "\n".join(
-            f"{cat}: {' | '.join(sorted(structure.get(cat, [])))}"
-            for cat in CATEGORY_ORDER
-            if cat in structure
-        )
-    finally:
-        db.close()
-
+# Controlled catalog for the extraction prompt.
+# This is deliberately static — it defines what the LLM is *allowed* to search,
+# not what happens to be in the DB. Update this when subcategories are added via migration.
+PROMPT_CATALOG = (
+    "Electronics: Cameras & Photography | adapter | battery | cable | camera accessory"
+    " | charger | headphones | memory card | pen | phone case | phone stand | power bank"
+    " | projector | screen protector | selfie stick | set top box | smartwatch | speakers"
+    " | streaming device | tv | tv mount | tv remote\n"
+    "Computers & Accessories: adapter | cable | drawing tablet | external hdd | external ssd"
+    " | gamepad | ink cartridge | keyboard | laptop bag | memory card | microphone | monitor"
+    " | monitor stand | mouse | pen drive | printer | router | screen protector | ups"
+    " | usb hub | webcam | wifi adapter | wifi range extender\n"
+    "Home & Kitchen: air conditioner | air fryer | air purifier | blender | ceiling fan"
+    " | chopper | coffee maker | egg boiler | electric kettle | frother | garment steamer"
+    " | hand mixer | humidifier | induction | iron | juicer | kitchen scale | kitchen tools"
+    " | lint remover | mixer grinder | pedestal fan | pressure washer | rice cooker"
+    " | room heater | roti maker | sandwich maker | sealing machine | sewing machine"
+    " | storage organizer | toaster | vacuum cleaner | waffle maker | water filter"
+    " | water heater | water purifier | yogurt maker\n"
+    "Office Products: art supplies | office electronics | stationery"
+)
 
 # Generic relaxation order for all categories
 RELAXATION_ORDER = [
@@ -145,12 +137,10 @@ RELAXATION_ORDER = [
     "keywords",
 ]
 
-_CATALOG = build_catalog_for_prompt()
-
 EXTRACTION_SYSTEM_PROMPT = f"""Extract product search preferences. Return JSON only.
 
 Catalog (use exact subcategory names):
-{_CATALOG}
+{PROMPT_CATALOG}
 
 Output schema: {{"category": str|null, "subcategory": str|null, "type": str|null, "brand": str|null, "max_price": int|null, "min_price": int|null, "keywords": [str], "unavailable_request": bool}}
 
