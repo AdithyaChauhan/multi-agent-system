@@ -50,8 +50,9 @@ Base.metadata.create_all(bind=engine)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Lifespan events"""
     logger.info("Application startup")
+    from app.core.prompt_loader import prewarm_prompts
+    prewarm_prompts()
     yield
     logger.info("Application shutdown")
 
