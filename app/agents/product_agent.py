@@ -123,7 +123,7 @@ Electronics:
   tv → type: smart tv
   smartwatch | tv remote | set top box | projector | streaming device
   power bank | phone stand | phone case | selfie stick | charger | screen protector
-  GeneralPurposeBatteries & BatteryChargers | Cameras & Photography
+  battery | Cameras & Photography
 
 Computers & Accessories (subcategory = specific product):
   mouse | keyboard | cable | adapter | drawing tablet | monitor stand | mouse pad
@@ -138,9 +138,10 @@ Home & Kitchen (subcategory = the appliance, type = null):
   sandwich maker | toaster | rice cooker | juicer | egg boiler | water purifier | water filter
   frother | chopper | hand mixer | garment steamer | kitchen scale | lint remover | coffee maker
   room heater | ceiling fan | air purifier | water heater | pedestal fan | humidifier | air conditioner
-  HomeStorage & Organization
+  sealing machine | sewing machine | waffle maker | pressure washer | roti maker | yogurt maker
+  storage organizer | kitchen tools
 
-Office Products (no subcategory)
+Office Products: stationery | art supplies | office electronics
 
 Output schema: {"category": str|null, "subcategory": str|null, "type": str|null, "brand": str|null, "max_price": int|null, "min_price": int|null, "keywords": [str], "unavailable_request": bool}
 
