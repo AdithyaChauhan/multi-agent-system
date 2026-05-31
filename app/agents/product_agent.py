@@ -183,10 +183,11 @@ def extract_preferences(state: AgentState) -> dict:
     user_message = state.get("user_message", "")
     conversation_history = state.get("conversation_history", [])
 
-    # Build context from history for follow-up understanding
+    # Last 2 messages (prev user + last assistant) is enough to detect follow-ups.
+    # The last assistant response is what the user is refining — no need for deeper history.
     history_context = ""
     if conversation_history:
-        recent = conversation_history[-4:]
+        recent = conversation_history[-2:]
         history_context = "\n".join([
             f"{msg['role'].title()}: {msg['content']}"
             for msg in recent

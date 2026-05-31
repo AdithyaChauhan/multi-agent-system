@@ -104,10 +104,11 @@ def classify_intent_and_extract(state: AgentState) -> dict:
         system_prompt = ROUTER_SYSTEM_PROMPT
         commit_hash = "fallback"
     
-    # Build conversation context
+    # Router only needs the last assistant message to apply context-priority rules.
+    # Last 2 messages (prev user + last assistant) is sufficient — no need for full history.
     history_context = ""
     if conversation_history:
-        recent = conversation_history[-4:]
+        recent = conversation_history[-2:]
         history_context = "\n".join([
             f"{msg['role'].title()}: {msg['content']}"
             for msg in recent
