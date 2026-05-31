@@ -134,7 +134,12 @@ Rules:
 - Never output string "null" — use JSON null
 - "notebook" or "notebooks" alone = paper/stationery notebooks → category: "Office Products", subcategory: null, unavailable_request: false. Only "laptop" or "laptop notebook" = unavailable.
 - Indian colloquial terms: "geyser"/"geysers" → subcategory: "water heater"; "AC"/"ACs" → subcategory: "air conditioner"; "cooler" → subcategory: "air purifier" (if no room cooler subcategory exists)
-- Vague browsing ("give me a list", "show me products", "product list", "browse", "what do you have", "show everything") → category: null, subcategory: null, keywords: [], unavailable_request: false
+- Generic category browsing (user names a category or synonym, no specific product): set category only, subcategory: null, keywords: []
+  - "electronics", "gadgets", "electronic items" → category: "Electronics"
+  - "appliances", "home appliances", "kitchen appliances", "kitchen items" → category: "Home & Kitchen"
+  - "computers", "computer accessories", "peripherals", "computer items" → category: "Computers & Accessories"
+  - "office", "office products", "stationery", "office supplies" → category: "Office Products"
+- Vague browsing with no category intent ("give me a list", "show me products", "product list", "browse", "what do you have", "show everything", "show me something") → category: null, subcategory: null, keywords: [], unavailable_request: false
 - unavailable_request TRUE: laptops, desktop PCs, tablets (devices), smartphones (devices), clothing, shoes, furniture, food, books, novels, magazines, toys, sports equipment, automotive parts, garden supplies, pet supplies, beauty products, medicines
 - unavailable_request FALSE: all appliances, accessories, peripherals, fans, air purifiers, geysers, paper notebooks, stationery
 
@@ -149,6 +154,9 @@ Examples:
 "AC under 30000" → {"category": "Home & Kitchen", "subcategory": "air conditioner", "type": null, "brand": null, "max_price": 30000, "min_price": null, "keywords": [], "unavailable_request": false}
 "give me product list" → {"category": null, "subcategory": null, "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": [], "unavailable_request": false}
 "show me everything" → {"category": null, "subcategory": null, "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": [], "unavailable_request": false}
+"appliances" → {"category": "Home & Kitchen", "subcategory": null, "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": [], "unavailable_request": false}
+"electronics" → {"category": "Electronics", "subcategory": null, "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": [], "unavailable_request": false}
+"stationery" → {"category": "Office Products", "subcategory": null, "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": [], "unavailable_request": false}
 
 Respond ONLY with valid JSON."""
 
