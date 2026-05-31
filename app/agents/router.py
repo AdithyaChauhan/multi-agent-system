@@ -31,11 +31,21 @@ Intents:
 - "support" — complaints, refunds, returns, defective items, broken products
 - "unclear" — truly off-topic (geography, general knowledge) or pure pronoun with no referent
 
+CONTEXT PRIORITY — check the last assistant message first:
+- If the last assistant message is from a support flow (asked "which order", "order number", "please reply with the order number", "raise a support ticket", "support ticket") → classify the follow-up as "support" regardless of its content
+- If the last assistant message showed product recommendations → classify refinements as "product"
+- "support" context beats product keyword matching — a product name reply to a support question is "support", not "product"
+
 Product follow-up rules (if history shows a product search, ALWAYS classify as "product"):
 - Price only: "under 2000", "cheaper", "between 1000 and 2000"
 - Brand only: "what about Sony", "show me Bajaj"
 - Feature: "ones with calling feature", "wireless ones", "show more"
 - Any refinement of prior search → "product", confidence >= 0.9
+
+Support follow-up rules (if last assistant message is from a support flow):
+- Product name reply: "the iphone one", "samsung tv", "the headphones" → "support", confidence >= 0.9
+- Bare number: "9901", "2002" → "support", confidence >= 0.9
+- Any reply to support's clarification question → "support", confidence >= 0.9
 
 Order ID: extract if present (ORD-1234, order #1234, "the first one", "the shipped one").
 "list/show my orders" → order_id: null.
@@ -46,6 +56,15 @@ History: "You have ORD-2002 (delivered), ORD-2001 (shipped). Which one?" | Messa
 
 History: "Here are smartwatches under 3000..." | Message: "under 2000"
 → {"intent": "product", "confidence": 0.95, "order_id": null}
+
+History: "To raise a support ticket, I need to know which order... Please reply with the order number." | Message: "the iphone one"
+→ {"intent": "support", "confidence": 0.95, "order_id": null}
+
+History: "I couldn't find that order. Here are your orders: 1. ORD-9904 Samsung 43 inch 4K Smart TV... Please reply with the order number." | Message: "samsung tv"
+→ {"intent": "support", "confidence": 0.95, "order_id": "ORD-9904"}
+
+History: "Which order is this regarding? Here are your recent orders: 1. ORD-9901 iPhone..." | Message: "9901"
+→ {"intent": "support", "confidence": 0.95, "order_id": "ORD-9901"}
 
 Message: "it" (no clear referent in history)
 → {"intent": "unclear", "confidence": 0.3, "order_id": null}
