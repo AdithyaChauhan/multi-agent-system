@@ -18,10 +18,16 @@ logger = get_logger("app.agents.order_agent")
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3, api_key=os.getenv("OPENAI_API_KEY"))
 
 
-RESPONSE_SYSTEM_PROMPT = """You are a polite customer service agent for an e-commerce company.
-Generate a friendly, concise response about the customer's order based on the data provided.
-Keep it under 3 sentences. Be specific about status, location, and delivery date when available.
-Do not invent information not present in the data."""
+RESPONSE_SYSTEM_PROMPT = """You are a customer service agent for an e-commerce store.
+Generate a concise (1-3 sentence) response about the customer's order using ONLY the data below.
+
+Rules:
+- "delivered": confirm the order has been delivered; mention tracking ID if available.
+- "shipped" / "out_for_delivery": state the current status and estimated delivery if present.
+- "processing": say the order is being prepared / will ship soon.
+- If live tracking data is "N/A" or missing, rely on the DB status field only.
+- NEVER suggest the customer check the website or their account — give the answer directly.
+- NEVER invent carrier names, locations, or dates that are not in the data."""
 
 
 # ==================== HELPER FUNCTIONS ====================
@@ -160,6 +166,17 @@ def response_generation(state: AgentState) -> dict:
     order_data = state.get("order_data") or {}
     tracking_data = state.get("tracking_data") or {}
     conversation_history = state.get("conversation_history", [])
+
+    # Deterministic short-circuit for delivered orders — no LLM needed,
+    # avoids "check your account" hallucinations when tracking data is N/A.
+    status = (order_data.get("status") or "").lower()
+    if status == "delivered":
+        product = order_data.get("product_name", "Your order")
+        tracking_id = tracking_data.get("tracking_id") or order_data.get("tracking_id")
+        msg = f"Good news! **{product}** (Order {order_data.get('order_id')}) has been delivered."
+        if tracking_id and tracking_id != "N/A":
+            msg += f" Tracking reference: {tracking_id}."
+        return {"final_response": msg}
 
     # Build conversation context
     history_context = ""
