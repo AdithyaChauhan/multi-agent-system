@@ -49,11 +49,13 @@ def get_catalog_structure() -> str:
                 lines.append(f"  - {sub}")
 
         return "\n".join(lines)
+    except Exception:  # pragma: no cover
+        return ""
     finally:
         db.close()
 
 
-# Load once at startup
+# Load once at startup — returns empty string if DB is unavailable (e.g. during tests)
 CATALOG_STRUCTURE = get_catalog_structure()
 
 
@@ -117,10 +119,13 @@ def build_catalog_blurb() -> str:
             lines.append(f"• {cat} ({cnt} products){suffix}")
 
         return "\n".join(lines)
+    except Exception:  # pragma: no cover
+        return ""
     finally:
         db.close()
 
 
+# Load once at startup — returns empty string if DB is unavailable (e.g. during tests)
 CATALOG_BLURB = build_catalog_blurb()
 
 

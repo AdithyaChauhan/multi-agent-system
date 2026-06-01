@@ -143,7 +143,11 @@ def get_or_create_session(db, session_id: Optional[str], user_id: str) -> Sessio
             return session
 
         expiry_cutoff = datetime.now(timezone.utc) - timedelta(minutes=SESSION_EXPIRY_MINUTES)
-        if session.last_active_at < expiry_cutoff:
+        last_active = session.last_active_at
+        # SQLite returns naive datetimes; make it aware so comparison works on both dialects
+        if last_active.tzinfo is None:
+            last_active = last_active.replace(tzinfo=timezone.utc)
+        if last_active < expiry_cutoff:
             logger.warning(
                 f"request_id={get_request_id()} | Session expired | session_id={session_id} | last_active_at={session.last_active_at}"
             )
