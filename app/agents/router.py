@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from typing import Literal
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
@@ -124,8 +125,18 @@ def classify_intent_and_extract(state: AgentState) -> dict:
         HumanMessage(content=prompt),
     ]
 
+    _t0 = time.perf_counter()
     response = llm.invoke(
         messages, config={"metadata": {"prompt_name": "router-classification-prompt", "prompt_version": commit_hash}}
+    )
+    _latency_ms = int((time.perf_counter() - _t0) * 1000)
+    _usage = response.response_metadata.get("token_usage", {})
+    logger.info(
+        f"request_id={get_request_id()} | LLM_USAGE | agent=router | node=classify_intent"
+        f" | prompt_tokens={_usage.get('prompt_tokens', 0)}"
+        f" | completion_tokens={_usage.get('completion_tokens', 0)}"
+        f" | total_tokens={_usage.get('total_tokens', 0)}"
+        f" | latency_ms={_latency_ms}"
     )
 
     raw = response.content.strip()

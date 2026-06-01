@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import time
 from typing import Literal
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
@@ -134,8 +135,18 @@ def classify_issue(state: AgentState) -> dict:
         HumanMessage(content=full_prompt),
     ]
 
+    _t0 = time.perf_counter()
     response = llm.invoke(
         messages, config={"metadata": {"prompt_name": "support-classification-prompt", "prompt_version": commit_hash}}
+    )
+    _latency_ms = int((time.perf_counter() - _t0) * 1000)
+    _usage = response.response_metadata.get("token_usage", {})
+    logger.info(
+        f"request_id={get_request_id()} | LLM_USAGE | agent=support | node=classify_issue"
+        f" | prompt_tokens={_usage.get('prompt_tokens', 0)}"
+        f" | completion_tokens={_usage.get('completion_tokens', 0)}"
+        f" | total_tokens={_usage.get('total_tokens', 0)}"
+        f" | latency_ms={_latency_ms}"
     )
     raw = response.content.strip()
 
@@ -312,7 +323,17 @@ def draft_resolution(state: AgentState) -> dict:
         HumanMessage(content=prompt),
     ]
 
+    _t0 = time.perf_counter()
     response = llm.invoke(messages)
+    _latency_ms = int((time.perf_counter() - _t0) * 1000)
+    _usage = response.response_metadata.get("token_usage", {})
+    logger.info(
+        f"request_id={get_request_id()} | LLM_USAGE | agent=support | node=draft_resolution"
+        f" | prompt_tokens={_usage.get('prompt_tokens', 0)}"
+        f" | completion_tokens={_usage.get('completion_tokens', 0)}"
+        f" | total_tokens={_usage.get('total_tokens', 0)}"
+        f" | latency_ms={_latency_ms}"
+    )
     logger.info(f"request_id={get_request_id()} | Drafted resolution for low-severity issue")
     return {"final_response": response.content.strip()}
 

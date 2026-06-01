@@ -2,6 +2,7 @@ import os
 import re
 import json
 import copy
+import time
 from typing import Literal
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
@@ -227,7 +228,17 @@ def extract_preferences(state: AgentState) -> dict:
         HumanMessage(content=full_prompt),
     ]
 
+    _t0 = time.perf_counter()
     response = llm.invoke(messages)
+    _latency_ms = int((time.perf_counter() - _t0) * 1000)
+    _usage = response.response_metadata.get("token_usage", {})
+    logger.info(
+        f"request_id={get_request_id()} | LLM_USAGE | agent=product | node=extract_preferences"
+        f" | prompt_tokens={_usage.get('prompt_tokens', 0)}"
+        f" | completion_tokens={_usage.get('completion_tokens', 0)}"
+        f" | total_tokens={_usage.get('total_tokens', 0)}"
+        f" | latency_ms={_latency_ms}"
+    )
     raw = response.content.strip()
 
     if raw.startswith("```"):
@@ -579,7 +590,17 @@ def rank_and_filter(state: AgentState) -> dict:
         ),
     ]
 
+    _t0 = time.perf_counter()
     response = llm.invoke(messages)
+    _latency_ms = int((time.perf_counter() - _t0) * 1000)
+    _usage = response.response_metadata.get("token_usage", {})
+    logger.info(
+        f"request_id={get_request_id()} | LLM_USAGE | agent=product | node=rank_and_filter"
+        f" | prompt_tokens={_usage.get('prompt_tokens', 0)}"
+        f" | completion_tokens={_usage.get('completion_tokens', 0)}"
+        f" | total_tokens={_usage.get('total_tokens', 0)}"
+        f" | latency_ms={_latency_ms}"
+    )
     raw = response.content.strip()
 
     try:

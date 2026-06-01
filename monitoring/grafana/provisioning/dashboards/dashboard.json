@@ -1,0 +1,154 @@
+{
+  "id": null,
+  "uid": "multiagent-ecommerce",
+  "title": "Multi-Agent E-commerce Dashboard",
+  "schemaVersion": 36,
+  "version": 2,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Request Volume Over Time",
+      "description": "Total API requests per minute hitting the /chat endpoint",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqpm",
+          "color": {"mode": "palette-classic"}
+        }
+      },
+      "targets": [{
+        "datasource": {"type": "loki", "uid": "loki"},
+        "expr": "sum(count_over_time({job=\"multiagent-app\"} |= \"REQUEST RECEIVED\" [1m]))",
+        "legendFormat": "Requests/min"
+      }]
+    },
+    {
+      "id": 2,
+      "title": "Agent Selection Distribution",
+      "description": "How often each downstream agent is selected by the router",
+      "type": "piechart",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "options": {
+        "pieType": "pie",
+        "displayLabels": ["name", "percent"]
+      },
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "sum(count_over_time({job=\"multiagent-app\"} |= \"LLM_USAGE\" |= \"agent=order\" [1h]))",
+          "legendFormat": "Order Agent"
+        },
+        {
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "sum(count_over_time({job=\"multiagent-app\"} |= \"LLM_USAGE\" |= \"agent=product\" [1h]))",
+          "legendFormat": "Product Agent"
+        },
+        {
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "sum(count_over_time({job=\"multiagent-app\"} |= \"LLM_USAGE\" |= \"agent=support\" [1h]))",
+          "legendFormat": "Support Agent"
+        },
+        {
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "sum(count_over_time({job=\"multiagent-app\"} |= \"LLM_USAGE\" |= \"agent=router\" [1h]))",
+          "legendFormat": "Router (classify)"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Average LLM Latency Per Agent (ms)",
+      "description": "Average time the LLM takes per agent node, measured from llm.invoke() start to return",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": {"mode": "palette-classic"}
+        }
+      },
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "avg by (agent) (\n  avg_over_time(\n    {job=\"multiagent-app\"}\n    |= \"LLM_USAGE\"\n    | pattern `<_> | LLM_USAGE | agent=<agent> | node=<node> | prompt_tokens=<pt> | completion_tokens=<ct> | total_tokens=<tt> | latency_ms=<latency_ms>`\n    | unwrap latency_ms\n    [5m]\n  )\n)",
+          "legendFormat": "{{agent}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Error Rate Over Time",
+      "description": "Log lines at ERROR level per minute",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {"mode": "fixed", "fixedColor": "red"}
+        }
+      },
+      "targets": [{
+        "datasource": {"type": "loki", "uid": "loki"},
+        "expr": "sum(count_over_time({job=\"multiagent-app\"} |= \"| ERROR |\" [1m]))",
+        "legendFormat": "Errors/min"
+      }]
+    },
+    {
+      "id": 5,
+      "title": "LLM Token Consumption Over Time",
+      "description": "Total tokens (prompt + completion) consumed per agent per minute",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {"mode": "palette-classic"},
+          "custom": {"lineWidth": 2}
+        }
+      },
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "sum by (agent) (\n  sum_over_time(\n    {job=\"multiagent-app\"}\n    |= \"LLM_USAGE\"\n    | pattern `<_> | LLM_USAGE | agent=<agent> | node=<node> | prompt_tokens=<pt> | completion_tokens=<ct> | total_tokens=<total_tokens> | latency_ms=<lm>`\n    | unwrap total_tokens\n    [1m]\n  )\n)",
+          "legendFormat": "{{agent}} — total tokens/min"
+        },
+        {
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "sum by (agent) (\n  sum_over_time(\n    {job=\"multiagent-app\"}\n    |= \"LLM_USAGE\"\n    | pattern `<_> | LLM_USAGE | agent=<agent> | node=<node> | prompt_tokens=<prompt_tokens> | completion_tokens=<ct> | total_tokens=<tt> | latency_ms=<lm>`\n    | unwrap prompt_tokens\n    [1m]\n  )\n)",
+          "legendFormat": "{{agent}} — prompt tokens/min"
+        },
+        {
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "sum by (agent) (\n  sum_over_time(\n    {job=\"multiagent-app\"}\n    |= \"LLM_USAGE\"\n    | pattern `<_> | LLM_USAGE | agent=<agent> | node=<node> | prompt_tokens=<pt> | completion_tokens=<completion_tokens> | total_tokens=<tt> | latency_ms=<lm>`\n    | unwrap completion_tokens\n    [1m]\n  )\n)",
+          "legendFormat": "{{agent}} — completion tokens/min"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Application Logs",
+      "description": "Filter by request_id, agent name (e.g. app.agents.router), or level (INFO / ERROR / WARNING)",
+      "type": "logs",
+      "gridPos": {"h": 10, "w": 24, "x": 0, "y": 24},
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "showCommonLabels": false,
+        "wrapLogMessage": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
+      "targets": [{
+        "datasource": {"type": "loki", "uid": "loki"},
+        "expr": "{job=\"multiagent-app\"}",
+        "legendFormat": ""
+      }]
+    }
+  ],
+  "time": {"from": "now-6h", "to": "now"},
+  "refresh": "30s",
+  "templating": {
+    "list": []
+  }
+}

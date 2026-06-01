@@ -1,5 +1,6 @@
 import os
 import re
+import time
 from typing import Literal
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
@@ -203,7 +204,17 @@ User asked: {state.get('user_message')}"""
         HumanMessage(content=context),
     ]
 
+    _t0 = time.perf_counter()
     response = llm.invoke(messages)
+    _latency_ms = int((time.perf_counter() - _t0) * 1000)
+    _usage = response.response_metadata.get("token_usage", {})
+    logger.info(
+        f"request_id={get_request_id()} | LLM_USAGE | agent=order | node=response_generation"
+        f" | prompt_tokens={_usage.get('prompt_tokens', 0)}"
+        f" | completion_tokens={_usage.get('completion_tokens', 0)}"
+        f" | total_tokens={_usage.get('total_tokens', 0)}"
+        f" | latency_ms={_latency_ms}"
+    )
     final_response = response.content.strip()
 
     logger.info(f"request_id={get_request_id()} | Response generated")
