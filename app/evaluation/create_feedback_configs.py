@@ -6,11 +6,14 @@ feedback panel and in the Evaluators section of LangSmith.
 
     python3 app/evaluation/create_feedback_configs.py
 """
+
 import os
 import sys
+
 sys.path.insert(0, '/home/admin1/project/multi-agent-system')
 
 from dotenv import load_dotenv
+
 load_dotenv('/home/admin1/project/multi-agent-system/.env')
 
 from langsmith import Client

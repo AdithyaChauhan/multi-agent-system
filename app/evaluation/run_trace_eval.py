@@ -15,13 +15,16 @@ Usage:
     # Skip traces that already have scores (default: True)
     python3 app/evaluation/run_trace_eval.py --skip-scored
 """
+
 import os
 import sys
 import json
 import argparse
+
 sys.path.insert(0, '/home/admin1/project/multi-agent-system')
 
 from dotenv import load_dotenv
+
 load_dotenv('/home/admin1/project/multi-agent-system/.env')
 
 from langsmith import Client
@@ -89,6 +92,7 @@ Respond ONLY with valid JSON: {{"score": 0.0|0.5|1.0, "reason": "one sentence"}}
 
 # ── Evaluator functions ──────────────────────────────────────────────────────
 
+
 def _call_llm_judge(prompt: str) -> tuple[float, str]:
     """Call GPT-4o-mini as judge. Returns (score, reason)."""
     messages = [
@@ -108,8 +112,8 @@ def score_run(user_message: str, response: str) -> dict[str, tuple[float, str]]:
     results = {}
 
     for key, template in [
-        ("response_relevance",  RESPONSE_RELEVANCE_PROMPT),
-        ("no_hallucination",    NO_HALLUCINATION_PROMPT),
+        ("response_relevance", RESPONSE_RELEVANCE_PROMPT),
+        ("no_hallucination", NO_HALLUCINATION_PROMPT),
         ("answer_completeness", ANSWER_COMPLETENESS_PROMPT),
     ]:
         prompt = template.format(user_message=user_message, response=response)
@@ -121,26 +125,17 @@ def score_run(user_message: str, response: str) -> dict[str, tuple[float, str]]:
 
 # ── Run fetching ─────────────────────────────────────────────────────────────
 
+
 def _get_user_message(run) -> str | None:
     """Extract the user message from a run's inputs."""
     inputs = run.inputs or {}
-    return (
-        inputs.get("user_message")
-        or inputs.get("message")
-        or inputs.get("input")
-        or inputs.get("query")
-    )
+    return inputs.get("user_message") or inputs.get("message") or inputs.get("input") or inputs.get("query")
 
 
 def _get_response(run) -> str | None:
     """Extract the chatbot response from a run's outputs."""
     outputs = run.outputs or {}
-    return (
-        outputs.get("final_response")
-        or outputs.get("response")
-        or outputs.get("output")
-        or outputs.get("answer")
-    )
+    return outputs.get("final_response") or outputs.get("response") or outputs.get("output") or outputs.get("answer")
 
 
 def _already_scored(run_id: str, key: str) -> bool:
@@ -151,15 +146,18 @@ def _already_scored(run_id: str, key: str) -> bool:
 
 # ── Main ─────────────────────────────────────────────────────────────────────
 
+
 def main(limit: int = 20, skip_scored: bool = True):
     print(f"Fetching last {limit} runs from project '{PROJECT_NAME}'...")
 
-    runs = list(client.list_runs(
-        project_name=PROJECT_NAME,
-        run_type="chain",
-        limit=limit,
-        is_root=True,
-    ))
+    runs = list(
+        client.list_runs(
+            project_name=PROJECT_NAME,
+            run_type="chain",
+            limit=limit,
+            is_root=True,
+        )
+    )
 
     if not runs:
         print("No runs found.")

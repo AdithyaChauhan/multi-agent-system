@@ -8,18 +8,18 @@ logger = get_logger("app.agents.product_subgraph")
 
 # ---------- Scoring weights ----------
 
-WEIGHT_RATING          = 0.30
-WEIGHT_REVIEW_RATING   = 0.20
-WEIGHT_PRICE           = 0.15
-WEIGHT_SPEC_MATCH      = 0.10
-WEIGHT_BRAND_MATCH     = 0.15
-WEIGHT_TAG_MATCH       = 0.07
-WEIGHT_TITLE_MATCH     = 0.03
-WEIGHT_TYPE_MATCH      = 0.07
-
+WEIGHT_RATING = 0.30
+WEIGHT_REVIEW_RATING = 0.20
+WEIGHT_PRICE = 0.15
+WEIGHT_SPEC_MATCH = 0.10
+WEIGHT_BRAND_MATCH = 0.15
+WEIGHT_TAG_MATCH = 0.07
+WEIGHT_TITLE_MATCH = 0.03
+WEIGHT_TYPE_MATCH = 0.07
 
 
 # ---------- Nodes ----------
+
 
 def fetch_reviews_node(state: AgentState) -> dict:
     """
@@ -31,24 +31,21 @@ def fetch_reviews_node(state: AgentState) -> dict:
     enriched = []
     for product in products:
         product_id = product.get("product_id")
-        reviews    = fetch_reviews(product_id)
+        reviews = fetch_reviews(product_id)
 
         avg_review_rating = 0.0
         if reviews:
-            avg_review_rating = sum(
-                r["rating"] for r in reviews
-            ) / len(reviews)
+            avg_review_rating = sum(r["rating"] for r in reviews) / len(reviews)
 
-        enriched.append({
-            **product,
-            "reviews":           reviews,
-            "avg_review_rating": round(avg_review_rating, 2),
-        })
+        enriched.append(
+            {
+                **product,
+                "reviews": reviews,
+                "avg_review_rating": round(avg_review_rating, 2),
+            }
+        )
 
-    logger.info(
-        f"request_id={get_request_id()} | "
-        f"Reviews fetched for {len(enriched)} products"
-    )
+    logger.info(f"request_id={get_request_id()} | " f"Reviews fetched for {len(enriched)} products")
 
     return {"ranked_products": enriched}
 
@@ -63,23 +60,19 @@ def fetch_specs_node(state: AgentState) -> dict:
     enriched = []
     for product in products:
         product_id = product.get("product_id")
-        specs      = fetch_specs(product_id)
+        specs = fetch_specs(product_id)
 
-        specs_dict = {
-            s["spec_key"]: s["spec_value"]
-            for s in specs
-        }
+        specs_dict = {s["spec_key"]: s["spec_value"] for s in specs}
 
-        enriched.append({
-            **product,
-            "specs":      specs,
-            "specs_dict": specs_dict,
-        })
+        enriched.append(
+            {
+                **product,
+                "specs": specs,
+                "specs_dict": specs_dict,
+            }
+        )
 
-    logger.info(
-        f"request_id={get_request_id()} | "
-        f"Specs fetched for {len(enriched)} products"
-    )
+    logger.info(f"request_id={get_request_id()} | " f"Specs fetched for {len(enriched)} products")
 
     return {"ranked_products": enriched}
 
@@ -89,16 +82,13 @@ def compute_score(state: AgentState) -> dict:
     Deterministic node — computes a final enriched score
     combining product rating, review rating, price, and spec match.
     """
-    products  = state.get("ranked_products") or []
-    prefs     = state.get("preferences") or {}
+    products = state.get("ranked_products") or []
+    prefs = state.get("preferences") or {}
     max_price = prefs.get("max_price")
-    keywords  = prefs.get("keywords") or []
+    keywords = prefs.get("keywords") or []
 
     if not products:
         return {"ranked_products": []}
-
-    prices        = [p.get("price", 0) for p in products]
-    highest_price = max(prices) if prices else 1
 
     scored = []
     for product in products:
@@ -107,7 +97,7 @@ def compute_score(state: AgentState) -> dict:
         rating_score = (product.get("rating") or 0) / 5.0
 
         # 2. review rating score (0 to 1)
-        avg_review   = product.get("avg_review_rating") or 0
+        avg_review = product.get("avg_review_rating") or 0
         review_score = avg_review / 5.0
 
         # 3. price score (0 to 1) — value-based
@@ -117,13 +107,13 @@ def compute_score(state: AgentState) -> dict:
         if max_price and max_price > 0:
             ratio = price / max_price
             if ratio > 1.0:
-                price_score = 0.0   # over budget — safety case
+                price_score = 0.0  # over budget — safety case
             elif ratio >= 0.7:
-                price_score = 1.0   # using 70-100% of budget — best value
+                price_score = 1.0  # using 70-100% of budget — best value
             elif ratio >= 0.5:
-                price_score = 0.7   # using 50-70% — decent
+                price_score = 0.7  # using 50-70% — decent
             else:
-                price_score = 0.4   # too cheap — likely lower quality
+                price_score = 0.4  # too cheap — likely lower quality
         else:
             # no budget specified — neutral
             price_score = 0.5
@@ -131,17 +121,12 @@ def compute_score(state: AgentState) -> dict:
         # 4. spec match score (0 to 1) — keywords found in specs
         spec_match_score = 0.0
         if keywords:
-            specs_dict  = product.get("specs_dict") or {}
+            specs_dict = product.get("specs_dict") or {}
             description = (product.get("description") or "").lower()
-            spec_text   = " ".join(
-                str(v) for v in specs_dict.values()
-            ).lower()
-            combined    = description + " " + spec_text
+            spec_text = " ".join(str(v) for v in specs_dict.values()).lower()
+            combined = description + " " + spec_text
 
-            matched = sum(
-                1 for kw in keywords
-                if kw.lower() in combined
-            )
+            matched = sum(1 for kw in keywords if kw.lower() in combined)
             spec_match_score = matched / len(keywords)
 
         # 5. brand match score (0 or 1)
@@ -156,22 +141,16 @@ def compute_score(state: AgentState) -> dict:
         if keywords:
             tags = product.get("tags") or []
             tags_text = " ".join(tags).lower() if isinstance(tags, list) else str(tags).lower()
-            tag_matched = sum(
-                1 for kw in keywords
-                if kw.lower() in tags_text
-            )
+            tag_matched = sum(1 for kw in keywords if kw.lower() in tags_text)
             tag_match_score = tag_matched / len(keywords)
 
         # 7. title match score (0 to 1)
         title_match_score = 0.0
         if keywords:
             title = (product.get("name") or "").lower()
-            title_matched = sum(
-                1 for kw in keywords
-                if kw.lower() in title
-            )
+            title_matched = sum(1 for kw in keywords if kw.lower() in title)
             title_match_score = title_matched / len(keywords)
-        
+
         # 8. type match score (0 or 1)
         type_match_score = 0.0
         user_type = (prefs.get("type") or "").lower()
@@ -182,28 +161,30 @@ def compute_score(state: AgentState) -> dict:
         # combine all scores
 
         final_score = (
-            WEIGHT_RATING        * rating_score      +
-            WEIGHT_REVIEW_RATING * review_score      +
-            WEIGHT_PRICE         * price_score       +
-            WEIGHT_SPEC_MATCH    * spec_match_score  +
-            WEIGHT_BRAND_MATCH   * brand_match_score +
-            WEIGHT_TAG_MATCH     * tag_match_score   +
-            WEIGHT_TITLE_MATCH   * title_match_score +
-            WEIGHT_TYPE_MATCH    * type_match_score
+            WEIGHT_RATING * rating_score
+            + WEIGHT_REVIEW_RATING * review_score
+            + WEIGHT_PRICE * price_score
+            + WEIGHT_SPEC_MATCH * spec_match_score
+            + WEIGHT_BRAND_MATCH * brand_match_score
+            + WEIGHT_TAG_MATCH * tag_match_score
+            + WEIGHT_TITLE_MATCH * title_match_score
+            + WEIGHT_TYPE_MATCH * type_match_score
         )
-        
-        scored.append({
-            **product,
-            "rating_score":      round(rating_score, 3),
-            "review_score":      round(review_score, 3),
-            "price_score":       round(price_score, 3),
-            "spec_match_score":  round(spec_match_score, 3),
-            "brand_match_score": round(brand_match_score, 3),
-            "tag_match_score":   round(tag_match_score, 3),
-            "title_match_score": round(title_match_score, 3),
-            "type_match_score":  round(type_match_score, 3),
-            "final_score":       round(final_score, 3),
-        })
+
+        scored.append(
+            {
+                **product,
+                "rating_score": round(rating_score, 3),
+                "review_score": round(review_score, 3),
+                "price_score": round(price_score, 3),
+                "spec_match_score": round(spec_match_score, 3),
+                "brand_match_score": round(brand_match_score, 3),
+                "tag_match_score": round(tag_match_score, 3),
+                "title_match_score": round(title_match_score, 3),
+                "type_match_score": round(type_match_score, 3),
+                "final_score": round(final_score, 3),
+            }
+        )
 
     # sort by final score descending
     scored.sort(key=lambda x: x["final_score"], reverse=True)
@@ -211,26 +192,25 @@ def compute_score(state: AgentState) -> dict:
     # take top 5
     top = scored[:5]
 
-    logger.info(
-        f"request_id={get_request_id()} | "
-        f"Scores computed | total={len(scored)} | top={len(top)}"
-    )
+    logger.info(f"request_id={get_request_id()} | " f"Scores computed | total={len(scored)} | top={len(top)}")
 
     return {"ranked_products": top}
 
+
 # ---------- Graph builder ----------
+
 
 def build_product_enrichment_subgraph():
     graph = StateGraph(AgentState)
 
     graph.add_node("fetch_reviews", fetch_reviews_node)
-    graph.add_node("fetch_specs",   fetch_specs_node)
+    graph.add_node("fetch_specs", fetch_specs_node)
     graph.add_node("compute_score", compute_score)
 
     graph.set_entry_point("fetch_reviews")
 
     graph.add_edge("fetch_reviews", "fetch_specs")
-    graph.add_edge("fetch_specs",   "compute_score")
+    graph.add_edge("fetch_specs", "compute_score")
     graph.add_edge("compute_score", END)
 
     return graph.compile()

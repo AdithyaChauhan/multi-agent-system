@@ -7,7 +7,15 @@ class TestCheckOrderId:
 
     def test_auto_selects_single_order(self):
         """Auto-selects order when user has only one"""
-        mock_orders = [{"order_id": "ORD-2001", "product_name": "AirPods", "status": "shipped", "tracking_id": "TRK-001", "created_at": None}]
+        mock_orders = [
+            {
+                "order_id": "ORD-2001",
+                "product_name": "AirPods",
+                "status": "shipped",
+                "tracking_id": "TRK-001",
+                "created_at": None,
+            }
+        ]
 
         with patch("app.agents.order_agent.fetch_user_orders", return_value=mock_orders):
             from app.agents.order_agent import check_order_id
@@ -16,7 +24,7 @@ class TestCheckOrderId:
                 user_message="Where is my order?",
                 user_id="test-user",
                 session_id="test-session",
-                conversation_history=[]
+                conversation_history=[],
             )
             result = check_order_id(state)
 
@@ -31,7 +39,7 @@ class TestCheckOrderId:
                 user_message="Where is my order?",
                 user_id="test-user",
                 session_id="test-session",
-                conversation_history=[]
+                conversation_history=[],
             )
             result = check_order_id(state)
 
@@ -47,7 +55,7 @@ class TestCheckOrderId:
                 user_message="Track order ORD-2001",
                 user_id="test-user",
                 session_id="test-session",
-                conversation_history=[]
+                conversation_history=[],
             )
             result = check_order_id(state)
 
@@ -56,8 +64,20 @@ class TestCheckOrderId:
     def test_multiple_orders_returns_none(self):
         """Returns None order_id when multiple orders exist"""
         mock_orders = [
-            {"order_id": "ORD-2001", "product_name": "AirPods", "status": "shipped", "tracking_id": "TRK-001", "created_at": None},
-            {"order_id": "ORD-2002", "product_name": "Headphones", "status": "delivered", "tracking_id": "TRK-002", "created_at": None},
+            {
+                "order_id": "ORD-2001",
+                "product_name": "AirPods",
+                "status": "shipped",
+                "tracking_id": "TRK-001",
+                "created_at": None,
+            },
+            {
+                "order_id": "ORD-2002",
+                "product_name": "Headphones",
+                "status": "delivered",
+                "tracking_id": "TRK-002",
+                "created_at": None,
+            },
         ]
 
         with patch("app.agents.order_agent.fetch_user_orders", return_value=mock_orders):
@@ -67,7 +87,7 @@ class TestCheckOrderId:
                 user_message="Where is my order?",
                 user_id="test-user",
                 session_id="test-session",
-                conversation_history=[]
+                conversation_history=[],
             )
             result = check_order_id(state)
 
@@ -89,7 +109,7 @@ class TestFetchOrder:
                 user_id="test-user",
                 session_id="test-session",
                 order_id="ORD-2001",
-                conversation_history=[]
+                conversation_history=[],
             )
             result = fetch_order(state)
 
@@ -105,7 +125,7 @@ class TestFetchOrder:
                 user_id="test-user",
                 session_id="test-session",
                 order_id="ORD-9999",
-                conversation_history=[]
+                conversation_history=[],
             )
             result = fetch_order(state)
 

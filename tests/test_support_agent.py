@@ -8,10 +8,13 @@ class TestClassifyIssue:
     def test_classifies_defective_product(self):
         """Correctly classifies defective product issue"""
         mock_response = MagicMock()
-        mock_response.content = '{"category": "defective_product", "order_id": null, "description": "Product is broken"}'
+        mock_response.content = (
+            '{"category": "defective_product", "order_id": null, "description": "Product is broken"}'
+        )
 
-        with patch("app.agents.support_agent.llm") as mock_llm, \
-             patch("app.agents.support_agent.load_prompt", return_value=("system prompt", "latest")):
+        with patch("app.agents.support_agent.llm") as mock_llm, patch(
+            "app.agents.support_agent.load_prompt", return_value=("system prompt", "latest")
+        ):
             mock_llm.invoke.return_value = mock_response
             from app.agents.support_agent import classify_issue
 
@@ -19,7 +22,7 @@ class TestClassifyIssue:
                 user_message="My product is broken",
                 user_id="test-user",
                 session_id="test-session",
-                conversation_history=[]
+                conversation_history=[],
             )
             result = classify_issue(state)
 
@@ -30,8 +33,9 @@ class TestClassifyIssue:
         mock_response = MagicMock()
         mock_response.content = '{"category": "refund_request", "order_id": "ORD-2001", "description": "Want refund"}'
 
-        with patch("app.agents.support_agent.llm") as mock_llm, \
-             patch("app.agents.support_agent.load_prompt", return_value=("system prompt", "latest")):
+        with patch("app.agents.support_agent.llm") as mock_llm, patch(
+            "app.agents.support_agent.load_prompt", return_value=("system prompt", "latest")
+        ):
             mock_llm.invoke.return_value = mock_response
             from app.agents.support_agent import classify_issue
 
@@ -39,7 +43,7 @@ class TestClassifyIssue:
                 user_message="I want a refund for ORD-2001",
                 user_id="test-user",
                 session_id="test-session",
-                conversation_history=[]
+                conversation_history=[],
             )
             result = classify_issue(state)
 
@@ -50,8 +54,9 @@ class TestClassifyIssue:
         mock_response = MagicMock()
         mock_response.content = "invalid json"
 
-        with patch("app.agents.support_agent.llm") as mock_llm, \
-             patch("app.agents.support_agent.load_prompt", return_value=("system prompt", "latest")):
+        with patch("app.agents.support_agent.llm") as mock_llm, patch(
+            "app.agents.support_agent.load_prompt", return_value=("system prompt", "latest")
+        ):
             mock_llm.invoke.return_value = mock_response
             from app.agents.support_agent import classify_issue
 
@@ -59,7 +64,7 @@ class TestClassifyIssue:
                 user_message="Something is wrong",
                 user_id="test-user",
                 session_id="test-session",
-                conversation_history=[]
+                conversation_history=[],
             )
             result = classify_issue(state)
 
@@ -77,7 +82,7 @@ class TestAssessSeverity:
             user_id="test-user",
             session_id="test-session",
             support_issue={"category": "defective_product"},
-            conversation_history=[]
+            conversation_history=[],
         )
         result = assess_severity(state)
         assert result["severity"] == "critical"
@@ -91,7 +96,7 @@ class TestAssessSeverity:
             user_id="test-user",
             session_id="test-session",
             support_issue={"category": "defective_product"},
-            conversation_history=[]
+            conversation_history=[],
         )
         result = assess_severity(state)
         assert result["severity"] == "medium"
@@ -105,7 +110,7 @@ class TestAssessSeverity:
             user_id="test-user",
             session_id="test-session",
             support_issue={"category": "refund_request"},
-            conversation_history=[]
+            conversation_history=[],
         )
         result = assess_severity(state)
         assert result["severity"] == "low"

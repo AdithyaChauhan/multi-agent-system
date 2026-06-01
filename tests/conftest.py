@@ -10,12 +10,14 @@ from app.main import app
 # Use in-memory SQLite for tests
 TEST_DATABASE_URL = "sqlite:///./test.db"
 
+
 @pytest.fixture(scope="session")
 def test_engine():
     engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
     Base.metadata.create_all(bind=engine)
     yield engine
     Base.metadata.drop_all(bind=engine)
+
 
 @pytest.fixture(scope="function")
 def test_db(test_engine):
@@ -25,10 +27,12 @@ def test_db(test_engine):
     db.rollback()
     db.close()
 
+
 @pytest.fixture(scope="module")
 def client():
     with TestClient(app) as c:
         yield c
+
 
 @pytest.fixture
 def mock_llm_response():
@@ -36,6 +40,7 @@ def mock_llm_response():
     mock = MagicMock()
     mock.content = '{"intent": "order", "confidence": 0.95, "order_id": null}'
     return mock
+
 
 @pytest.fixture
 def mock_openai():

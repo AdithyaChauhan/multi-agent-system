@@ -5,23 +5,19 @@ from contextlib import asynccontextmanager
 
 from fastapi.responses import RedirectResponse
 
-from fastapi import FastAPI, HTTPException, Header, Request, Response, Depends
+from fastapi import FastAPI, HTTPException, Header, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List, Optional
+from typing import Optional
 
 from app.db.database import Base, SessionLocal, engine
 
 from app.models.user import User
 from app.models.session import Session
 from app.models.message import Message
-from app.models.order import Order
-from app.models.product import Product
-from app.models.review import Review
-from app.models.spec import Spec
 
 from app.agents.router import router_graph
 
-from app.schemas.chat import ChatRequest, MessageResponse, SessionMessagesResponse, ChatResponse
+from app.schemas.chat import ChatRequest, SessionMessagesResponse, ChatResponse
 from app.core.logger import get_logger, set_request_id, get_request_id
 from app.core.config import SESSION_EXPIRY_MINUTES
 from app.core.jwt_utils import verify_access_token
@@ -40,7 +36,6 @@ from fastapi.staticfiles import StaticFiles
 
 from langchain_core.tracers.context import collect_runs
 
-
 Base.metadata.create_all(bind=engine)
 
 # seed_demo_data()
@@ -52,23 +47,17 @@ Base.metadata.create_all(bind=engine)
 async def lifespan(app: FastAPI):
     logger.info("Application startup")
     from app.core.prompt_loader import prewarm_prompts
+
     prewarm_prompts()
     yield
     logger.info("Application shutdown")
 
 
-app = FastAPI(
-    title="Multi-Agent E-commerce System",
-    version="1.0.0",
-    lifespan=lifespan
-)
+app = FastAPI(title="Multi-Agent E-commerce System", version="1.0.0", lifespan=lifespan)
 
 
 # Session middleware (required for OAuth)
-app.add_middleware(
-    SessionMiddleware,
-    secret_key=os.getenv("JWT_SECRET_KEY", secrets.token_urlsafe(32))
-)
+app.add_middleware(SessionMiddleware, secret_key=os.getenv("JWT_SECRET_KEY", secrets.token_urlsafe(32)))
 
 # CORS middleware
 app.add_middleware(
@@ -102,7 +91,7 @@ async def request_logging_middleware(request: Request, call_next):
 def get_current_user_id(request: Request) -> str:
     """
     Extract user_id from JWT token or X-User-ID header
-    
+
     Priority:
     1. JWT token (Authorization: Bearer <token>)
     2. X-User-ID header (for testing/development)
@@ -118,13 +107,13 @@ def get_current_user_id(request: Request) -> str:
             return payload.get("sub")
         else:
             raise HTTPException(status_code=401, detail="Invalid or expired token")
-    
+
     # Fallback to X-User-ID for testing
     user_id = request.headers.get("x-user-id")
     if user_id:
         logger.warning(f"request_id={get_request_id()} | Using X-User-ID header (development mode) | user_id={user_id}")
         return user_id
-    
+
     # Allow anonymous users
     anon_user_id = f"anon-{str(uuid.uuid4())}"
     logger.info(f"request_id={get_request_id()} | Anonymous user | user_id={anon_user_id}")
@@ -145,7 +134,9 @@ def get_or_create_session(db, session_id: Optional[str], user_id: str) -> Sessio
     if session_id:
         session = db.query(Session).filter(Session.session_id == session_id).first()
         if not session:
-            logger.info(f"request_id={get_request_id()} | Creating new session with provided id | session_id={session_id}")
+            logger.info(
+                f"request_id={get_request_id()} | Creating new session with provided id | session_id={session_id}"
+            )
             session = Session(session_id=session_id, user_id=user_id)
             db.add(session)
             db.flush()
@@ -153,31 +144,30 @@ def get_or_create_session(db, session_id: Optional[str], user_id: str) -> Sessio
 
         expiry_cutoff = datetime.now(timezone.utc) - timedelta(minutes=SESSION_EXPIRY_MINUTES)
         if session.last_active_at < expiry_cutoff:
-            logger.warning(f"request_id={get_request_id()} | Session expired | session_id={session_id} | last_active_at={session.last_active_at}")
-            raise HTTPException(status_code=410, detail=f"Session expired. Last activity was more than {SESSION_EXPIRY_MINUTES} minutes ago. Start a new session.")
+            logger.warning(
+                f"request_id={get_request_id()} | Session expired | session_id={session_id} | last_active_at={session.last_active_at}"
+            )
+            raise HTTPException(
+                status_code=410,
+                detail=f"Session expired. Last activity was more than {SESSION_EXPIRY_MINUTES} minutes ago. Start a new session.",
+            )
 
         session.last_active_at = datetime.now(timezone.utc)
         db.flush()
         logger.info(f"request_id={get_request_id()} | Session resumed | session_id={session_id}")
         return session
-    
-    session = Session(
-        session_id=str(uuid.uuid4()),
-        user_id=user_id
-    )
+
+    session = Session(session_id=str(uuid.uuid4()), user_id=user_id)
     db.add(session)
     db.flush()
     logger.info(f"request_id={get_request_id()} | New session created | session_id={session.session_id}")
     return session
 
+
 def load_conversation_history(db, session_id: str, limit: int = 20) -> list:
     """Load recent conversation history for session"""
     messages = (
-        db.query(Message)
-        .filter(Message.session_id == session_id)
-        .order_by(Message.created_at.asc())
-        .limit(limit)
-        .all()
+        db.query(Message).filter(Message.session_id == session_id).order_by(Message.created_at.asc()).limit(limit).all()
     )
     return [{"role": msg.role, "content": msg.content} for msg in messages]
 
@@ -187,39 +177,37 @@ def root():
     """Redirect root to chat interface"""
     return RedirectResponse(url="/static/chat.html")
 
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
 
 @app.post("/chat", response_model=ChatResponse)
 def chat(
     request_obj: Request,
     chat_request: ChatRequest,
     response: Response,
-    x_session_id: Optional[str] = Header(default=None)
+    x_session_id: Optional[str] = Header(default=None),
 ):
     # Get user_id from JWT or X-User-ID header or anonymous
     user_id = get_current_user_id(request_obj)
-    
+
     logger.info(f"request_id={get_request_id()} | user_id={user_id} | message={chat_request.message}")
 
     db = SessionLocal()
 
     try:
-        user = get_or_create_user(db, user_id)
+        get_or_create_user(db, user_id)
         session = get_or_create_session(db, x_session_id or chat_request.session_id, user_id)
 
-        new_message = Message(
-            session_id=session.session_id,
-            role="user",
-            content=chat_request.message
-        )
+        new_message = Message(session_id=session.session_id, role="user", content=chat_request.message)
         db.add(new_message)
         db.commit()
 
         logger.info(f"request_id={get_request_id()} | User message stored | session_id={session.session_id}")
 
-# Invoke the router graph with LangSmith tracking
+        # Invoke the router graph with LangSmith tracking
         logger.info(f"request_id={get_request_id()} | Invoking router")
 
         conversation_history = load_conversation_history(db, session.session_id)
@@ -240,23 +228,19 @@ def chat(
                         "session_id": session.session_id,
                         "request_id": get_request_id(),
                     },
-                    "run_name": f"chat_request_{get_request_id()[:8]}"
-                }
+                    "run_name": f"chat_request_{get_request_id()[:8]}",
+                },
             )
-        
+
         langsmith_run_id = str(cb.traced_runs[0].id) if cb.traced_runs else None
         logger.info(f"request_id={get_request_id()} | langsmith_run_id={langsmith_run_id}")
 
-        
         final_response = graph_result.get("final_response", "Something went wrong.")
         logger.info(f"request_id={get_request_id()} | Graph completed | final_response_preview={final_response[:80]}")
 
         # Store the assistant response
         assistant_message = Message(
-            session_id=session.session_id,
-            role="assistant",
-            content=final_response,
-            langsmith_run_id=langsmith_run_id
+            session_id=session.session_id, role="assistant", content=final_response, langsmith_run_id=langsmith_run_id
         )
         db.add(assistant_message)
         db.commit()
@@ -266,11 +250,7 @@ def chat(
         response.headers["X-Session-ID"] = session.session_id
         response.headers["X-User-ID"] = user_id
 
-        return ChatResponse(
-            session_id=session.session_id,
-            user_id=user_id,
-            response=final_response
-        )
+        return ChatResponse(session_id=session.session_id, user_id=user_id, response=final_response)
 
     except HTTPException:
         db.rollback()
@@ -292,18 +272,9 @@ def get_session_messages(session_id: str):
         if not session:
             raise HTTPException(status_code=404, detail="Session not found")
 
-        messages = (
-            db.query(Message)
-            .filter(Message.session_id == session_id)
-            .order_by(Message.created_at.asc())
-            .all()
-        )
+        messages = db.query(Message).filter(Message.session_id == session_id).order_by(Message.created_at.asc()).all()
 
-        return SessionMessagesResponse(
-            session_id=session_id,
-            user_id=session.user_id,
-            messages=messages
-        )
+        return SessionMessagesResponse(session_id=session_id, user_id=session.user_id, messages=messages)
 
     finally:
         db.close()

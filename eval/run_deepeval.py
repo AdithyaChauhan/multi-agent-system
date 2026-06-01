@@ -32,11 +32,13 @@ os.environ.setdefault("DEEPEVAL_TELEMETRY_OPT_OUT", "YES")
 # Prevent deepeval from hard-failing on missing OpenAI key for custom metrics
 os.environ.setdefault("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY", "ci-fixture-mode-no-llm"))
 
-from deepeval import evaluate as deepeval_evaluate       # noqa: E402
-from deepeval.metrics import BaseMetric                 # noqa: E402
-from deepeval.test_case import LLMTestCase              # noqa: E402
+from deepeval import evaluate as deepeval_evaluate  # noqa: E402
+from deepeval.metrics import BaseMetric  # noqa: E402
+from deepeval.test_case import LLMTestCase  # noqa: E402
+
 try:
     from deepeval.evaluate.configs import AsyncConfig, DisplayConfig
+
     _DEEPEVAL_V4 = True
 except ImportError:
     _DEEPEVAL_V4 = False
@@ -50,6 +52,7 @@ RUN_LIVE_EVAL = os.getenv("RUN_LIVE_EVAL", "false").lower() == "true"
 
 
 # ── Custom rule-based metrics (no LLM — deterministic for CI) ────────────────
+
 
 class AnswerRelevancyMetric(BaseMetric):
     """
@@ -190,14 +193,11 @@ class CorrectnessMetric(BaseMetric):
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
+
 def get_git_info() -> dict:
     try:
-        sha = subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], text=True, cwd=REPO_ROOT
-        ).strip()
-        branch = subprocess.check_output(
-            ["git", "rev-parse", "--abbrev-ref", "HEAD"], text=True, cwd=REPO_ROOT
-        ).strip()
+        sha = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True, cwd=REPO_ROOT).strip()
+        branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], text=True, cwd=REPO_ROOT).strip()
     except Exception:
         sha = "unknown"
         branch = "unknown"
@@ -265,6 +265,7 @@ def push_to_langsmith(report: dict, config: dict) -> None:
 
 # ── HTML report generation ────────────────────────────────────────────────────
 
+
 def _svg_bar(score: float, threshold: float, width: int = 300) -> str:
     bar_w = int(score * width)
     thresh_x = int(threshold * width)
@@ -325,7 +326,7 @@ def generate_html_report(report: dict, config: dict) -> str:
 
     # Per-sample table
     metric_names = list(report["per_sample_scores"][0]["metrics"].keys()) if report["per_sample_scores"] else []
-    header_cells = "".join(f"<th>{n.replace('_',' ').title()}</th>" for n in metric_names)
+    header_cells = "".join(f"<th>{n.replace('_', ' ').title()}</th>" for n in metric_names)
 
     sample_rows = ""
     for s in report["per_sample_scores"]:
@@ -421,6 +422,7 @@ def generate_html_report(report: dict, config: dict) -> str:
 
 # ── Main ─────────────────────────────────────────────────────────────────────
 
+
 def main() -> None:
     sep = "=" * 62
     print(f"\n{sep}")
@@ -443,10 +445,12 @@ def main() -> None:
     test_cases: list[LLMTestCase] = []
     for tc_data in dataset:
         actual = get_actual_output(tc_data, config)
-        criteria_json = json.dumps({
-            "contains": tc_data.get("expected_contains", []),
-            "not_contains": tc_data.get("expected_not_contains", []),
-        })
+        criteria_json = json.dumps(
+            {
+                "contains": tc_data.get("expected_contains", []),
+                "not_contains": tc_data.get("expected_not_contains", []),
+            }
+        )
         test_cases.append(
             LLMTestCase(
                 input=tc_data["input"]["user_message"],
@@ -475,17 +479,19 @@ def main() -> None:
         icon = "✓" if passed else "✗"
         print(f"  [{icon}] {tc_data['id']}  rel={r:.2f}  cor={c:.2f}  — {tc_data['name']}")
 
-        per_sample.append({
-            "id": tc_data["id"],
-            "name": tc_data["name"],
-            "input": tc_data["input"]["user_message"],
-            "actual_output": tc.actual_output,
-            "metrics": {
-                "answer_relevancy": {"score": r, "pass": r >= rel_threshold},
-                "correctness": {"score": c, "pass": c >= cor_threshold},
-            },
-            "overall_pass": passed,
-        })
+        per_sample.append(
+            {
+                "id": tc_data["id"],
+                "name": tc_data["name"],
+                "input": tc_data["input"]["user_message"],
+                "actual_output": tc.actual_output,
+                "metrics": {
+                    "answer_relevancy": {"score": r, "pass": r >= rel_threshold},
+                    "correctness": {"score": c, "pass": c >= cor_threshold},
+                },
+                "overall_pass": passed,
+            }
+        )
 
     # Run deepeval evaluate() for framework-level integration
     print("\nRunning deepeval evaluate()...")
@@ -566,7 +572,7 @@ def main() -> None:
         for s in failed_cases:
             print(f"    ✗ [{s['id']}] {s['name']}")
 
-    print(f"\nReports written:")
+    print("\nReports written:")
     print(f"  JSON : {json_path}")
     print(f"  HTML : {html_path}")
 

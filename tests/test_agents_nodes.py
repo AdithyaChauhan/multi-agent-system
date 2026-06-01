@@ -20,7 +20,7 @@ class TestOrderAgentResponseGeneration:
                 session_id="test-session",
                 order_data={"order_id": "ORD-2001", "product_name": "AirPods", "status": "shipped"},
                 tracking_data={"carrier": "FedEx", "current_location": "Mumbai", "estimated_delivery": "2026-05-25"},
-                conversation_history=[]
+                conversation_history=[],
             )
             result = response_generation(state)
 
@@ -42,7 +42,7 @@ class TestOrderAgentResponseGeneration:
                 session_id="test-session",
                 order_data={"order_id": "ORD-2001", "product_name": "AirPods", "status": "processing"},
                 tracking_data={},
-                conversation_history=[]
+                conversation_history=[],
             )
             result = response_generation(state)
 
@@ -60,7 +60,7 @@ class TestOrderRouting:
             user_id="test-user",
             session_id="test-session",
             order_id="ORD-2001",
-            conversation_history=[]
+            conversation_history=[],
         )
         result = route_after_check(state)
         assert result == "has_id"
@@ -75,7 +75,7 @@ class TestOrderRouting:
             session_id="test-session",
             order_id=None,
             user_orders=[],
-            conversation_history=[]
+            conversation_history=[],
         )
         result = route_after_check(state)
         assert result == "no_orders"
@@ -93,7 +93,7 @@ class TestOrderRouting:
                 {"order_id": "ORD-2001"},
                 {"order_id": "ORD-2002"},
             ],
-            conversation_history=[]
+            conversation_history=[],
         )
         result = route_after_check(state)
         assert result == "multiple_orders"
@@ -107,7 +107,7 @@ class TestOrderRouting:
             user_id="test-user",
             session_id="test-session",
             order_data={"order_id": "ORD-2001"},
-            conversation_history=[]
+            conversation_history=[],
         )
         result = route_after_fetch(state)
         assert result == "found"
@@ -121,7 +121,7 @@ class TestOrderRouting:
             user_id="test-user",
             session_id="test-session",
             order_data=None,
-            conversation_history=[]
+            conversation_history=[],
         )
         result = route_after_fetch(state)
         assert result == "not_found"
@@ -144,7 +144,7 @@ class TestSupportAgentDraftResolution:
                 session_id="test-session",
                 support_issue={"category": "refund_request", "description": "Want refund"},
                 policy={"response_time": "48 hours"},
-                conversation_history=[]
+                conversation_history=[],
             )
             result = draft_resolution(state)
 
@@ -163,7 +163,7 @@ class TestSupportRouting:
             user_id="test-user",
             session_id="test-session",
             severity="critical",
-            conversation_history=[]
+            conversation_history=[],
         )
         result = route_by_severity(state)
         assert result == "high"
@@ -177,7 +177,7 @@ class TestSupportRouting:
             user_id="test-user",
             session_id="test-session",
             severity="medium",
-            conversation_history=[]
+            conversation_history=[],
         )
         result = route_by_severity(state)
         assert result == "high"
@@ -191,7 +191,7 @@ class TestSupportRouting:
             user_id="test-user",
             session_id="test-session",
             severity="low",
-            conversation_history=[]
+            conversation_history=[],
         )
         result = route_by_severity(state)
         assert result == "low"
@@ -214,7 +214,7 @@ class TestSupportSubgraphCreateTicket:
                 severity="medium",
                 priority="P2",
                 policy={"response_time": "24 hours"},
-                conversation_history=[]
+                conversation_history=[],
             )
             result = create_ticket_node(state)
 
@@ -236,7 +236,7 @@ class TestSupportSubgraphCreateTicket:
                 severity="critical",
                 priority="P0",
                 policy={"response_time": "1 hour"},
-                conversation_history=[]
+                conversation_history=[],
             )
             result = create_ticket_node(state)
 
@@ -256,7 +256,7 @@ class TestRouterRouting:
             session_id="test-session",
             confidence=0.3,
             intent="unclear",
-            conversation_history=[]
+            conversation_history=[],
         )
         result = route_after_classification(state)
         assert result == "clarify"
@@ -271,7 +271,7 @@ class TestRouterRouting:
             session_id="test-session",
             confidence=0.9,
             intent="order",
-            conversation_history=[]
+            conversation_history=[],
         )
         result = route_after_classification(state)
         assert result == "auth_gate"

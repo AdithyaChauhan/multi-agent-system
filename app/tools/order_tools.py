@@ -16,11 +16,7 @@ def fetch_order_from_db(order_id: str, user_id: str) -> Optional[dict]:
     db = SessionLocal()
 
     try:
-        order = (
-            db.query(Order)
-            .filter(Order.order_id == order_id, Order.user_id == user_id)
-            .first()
-        )
+        order = db.query(Order).filter(Order.order_id == order_id, Order.user_id == user_id).first()
 
         if not order:
             logger.info(f"request_id={get_request_id()} | Order not found | order_id={order_id} | user_id={user_id}")
@@ -40,24 +36,24 @@ def fetch_order_from_db(order_id: str, user_id: str) -> Optional[dict]:
         db.close()
 
 
-
 def fetch_user_orders(user_id: str) -> List[dict]:
     """Fetch all orders for a given user"""
     from app.models.order import Order
-    
+
     db = SessionLocal()
     try:
-        orders = db.query(Order).filter(
-            Order.user_id == user_id
-        ).order_by(Order.created_at.desc()).all()
-        
-        return [{
-            "order_id": o.order_id,
-            "product_name": o.product_name,
-            "status": o.status,
-            "tracking_id": o.tracking_id,
-            "created_at": o.created_at.isoformat() if o.created_at else None,
-        } for o in orders]
-        
+        orders = db.query(Order).filter(Order.user_id == user_id).order_by(Order.created_at.desc()).all()
+
+        return [
+            {
+                "order_id": o.order_id,
+                "product_name": o.product_name,
+                "status": o.status,
+                "tracking_id": o.tracking_id,
+                "created_at": o.created_at.isoformat() if o.created_at else None,
+            }
+            for o in orders
+        ]
+
     finally:
         db.close()

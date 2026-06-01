@@ -18,11 +18,7 @@ load_dotenv()
 
 logger = get_logger("app.agents.support_agent")
 
-llm = ChatOpenAI(
-    model="gpt-4o-mini",
-    temperature=0,
-    api_key=os.getenv("OPENAI_API_KEY")
-)
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=os.getenv("OPENAI_API_KEY"))
 
 
 CLASSIFICATION_SYSTEM_PROMPT = """You are a support issue classification system.
@@ -86,13 +82,25 @@ IMPORTANT:
 
 # Product categories that carry higher physical risk
 HIGH_RISK_PRODUCT_KEYWORDS = [
-    "baby", "infant", "toddler", "child", "toy",
-    "heater", "iron", "kettle", "fryer", "blender",
-    "pressure", "gas", "electric", "induction",
+    "baby",
+    "infant",
+    "toddler",
+    "child",
+    "toy",
+    "heater",
+    "iron",
+    "kettle",
+    "fryer",
+    "blender",
+    "pressure",
+    "gas",
+    "electric",
+    "induction",
 ]
 
 
 # ==================== MAIN FLOW NODES ====================
+
 
 def classify_issue(state: AgentState) -> dict:
     """LLM node — classifies the support issue from message + conversation history."""
@@ -110,10 +118,7 @@ def classify_issue(state: AgentState) -> dict:
     history_context = ""
     if conversation_history:
         recent = conversation_history[-4:]
-        history_context = "\n".join([
-            f"{msg['role'].title()}: {msg['content']}"
-            for msg in recent
-        ])
+        history_context = "\n".join([f"{msg['role'].title()}: {msg['content']}" for msg in recent])
 
     if history_context:
         full_prompt = (
@@ -130,13 +135,7 @@ def classify_issue(state: AgentState) -> dict:
     ]
 
     response = llm.invoke(
-        messages,
-        config={
-            "metadata": {
-                "prompt_name": "support-classification-prompt",
-                "prompt_version": commit_hash
-            }
-        }
+        messages, config={"metadata": {"prompt_name": "support-classification-prompt", "prompt_version": commit_hash}}
     )
     raw = response.content.strip()
 
@@ -210,21 +209,19 @@ def ask_for_order(state: AgentState) -> dict:
             "Could you double-check and provide the order number (e.g. ORD-1234)?"
         )
     else:
-        order_lines = "\n".join([
-            f"{i+1}. **{o['order_id']}** — {o['product_name'][:60]} ({o['status'].title()})"
-            for i, o in enumerate(user_orders[:5])
-        ])
+        order_lines = "\n".join(
+            [
+                f"{i+1}. **{o['order_id']}** — {o['product_name'][:60]} ({o['status'].title()})"
+                for i, o in enumerate(user_orders[:5])
+            ]
+        )
         prefix = (
             f"I couldn't find order **{issue['order_id']}** on your account. "
-            if had_invalid_id else
-            "To raise a support ticket, I need to know which order this is about.\n\n"
+            if had_invalid_id
+            else "To raise a support ticket, I need to know which order this is about.\n\n"
             "Here are your recent orders:\n\n"
         )
-        msg = (
-            f"{prefix}"
-            f"{order_lines}\n\n"
-            f"Please reply with the order number you need help with."
-        )
+        msg = f"{prefix}" f"{order_lines}\n\n" f"Please reply with the order number you need help with."
 
     logger.info(f"request_id={get_request_id()} | Asking user for order")
     return {"final_response": msg}
@@ -242,9 +239,23 @@ def assess_severity(state: AgentState) -> dict:
     support_order = state.get("support_order", {})
 
     critical_message_keywords = [
-        "urgent", "emergency", "danger", "safety", "injury", "hurt",
-        "burn", "child", "baby", "toddler", "hospital", "poison", "toxic",
-        "choking", "fire", "smoke", "electric shock",
+        "urgent",
+        "emergency",
+        "danger",
+        "safety",
+        "injury",
+        "hurt",
+        "burn",
+        "child",
+        "baby",
+        "toddler",
+        "hospital",
+        "poison",
+        "toxic",
+        "choking",
+        "fire",
+        "smoke",
+        "electric shock",
     ]
 
     product_name = (support_order.get("product_name") or "").lower()
@@ -277,10 +288,7 @@ def lookup_policy(state: AgentState) -> dict:
 
     policy = lookup_support_policy(category, severity)
 
-    logger.info(
-        f"request_id={get_request_id()} | "
-        f"Policy lookup | category={category} | severity={severity}"
-    )
+    logger.info(f"request_id={get_request_id()} | " f"Policy lookup | category={category} | severity={severity}")
 
     return {"policy": policy}
 
@@ -311,6 +319,7 @@ def draft_resolution(state: AgentState) -> dict:
 
 # ==================== ROUTING ====================
 
+
 def route_after_order_fetch(state: AgentState) -> Literal["found", "not_found"]:
     return "found" if state.get("support_order") else "not_found"
 
@@ -321,6 +330,7 @@ def route_by_severity(state: AgentState) -> Literal["high", "low"]:
 
 
 # ==================== BUILD GRAPH ====================
+
 
 def build_support_agent_graph():
     graph = StateGraph(AgentState)
@@ -343,7 +353,7 @@ def build_support_agent_graph():
         {
             "found": "assess_severity",
             "not_found": "ask_for_order",
-        }
+        },
     )
 
     graph.add_edge("assess_severity", "lookup_policy")
@@ -354,7 +364,7 @@ def build_support_agent_graph():
         {
             "high": "escalation_handler",
             "low": "draft_resolution",
-        }
+        },
     )
 
     graph.add_edge("escalation_handler", END)

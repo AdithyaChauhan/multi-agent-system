@@ -12,12 +12,15 @@ Evaluators
 - confidence_check     : 1.0 if confidence >= 0.7 (router threshold), else 0.0
 - order_id_correctness : 1.0/0.0 only scored when the example expects a non-null order_id
 """
+
 import os
 import sys
 import json
+
 sys.path.insert(0, '/home/admin1/project/multi-agent-system')
 
 from dotenv import load_dotenv
+
 load_dotenv('/home/admin1/project/multi-agent-system/.env')
 
 from langsmith import Client
@@ -39,6 +42,7 @@ def _load_router_prompt() -> str:
     """Pull the live router prompt from LangSmith hub, fall back to hardcoded."""
     try:
         from app.core.prompt_loader import load_prompt
+
         text, _ = load_prompt("router-classification-prompt", "latest")
         if text:
             return text
@@ -65,9 +69,7 @@ def predict(inputs: dict) -> dict:
     history_context = ""
     if conversation_history:
         recent = conversation_history[-2:]
-        history_context = "\n".join(
-            f"{msg['role'].title()}: {msg['content']}" for msg in recent
-        )
+        history_context = "\n".join(f"{msg['role'].title()}: {msg['content']}" for msg in recent)
 
     prompt_text = user_message
     if history_context:
@@ -84,9 +86,9 @@ def predict(inputs: dict) -> dict:
     try:
         parsed = json.loads(raw)
         return {
-            "intent":     parsed.get("intent", "unclear"),
+            "intent": parsed.get("intent", "unclear"),
             "confidence": float(parsed.get("confidence", 0.0)),
-            "order_id":   parsed.get("order_id"),
+            "order_id": parsed.get("order_id"),
         }
     except (json.JSONDecodeError, ValueError):
         return {"intent": "unclear", "confidence": 0.0, "order_id": None}
@@ -94,13 +96,14 @@ def predict(inputs: dict) -> dict:
 
 # ── Evaluators ──────────────────────────────────────────────────────────────
 
+
 def intent_correctness(run, example) -> dict:
     predicted = run.outputs.get("intent", "unclear")
-    expected  = example.outputs.get("intent", "")
+    expected = example.outputs.get("intent", "")
     score = 1.0 if predicted == expected else 0.0
     return {
-        "key":     "intent_correctness",
-        "score":   score,
+        "key": "intent_correctness",
+        "score": score,
         "comment": f"predicted={predicted}  expected={expected}",
     }
 
@@ -109,8 +112,8 @@ def confidence_check(run, _example) -> dict:
     confidence = run.outputs.get("confidence", 0.0)
     score = 1.0 if confidence >= CONFIDENCE_THRESHOLD else 0.0
     return {
-        "key":     "confidence_check",
-        "score":   score,
+        "key": "confidence_check",
+        "score": score,
         "comment": f"confidence={confidence:.2f}  threshold={CONFIDENCE_THRESHOLD}",
     }
 

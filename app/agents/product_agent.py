@@ -17,11 +17,8 @@ load_dotenv()
 
 logger = get_logger("app.agents.product_agent")
 
-llm = ChatOpenAI(
-    model="gpt-4o-mini",
-    temperature=0,
-    api_key=os.getenv("OPENAI_API_KEY")
-)
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=os.getenv("OPENAI_API_KEY"))
+
 
 def get_catalog_structure() -> str:
     """Load category/subcategory structure from DB dynamically"""
@@ -30,12 +27,13 @@ def get_catalog_structure() -> str:
 
     db = SessionLocal()
     try:
-        rows = db.query(
-            Product.category,
-            Product.subcategory
-        ).distinct().filter(
-            Product.category.isnot(None)
-        ).order_by(Product.category, Product.subcategory).all()
+        rows = (
+            db.query(Product.category, Product.subcategory)
+            .distinct()
+            .filter(Product.category.isnot(None))
+            .order_by(Product.category, Product.subcategory)
+            .all()
+        )
 
         structure = {}
         for category, subcategory in rows:
@@ -54,6 +52,7 @@ def get_catalog_structure() -> str:
     finally:
         db.close()
 
+
 # Load once at startup
 CATALOG_STRUCTURE = get_catalog_structure()
 
@@ -61,10 +60,19 @@ CATALOG_STRUCTURE = get_catalog_structure()
 SERVED_CATEGORIES = {"Electronics", "Computers & Accessories", "Home & Kitchen", "Office Products"}
 
 # Subcategories that exist in the DB but are not served — exclude from user-facing blurb
-BLURB_EXCLUDED_SUBCATEGORIES = frozenset({
-    "smartphone", "laptop", "tablet", "clothing", "shoes",
-    "furniture", "book", "toy", "sports equipment",
-})
+BLURB_EXCLUDED_SUBCATEGORIES = frozenset(
+    {
+        "smartphone",
+        "laptop",
+        "tablet",
+        "clothing",
+        "shoes",
+        "furniture",
+        "book",
+        "toy",
+        "sports equipment",
+    }
+)
 
 
 def build_catalog_blurb() -> str:
@@ -75,26 +83,25 @@ def build_catalog_blurb() -> str:
 
     db = SessionLocal()
     try:
-        counts = db.query(
-            Product.category,
-            func.count(Product.product_id).label("cnt")
-        ).filter(
-            Product.category.in_(SERVED_CATEGORIES)
-        ).group_by(
-            Product.category
-        ).order_by(func.count(Product.product_id).desc()).all()
+        counts = (
+            db.query(Product.category, func.count(Product.product_id).label("cnt"))
+            .filter(Product.category.in_(SERVED_CATEGORIES))
+            .group_by(Product.category)
+            .order_by(func.count(Product.product_id).desc())
+            .all()
+        )
 
-        sub_rows = db.query(
-            Product.category,
-            Product.subcategory,
-            func.count(Product.product_id).label("cnt")
-        ).filter(
-            Product.category.in_(SERVED_CATEGORIES),
-            Product.subcategory.isnot(None),
-            Product.subcategory.notin_(BLURB_EXCLUDED_SUBCATEGORIES),
-        ).group_by(Product.category, Product.subcategory).order_by(
-            Product.category, func.count(Product.product_id).desc()
-        ).all()
+        sub_rows = (
+            db.query(Product.category, Product.subcategory, func.count(Product.product_id).label("cnt"))
+            .filter(
+                Product.category.in_(SERVED_CATEGORIES),
+                Product.subcategory.isnot(None),
+                Product.subcategory.notin_(BLURB_EXCLUDED_SUBCATEGORIES),
+            )
+            .group_by(Product.category, Product.subcategory)
+            .order_by(Product.category, func.count(Product.product_id).desc())
+            .all()
+        )
 
         subcat_map: dict = {}
         for cat, sub, _ in sub_rows:
@@ -196,10 +203,7 @@ def extract_preferences(state: AgentState) -> dict:
     history_context = ""
     if conversation_history:
         recent = conversation_history[-2:]
-        history_context = "\n".join([
-            f"{msg['role'].title()}: {msg['content']}"
-            for msg in recent
-        ])
+        history_context = "\n".join([f"{msg['role'].title()}: {msg['content']}" for msg in recent])
 
     if history_context:
         full_prompt = (
@@ -229,10 +233,7 @@ def extract_preferences(state: AgentState) -> dict:
         # LLM occasionally returns the string "null" instead of JSON null
         preferences = {k: (None if v == "null" or v == "None" else v) for k, v in preferences.items()}
     except json.JSONDecodeError as e:
-        logger.error(
-            f"request_id={get_request_id()} | "
-            f"Preference parse error | raw={raw} | error={str(e)}"
-        )
+        logger.error(f"request_id={get_request_id()} | " f"Preference parse error | raw={raw} | error={str(e)}")
         preferences = {"category": None, "keywords": [], "unavailable_request": False}
 
     # Merge with previous preferences — preserve context across turns
@@ -251,26 +252,23 @@ def extract_preferences(state: AgentState) -> dict:
             and prev_subcategory
             and new_subcategory
             and new_subcategory != prev_subcategory
-            and not preferences.get("type")       # no explicit type change
+            and not preferences.get("type")  # no explicit type change
             and preferences.get("brand") is not None  # only brand was specified
         ):
             new_subcategory = prev_subcategory
 
         preferences = {
-            "category":    new_category,
+            "category": new_category,
             "subcategory": new_subcategory or prev_subcategory,
-            "type":        preferences.get("type")        or previous_prefs.get("type"),
-            "brand":       preferences.get("brand"),
-            "max_price":   preferences.get("max_price")   or previous_prefs.get("max_price"),
-            "min_price":   preferences.get("min_price")   or previous_prefs.get("min_price"),
-            "keywords":    preferences.get("keywords")    or previous_prefs.get("keywords"),
+            "type": preferences.get("type") or previous_prefs.get("type"),
+            "brand": preferences.get("brand"),
+            "max_price": preferences.get("max_price") or previous_prefs.get("max_price"),
+            "min_price": preferences.get("min_price") or previous_prefs.get("min_price"),
+            "keywords": preferences.get("keywords") or previous_prefs.get("keywords"),
             "unavailable_request": preferences.get("unavailable_request", False),
         }
 
-    logger.info(
-        f"request_id={get_request_id()} | "
-        f"EXTRACTED: {json.dumps(preferences)}"
-    )
+    logger.info(f"request_id={get_request_id()} | " f"EXTRACTED: {json.dumps(preferences)}")
 
     return {
         "preferences": preferences,
@@ -283,16 +281,17 @@ def extract_preferences(state: AgentState) -> dict:
 
 def ask_for_preferences(state: AgentState) -> dict:
     logger.info(f"request_id={get_request_id()} | Asking for preferences")
-    return {
-        "final_response": f"What are you looking for? Here's what we carry:\n\n{CATALOG_BLURB}"
-    }
+    return {"final_response": f"What are you looking for? Here's what we carry:\n\n{CATALOG_BLURB}"}
 
 
 def _unavailable_suggestion(user_message: str, preferences: dict) -> str:
     """Return a short, targeted suggestion when a user asks for something we don't carry."""
     query = (user_message + " " + " ".join(preferences.get("keywords") or [])).lower()
 
-    if any(w in query for w in ["phone", "smartphone", "mobile", "iphone", "android", "galaxy", "oneplus phone", "samsung phone"]):
+    if any(
+        w in query
+        for w in ["phone", "smartphone", "mobile", "iphone", "android", "galaxy", "oneplus phone", "samsung phone"]
+    ):
         return (
             "We don't carry smartphones. "
             "We do have **phone accessories** — cases, chargers, power banks, and phone stands."
@@ -303,12 +302,22 @@ def _unavailable_suggestion(user_message: str, preferences: dict) -> str:
             "We do have **computer accessories** — mouse, keyboard, monitors, and laptop bags."
         )
     if any(w in query for w in ["tablet", "ipad", "surface"]):
-        return (
-            "We don't carry tablets. "
-            "We do have **computer accessories** — keyboards, mouse, and adapters."
-        )
-    if any(w in query for w in ["soap", "shampoo", "hygiene", "lotion", "cream", "toothpaste",
-                                  "detergent", "cleanser", "grooming", "skincare"]):
+        return "We don't carry tablets. " "We do have **computer accessories** — keyboards, mouse, and adapters."
+    if any(
+        w in query
+        for w in [
+            "soap",
+            "shampoo",
+            "hygiene",
+            "lotion",
+            "cream",
+            "toothpaste",
+            "detergent",
+            "cleanser",
+            "grooming",
+            "skincare",
+        ]
+    ):
         return (
             "We don't carry personal care items. "
             "We do have **Home & Kitchen appliances** — mixer grinders, air fryers, room heaters, and more."
@@ -322,10 +331,7 @@ def _unavailable_suggestion(user_message: str, preferences: dict) -> str:
     if any(w in query for w in ["book", "novel", "textbook", "magazine"]):
         return "We don't carry books."
     if any(w in query for w in ["toy", "doll", "lego", "puzzle", "board game"]):
-        return (
-            "We don't carry toys. "
-            "We do have **art supplies and stationery** if you're interested."
-        )
+        return "We don't carry toys. " "We do have **art supplies and stationery** if you're interested."
 
     # Generic fallback — show the full blurb
     return f"We don't carry that in our catalog. Here's what we do have:\n\n{CATALOG_BLURB}"
@@ -344,14 +350,11 @@ def do_search_products(state: AgentState) -> dict:
     prefs = state.get("preferences") or {}
     category = prefs.get("category")
     subcategory = prefs.get("subcategory")
-    
-    logger.info(
-        f"request_id={get_request_id()} | "
-        f"Searching | category={category} | subcategory={subcategory}"
-    )
+
+    logger.info(f"request_id={get_request_id()} | " f"Searching | category={category} | subcategory={subcategory}")
 
     keywords = prefs.get("keywords") or []
-    
+
     results = search_products(
         category=category,
         subcategory=subcategory,
@@ -394,12 +397,7 @@ def broaden_search(state: AgentState) -> dict:
         return {"broaden_attempt": attempt, "filters_exhausted": True}
 
     # Guard: if no specificity remains beyond category, treat as exhausted.
-    has_specificity = (
-        prefs.get("subcategory") or
-        prefs.get("brand") or
-        prefs.get("type") or
-        prefs.get("keywords")
-    )
+    has_specificity = prefs.get("subcategory") or prefs.get("brand") or prefs.get("type") or prefs.get("keywords")
     if not has_specificity:
         return {"broaden_attempt": attempt, "filters_exhausted": True}
 
@@ -429,41 +427,73 @@ def format_recommendations(state: AgentState) -> dict:
     if not ranked:
         return {"final_response": "I found some products but could not rank them."}
 
-# Relevance check — only for specific product keywords
+    # Relevance check — only for specific product keywords
     if relaxed and "keywords" in relaxed:
         original_keywords = original_preferences.get("keywords") or []
         if original_keywords:
             # Skip check for generic/category-level words
             GENERIC_WORDS = {
-                "items", "products", "things", "stuff", "good", "best",
-                "something", "show", "me", "under", "below", "above",
-                "kitchen", "home", "baby", "sport", "sports", "toy", "toys",
-                "clothing", "office", "art", "craft", "outdoor", "fitness",
-                "gear", "equipment", "accessories", "supplies", "desk",
-                "indoor", "kids", "children", "adult", "women",
-                "men", "girls", "boys", "need", "want", "looking", "find",
-                "care", "essentials", "essential", "basics", "basic",
-                "type", "kind", "sort", "related", "category", "range"
+                "items",
+                "products",
+                "things",
+                "stuff",
+                "good",
+                "best",
+                "something",
+                "show",
+                "me",
+                "under",
+                "below",
+                "above",
+                "kitchen",
+                "home",
+                "baby",
+                "sport",
+                "sports",
+                "toy",
+                "toys",
+                "clothing",
+                "office",
+                "art",
+                "craft",
+                "outdoor",
+                "fitness",
+                "gear",
+                "equipment",
+                "accessories",
+                "supplies",
+                "desk",
+                "indoor",
+                "kids",
+                "children",
+                "adult",
+                "women",
+                "men",
+                "girls",
+                "boys",
+                "need",
+                "want",
+                "looking",
+                "find",
+                "care",
+                "essentials",
+                "essential",
+                "basics",
+                "basic",
+                "type",
+                "kind",
+                "sort",
+                "related",
+                "category",
+                "range",
             }
-            specific_keywords = [
-                kw for kw in original_keywords
-                if kw.lower() not in GENERIC_WORDS
-            ]
+            specific_keywords = [kw for kw in original_keywords if kw.lower() not in GENERIC_WORDS]
             if specific_keywords:
-                relevant = any(
-                    any(kw.lower() in p.get("name", "").lower() for kw in specific_keywords)
-                    for p in ranked
-                )
+                relevant = any(any(kw.lower() in p.get("name", "").lower() for kw in specific_keywords) for p in ranked)
                 if not relevant:
                     original_query = " ".join(specific_keywords)
                     suggestion = _unavailable_suggestion(original_query, {"keywords": specific_keywords})
-                    return {
-                        "final_response": (
-                            f"I couldn't find '{original_query}' in our catalog. "
-                            f"{suggestion}"
-                        )
-                    }
-                
+                    return {"final_response": (f"I couldn't find '{original_query}' in our catalog. " f"{suggestion}")}
 
     lines = []
     if relaxed:
@@ -488,6 +518,7 @@ def format_recommendations(state: AgentState) -> dict:
 
 
 # ROUTING FUNCTIONS (only one of each!)
+
 
 def route_after_extraction(state: AgentState) -> Literal["search", "ask", "unavailable"]:
     prefs = state.get("preferences") or {}
@@ -518,25 +549,29 @@ def rank_and_filter(state: AgentState) -> dict:
         return {"ranked_products": []}
 
     candidates = search_results[:20]
-    product_list = "\n".join([
-        f"{i+1}. {p['name'][:70]} | Price: ₹{p['price']} | Rating: {p['rating']} | Brand: {p.get('brand', 'N/A')}"
-        for i, p in enumerate(candidates)
-    ])
+    product_list = "\n".join(
+        [
+            f"{i+1}. {p['name'][:70]} | Price: ₹{p['price']} | Rating: {p['rating']} | Brand: {p.get('brand', 'N/A')}"
+            for i, p in enumerate(candidates)
+        ]
+    )
 
     messages = [
         SystemMessage(content="You are a product ranking expert. Return only valid JSON arrays. No explanation."),
-        HumanMessage(content=(
-            f"Rank these products by relevance to the user's request.\n\n"
-            f"User request: \"{user_message}\"\n\n"
-            f"Products:\n{product_list}\n\n"
-            f"Rules:\n"
-            f"- For feature requests (e.g. 'best battery', 'calling feature', 'noise cancellation'), "
-            f"rank products that match those features first.\n"
-            f"- Include any product that is a direct or close match.\n"
-            f"- Return [] only if the products are entirely unrelated to the request.\n\n"
-            f"Return ONLY a JSON array of 1-based indices, most relevant first. Max 5 products.\n"
-            f"Example: [3, 1, 7, 2, 5]"
-        )),
+        HumanMessage(
+            content=(
+                f"Rank these products by relevance to the user's request.\n\n"
+                f"User request: \"{user_message}\"\n\n"
+                f"Products:\n{product_list}\n\n"
+                f"Rules:\n"
+                f"- For feature requests (e.g. 'best battery', 'calling feature', 'noise cancellation'), "
+                f"rank products that match those features first.\n"
+                f"- Include any product that is a direct or close match.\n"
+                f"- Return [] only if the products are entirely unrelated to the request.\n\n"
+                f"Return ONLY a JSON array of 1-based indices, most relevant first. Max 5 products.\n"
+                f"Example: [3, 1, 7, 2, 5]"
+            )
+        ),
     ]
 
     response = llm.invoke(messages)
@@ -580,6 +615,7 @@ def route_after_broaden(state: AgentState) -> Literal["retry_search", "no_result
 
 # GRAPH
 
+
 def build_product_agent_graph():
     graph = StateGraph(AgentState)
 
@@ -598,19 +634,15 @@ def build_product_agent_graph():
     graph.add_conditional_edges(
         "extract_preferences",
         route_after_extraction,
-        {"search": "search_products", "ask": "ask_for_preferences", "unavailable": "handle_unavailable"}
+        {"search": "search_products", "ask": "ask_for_preferences", "unavailable": "handle_unavailable"},
     )
 
     graph.add_conditional_edges(
-        "search_products",
-        route_after_search,
-        {"rank": "rank_and_filter", "broaden": "broaden_search"}
+        "search_products", route_after_search, {"rank": "rank_and_filter", "broaden": "broaden_search"}
     )
 
     graph.add_conditional_edges(
-        "broaden_search",
-        route_after_broaden,
-        {"retry_search": "search_products", "no_results": "respond_no_results"}
+        "broaden_search", route_after_broaden, {"retry_search": "search_products", "no_results": "respond_no_results"}
     )
 
     graph.add_edge("rank_and_filter", "product_enrichment")

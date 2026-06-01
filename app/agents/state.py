@@ -1,5 +1,6 @@
 from typing import TypedDict, Optional, List
 
+
 class AgentState(TypedDict, total=False):
     # Core
     user_message: str

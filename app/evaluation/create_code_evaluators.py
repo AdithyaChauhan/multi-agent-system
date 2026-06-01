@@ -10,18 +10,21 @@ Code evaluators run pure Python — no LLM calls, no version conflicts.
 Run once:
     python3 app/evaluation/create_code_evaluators.py
 """
+
 import os
 import sys
+
 sys.path.insert(0, '/home/admin1/project/multi-agent-system')
 
-from dotenv import load_dotenv
+from dotenv import load_dotenv  # noqa: E402
+
 load_dotenv('/home/admin1/project/multi-agent-system/.env')
 
-from langsmith import Client
+from langsmith import Client  # noqa: E402
 
 client = Client(api_key=os.getenv("LANGCHAIN_API_KEY"))
 PROJECT_NAME = "multi-agent-ecommerce"
-OLD_RULE_ID  = "91965491-46be-4f78-a0db-296c4261fbe0"  # the broken LLM evaluator
+OLD_RULE_ID = "91965491-46be-4f78-a0db-296c4261fbe0"  # the broken LLM evaluator
 
 # ── Evaluator code strings ───────────────────────────────────────────────────
 
@@ -109,6 +112,7 @@ def perform_eval(run):
 
 # ── Entry point ──────────────────────────────────────────────────────────────
 
+
 def main():
     proj = client.read_project(project_name=PROJECT_NAME)
 
@@ -121,9 +125,10 @@ def main():
 
     # LangSmith allows only 1 evaluator per rule — create one rule each
     import json
+
     evaluators = [
-        ("intent_served",             INTENT_SERVED_CODE,             "intent_served"),
-        ("response_non_empty",        RESPONSE_NON_EMPTY_CODE,        "response_non_empty"),
+        ("intent_served", INTENT_SERVED_CODE, "intent_served"),
+        ("response_non_empty", RESPONSE_NON_EMPTY_CODE, "response_non_empty"),
         ("no_auth_wall_for_products", NO_AUTH_WALL_FOR_PRODUCTS_CODE, "no_auth_wall_for_products"),
     ]
 
@@ -140,7 +145,7 @@ def main():
         result = json.loads(resp.text)
         print(f"  created  {name}  (rule {result['id']})")
 
-    print(f"\nEvaluators are live — scoring new traces automatically.")
+    print("\nEvaluators are live — scoring new traces automatically.")
     print(f"View at: https://smith.langchain.com/o/~/projects/p/{proj.id}/traces")
 
 

@@ -26,6 +26,7 @@ Do not invent information not present in the data."""
 
 # ==================== HELPER FUNCTIONS ====================
 
+
 def extract_order_id_from_text(text: str) -> str:
     """Extract order_id from text using regex"""
     pattern = r'\b(ORD-?\d{4})\b'
@@ -41,6 +42,7 @@ def extract_order_id_from_text(text: str) -> str:
 
 # ==================== NODES ====================
 
+
 def check_order_id(state: AgentState) -> dict:
     """
     Smart order_id detection:
@@ -53,27 +55,27 @@ def check_order_id(state: AgentState) -> dict:
     user_message = state.get("user_message", "")
     conversation_history = state.get("conversation_history", [])
     order_id = state.get("order_id")  # From Router
-    
+
     # Try to extract from current message
     if not order_id:
         order_id = extract_order_id_from_text(user_message)
-    
+
     # Check conversation history for context
     if not order_id and conversation_history:
         recent_messages = conversation_history[-4:]
-        
+
         # Check if assistant recently asked for order_id
         assistant_asked = False
         for msg in reversed(recent_messages):
             if msg.get("role") == "assistant":
                 content = msg.get("content", "").lower()
-                if any(phrase in content for phrase in [
-                    "order id", "order number", "which order", 
-                    "provide your order", "share your order"
-                ]):
+                if any(
+                    phrase in content
+                    for phrase in ["order id", "order number", "which order", "provide your order", "share your order"]
+                ):
                     assistant_asked = True
                     break
-        
+
         # If asked, try to extract from current message
         if assistant_asked:
             order_id = extract_order_id_from_text(user_message)
@@ -83,12 +85,12 @@ def check_order_id(state: AgentState) -> dict:
                 match = re.search(r'\b(\d{4})\b', user_message)
                 if match:
                     order_id = f"ORD-{match.group(1)}"
-    
+
     # If we have order_id, return it
     if order_id:
         logger.info(f"request_id={get_request_id()} | Order ID extracted: {order_id}")
         return {"order_id": order_id}
-    
+
     # Otherwise, fetch user's orders from database
     user_orders = fetch_user_orders(user_id)
 
@@ -114,23 +116,18 @@ def check_order_id(state: AgentState) -> dict:
 def respond_no_orders(state: AgentState) -> dict:
     """User has no orders in database"""
     logger.info(f"request_id={get_request_id()} | No orders found for user")
-    return {
-        "final_response": "I couldn't find any orders on your account. Have you placed an order with us recently?"
-    }
+    return {"final_response": "I couldn't find any orders on your account. Have you placed an order with us recently?"}
 
 
 def ask_which_order(state: AgentState) -> dict:
     """User has multiple orders, ask which one"""
     user_orders = state.get("user_orders", [])
-    
+
     logger.info(f"request_id={get_request_id()} | Asking user to select from {len(user_orders)} orders")
-    
+
     # Show up to 5 most recent orders
-    order_list = "\n".join([
-        f"• **{o['order_id']}** - {o['product_name']} ({o['status']})"
-        for o in user_orders[:5]
-    ])
-    
+    order_list = "\n".join([f"• **{o['order_id']}** - {o['product_name']} ({o['status']})" for o in user_orders[:5]])
+
     return {
         "final_response": f"You have multiple orders. Which one would you like to check?\n\n{order_list}\n\nPlease provide the order ID."
     }
@@ -163,15 +160,12 @@ def response_generation(state: AgentState) -> dict:
     order_data = state.get("order_data") or {}
     tracking_data = state.get("tracking_data") or {}
     conversation_history = state.get("conversation_history", [])
-    
+
     # Build conversation context
     history_context = ""
     if conversation_history:
         recent = conversation_history[-4:]
-        history_context = "\n".join([
-            f"{msg['role'].title()}: {msg['content']}"
-            for msg in recent
-        ])
+        history_context = "\n".join([f"{msg['role'].title()}: {msg['content']}" for msg in recent])
 
     context = f"""
 {"Recent conversation:" + chr(10) + history_context + chr(10) if history_context else ""}
@@ -202,11 +196,12 @@ User asked: {state.get('user_message')}"""
 
 # ==================== ROUTING ====================
 
+
 def route_after_check(state: AgentState) -> Literal["has_id", "no_orders", "multiple_orders"]:
     """Route based on order_id detection"""
     order_id = state.get("order_id")
     user_orders = state.get("user_orders", [])
-    
+
     if order_id:
         return "has_id"
     elif len(user_orders) == 0:
@@ -221,6 +216,7 @@ def route_after_fetch(state: AgentState) -> Literal["found", "not_found"]:
 
 
 # ==================== GRAPH ====================
+
 
 def build_order_agent_graph():
     graph = StateGraph(AgentState)
@@ -242,7 +238,7 @@ def build_order_agent_graph():
             "has_id": "fetch_order",
             "no_orders": "respond_no_orders",
             "multiple_orders": "ask_which_order",
-        }
+        },
     )
 
     graph.add_conditional_edges(
@@ -251,7 +247,7 @@ def build_order_agent_graph():
         {
             "found": "shipment_tracking",
             "not_found": "respond_not_found",
-        }
+        },
     )
 
     graph.add_edge("respond_no_orders", END)

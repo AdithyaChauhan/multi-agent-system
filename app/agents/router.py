@@ -92,31 +92,29 @@ Message: "it" (no clear referent in history)
 Respond ONLY with valid JSON:
 {"intent": "order"|"product"|"support"|"unclear", "confidence": 0.0-1.0, "order_id": "ORD-1234"|null}"""
 
+
 def classify_intent_and_extract(state: AgentState) -> dict:
     """LLM node — classifies intent using prompt from LangSmith Hub"""
     user_message = state["user_message"]
     conversation_history = state.get("conversation_history", [])
-    
+
     # Load prompt from LangSmith Hub
     version = PROMPT_VERSIONS.get("router-classification-prompt", "latest")
     system_prompt, commit_hash = load_prompt("router-classification-prompt", version)
-    
+
     # Fallback to hardcoded if hub fails
     if not system_prompt:
         logger.warning(f"request_id={get_request_id()} | Using fallback router prompt")
         system_prompt = ROUTER_SYSTEM_PROMPT
         commit_hash = "fallback"
-    
+
     # Router only needs the last assistant message to apply context-priority rules.
     # Last 2 messages (prev user + last assistant) is sufficient — no need for full history.
     history_context = ""
     if conversation_history:
         recent = conversation_history[-2:]
-        history_context = "\n".join([
-            f"{msg['role'].title()}: {msg['content']}"
-            for msg in recent
-        ])
-    
+        history_context = "\n".join([f"{msg['role'].title()}: {msg['content']}" for msg in recent])
+
     prompt = user_message
     if history_context:
         prompt = f"Recent conversation:\n{history_context}\n\nCurrent message: {user_message}"
@@ -127,15 +125,9 @@ def classify_intent_and_extract(state: AgentState) -> dict:
     ]
 
     response = llm.invoke(
-        messages,
-        config={
-            "metadata": {
-                "prompt_name": "router-classification-prompt",
-                "prompt_version": commit_hash
-            }
-        }
+        messages, config={"metadata": {"prompt_name": "router-classification-prompt", "prompt_version": commit_hash}}
     )
-    
+
     raw = response.content.strip()
 
     try:
@@ -149,7 +141,9 @@ def classify_intent_and_extract(state: AgentState) -> dict:
         confidence = 0.0
         order_id = None
 
-    logger.info(f"request_id={get_request_id()} | Router classified | intent={intent} | confidence={confidence} | order_id={order_id} | prompt_version={commit_hash}")
+    logger.info(
+        f"request_id={get_request_id()} | Router classified | intent={intent} | confidence={confidence} | order_id={order_id} | prompt_version={commit_hash}"
+    )
 
     return {
         "intent": intent,
@@ -159,18 +153,18 @@ def classify_intent_and_extract(state: AgentState) -> dict:
 
 
 def ask_for_clarification(state: AgentState) -> dict:
-    user_message = state.get("user_message", "")
     conversation_history = state.get("conversation_history", [])
-    
+
     # If there's product history, likely a follow-up that wasn't understood
     if conversation_history:
         return {
             "final_response": "I didn't quite understand that. Are you looking for a product, checking an order, or need support?"
         }
-    
+
     return {
         "final_response": "I'm a shopping assistant. I can help you find products, track orders, or resolve support issues. What are you looking for?"
     }
+
 
 def auth_gate(state: AgentState) -> dict:
     """Deterministic node — pass-through for auth routing."""
@@ -182,7 +176,6 @@ def auth_gate(state: AgentState) -> dict:
 
 
 def respond_sign_in(state: AgentState) -> dict:
-    intent = state.get("intent", "")
     return {
         "final_response": (
             "To track your orders, you need to sign in first.\n\n"
@@ -258,7 +251,7 @@ def build_router_graph():
         {
             "clarify": "clarify",
             "auth_gate": "auth_gate",
-        }
+        },
     )
 
     graph.add_conditional_edges(
@@ -269,7 +262,7 @@ def build_router_graph():
             "product_agent": "product_agent",
             "support_agent": "support_agent",
             "sign_in": "sign_in",
-        }
+        },
     )
 
     graph.add_edge("order_agent", END)

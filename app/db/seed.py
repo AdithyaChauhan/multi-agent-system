@@ -10,12 +10,54 @@ logger = get_logger("app.db.seed")
 DEMO_USERS = ["demo-user-1", "demo-user-2", "demo-user-3"]
 
 DEMO_ORDERS = [
-    {"order_id": "ORD-1001", "user_id": "demo-user-1", "product_name": "iPhone 15",      "status": "shipped",    "carrier": "FakeExpress", "tracking_id": "TRK-9001"},
-    {"order_id": "ORD-1002", "user_id": "demo-user-1", "product_name": "AirPods Pro",    "status": "delivered",  "carrier": "FakeExpress", "tracking_id": "TRK-9002"},
-    {"order_id": "ORD-1003", "user_id": "demo-user-2", "product_name": "Samsung Galaxy", "status": "in transit", "carrier": "FakeExpress", "tracking_id": "TRK-9003"},
-    {"order_id": "ORD-1004", "user_id": "demo-user-2", "product_name": "Sony Headphones","status": "shipped",    "carrier": "FakeExpress", "tracking_id": "TRK-9004"},
-    {"order_id": "ORD-1005", "user_id": "demo-user-3", "product_name": "MacBook Air",    "status": "delivered",  "carrier": "FakeExpress", "tracking_id": "TRK-9005"},
-    {"order_id": "ORD-1006", "user_id": "demo-user-3", "product_name": "iPad",           "status": "placed",     "carrier": None,           "tracking_id": None},
+    {
+        "order_id": "ORD-1001",
+        "user_id": "demo-user-1",
+        "product_name": "iPhone 15",
+        "status": "shipped",
+        "carrier": "FakeExpress",
+        "tracking_id": "TRK-9001",
+    },
+    {
+        "order_id": "ORD-1002",
+        "user_id": "demo-user-1",
+        "product_name": "AirPods Pro",
+        "status": "delivered",
+        "carrier": "FakeExpress",
+        "tracking_id": "TRK-9002",
+    },
+    {
+        "order_id": "ORD-1003",
+        "user_id": "demo-user-2",
+        "product_name": "Samsung Galaxy",
+        "status": "in transit",
+        "carrier": "FakeExpress",
+        "tracking_id": "TRK-9003",
+    },
+    {
+        "order_id": "ORD-1004",
+        "user_id": "demo-user-2",
+        "product_name": "Sony Headphones",
+        "status": "shipped",
+        "carrier": "FakeExpress",
+        "tracking_id": "TRK-9004",
+    },
+    {
+        "order_id": "ORD-1005",
+        "user_id": "demo-user-3",
+        "product_name": "MacBook Air",
+        "status": "delivered",
+        "carrier": "FakeExpress",
+        "tracking_id": "TRK-9005",
+    },
+    {
+        "order_id": "ORD-1006",
+        "user_id": "demo-user-3",
+        "product_name": "iPad",
+        "status": "placed",
+        "carrier": None,
+        "tracking_id": None,
+    },
 ]
 
 
@@ -44,4 +86,3 @@ DEMO_ORDERS = [
 #         raise
 #     finally:
 #         db.close()
-        

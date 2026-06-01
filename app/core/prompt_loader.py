@@ -1,4 +1,5 @@
 """Load prompts from LangSmith Prompt Hub at runtime"""
+
 import os
 from langsmith import Client
 from app.core.logger import get_logger

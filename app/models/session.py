@@ -2,6 +2,7 @@ from sqlalchemy import Column, String, ForeignKey, DateTime
 from sqlalchemy.sql import func
 from app.db.database import Base
 
+
 class Session(Base):
     __tablename__ = "sessions"
 

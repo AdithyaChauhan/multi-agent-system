@@ -2,14 +2,15 @@
 Deep continuous testing for all 3 agents.
 Tests every flow path, edge case, and routing decision.
 """
+
 import pytest
 from unittest.mock import MagicMock, patch
 from app.agents.state import AgentState
 
-
 # ====================================================================
 # AGENT 1: ORDER TRACKING - DEEP TESTS
 # ====================================================================
+
 
 class TestOrderAgentCompleteFlow:
     """Tests every state transition in the order agent graph"""
@@ -20,10 +21,7 @@ class TestOrderAgentCompleteFlow:
             from app.agents.order_agent import check_order_id
 
             state = AgentState(
-                user_message="Where is my order?",
-                user_id="new-user",
-                session_id="s1",
-                conversation_history=[]
+                user_message="Where is my order?", user_id="new-user", session_id="s1", conversation_history=[]
             )
             result = check_order_id(state)
 
@@ -32,7 +30,15 @@ class TestOrderAgentCompleteFlow:
 
     def test_flow_single_order_auto_select(self):
         """Single order is auto-selected without asking user"""
-        orders = [{"order_id": "ORD-2001", "product_name": "AirPods", "status": "shipped", "tracking_id": "TRK-001", "created_at": None}]
+        orders = [
+            {
+                "order_id": "ORD-2001",
+                "product_name": "AirPods",
+                "status": "shipped",
+                "tracking_id": "TRK-001",
+                "created_at": None,
+            }
+        ]
 
         with patch("app.agents.order_agent.fetch_user_orders", return_value=orders):
             from app.agents.order_agent import check_order_id
@@ -47,7 +53,13 @@ class TestOrderAgentCompleteFlow:
         orders = [
             {"order_id": "ORD-1", "product_name": "P1", "status": "shipped", "tracking_id": "T1", "created_at": None},
             {"order_id": "ORD-2", "product_name": "P2", "status": "delivered", "tracking_id": "T2", "created_at": None},
-            {"order_id": "ORD-3", "product_name": "P3", "status": "processing", "tracking_id": None, "created_at": None},
+            {
+                "order_id": "ORD-3",
+                "product_name": "P3",
+                "status": "processing",
+                "tracking_id": None,
+                "created_at": None,
+            },
         ]
 
         with patch("app.agents.order_agent.fetch_user_orders", return_value=orders):
@@ -71,12 +83,20 @@ class TestOrderAgentCompleteFlow:
 
     def test_flow_fetch_order_success(self):
         """Fetching valid order returns data"""
-        order = {"order_id": "ORD-2001", "product_name": "AirPods", "status": "shipped", "carrier": "FedEx", "tracking_id": "TRK-001"}
+        order = {
+            "order_id": "ORD-2001",
+            "product_name": "AirPods",
+            "status": "shipped",
+            "carrier": "FedEx",
+            "tracking_id": "TRK-001",
+        }
 
         with patch("app.agents.order_agent.fetch_order_from_db", return_value=order):
             from app.agents.order_agent import fetch_order
 
-            state = AgentState(user_message="track", user_id="u1", session_id="s1", order_id="ORD-2001", conversation_history=[])
+            state = AgentState(
+                user_message="track", user_id="u1", session_id="s1", order_id="ORD-2001", conversation_history=[]
+            )
             result = fetch_order(state)
 
         assert result["order_data"]["status"] == "shipped"
@@ -86,7 +106,9 @@ class TestOrderAgentCompleteFlow:
         with patch("app.agents.order_agent.fetch_order_from_db", return_value=None):
             from app.agents.order_agent import fetch_order
 
-            state = AgentState(user_message="track", user_id="u1", session_id="s1", order_id="ORD-9999", conversation_history=[])
+            state = AgentState(
+                user_message="track", user_id="u1", session_id="s1", order_id="ORD-9999", conversation_history=[]
+            )
             result = fetch_order(state)
 
         assert result["order_data"] is None
@@ -102,10 +124,11 @@ class TestOrderAgentCompleteFlow:
 
             state = AgentState(
                 user_message="track",
-                user_id="u1", session_id="s1",
+                user_id="u1",
+                session_id="s1",
                 order_data={"order_id": "ORD-1", "product_name": "AirPods", "status": "shipped"},
                 tracking_data={"carrier": "FedEx", "current_location": "Mumbai", "estimated_delivery": "tomorrow"},
-                conversation_history=[]
+                conversation_history=[],
             )
             result = response_generation(state)
 
@@ -122,10 +145,11 @@ class TestOrderAgentCompleteFlow:
 
             state = AgentState(
                 user_message="track",
-                user_id="u1", session_id="s1",
+                user_id="u1",
+                session_id="s1",
                 order_data={"order_id": "ORD-1", "product_name": "AirPods", "status": "delivered"},
                 tracking_data={},
-                conversation_history=[]
+                conversation_history=[],
             )
             result = response_generation(state)
 
@@ -137,16 +161,22 @@ class TestOrderSubgraphDeep:
 
     def test_subgraph_fetches_tracking_from_api(self):
         """Subgraph successfully fetches tracking from carrier API"""
-        tracking = {"carrier": "FedEx", "status": "In Transit", "current_location": "Delhi", "estimated_delivery": "2026-05-26"}
+        tracking = {
+            "carrier": "FedEx",
+            "status": "In Transit",
+            "current_location": "Delhi",
+            "estimated_delivery": "2026-05-26",
+        }
 
         with patch("app.agents.order_agent_subgraph.fetch_tracking_info", return_value=tracking):
             from app.agents.order_agent_subgraph import fetch_tracking
 
             state = AgentState(
                 user_message="track",
-                user_id="u1", session_id="s1",
+                user_id="u1",
+                session_id="s1",
                 order_data={"tracking_id": "TRK-001", "carrier": "FedEx"},
-                conversation_history=[]
+                conversation_history=[],
             )
             result = fetch_tracking(state)
 
@@ -159,9 +189,10 @@ class TestOrderSubgraphDeep:
 
             state = AgentState(
                 user_message="track",
-                user_id="u1", session_id="s1",
+                user_id="u1",
+                session_id="s1",
                 order_data={"tracking_id": "TRK-001", "carrier": "FedEx"},
-                conversation_history=[]
+                conversation_history=[],
             )
             result = fetch_tracking(state)
 
@@ -171,6 +202,7 @@ class TestOrderSubgraphDeep:
 # ====================================================================
 # AGENT 2: PRODUCT RECOMMENDATIONS - DEEP TESTS
 # ====================================================================
+
 
 class TestProductAgentCompleteFlow:
     """Tests every flow path in product agent"""
@@ -184,7 +216,12 @@ class TestProductAgentCompleteFlow:
             mock_llm.invoke.return_value = mock_resp
             from app.agents.product_agent import extract_preferences
 
-            state = AgentState(user_message="show me Lego educational toys 500-2000 rupees", user_id="u1", session_id="s1", conversation_history=[])
+            state = AgentState(
+                user_message="show me Lego educational toys 500-2000 rupees",
+                user_id="u1",
+                session_id="s1",
+                conversation_history=[],
+            )
             result = extract_preferences(state)
 
         prefs = result["preferences"]
@@ -204,9 +241,11 @@ class TestProductAgentCompleteFlow:
             from app.agents.product_agent import do_search_products
 
             state = AgentState(
-                user_message="toys", user_id="u1", session_id="s1",
+                user_message="toys",
+                user_id="u1",
+                session_id="s1",
                 preferences={"category": "Toys & Games", "keywords": ["toy"]},
-                conversation_history=[]
+                conversation_history=[],
             )
             result = do_search_products(state)
 
@@ -218,31 +257,39 @@ class TestProductAgentCompleteFlow:
             from app.agents.product_agent import do_search_products
 
             state = AgentState(
-                user_message="toys", user_id="u1", session_id="s1",
+                user_message="toys",
+                user_id="u1",
+                session_id="s1",
                 preferences={"category": "Toys & Games", "min_price": 100000},
                 broaden_attempt=0,
-                conversation_history=[]
+                conversation_history=[],
             )
             result = do_search_products(state)
 
         assert len(result["search_results"]) == 0
 
     def test_flow_broaden_relaxes_filters(self):
-        """Broaden search relaxes subcategory first, leaving brand/keywords as specificity"""
-        from app.agents.product_agent import broaden_search
+        """broaden_search relaxes subcategory when attempt index reaches it in RELAXATION_ORDER"""
+        from app.agents.product_agent import broaden_search, RELAXATION_ORDER
 
+        # Start exactly at the subcategory step so the test is independent of earlier steps
+        subcategory_idx = RELAXATION_ORDER.index("subcategory")
         state = AgentState(
-            user_message="toys", user_id="u1", session_id="s1",
-            preferences={"category": "Toys & Games", "subcategory": "BoardGames", "brand": "Lego", "min_price": 5000, "max_price": 10000},
-            original_preferences={"category": "Toys & Games", "subcategory": "BoardGames", "brand": "Lego", "min_price": 5000, "max_price": 10000},
-            broaden_attempt=0,
-            conversation_history=[]
+            user_message="headphones",
+            user_id="u1",
+            session_id="s1",
+            preferences={"category": "Electronics", "subcategory": "headphones", "keywords": ["sony"]},
+            original_preferences={"category": "Electronics", "subcategory": "headphones", "keywords": ["sony"]},
+            broaden_attempt=subcategory_idx,
+            conversation_history=[],
         )
         result = broaden_search(state)
 
         assert "preferences" in result
-        assert result["broaden_attempt"] >= 1
+        assert result["broaden_attempt"] > subcategory_idx
         assert result["preferences"]["subcategory"] is None
+        # keywords still present so specificity remains and search is retried
+        assert result["preferences"].get("keywords")
 
     def test_flow_unavailable_product_response(self):
         """Unavailable products get redirect message"""
@@ -250,9 +297,10 @@ class TestProductAgentCompleteFlow:
 
         state = AgentState(
             user_message="show me MacBook",
-            user_id="u1", session_id="s1",
+            user_id="u1",
+            session_id="s1",
             preferences={"category": "electronics", "unavailable_request": True},
-            conversation_history=[]
+            conversation_history=[],
         )
         result = handle_unavailable_products(state)
         assert "final_response" in result
@@ -262,9 +310,11 @@ class TestProductAgentCompleteFlow:
         from app.agents.product_agent import route_after_extraction
 
         state = AgentState(
-            user_message="toys", user_id="u1", session_id="s1",
+            user_message="toys",
+            user_id="u1",
+            session_id="s1",
             preferences={"category": "Toys & Games", "unavailable_request": False},
-            conversation_history=[]
+            conversation_history=[],
         )
         result = route_after_extraction(state)
         assert result == "search"
@@ -275,9 +325,10 @@ class TestProductAgentCompleteFlow:
 
         state = AgentState(
             user_message="show me products",
-            user_id="u1", session_id="s1",
+            user_id="u1",
+            session_id="s1",
             preferences={"category": None, "unavailable_request": False},
-            conversation_history=[]
+            conversation_history=[],
         )
         result = route_after_extraction(state)
         assert result in ["ask", "search"]
@@ -292,12 +343,14 @@ class TestProductSubgraphDeep:
             from app.agents.product_agent_subgraph import fetch_reviews_node
 
             state = AgentState(
-                user_message="toys", user_id="u1", session_id="s1",
+                user_message="toys",
+                user_id="u1",
+                session_id="s1",
                 ranked_products=[
                     {"product_id": "P1", "name": "Toy A"},
                     {"product_id": "P2", "name": "Toy B"},
                 ],
-                conversation_history=[]
+                conversation_history=[],
             )
             result = fetch_reviews_node(state)
 
@@ -308,13 +361,37 @@ class TestProductSubgraphDeep:
         from app.agents.product_agent_subgraph import compute_score
 
         state = AgentState(
-            user_message="toys", user_id="u1", session_id="s1",
+            user_message="toys",
+            user_id="u1",
+            session_id="s1",
             ranked_products=[
-                {"product_id": "P1", "name": "Low Rated", "rating": 2.0, "avg_review_rating": 2.0, "price": 500, "specs_dict": {}, "description": "", "tags": [], "brand": "", "name": "Low Rated"},
-                {"product_id": "P2", "name": "High Rated", "rating": 4.8, "avg_review_rating": 4.8, "price": 800, "specs_dict": {}, "description": "", "tags": [], "brand": "", "name": "High Rated"},
+                {
+                    "product_id": "P1",
+                    "name": "Low Rated",
+                    "rating": 2.0,
+                    "avg_review_rating": 2.0,
+                    "price": 500,
+                    "specs_dict": {},
+                    "description": "",
+                    "tags": [],
+                    "brand": "",
+                    "name": "Low Rated",
+                },
+                {
+                    "product_id": "P2",
+                    "name": "High Rated",
+                    "rating": 4.8,
+                    "avg_review_rating": 4.8,
+                    "price": 800,
+                    "specs_dict": {},
+                    "description": "",
+                    "tags": [],
+                    "brand": "",
+                    "name": "High Rated",
+                },
             ],
             preferences={"category": "Toys & Games"},
-            conversation_history=[]
+            conversation_history=[],
         )
         result = compute_score(state)
 
@@ -326,6 +403,7 @@ class TestProductSubgraphDeep:
 # AGENT 3: SUPPORT - DEEP TESTS
 # ====================================================================
 
+
 class TestSupportAgentCompleteFlow:
     """Tests every flow path in support agent"""
 
@@ -334,12 +412,15 @@ class TestSupportAgentCompleteFlow:
         mock_resp = MagicMock()
         mock_resp.content = '{"category": "defective_product", "order_id": "ORD-1", "description": "Broken"}'
 
-        with patch("app.agents.support_agent.llm") as mock_llm, \
-             patch("app.agents.support_agent.load_prompt", return_value=("prompt", "latest")):
+        with patch("app.agents.support_agent.llm") as mock_llm, patch(
+            "app.agents.support_agent.load_prompt", return_value=("prompt", "latest")
+        ):
             mock_llm.invoke.return_value = mock_resp
             from app.agents.support_agent import classify_issue
 
-            state = AgentState(user_message="my product is broken", user_id="u1", session_id="s1", conversation_history=[])
+            state = AgentState(
+                user_message="my product is broken", user_id="u1", session_id="s1", conversation_history=[]
+            )
             result = classify_issue(state)
 
         assert result["support_issue"]["category"] == "defective_product"
@@ -349,8 +430,9 @@ class TestSupportAgentCompleteFlow:
         mock_resp = MagicMock()
         mock_resp.content = '{"category": "refund_request", "order_id": null, "description": "Want refund"}'
 
-        with patch("app.agents.support_agent.llm") as mock_llm, \
-             patch("app.agents.support_agent.load_prompt", return_value=("prompt", "latest")):
+        with patch("app.agents.support_agent.llm") as mock_llm, patch(
+            "app.agents.support_agent.load_prompt", return_value=("prompt", "latest")
+        ):
             mock_llm.invoke.return_value = mock_resp
             from app.agents.support_agent import classify_issue
 
@@ -365,9 +447,10 @@ class TestSupportAgentCompleteFlow:
 
         state = AgentState(
             user_message="My baby got hurt by toy",
-            user_id="u1", session_id="s1",
+            user_id="u1",
+            session_id="s1",
             support_issue={"category": "defective_product"},
-            conversation_history=[]
+            conversation_history=[],
         )
         result = assess_severity(state)
         assert result["severity"] == "critical"
@@ -378,9 +461,10 @@ class TestSupportAgentCompleteFlow:
 
         state = AgentState(
             user_message="caused injury",
-            user_id="u1", session_id="s1",
+            user_id="u1",
+            session_id="s1",
             support_issue={"category": "defective_product"},
-            conversation_history=[]
+            conversation_history=[],
         )
         result = assess_severity(state)
         assert result["severity"] == "critical"
@@ -391,9 +475,10 @@ class TestSupportAgentCompleteFlow:
 
         state = AgentState(
             user_message="product stopped working",
-            user_id="u1", session_id="s1",
+            user_id="u1",
+            session_id="s1",
             support_issue={"category": "defective_product"},
-            conversation_history=[]
+            conversation_history=[],
         )
         result = assess_severity(state)
         assert result["severity"] == "medium"
@@ -404,9 +489,10 @@ class TestSupportAgentCompleteFlow:
 
         state = AgentState(
             user_message="want refund",
-            user_id="u1", session_id="s1",
+            user_id="u1",
+            session_id="s1",
             support_issue={"category": "refund_request"},
-            conversation_history=[]
+            conversation_history=[],
         )
         result = assess_severity(state)
         assert result["severity"] == "low"
@@ -417,10 +503,12 @@ class TestSupportAgentCompleteFlow:
             from app.agents.support_agent import lookup_policy
 
             state = AgentState(
-                user_message="broken", user_id="u1", session_id="s1",
+                user_message="broken",
+                user_id="u1",
+                session_id="s1",
                 support_issue={"category": "defective_product"},
                 severity="medium",
-                conversation_history=[]
+                conversation_history=[],
             )
             result = lookup_policy(state)
 
@@ -431,9 +519,7 @@ class TestSupportAgentCompleteFlow:
         from app.agents.support_agent import route_by_severity
 
         state = AgentState(
-            user_message="urgent", user_id="u1", session_id="s1",
-            severity="critical",
-            conversation_history=[]
+            user_message="urgent", user_id="u1", session_id="s1", severity="critical", conversation_history=[]
         )
         result = route_by_severity(state)
         assert result == "high"
@@ -443,9 +529,7 @@ class TestSupportAgentCompleteFlow:
         from app.agents.support_agent import route_by_severity
 
         state = AgentState(
-            user_message="question", user_id="u1", session_id="s1",
-            severity="low",
-            conversation_history=[]
+            user_message="question", user_id="u1", session_id="s1", severity="low", conversation_history=[]
         )
         result = route_by_severity(state)
         assert result == "low"
@@ -471,10 +555,12 @@ class TestSupportSubgraphDeep:
         from app.agents.support_agent_subgraph import assign_priority
 
         state = AgentState(
-            user_message="urgent", user_id="u1", session_id="s1",
+            user_message="urgent",
+            user_id="u1",
+            session_id="s1",
             severity="critical",
             recent_critical_count=3,
-            conversation_history=[]
+            conversation_history=[],
         )
         result = assign_priority(state)
         assert result["priority"] == "P0"
@@ -484,10 +570,12 @@ class TestSupportSubgraphDeep:
         from app.agents.support_agent_subgraph import assign_priority
 
         state = AgentState(
-            user_message="urgent", user_id="u1", session_id="s1",
+            user_message="urgent",
+            user_id="u1",
+            session_id="s1",
             severity="critical",
             recent_critical_count=0,
-            conversation_history=[]
+            conversation_history=[],
         )
         result = assign_priority(state)
         assert result["priority"] == "P1"
@@ -497,10 +585,12 @@ class TestSupportSubgraphDeep:
         from app.agents.support_agent_subgraph import assign_priority
 
         state = AgentState(
-            user_message="broken", user_id="u1", session_id="s1",
+            user_message="broken",
+            user_id="u1",
+            session_id="s1",
             severity="medium",
             recent_critical_count=0,
-            conversation_history=[]
+            conversation_history=[],
         )
         result = assign_priority(state)
         assert result["priority"] == "P2"
@@ -514,12 +604,13 @@ class TestSupportSubgraphDeep:
 
             state = AgentState(
                 user_message="broken",
-                user_id="u1", session_id="s1",
+                user_id="u1",
+                session_id="s1",
                 support_issue={"category": "defective_product", "description": "Broken", "order_id": "ORD-1"},
                 severity="medium",
                 priority="P2",
                 policy={"response_time": "24 hours"},
-                conversation_history=[]
+                conversation_history=[],
             )
             result = create_ticket_node(state)
 

@@ -11,7 +11,7 @@ class TestOrderSubgraph:
             "carrier": "FedEx",
             "status": "In Transit",
             "current_location": "Mumbai",
-            "estimated_delivery": "2026-05-25"
+            "estimated_delivery": "2026-05-25",
         }
 
         with patch("app.agents.order_agent_subgraph.fetch_tracking_info", return_value=mock_tracking):
@@ -22,7 +22,7 @@ class TestOrderSubgraph:
                 user_id="test-user",
                 session_id="test-session",
                 order_data={"order_id": "ORD-2001", "tracking_id": "TRK-001", "carrier": "FedEx"},
-                conversation_history=[]
+                conversation_history=[],
             )
             result = fetch_tracking(state)
 
@@ -37,7 +37,7 @@ class TestOrderSubgraph:
             user_id="test-user",
             session_id="test-session",
             order_data={"order_id": "ORD-2001", "tracking_id": None, "carrier": None},
-            conversation_history=[]
+            conversation_history=[],
         )
         result = fetch_tracking(state)
         assert "tracking_data" in result
@@ -51,7 +51,7 @@ class TestOrderSubgraph:
             user_id="test-user",
             session_id="test-session",
             order_data={"order_id": "ORD-2001", "carrier": "FedEx", "tracking_id": "TRK-001"},
-            conversation_history=[]
+            conversation_history=[],
         )
         result = get_carrier_info(state)
         assert isinstance(result, dict)
@@ -65,10 +65,7 @@ class TestSupportSubgraph:
             from app.agents.support_agent_subgraph import check_history
 
             state = AgentState(
-                user_message="product broken",
-                user_id="test-user",
-                session_id="test-session",
-                conversation_history=[]
+                user_message="product broken", user_id="test-user", session_id="test-session", conversation_history=[]
             )
             result = check_history(state)
 
@@ -85,7 +82,7 @@ class TestSupportSubgraph:
             session_id="test-session",
             severity="critical",
             recent_critical_count=0,
-            conversation_history=[]
+            conversation_history=[],
         )
         result = assign_priority(state)
         assert result["priority"] == "P1"
@@ -100,7 +97,7 @@ class TestSupportSubgraph:
             session_id="test-session",
             severity="critical",
             recent_critical_count=2,
-            conversation_history=[]
+            conversation_history=[],
         )
         result = assign_priority(state)
         assert result["priority"] == "P0"
@@ -115,7 +112,7 @@ class TestSupportSubgraph:
             session_id="test-session",
             severity="medium",
             recent_critical_count=0,
-            conversation_history=[]
+            conversation_history=[],
         )
         result = assign_priority(state)
         assert result["priority"] == "P2"
@@ -135,7 +132,7 @@ class TestProductSubgraph:
                 user_id="test-user",
                 session_id="test-session",
                 ranked_products=[{"product_id": "TOY-001", "name": "Toy"}],
-                conversation_history=[]
+                conversation_history=[],
             )
             result = fetch_reviews_node(state)
 
@@ -152,7 +149,7 @@ class TestProductSubgraph:
                 user_id="test-user",
                 session_id="test-session",
                 ranked_products=[{"product_id": "TOY-001", "name": "Toy", "reviews": []}],
-                conversation_history=[]
+                conversation_history=[],
             )
             result = fetch_specs_node(state)
 
@@ -168,11 +165,31 @@ class TestProductSubgraph:
             user_id="test-user",
             session_id="test-session",
             ranked_products=[
-                {"product_id": "TOY-001", "name": "Toy A", "rating": 4.5, "avg_review_rating": 4.5, "price": 500, "specs_dict": {}, "description": "", "tags": [], "brand": ""},
-                {"product_id": "TOY-002", "name": "Toy B", "rating": 3.0, "avg_review_rating": 3.0, "price": 300, "specs_dict": {}, "description": "", "tags": [], "brand": ""},
+                {
+                    "product_id": "TOY-001",
+                    "name": "Toy A",
+                    "rating": 4.5,
+                    "avg_review_rating": 4.5,
+                    "price": 500,
+                    "specs_dict": {},
+                    "description": "",
+                    "tags": [],
+                    "brand": "",
+                },
+                {
+                    "product_id": "TOY-002",
+                    "name": "Toy B",
+                    "rating": 3.0,
+                    "avg_review_rating": 3.0,
+                    "price": 300,
+                    "specs_dict": {},
+                    "description": "",
+                    "tags": [],
+                    "brand": "",
+                },
             ],
             preferences={"category": "Toys & Games"},
-            conversation_history=[]
+            conversation_history=[],
         )
         result = compute_score(state)
         assert "ranked_products" in result

@@ -22,7 +22,9 @@ def fetch_tracking_info(tracking_id: str) -> Optional[dict]:
             return None
 
         if response.status_code != 200:
-            logger.error(f"request_id={get_request_id()} | Carrier API error | status={response.status_code} | tracking_id={tracking_id}")
+            logger.error(
+                f"request_id={get_request_id()} | Carrier API error | status={response.status_code} | tracking_id={tracking_id}"
+            )
             return None
 
         data = response.json()
