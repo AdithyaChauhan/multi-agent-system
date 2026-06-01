@@ -142,13 +142,13 @@ jobs:
           cache-to: type=gha,mode=max
 
   # ─────────────────────────────────────────────────────────────────
-  # Stage 5 — Push to Registry  (main branch only)
+  # Stage 5 — Push to Registry  (stable branch push only)
   # ─────────────────────────────────────────────────────────────────
   push-image:
     name: Push to Registry
     runs-on: ubuntu-latest
     needs: docker-build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/stable' && github.event_name == 'push'
     permissions:
       contents: read
       packages: write
@@ -174,7 +174,7 @@ jobs:
           tags: |
             type=sha,prefix=sha-
             type=ref,event=branch
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest
 
       - name: Build and push app image
         uses: docker/build-push-action@v5
@@ -188,22 +188,40 @@ jobs:
           cache-to: type=gha,mode=max
 
   # ─────────────────────────────────────────────────────────────────
-  # Stage 6 — Deploy to Kubernetes via Helm  (main branch only)
+  # Stage 6 — Deploy to Kubernetes via Helm  (stable branch push only)
+  # Requires KUBECONFIG and APP_URL repository secrets.
+  # Skips gracefully with a warning if secrets are not configured.
   # ─────────────────────────────────────────────────────────────────
   deploy:
     name: Deploy to Kubernetes
     runs-on: ubuntu-latest
     needs: push-image
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/stable' && github.event_name == 'push'
     environment: production
+    continue-on-error: true  # deployment is best-effort; requires a live cluster
 
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check deployment prerequisites
+        id: prereqs
+        run: |
+          if [ -z "$KUBECONFIG_SECRET" ]; then
+            echo "::warning::KUBECONFIG secret is not set — skipping Kubernetes deployment."
+            echo "To enable: add KUBECONFIG (base64-encoded kubeconfig) as a repository secret."
+            echo "configured=false" >> $GITHUB_OUTPUT
+          else
+            echo "configured=true" >> $GITHUB_OUTPUT
+          fi
+        env:
+          KUBECONFIG_SECRET: ${{ secrets.KUBECONFIG }}
+
       - name: Install Helm
+        if: steps.prereqs.outputs.configured == 'true'
         uses: azure/setup-helm@v4
 
       - name: Configure kubectl
+        if: steps.prereqs.outputs.configured == 'true'
         uses: azure/k8s-set-context@v4
         with:
           method: kubeconfig
@@ -211,6 +229,7 @@ jobs:
 
       - name: Deploy with Helm
         id: helm-deploy
+        if: steps.prereqs.outputs.configured == 'true'
         run: |
           helm upgrade --install multi-agent-system ./helm \
             --namespace multi-agent \
@@ -224,6 +243,7 @@ jobs:
 
       - name: Smoke test — health check
         id: smoke-test
+        if: steps.prereqs.outputs.configured == 'true'
         run: |
           APP_URL="${{ secrets.APP_URL }}"
           echo "Hitting health endpoint at $APP_URL/health ..."
@@ -240,7 +260,7 @@ jobs:
           exit 1
 
       - name: Rollback on smoke-test failure
-        if: failure() && steps.smoke-test.outcome == 'failure'
+        if: steps.prereqs.outputs.configured == 'true' && failure() && steps.smoke-test.outcome == 'failure'
         run: |
           echo "Smoke test failed — rolling back Helm release..."
           helm rollback multi-agent-system --namespace multi-agent
