@@ -61,6 +61,12 @@ CATALOG_STRUCTURE = get_catalog_structure()
 
 SERVED_CATEGORIES = {"Electronics", "Computers & Accessories", "Home & Kitchen", "Office Products"}
 
+# Subcategories that exist in the DB but are not served — exclude from user-facing blurb
+BLURB_EXCLUDED_SUBCATEGORIES = frozenset({
+    "smartphone", "laptop", "tablet", "clothing", "shoes",
+    "furniture", "book", "toy", "sports equipment",
+})
+
 
 def build_catalog_blurb() -> str:
     """Build catalog blurb from DB — only the 4 categories the system can actually serve."""
@@ -85,7 +91,8 @@ def build_catalog_blurb() -> str:
             func.count(Product.product_id).label("cnt")
         ).filter(
             Product.category.in_(SERVED_CATEGORIES),
-            Product.subcategory.isnot(None)
+            Product.subcategory.isnot(None),
+            Product.subcategory.notin_(BLURB_EXCLUDED_SUBCATEGORIES),
         ).group_by(Product.category, Product.subcategory).order_by(
             Product.category, func.count(Product.product_id).desc()
         ).all()
@@ -280,15 +287,56 @@ def ask_for_preferences(state: AgentState) -> dict:
     }
 
 
+def _unavailable_suggestion(user_message: str, preferences: dict) -> str:
+    """Return a short, targeted suggestion when a user asks for something we don't carry."""
+    query = (user_message + " " + " ".join(preferences.get("keywords") or [])).lower()
+
+    if any(w in query for w in ["phone", "smartphone", "mobile", "iphone", "android", "galaxy"]):
+        return (
+            "We don't carry smartphones. "
+            "We do have **phone accessories** — cases, chargers, power banks, and phone stands."
+        )
+    if any(w in query for w in ["laptop", "notebook", "macbook", "chromebook"]):
+        return (
+            "We don't carry laptops. "
+            "We do have **computer accessories** — mouse, keyboard, monitors, and laptop bags."
+        )
+    if any(w in query for w in ["tablet", "ipad", "surface"]):
+        return (
+            "We don't carry tablets. "
+            "We do have **computer accessories** — keyboards, mouse, and adapters."
+        )
+    if any(w in query for w in ["soap", "shampoo", "hygiene", "lotion", "cream", "toothpaste",
+                                  "detergent", "cleanser", "grooming", "skincare"]):
+        return (
+            "We don't carry personal care items. "
+            "We do have **Home & Kitchen appliances** — mixer grinders, air fryers, room heaters, and more."
+        )
+    if any(w in query for w in ["cloth", "shirt", "dress", "pant", "shoe", "apparel", "fashion", "wear"]):
+        return "We don't carry clothing or footwear."
+    if any(w in query for w in ["furniture", "sofa", "chair", "table", "bed", "shelf", "wardrobe"]):
+        return "We don't carry furniture."
+    if any(w in query for w in ["food", "grocery", "snack", "drink", "beverage", "vegetable", "fruit"]):
+        return "We don't carry food or groceries."
+    if any(w in query for w in ["book", "novel", "textbook", "magazine"]):
+        return "We don't carry books."
+    if any(w in query for w in ["toy", "doll", "lego", "puzzle", "board game"]):
+        return (
+            "We don't carry toys. "
+            "We do have **art supplies and stationery** if you're interested."
+        )
+
+    # Generic fallback — show the full blurb
+    return f"We don't carry that in our catalog. Here's what we do have:\n\n{CATALOG_BLURB}"
+
+
 def handle_unavailable_products(state: AgentState) -> dict:
     logger.info(f"request_id={get_request_id()} | Unavailable category requested")
-    return {
-        "final_response": (
-            f"I'm sorry, we don't carry that item in our catalog. "
-            f"Here's what we do have:\n\n{CATALOG_BLURB}\n\n"
-            f"Would you like to explore any of these?"
-        )
-    }
+    suggestion = _unavailable_suggestion(
+        state.get("user_message", ""),
+        state.get("preferences") or {},
+    )
+    return {"final_response": suggestion}
 
 
 def do_search_products(state: AgentState) -> dict:
@@ -407,12 +455,11 @@ def format_recommendations(state: AgentState) -> dict:
                 )
                 if not relevant:
                     original_query = " ".join(specific_keywords)
+                    suggestion = _unavailable_suggestion(original_query, {"keywords": specific_keywords})
                     return {
                         "final_response": (
                             f"I couldn't find '{original_query}' in our catalog. "
-                            f"Our inventory may not carry this specific item.\n\n"
-                            f"Here's what we do carry:\n{CATALOG_BLURB}\n\n"
-                            f"Would you like to explore any of these categories?"
+                            f"{suggestion}"
                         )
                     }
                 
