@@ -1,10 +1,10 @@
+import os
+
 import httpx
 from typing import Optional
 from app.core.logger import get_logger, get_request_id
 
 logger = get_logger("app.tools.shipment_tools")
-
-import os
 
 # Inside Docker the mock API is a separate container — use its service name.
 # Outside Docker (local scripts / tests) fall back to localhost.
