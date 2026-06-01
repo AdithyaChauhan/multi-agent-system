@@ -162,11 +162,12 @@ What can I help you with today?</div>
         const token = localStorage.getItem('access_token');
         let isGuest = false;
 
-        // Restore session after sign-in
-        let sessionId = null;
+        // Restore session after sign-in (post-login redirect)
+        let sessionId = localStorage.getItem('chat_session_id') || null;
         if (token && localStorage.getItem('pending_session')) {
             sessionId = localStorage.getItem('pending_session');
             localStorage.removeItem('pending_session');
+            localStorage.setItem('chat_session_id', sessionId);
             setTimeout(() => addMessage("✅ Signed in! You can now track your orders.", 'assistant'), 300);
         }
 
@@ -177,11 +178,11 @@ What can I help you with today?</div>
             isGuest = true;
             document.getElementById('userInfo').textContent = 'Browsing as Guest';
             document.getElementById('guestBanner').style.display = 'block';
-            headerButtons.innerHTML = `<button class="btn-signin" onclick="signIn()">🔑 Sign In</button>`;        } else {
+            headerButtons.innerHTML = `<button class="btn-header" onclick="newChat()">New Chat</button><button class="btn-signin" onclick="signIn()">🔑 Sign In</button>`;        } else {
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
                 document.getElementById('userInfo').textContent = `${payload.name} (${payload.email})`;
-                headerButtons.innerHTML = `<button class="btn-header" onclick="logout()">Logout</button>`;
+                headerButtons.innerHTML = `<button class="btn-header" onclick="newChat()">New Chat</button><button class="btn-header" onclick="logout()">Logout</button>`;
             } catch(e) {
                 isGuest = true;
                 document.getElementById('userInfo').textContent = 'Session invalid';
@@ -229,6 +230,7 @@ What can I help you with today?</div>
 
 if (response.ok) {
                     sessionId = data.session_id;
+                    localStorage.setItem('chat_session_id', sessionId);
                     addMessage(data.response, 'assistant');
 
                     // Show inline sign-in button if agent asks user to sign in
@@ -265,6 +267,36 @@ if (response.ok) {
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
+        async function restoreHistory(sid) {
+            try {
+                const resp = await fetch(`/messages/${sid}`);
+                if (!resp.ok) {
+                    localStorage.removeItem('chat_session_id');
+                    return;
+                }
+                const data = await resp.json();
+                if (data.messages && data.messages.length > 0) {
+                    chatContainer.innerHTML = '';
+                    for (const msg of data.messages) {
+                        addMessage(msg.content, msg.role === 'user' ? 'user' : 'assistant');
+                    }
+                }
+            } catch (e) {
+                // silently fall through to the welcome message
+            }
+        }
+
+        function newChat() {
+            localStorage.removeItem('chat_session_id');
+            sessionId = null;
+            chatContainer.innerHTML = `<div class="message assistant">Hi! I'm your AI shopping assistant. I can help you:
+- Track your orders (sign in required)
+- Find products
+- Handle support issues
+
+What can I help you with today?</div>`;
+        }
+
         function signIn() {
             // Don't carry over guest session — start fresh after login
             window.location.href = '/static/login.html';
@@ -273,8 +305,12 @@ if (response.ok) {
         function logout() {
             localStorage.removeItem('access_token');
             localStorage.removeItem('pending_session');
+            localStorage.removeItem('chat_session_id');
             window.location.href = '/static/chat.html';
         }
+
+        // Restore previous session on page load
+        if (sessionId) restoreHistory(sessionId);
 
         sendButton.addEventListener('click', sendMessage);
         messageInput.addEventListener('keypress', (e) => {
