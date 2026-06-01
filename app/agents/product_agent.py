@@ -27,7 +27,6 @@ def get_catalog_structure() -> str:
     """Load category/subcategory structure from DB dynamically"""
     from app.db.database import SessionLocal
     from app.models.product import Product
-    from sqlalchemy import distinct
 
     db = SessionLocal()
     try:
@@ -167,10 +166,12 @@ Type variants (Electronics only):
 Rules:
 - subcategory must exactly match catalog above
 - Normalize: mice→mouse, earbuds/earphones→headphones+type, telly→tv, adaptor→adapter, geyser→water heater, AC→air conditioner
+- Normalize: pencil/pen/highlighter/eraser/ruler/marker/sketch pad→stationery (Office Products), paintbrush/canvas/palette→art supplies (Office Products)
+- Normalize: phone charger/mobile charger→subcategory: charger, keywords: ["USB"] (NOT "phone" — avoids matching AA battery chargers)
 - keywords: features not covered by subcategory/type (calling, noise cancellation, 4K, wireless)
 - Generic category browsing (no specific product): category only, subcategory: null, keywords: []
 - Vague browsing (product list, show me products, what do you have): category: null, keywords: [], unavailable_request: false
-- unavailable_request TRUE: laptops, smartphones, tablets, clothing, shoes, furniture, food, books, toys, sports equipment
+- unavailable_request TRUE: laptops, smartphones, tablets, iphone, android phone, samsung galaxy (phone), clothing, shoes, furniture, food, books, toys, sports equipment
 - Never output string "null" — use JSON null
 
 Examples:
@@ -291,7 +292,7 @@ def _unavailable_suggestion(user_message: str, preferences: dict) -> str:
     """Return a short, targeted suggestion when a user asks for something we don't carry."""
     query = (user_message + " " + " ".join(preferences.get("keywords") or [])).lower()
 
-    if any(w in query for w in ["phone", "smartphone", "mobile", "iphone", "android", "galaxy"]):
+    if any(w in query for w in ["phone", "smartphone", "mobile", "iphone", "android", "galaxy", "oneplus phone", "samsung phone"]):
         return (
             "We don't carry smartphones. "
             "We do have **phone accessories** — cases, chargers, power banks, and phone stands."

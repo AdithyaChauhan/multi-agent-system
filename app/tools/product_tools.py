@@ -30,10 +30,16 @@ def search_products(
         keywords: List of keywords to search in name/description/attributes
         limit: Maximum results to return
     """
+    # Subcategories that exist in the DB but are never served — block them from all results,
+    # including relaxed searches. Prevents "iphone" / "redmi charger" from surfacing phones.
+    EXCLUDED_SUBCATEGORIES = {"smartphone", "laptop", "tablet"}
+
     db = SessionLocal()
     try:
-        query = db.query(Product)
-        
+        query = db.query(Product).filter(
+            ~Product.subcategory.in_(EXCLUDED_SUBCATEGORIES)
+        )
+
         # Filter by category
         if category:
             query = query.filter(Product.category.ilike(f"%{category}%"))
