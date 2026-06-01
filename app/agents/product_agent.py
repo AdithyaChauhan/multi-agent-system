@@ -142,9 +142,9 @@ PROMPT_CATALOG = (
 # Generic relaxation order for all categories
 RELAXATION_ORDER = [
     "type",
-    "subcategory",
-    "brand",
     "price_increase",
+    "brand",
+    "subcategory",
     "keywords",
 ]
 
@@ -171,7 +171,7 @@ Rules:
 - keywords: features not covered by subcategory/type (calling, noise cancellation, 4K, wireless)
 - Generic category browsing (no specific product): category only, subcategory: null, keywords: []
 - Vague browsing (product list, show me products, what do you have): category: null, keywords: [], unavailable_request: false
-- unavailable_request TRUE: laptops, smartphones, tablets, iphone, android phone, samsung galaxy (phone), clothing, shoes, furniture, food, books, toys, sports equipment
+- unavailable_request TRUE: laptops, smartphones, tablets, clothing, shoes, furniture, food, books, toys, sports equipment
 - Never output string "null" — use JSON null
 
 Examples:
