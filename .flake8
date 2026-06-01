@@ -1,0 +1,17 @@
+[flake8]
+max-line-length = 120
+extend-ignore = E203,W503,E501
+exclude =
+    venv,
+    __pycache__,
+    .git,
+    migrations,
+    data,
+    app/db/load_amazon_data.py,
+    app/db/migrate_schema.py,
+    app/db/seed.py,
+    app/db/seed_products.py,
+    app/db/seed_reviews_specs.py
+per-file-ignores =
+    app/evaluation/*.py:E402
+    tests/*.py:F401,F811

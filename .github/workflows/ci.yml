@@ -27,19 +27,13 @@ jobs:
           cache: pip
 
       - name: Install lint tools
-        run: pip install flake8 black
+        run: pip install "flake8==7.3.0" "black==26.5.1"
 
       - name: Black format check
         run: black --check --diff app/ tests/ eval/
 
       - name: Flake8 lint
-        run: |
-          flake8 app/ tests/ eval/ \
-            --max-line-length=120 \
-            --extend-ignore=E203,W503,E501 \
-            --exclude=venv,__pycache__,.git,migrations \
-            --per-file-ignores="app/evaluation/*.py:E402" \
-            --extend-exclude=app/db/load_amazon_data.py,app/db/migrate_schema.py,app/db/seed.py,app/db/seed_products.py,app/db/seed_reviews_specs.py
+        run: flake8 app/ tests/ eval/
 
   # ─────────────────────────────────────────────────────────────────
   # Stage 2 — Unit Tests (70 % coverage threshold)
