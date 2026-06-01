@@ -372,3 +372,124 @@ class TestSupportAgentNodes:
             conversation_history=[],
         )
         assert route_by_severity(state) == "low"
+
+
+# ── prompt_loader ────────────────────────────────────────────────────────────
+
+
+class TestPromptLoader:
+    def _make_prompt_mock(self, template: str):
+        msg = MagicMock()
+        msg.prompt.template = template
+        pulled = MagicMock()
+        pulled.messages = [msg]
+        return pulled
+
+    def test_load_prompt_success_path(self):
+        """Lines 27-37: successful client.pull_prompt populates cache and returns text."""
+        from app.core.prompt_loader import load_prompt, _cache
+
+        _cache.pop("__test-success-prompt__:v1", None)
+        with patch("app.core.prompt_loader.client") as mock_client:
+            mock_client.pull_prompt.return_value = self._make_prompt_mock("You are a test agent.")
+            text, version = load_prompt("__test-success-prompt__", "v1")
+
+        assert text == "You are a test agent."
+        assert version == "v1"
+
+    def test_load_prompt_cache_hit(self):
+        """Line 22: second call with same args returns cached result without hitting client."""
+        from app.core.prompt_loader import load_prompt, _cache
+
+        _cache.pop("__test-cache-prompt__:v2", None)
+        with patch("app.core.prompt_loader.client") as mock_client:
+            mock_client.pull_prompt.return_value = self._make_prompt_mock("Cached text.")
+            load_prompt("__test-cache-prompt__", "v2")
+
+        with patch("app.core.prompt_loader.client") as mock_client2:
+            text, version = load_prompt("__test-cache-prompt__", "v2")
+            mock_client2.pull_prompt.assert_not_called()
+
+        assert text == "Cached text."
+
+    def test_load_prompt_failure_returns_none(self):
+        """Lines 39-41: exception from pull_prompt returns (None, None)."""
+        from app.core.prompt_loader import load_prompt, _cache
+
+        _cache.pop("__test-fail-prompt__:latest", None)
+        with patch("app.core.prompt_loader.client") as mock_client:
+            mock_client.pull_prompt.side_effect = Exception("auth error")
+            text, version = load_prompt("__test-fail-prompt__", "latest")
+
+        assert text is None
+        assert version is None
+
+
+# ── product_agent extra branches ─────────────────────────────────────────────
+
+
+class TestProductAgentExtra:
+    def _llm_mock(self, content: str):
+        r = MagicMock()
+        r.content = content
+        r.response_metadata = {"token_usage": {"prompt_tokens": 80, "completion_tokens": 20, "total_tokens": 100}}
+        return r
+
+    def test_extract_preferences_with_conversation_history(self):
+        """Lines 211-212, 215: history branch in extract_preferences."""
+        with patch("app.agents.product_agent.llm") as mock_llm:
+            mock_llm.invoke.return_value = self._llm_mock(
+                '{"category": "Electronics", "subcategory": "speakers", "type": null, '
+                '"brand": null, "max_price": null, "min_price": null, "keywords": [], "unavailable_request": false}'
+            )
+            from app.agents.product_agent import extract_preferences
+
+            state = AgentState(
+                user_message="what about a cheaper one",
+                user_id="u1",
+                session_id="s1",
+                conversation_history=[
+                    {"role": "user", "content": "show me bluetooth speakers"},
+                    {"role": "assistant", "content": "Here are some speakers under ₹3000."},
+                ],
+            )
+            result = extract_preferences(state)
+
+        assert "preferences" in result
+
+    def test_rank_and_filter_with_results(self):
+        """Covers LLM call path in rank_and_filter (lines 593-602)."""
+        search_results = [
+            {"product_id": "P1", "name": "JBL Go 2 Speaker", "price": 2499, "rating": 4.5, "brand": "JBL"},
+            {"product_id": "P2", "name": "boAt Stone 200", "price": 1299, "rating": 4.2, "brand": "boAt"},
+        ]
+        with patch("app.agents.product_agent.llm") as mock_llm:
+            mock_llm.invoke.return_value = self._llm_mock("[1, 2]")
+            from app.agents.product_agent import rank_and_filter
+
+            state = AgentState(
+                user_message="show me bluetooth speakers",
+                user_id="u1",
+                session_id="s1",
+                search_results=search_results,
+                preferences={"category": "Electronics", "subcategory": "speakers"},
+                conversation_history=[],
+            )
+            result = rank_and_filter(state)
+
+        assert "ranked_products" in result
+        assert len(result["ranked_products"]) >= 1
+
+    def test_rank_and_filter_empty_returns_early(self):
+        """Empty search_results returns early without calling LLM."""
+        from app.agents.product_agent import rank_and_filter
+
+        state = AgentState(
+            user_message="speakers",
+            user_id="u1",
+            session_id="s1",
+            search_results=[],
+            conversation_history=[],
+        )
+        result = rank_and_filter(state)
+        assert result == {"ranked_products": []}
