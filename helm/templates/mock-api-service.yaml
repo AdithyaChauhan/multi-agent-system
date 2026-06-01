@@ -1,0 +1,20 @@
+{{- if .Values.mockApi.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "multi-agent.mockApiServiceName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "multi-agent.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mock-api
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.mockApi.service.port }}
+      targetPort: 9000
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "multi-agent.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: mock-api
+{{- end }}

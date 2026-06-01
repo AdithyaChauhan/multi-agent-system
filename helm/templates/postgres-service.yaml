@@ -1,0 +1,20 @@
+{{- if .Values.postgres.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "multi-agent.postgresServiceName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "multi-agent.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgres
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.postgres.service.port }}
+      targetPort: 5432
+      protocol: TCP
+      name: postgres
+  selector:
+    {{- include "multi-agent.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: postgres
+{{- end }}

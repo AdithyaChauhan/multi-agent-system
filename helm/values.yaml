@@ -1,0 +1,180 @@
+# =============================================================================
+# multi-agent-system — default Helm values
+# Override per-environment in values-prod.yaml or via --set-string flags.
+# NEVER commit real secrets to this file.
+# =============================================================================
+
+# ── FastAPI application ───────────────────────────────────────────────────────
+app:
+  replicaCount: 1
+
+  image:
+    repository: ghcr.io/adithyachauhan/multi-agent-system
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8000
+
+  ingress:
+    enabled: false
+    className: nginx
+    host: multi-agent.example.com
+    tls: []
+    annotations: {}
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+  # Probe settings — both point to the /health endpoint
+  probes:
+    liveness:
+      initialDelaySeconds: 30
+      periodSeconds: 30
+      timeoutSeconds: 5
+      failureThreshold: 3
+    readiness:
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 3
+
+# ── Secrets ───────────────────────────────────────────────────────────────────
+# All values default to empty.  Supply real values by:
+#   - passing --set-string secrets.openaiApiKey=sk-... at deploy time, OR
+#   - creating a pre-existing Kubernetes Secret and setting existingSecret below.
+# Real credentials must NEVER be committed to any values file.
+secrets:
+  # Set existingSecret to the name of a pre-created Kubernetes Secret to skip
+  # creating the Secret from these values (recommended for production).
+  existingSecret: ""
+
+  openaiApiKey: ""
+  langchainApiKey: ""
+  jwtSecretKey: ""
+  googleClientId: ""
+  googleClientSecret: ""
+
+# ── Application config (non-secret) ──────────────────────────────────────────
+config:
+  sessionExpiryMinutes: "60"
+  langchainTracingV2: "true"
+  langchainEndpoint: "https://api.smith.langchain.com"
+  langchainProject: "multi-agent-ecommerce"
+  jwtAlgorithm: "HS256"
+  jwtExpirationHours: "24"
+  googleRedirectUri: "http://localhost:8000/auth/callback"
+
+# ── PostgreSQL ────────────────────────────────────────────────────────────────
+postgres:
+  enabled: true
+
+  image:
+    repository: postgres
+    tag: "15-alpine"
+
+  auth:
+    username: postgres
+    # Password supplied via --set-string postgres.auth.password=... at deploy time.
+    # Never hardcode a real password here.
+    password: ""
+    database: multi_agent_db
+
+  persistence:
+    enabled: true
+    storageClass: ""       # use cluster default
+    size: 10Gi
+
+  service:
+    port: 5432
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# ── Mock carrier API ──────────────────────────────────────────────────────────
+mockApi:
+  enabled: true
+
+  image:
+    repository: ghcr.io/adithyachauhan/multi-agent-system
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  service:
+    port: 9000
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+# ── Monitoring (Grafana + Loki) ───────────────────────────────────────────────
+monitoring:
+  enabled: true
+
+  grafana:
+    image:
+      repository: grafana/grafana
+      tag: "10.0.0"
+    # Admin password via --set-string monitoring.grafana.adminPassword=...
+    adminUser: admin
+    adminPassword: ""
+    service:
+      port: 3000
+    persistence:
+      enabled: true
+      size: 2Gi
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
+
+  loki:
+    image:
+      repository: grafana/loki
+      tag: "2.9.0"
+    service:
+      port: 3100
+    persistence:
+      enabled: true
+      size: 5Gi
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
+
+  promtail:
+    image:
+      repository: grafana/promtail
+      tag: "2.9.0"
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+
+# ── Global labels added to every resource ────────────────────────────────────
+commonLabels: {}

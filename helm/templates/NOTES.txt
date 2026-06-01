@@ -1,0 +1,40 @@
+Thank you for installing {{ .Chart.Name }} v{{ .Chart.AppVersion }}!
+
+Release: {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+
+=== Application ===
+{{- if .Values.app.ingress.enabled }}
+The app is accessible at: https://{{ .Values.app.ingress.host }}
+{{- else }}
+The app is running but no Ingress is configured.
+Forward the service port to access it locally:
+
+  kubectl port-forward -n {{ .Release.Namespace }} \
+    svc/{{ include "multi-agent.fullname" . }}-app 8000:{{ .Values.app.service.port }}
+
+Then open: http://localhost:8000
+{{- end }}
+
+Health check:
+  curl http(s)://<host>/health
+
+=== Monitoring ===
+{{- if .Values.monitoring.enabled }}
+Grafana is available at port {{ .Values.monitoring.grafana.service.port }} (admin / <GRAFANA_ADMIN_PASSWORD>).
+
+Forward to access locally:
+  kubectl port-forward -n {{ .Release.Namespace }} \
+    svc/{{ include "multi-agent.fullname" . }}-grafana 3000:{{ .Values.monitoring.grafana.service.port }}
+{{- else }}
+Monitoring stack is disabled. Enable with --set monitoring.enabled=true
+{{- end }}
+
+=== Secrets ===
+Secrets are managed via the Kubernetes Secret "{{ include "multi-agent.secretName" . }}".
+{{- if .Values.secrets.existingSecret }}
+Using pre-existing secret: {{ .Values.secrets.existingSecret }}
+{{- else }}
+The Secret was created from values supplied at deploy time via --set-string.
+Never commit real secret values to any values file.
+{{- end }}
