@@ -335,47 +335,46 @@ class TestSupportAgentNodes:
         assert "severity" in result
 
     def test_lookup_policy_returns_messages(self):
-        """lookup_policy is now an LLM tool-caller; returns messages."""
-        with patch("app.agents.support_agent.llm") as mock_llm:
-            mock_response = MagicMock()
-            mock_response.content = ""
-            mock_response.response_metadata = {
-                "token_usage": {"prompt_tokens": 30, "completion_tokens": 5, "total_tokens": 35}
-            }
-            mock_response.tool_calls = []
-            mock_llm.bind_tools.return_value.invoke.return_value = mock_response
+        """lookup_policy is deterministic — returns policy dict directly without LLM."""
+        from app.agents.support_agent import lookup_policy
 
-            from app.agents.support_agent import lookup_policy
-
-            state = AgentState(
-                user_message="I want a refund",
-                user_id="u1",
-                session_id="s1",
-                support_issue={"category": "refund"},
-                severity="low",
-                conversation_history=[],
-            )
-            result = lookup_policy(state)
-        assert "messages" in result
+        state = AgentState(
+            user_message="I want a refund",
+            user_id="u1",
+            session_id="s1",
+            support_issue={"category": "refund_request"},
+            severity="low",
+            conversation_history=[],
+        )
+        result = lookup_policy(state)
+        assert "policy" in result
+        assert "response_time" in result["policy"]
 
     def test_parse_policy_extracts_policy(self):
-        """parse_policy reads ToolMessage into state['policy']."""
-        import json
-        from langchain_core.messages import ToolMessage
-        from app.agents.support_agent import parse_policy
+        """route_to_draft_tool routes to draft_tools when messages contain tool_calls."""
+        from app.agents.support_agent import route_to_draft_tool
 
-        policy = {"auto_resolve": True, "response_time": "24 hours"}
-        tool_msg = ToolMessage(content=json.dumps(policy), tool_call_id="c1")
-        state = AgentState(
+        msg_with_tool = MagicMock()
+        msg_with_tool.tool_calls = [{"id": "c1"}]
+        state_tool = AgentState(
             user_message="refund",
             user_id="u1",
             session_id="s1",
             conversation_history=[],
-            messages=[tool_msg],
+            messages=[msg_with_tool],
         )
-        result = parse_policy(state)
-        assert "policy" in result
-        assert result["policy"]["auto_resolve"] is True
+        assert route_to_draft_tool(state_tool) == "draft_tools"
+
+        msg_no_tool = MagicMock()
+        msg_no_tool.tool_calls = []
+        state_no_tool = AgentState(
+            user_message="refund",
+            user_id="u1",
+            session_id="s1",
+            conversation_history=[],
+            messages=[msg_no_tool],
+        )
+        assert route_to_draft_tool(state_no_tool) == "end"
 
     def test_route_by_severity_high(self):
         from app.agents.support_agent import route_by_severity
@@ -486,13 +485,15 @@ class TestProductAgentExtra:
         assert "preferences" in result
 
     def test_rank_and_filter_with_results(self):
-        """Covers LLM call path in rank_and_filter (lines 593-602)."""
+        """rank_and_filter uses bind_tools; with tool_calls=[] it returns ranked_products directly."""
         search_results = [
             {"product_id": "P1", "name": "JBL Go 2 Speaker", "price": 2499, "rating": 4.5, "brand": "JBL"},
             {"product_id": "P2", "name": "boAt Stone 200", "price": 1299, "rating": 4.2, "brand": "boAt"},
         ]
+        mock_r = self._llm_mock("[1, 2]")
+        mock_r.tool_calls = []  # no tool call → parse ranking indices and return ranked_products
         with patch("app.agents.product_agent.llm") as mock_llm:
-            mock_llm.invoke.return_value = self._llm_mock("[1, 2]")
+            mock_llm.bind_tools.return_value.invoke.return_value = mock_r
             from app.agents.product_agent import rank_and_filter
 
             state = AgentState(

@@ -236,46 +236,41 @@ class TestProductAgentCompleteFlow:
         assert prefs["max_price"] == 2000
 
     def test_flow_search_returns_results(self):
-        """do_search_products is now an LLM tool-caller — returns messages."""
-        with patch("app.agents.product_agent.llm") as mock_llm:
-            mock_r = MagicMock()
-            mock_r.content = ""
-            mock_r.response_metadata = {
-                "token_usage": {"prompt_tokens": 50, "completion_tokens": 10, "total_tokens": 60}
-            }
-            mock_r.tool_calls = [{"id": "c1", "type": "function"}]
-            mock_llm.bind_tools.return_value.invoke.return_value = mock_r
+        """do_search_products is deterministic — returns search_results directly."""
+        products = [{"product_id": "P1", "name": "Speaker", "price": 1000, "rating": 4.5, "brand": "JBL"}]
+        with patch("app.agents.product_agent.search_products", return_value=products):
             from app.agents.product_agent import do_search_products
 
             state = AgentState(
-                user_message="toys",
+                user_message="speakers",
                 user_id="u1",
                 session_id="s1",
-                preferences={"category": "Toys & Games", "keywords": ["toy"]},
+                preferences={"category": "Electronics", "keywords": ["speaker"]},
                 conversation_history=[],
             )
             result = do_search_products(state)
 
-        assert "messages" in result
+        assert "search_results" in result
+        assert len(result["search_results"]) == 1
 
     def test_flow_search_no_results_triggers_broaden(self):
-        """parse_search_results with empty tool result leads to empty search_results."""
-        import json
-        from langchain_core.messages import ToolMessage
-        from app.agents.product_agent import parse_search_results
+        """Empty DB results from do_search_products causes route_after_search to return 'broaden'."""
+        from app.agents.product_agent import do_search_products, route_after_search
 
-        tool_msg = ToolMessage(content=json.dumps([]), tool_call_id="c1")
-        state = AgentState(
-            user_message="toys",
-            user_id="u1",
-            session_id="s1",
-            preferences={"category": "Toys & Games", "min_price": 100000},
-            broaden_attempt=0,
-            conversation_history=[],
-            messages=[tool_msg],
-        )
-        result = parse_search_results(state)
-        assert len(result["search_results"]) == 0
+        with patch("app.agents.product_agent.search_products", return_value=[]):
+            state = AgentState(
+                user_message="toys",
+                user_id="u1",
+                session_id="s1",
+                preferences={"category": "Electronics", "min_price": 100000},
+                broaden_attempt=0,
+                conversation_history=[],
+            )
+            result = do_search_products(state)
+
+        assert result["search_results"] == []
+        merged = {**state, **result}
+        assert route_after_search(merged) == "broaden"
 
     def test_flow_broaden_relaxes_filters(self):
         """broaden_search relaxes subcategory when attempt index reaches it in RELAXATION_ORDER"""
@@ -507,29 +502,21 @@ class TestSupportAgentCompleteFlow:
         assert result["severity"] == "low"
 
     def test_flow_lookup_policy(self):
-        """lookup_policy is now an LLM tool-caller; returns messages."""
-        with patch("app.agents.support_agent.llm") as mock_llm:
-            mock_resp = MagicMock()
-            mock_resp.content = ""
-            mock_resp.response_metadata = {
-                "token_usage": {"prompt_tokens": 30, "completion_tokens": 5, "total_tokens": 35}
-            }
-            mock_resp.tool_calls = []
-            mock_llm.bind_tools.return_value.invoke.return_value = mock_resp
+        """lookup_policy is deterministic — returns policy dict without any LLM call."""
+        from app.agents.support_agent import lookup_policy
 
-            from app.agents.support_agent import lookup_policy
+        state = AgentState(
+            user_message="broken",
+            user_id="u1",
+            session_id="s1",
+            support_issue={"category": "defective_product"},
+            severity="medium",
+            conversation_history=[],
+        )
+        result = lookup_policy(state)
 
-            state = AgentState(
-                user_message="broken",
-                user_id="u1",
-                session_id="s1",
-                support_issue={"category": "defective_product"},
-                severity="medium",
-                conversation_history=[],
-            )
-            result = lookup_policy(state)
-
-        assert "messages" in result
+        assert "policy" in result
+        assert "response_time" in result["policy"]
 
     def test_flow_route_critical_to_escalation(self):
         """Critical severity routes to escalation subgraph"""

@@ -136,12 +136,16 @@ class TestOrderRouting:
 class TestSupportAgentDraftResolution:
 
     def test_draft_resolution_for_low_severity(self):
-        """draft_resolution creates response for low severity issues"""
+        """draft_resolution calls fetch_support_policy tool; falls back to final_response when no tool call."""
         mock_response = MagicMock()
         mock_response.content = "We apologize for the inconvenience. Your refund will be processed within 3-5 days."
+        mock_response.response_metadata = {
+            "token_usage": {"prompt_tokens": 50, "completion_tokens": 30, "total_tokens": 80}
+        }
+        mock_response.tool_calls = []  # no tool call → returns final_response directly
 
         with patch("app.agents.support_agent.llm") as mock_llm:
-            mock_llm.invoke.return_value = mock_response
+            mock_llm.bind_tools.return_value.invoke.return_value = mock_response
             from app.agents.support_agent import draft_resolution
 
             state = AgentState(
@@ -149,7 +153,7 @@ class TestSupportAgentDraftResolution:
                 user_id="test-user",
                 session_id="test-session",
                 support_issue={"category": "refund_request", "description": "Want refund"},
-                policy={"response_time": "48 hours"},
+                severity="low",
                 conversation_history=[],
             )
             result = draft_resolution(state)

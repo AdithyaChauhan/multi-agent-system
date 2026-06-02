@@ -4,7 +4,7 @@ import re
 import time
 from typing import Literal
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import SystemMessage, HumanMessage, ToolMessage
+from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_core.tools import tool
 from langgraph.graph import StateGraph, END
 from langgraph.prebuilt import ToolNode
@@ -322,59 +322,33 @@ def fetch_support_policy(category: str, severity: str) -> str:
     return json.dumps(policy)
 
 
-_support_tools = [fetch_support_policy]
-support_tool_node = ToolNode(_support_tools)
+draft_tool_node = ToolNode([fetch_support_policy])
 
 
 def lookup_policy(state: AgentState) -> dict:
-    """LLM tool-caller node: calls fetch_support_policy to get the applicable policy."""
+    """Deterministic node — fetches support policy directly from the policy table."""
     issue = state.get("support_issue", {})
     severity = state.get("severity", "medium")
     category = issue.get("category", "other")
-
     logger.info(f"request_id={get_request_id()} | Policy lookup | category={category} | severity={severity}")
-
-    system_msg = SystemMessage(
-        content="Use the fetch_support_policy tool to retrieve the applicable support policy for this issue."
-    )
-    human_msg = HumanMessage(content=f"Get policy for: category={category}, severity={severity}")
-
-    response = llm.bind_tools(_support_tools).invoke([system_msg, human_msg])
-    return {"messages": [response]}
-
-
-def parse_policy(state: AgentState) -> dict:
-    """Deterministic node: extracts policy dict from ToolMessage into state."""
-    messages = state.get("messages") or []
-    for msg in reversed(messages):
-        if isinstance(msg, ToolMessage):
-            try:
-                policy = json.loads(msg.content)
-                return {"policy": policy}
-            except (json.JSONDecodeError, TypeError):
-                pass
-    return {"policy": {"auto_resolve": False, "response_time": "48 hours"}}
-
-
-def route_to_support_tool(state: AgentState) -> Literal["support_tools", "parse_policy"]:
-    messages = state.get("messages") or []
-    if messages and getattr(messages[-1], "tool_calls", None):
-        return "support_tools"
-    return "parse_policy"
+    policy = lookup_support_policy(category, severity)
+    logger.info(f"request_id={get_request_id()} | Policy fetched | response_time={policy.get('response_time')}")
+    return {"policy": policy}
 
 
 def draft_resolution(state: AgentState) -> dict:
-    """LLM node — drafts a conversational resolution for low-severity issues."""
+    """LLM node — calls fetch_support_policy to retrieve policy, then drafts a resolution."""
     issue = state.get("support_issue", {})
     support_order = state.get("support_order", {})
-    policy = state.get("policy", {})
+    severity = state.get("severity", "low")
+    category = issue.get("category", "other")
 
     prompt = (
         f"Order: {support_order.get('order_id')} — {support_order.get('product_name', 'your product')}\n"
         f"Issue: {issue.get('description')}\n"
-        f"Category: {issue.get('category')}\n"
-        f"Policy: Response time {policy.get('response_time', '48 hours')}\n\n"
-        f"Draft a helpful resolution for this customer issue."
+        f"Category: {category}, Severity: {severity}\n\n"
+        f"Use the fetch_support_policy tool to retrieve the applicable policy, "
+        f"then draft a helpful, empathetic resolution for the customer."
     )
 
     messages = [
@@ -383,7 +357,7 @@ def draft_resolution(state: AgentState) -> dict:
     ]
 
     _t0 = time.perf_counter()
-    response = llm.invoke(messages)
+    response = llm.bind_tools([fetch_support_policy]).invoke(messages)
     _latency_s = time.perf_counter() - _t0
     _latency_ms = int(_latency_s * 1000)
     _meta = getattr(response, "response_metadata", {})
@@ -406,8 +380,51 @@ def draft_resolution(state: AgentState) -> dict:
     llm_tokens_total.labels(agent="support", node="draft_resolution", token_type="total").inc(
         _usage.get("total_tokens", 0)
     )
-    logger.info(f"request_id={get_request_id()} | Drafted resolution for low-severity issue")
+
+    if getattr(response, "tool_calls", None):
+        logger.info(f"request_id={get_request_id()} | draft_resolution calling fetch_support_policy")
+        return {"messages": [response]}
+
+    logger.info(f"request_id={get_request_id()} | Drafted resolution (no tool call)")
     return {"final_response": response.content.strip()}
+
+
+def finalize_draft(state: AgentState) -> dict:
+    """LLM node — after fetch_support_policy tool call, generates the final resolution draft."""
+    messages = state.get("messages") or []
+    _t0 = time.perf_counter()
+    response = llm.invoke(messages)
+    _latency_s = time.perf_counter() - _t0
+    _latency_ms = int(_latency_s * 1000)
+    _meta = getattr(response, "response_metadata", {})
+    _usage = _meta.get("token_usage", {}) if isinstance(_meta, dict) else {}
+    logger.info(
+        f"request_id={get_request_id()} | LLM_USAGE | agent=support | node=finalize_draft"
+        f" | prompt_tokens={_usage.get('prompt_tokens', 0)}"
+        f" | completion_tokens={_usage.get('completion_tokens', 0)}"
+        f" | total_tokens={_usage.get('total_tokens', 0)}"
+        f" | latency_ms={_latency_ms}"
+    )
+    llm_requests_total.labels(agent="support", node="finalize_draft").inc()
+    llm_duration_seconds.labels(agent="support", node="finalize_draft").observe(_latency_s)
+    llm_tokens_total.labels(agent="support", node="finalize_draft", token_type="prompt").inc(
+        _usage.get("prompt_tokens", 0)
+    )
+    llm_tokens_total.labels(agent="support", node="finalize_draft", token_type="completion").inc(
+        _usage.get("completion_tokens", 0)
+    )
+    llm_tokens_total.labels(agent="support", node="finalize_draft", token_type="total").inc(
+        _usage.get("total_tokens", 0)
+    )
+    logger.info(f"request_id={get_request_id()} | Resolution drafted")
+    return {"final_response": response.content.strip()}
+
+
+def route_to_draft_tool(state: AgentState) -> Literal["draft_tools", "end"]:
+    messages = state.get("messages") or []
+    if messages and getattr(messages[-1], "tool_calls", None):
+        return "draft_tools"
+    return "end"
 
 
 # ==================== ROUTING ====================
@@ -433,10 +450,10 @@ def build_support_agent_graph():
     graph.add_node("ask_for_order", ask_for_order)
     graph.add_node("assess_severity", assess_severity)
     graph.add_node("lookup_policy", lookup_policy)
-    graph.add_node("support_tools", support_tool_node)
-    graph.add_node("parse_policy", parse_policy)
     graph.add_node("escalation_handler", escalation_handler_subgraph)
     graph.add_node("draft_resolution", draft_resolution)
+    graph.add_node("draft_tools", draft_tool_node)
+    graph.add_node("finalize_draft", finalize_draft)
 
     graph.set_entry_point("classify_issue")
 
@@ -455,13 +472,6 @@ def build_support_agent_graph():
 
     graph.add_conditional_edges(
         "lookup_policy",
-        route_to_support_tool,
-        {"support_tools": "support_tools", "parse_policy": "parse_policy"},
-    )
-    graph.add_edge("support_tools", "parse_policy")
-
-    graph.add_conditional_edges(
-        "parse_policy",
         route_by_severity,
         {
             "high": "escalation_handler",
@@ -469,8 +479,15 @@ def build_support_agent_graph():
         },
     )
 
+    graph.add_conditional_edges(
+        "draft_resolution",
+        route_to_draft_tool,
+        {"draft_tools": "draft_tools", "end": END},
+    )
+    graph.add_edge("draft_tools", "finalize_draft")
+    graph.add_edge("finalize_draft", END)
+
     graph.add_edge("escalation_handler", END)
-    graph.add_edge("draft_resolution", END)
     graph.add_edge("ask_for_order", END)
 
     return graph.compile()

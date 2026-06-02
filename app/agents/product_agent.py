@@ -423,70 +423,27 @@ def search_product_catalog(
     return json.dumps(slim)
 
 
-_product_search_tools = [search_product_catalog]
-product_tool_node = ToolNode(_product_search_tools)
+rank_tool_node = ToolNode([search_product_catalog])
 
 
 def do_search_products(state: AgentState) -> dict:
-    """LLM tool-caller node: LLM calls search_product_catalog to find matching products."""
+    """Deterministic node — reads preferences from state and calls search_products directly."""
     prefs = state.get("preferences") or {}
     logger.info(
         f"request_id={get_request_id()} | Searching | category={prefs.get('category')} | subcategory={prefs.get('subcategory')}"
     )
-
-    system_msg = SystemMessage(
-        content="Use the search_product_catalog tool to search for products matching the user preferences. Call the tool exactly once."
+    results = search_products(
+        category=prefs.get("category"),
+        subcategory=prefs.get("subcategory"),
+        product_type=prefs.get("type"),
+        brand=prefs.get("brand"),
+        max_price=prefs.get("max_price"),
+        min_price=prefs.get("min_price"),
+        keywords=prefs.get("keywords") or [],
+        limit=10,
     )
-    human_msg = HumanMessage(content=f"Search with these preferences: {json.dumps(prefs)}")
-
-    _t0 = time.perf_counter()
-    response = llm.bind_tools(_product_search_tools).invoke([system_msg, human_msg])
-    _latency_s = time.perf_counter() - _t0
-    _latency_ms = int(_latency_s * 1000)
-    _meta = getattr(response, "response_metadata", {})
-    _usage = _meta.get("token_usage", {}) if isinstance(_meta, dict) else {}
-    logger.info(
-        f"request_id={get_request_id()} | LLM_USAGE | agent=product | node=do_search_products"
-        f" | prompt_tokens={_usage.get('prompt_tokens', 0)}"
-        f" | completion_tokens={_usage.get('completion_tokens', 0)}"
-        f" | total_tokens={_usage.get('total_tokens', 0)}"
-        f" | latency_ms={_latency_ms}"
-    )
-    llm_requests_total.labels(agent="product", node="do_search_products").inc()
-    llm_duration_seconds.labels(agent="product", node="do_search_products").observe(_latency_s)
-    llm_tokens_total.labels(agent="product", node="do_search_products", token_type="prompt").inc(
-        _usage.get("prompt_tokens", 0)
-    )
-    llm_tokens_total.labels(agent="product", node="do_search_products", token_type="completion").inc(
-        _usage.get("completion_tokens", 0)
-    )
-    llm_tokens_total.labels(agent="product", node="do_search_products", token_type="total").inc(
-        _usage.get("total_tokens", 0)
-    )
-    return {"messages": [response]}
-
-
-def parse_search_results(state: AgentState) -> dict:
-    """Deterministic node: reads product list from ToolMessage into search_results."""
-    messages = state.get("messages") or []
-    for msg in reversed(messages):
-        if isinstance(msg, ToolMessage):
-            try:
-                products = json.loads(msg.content)
-                if isinstance(products, list):
-                    logger.info(f"request_id={get_request_id()} | Found {len(products)} products")
-                    return {"search_results": products}
-            except (json.JSONDecodeError, TypeError):
-                pass
-    logger.info(f"request_id={get_request_id()} | Found 0 products")
-    return {"search_results": []}
-
-
-def route_to_product_tool(state: AgentState) -> Literal["product_tools", "parse_results"]:
-    messages = state.get("messages") or []
-    if messages and getattr(messages[-1], "tool_calls", None):
-        return "product_tools"
-    return "parse_results"
+    logger.info(f"request_id={get_request_id()} | Found {len(results)} products")
+    return {"search_results": results}
 
 
 def broaden_search(state: AgentState) -> dict:
@@ -686,15 +643,16 @@ def rank_and_filter(state: AgentState) -> dict:
                 f"- For feature requests (e.g. 'best battery', 'calling feature', 'noise cancellation'), "
                 f"rank products that match those features first.\n"
                 f"- Include any product that is a direct or close match.\n"
-                f"- Return [] only if the products are entirely unrelated to the request.\n\n"
-                f"Return ONLY a JSON array of 1-based indices, most relevant first. Max 5 products.\n"
+                f"- If the products listed are entirely unrelated to the request, call search_product_catalog "
+                f"with more specific parameters to fetch better candidates.\n"
+                f"- Otherwise, return ONLY a JSON array of 1-based indices, most relevant first. Max 5 products.\n"
                 f"Example: [3, 1, 7, 2, 5]"
             )
         ),
     ]
 
     _t0 = time.perf_counter()
-    response = llm.invoke(messages)
+    response = llm.bind_tools([search_product_catalog]).invoke(messages)
     _latency_s = time.perf_counter() - _t0
     _latency_ms = int(_latency_s * 1000)
     _meta = getattr(response, "response_metadata", {})
@@ -717,6 +675,11 @@ def rank_and_filter(state: AgentState) -> dict:
     llm_tokens_total.labels(agent="product", node="rank_and_filter", token_type="total").inc(
         _usage.get("total_tokens", 0)
     )
+
+    if getattr(response, "tool_calls", None):
+        logger.info(f"request_id={get_request_id()} | rank_and_filter calling search tool for better candidates")
+        return {"messages": [response]}
+
     raw = response.content.strip()
 
     try:
@@ -751,6 +714,31 @@ def rank_and_filter(state: AgentState) -> dict:
     return {"ranked_products": ranked}
 
 
+def finalize_ranking(state: AgentState) -> dict:
+    """Deterministic node — uses tool-returned products as final ranking after rank_and_filter called search."""
+    messages = state.get("messages") or []
+    for msg in reversed(messages):
+        if isinstance(msg, ToolMessage):
+            try:
+                products = json.loads(msg.content)
+                if isinstance(products, list) and products:
+                    logger.info(
+                        f"request_id={get_request_id()} | finalize_ranking | {len(products)} products from tool"
+                    )
+                    return {"ranked_products": products[:5]}
+            except (json.JSONDecodeError, TypeError):
+                pass
+    fallback = (state.get("search_results") or [])[:5]
+    return {"ranked_products": fallback}
+
+
+def route_to_rank_tool(state: AgentState) -> Literal["rank_tools", "product_enrichment"]:
+    messages = state.get("messages") or []
+    if messages and getattr(messages[-1], "tool_calls", None):
+        return "rank_tools"
+    return "product_enrichment"
+
+
 def route_after_broaden(state: AgentState) -> Literal["retry_search", "no_results"]:
     return "no_results" if state.get("filters_exhausted") else "retry_search"
 
@@ -765,11 +753,11 @@ def build_product_agent_graph():
     graph.add_node("ask_for_preferences", ask_for_preferences)
     graph.add_node("handle_unavailable", handle_unavailable_products)
     graph.add_node("search_products", do_search_products)
-    graph.add_node("product_tools", product_tool_node)
-    graph.add_node("parse_search_results", parse_search_results)
     graph.add_node("broaden_search", broaden_search)
     graph.add_node("respond_no_results", respond_no_results)
     graph.add_node("rank_and_filter", rank_and_filter)
+    graph.add_node("rank_tools", rank_tool_node)
+    graph.add_node("finalize_ranking", finalize_ranking)
     graph.add_node("product_enrichment", product_enrichment_subgraph)
     graph.add_node("format_recommendations", format_recommendations)
 
@@ -782,21 +770,21 @@ def build_product_agent_graph():
     )
 
     graph.add_conditional_edges(
-        "search_products",
-        route_to_product_tool,
-        {"product_tools": "product_tools", "parse_results": "parse_search_results"},
-    )
-    graph.add_edge("product_tools", "parse_search_results")
-
-    graph.add_conditional_edges(
-        "parse_search_results", route_after_search, {"rank": "rank_and_filter", "broaden": "broaden_search"}
+        "search_products", route_after_search, {"rank": "rank_and_filter", "broaden": "broaden_search"}
     )
 
     graph.add_conditional_edges(
         "broaden_search", route_after_broaden, {"retry_search": "search_products", "no_results": "respond_no_results"}
     )
 
-    graph.add_edge("rank_and_filter", "product_enrichment")
+    graph.add_conditional_edges(
+        "rank_and_filter",
+        route_to_rank_tool,
+        {"rank_tools": "rank_tools", "product_enrichment": "product_enrichment"},
+    )
+    graph.add_edge("rank_tools", "finalize_ranking")
+    graph.add_edge("finalize_ranking", "product_enrichment")
+
     graph.add_edge("product_enrichment", "format_recommendations")
     graph.add_edge("ask_for_preferences", END)
     graph.add_edge("handle_unavailable", END)
