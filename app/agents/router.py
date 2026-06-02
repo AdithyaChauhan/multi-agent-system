@@ -16,6 +16,7 @@ from app.agents.support_agent import support_agent_graph
 from app.core.prompt_loader import load_prompt, PROMPT_VERSIONS
 
 from app.core.logger import get_logger, get_request_id
+from app.core.metrics import agent_requests_total, llm_requests_total, llm_tokens_total, llm_duration_seconds
 
 load_dotenv()
 
@@ -129,7 +130,8 @@ def classify_intent_and_extract(state: AgentState) -> dict:
     response = llm.invoke(
         messages, config={"metadata": {"prompt_name": "router-classification-prompt", "prompt_version": commit_hash}}
     )
-    _latency_ms = int((time.perf_counter() - _t0) * 1000)
+    _latency_s = time.perf_counter() - _t0
+    _latency_ms = int(_latency_s * 1000)
     _usage = response.response_metadata.get("token_usage", {})
     logger.info(
         f"request_id={get_request_id()} | LLM_USAGE | agent=router | node=classify_intent"
@@ -137,6 +139,17 @@ def classify_intent_and_extract(state: AgentState) -> dict:
         f" | completion_tokens={_usage.get('completion_tokens', 0)}"
         f" | total_tokens={_usage.get('total_tokens', 0)}"
         f" | latency_ms={_latency_ms}"
+    )
+    llm_requests_total.labels(agent="router", node="classify_intent").inc()
+    llm_duration_seconds.labels(agent="router", node="classify_intent").observe(_latency_s)
+    llm_tokens_total.labels(agent="router", node="classify_intent", token_type="prompt").inc(
+        _usage.get("prompt_tokens", 0)
+    )
+    llm_tokens_total.labels(agent="router", node="classify_intent", token_type="completion").inc(
+        _usage.get("completion_tokens", 0)
+    )
+    llm_tokens_total.labels(agent="router", node="classify_intent", token_type="total").inc(
+        _usage.get("total_tokens", 0)
     )
 
     raw = response.content.strip()
@@ -151,6 +164,9 @@ def classify_intent_and_extract(state: AgentState) -> dict:
         intent = "unclear"
         confidence = 0.0
         order_id = None
+
+    if intent in ("order", "product", "support"):
+        agent_requests_total.labels(agent=intent).inc()
 
     logger.info(
         f"request_id={get_request_id()} | Router classified | intent={intent} | confidence={confidence} | order_id={order_id} | prompt_version={commit_hash}"

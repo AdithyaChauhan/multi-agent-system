@@ -13,6 +13,7 @@ from app.agents.support_agent_subgraph import escalation_handler_subgraph
 from app.tools.support_tools import lookup_support_policy
 from app.tools.order_tools import fetch_order_from_db, fetch_user_orders
 from app.core.logger import get_logger, get_request_id
+from app.core.metrics import llm_requests_total, llm_tokens_total, llm_duration_seconds
 from app.core.prompt_loader import load_prompt, PROMPT_VERSIONS
 
 load_dotenv()
@@ -139,7 +140,8 @@ def classify_issue(state: AgentState) -> dict:
     response = llm.invoke(
         messages, config={"metadata": {"prompt_name": "support-classification-prompt", "prompt_version": commit_hash}}
     )
-    _latency_ms = int((time.perf_counter() - _t0) * 1000)
+    _latency_s = time.perf_counter() - _t0
+    _latency_ms = int(_latency_s * 1000)
     _usage = response.response_metadata.get("token_usage", {})
     logger.info(
         f"request_id={get_request_id()} | LLM_USAGE | agent=support | node=classify_issue"
@@ -147,6 +149,17 @@ def classify_issue(state: AgentState) -> dict:
         f" | completion_tokens={_usage.get('completion_tokens', 0)}"
         f" | total_tokens={_usage.get('total_tokens', 0)}"
         f" | latency_ms={_latency_ms}"
+    )
+    llm_requests_total.labels(agent="support", node="classify_issue").inc()
+    llm_duration_seconds.labels(agent="support", node="classify_issue").observe(_latency_s)
+    llm_tokens_total.labels(agent="support", node="classify_issue", token_type="prompt").inc(
+        _usage.get("prompt_tokens", 0)
+    )
+    llm_tokens_total.labels(agent="support", node="classify_issue", token_type="completion").inc(
+        _usage.get("completion_tokens", 0)
+    )
+    llm_tokens_total.labels(agent="support", node="classify_issue", token_type="total").inc(
+        _usage.get("total_tokens", 0)
     )
     raw = response.content.strip()
 
@@ -325,7 +338,8 @@ def draft_resolution(state: AgentState) -> dict:
 
     _t0 = time.perf_counter()
     response = llm.invoke(messages)
-    _latency_ms = int((time.perf_counter() - _t0) * 1000)
+    _latency_s = time.perf_counter() - _t0
+    _latency_ms = int(_latency_s * 1000)
     _usage = response.response_metadata.get("token_usage", {})
     logger.info(
         f"request_id={get_request_id()} | LLM_USAGE | agent=support | node=draft_resolution"
@@ -333,6 +347,17 @@ def draft_resolution(state: AgentState) -> dict:
         f" | completion_tokens={_usage.get('completion_tokens', 0)}"
         f" | total_tokens={_usage.get('total_tokens', 0)}"
         f" | latency_ms={_latency_ms}"
+    )
+    llm_requests_total.labels(agent="support", node="draft_resolution").inc()
+    llm_duration_seconds.labels(agent="support", node="draft_resolution").observe(_latency_s)
+    llm_tokens_total.labels(agent="support", node="draft_resolution", token_type="prompt").inc(
+        _usage.get("prompt_tokens", 0)
+    )
+    llm_tokens_total.labels(agent="support", node="draft_resolution", token_type="completion").inc(
+        _usage.get("completion_tokens", 0)
+    )
+    llm_tokens_total.labels(agent="support", node="draft_resolution", token_type="total").inc(
+        _usage.get("total_tokens", 0)
     )
     logger.info(f"request_id={get_request_id()} | Drafted resolution for low-severity issue")
     return {"final_response": response.content.strip()}

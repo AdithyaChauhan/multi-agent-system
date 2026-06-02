@@ -13,6 +13,7 @@ from app.agents.state import AgentState
 from app.agents.product_agent_subgraph import product_enrichment_subgraph
 from app.tools.product_tools import search_products
 from app.core.logger import get_logger, get_request_id
+from app.core.metrics import llm_requests_total, llm_tokens_total, llm_duration_seconds
 
 load_dotenv()
 
@@ -230,7 +231,8 @@ def extract_preferences(state: AgentState) -> dict:
 
     _t0 = time.perf_counter()
     response = llm.invoke(messages)
-    _latency_ms = int((time.perf_counter() - _t0) * 1000)
+    _latency_s = time.perf_counter() - _t0
+    _latency_ms = int(_latency_s * 1000)
     _usage = response.response_metadata.get("token_usage", {})
     logger.info(
         f"request_id={get_request_id()} | LLM_USAGE | agent=product | node=extract_preferences"
@@ -238,6 +240,17 @@ def extract_preferences(state: AgentState) -> dict:
         f" | completion_tokens={_usage.get('completion_tokens', 0)}"
         f" | total_tokens={_usage.get('total_tokens', 0)}"
         f" | latency_ms={_latency_ms}"
+    )
+    llm_requests_total.labels(agent="product", node="extract_preferences").inc()
+    llm_duration_seconds.labels(agent="product", node="extract_preferences").observe(_latency_s)
+    llm_tokens_total.labels(agent="product", node="extract_preferences", token_type="prompt").inc(
+        _usage.get("prompt_tokens", 0)
+    )
+    llm_tokens_total.labels(agent="product", node="extract_preferences", token_type="completion").inc(
+        _usage.get("completion_tokens", 0)
+    )
+    llm_tokens_total.labels(agent="product", node="extract_preferences", token_type="total").inc(
+        _usage.get("total_tokens", 0)
     )
     raw = response.content.strip()
 
@@ -592,7 +605,8 @@ def rank_and_filter(state: AgentState) -> dict:
 
     _t0 = time.perf_counter()
     response = llm.invoke(messages)
-    _latency_ms = int((time.perf_counter() - _t0) * 1000)
+    _latency_s = time.perf_counter() - _t0
+    _latency_ms = int(_latency_s * 1000)
     _usage = response.response_metadata.get("token_usage", {})
     logger.info(
         f"request_id={get_request_id()} | LLM_USAGE | agent=product | node=rank_and_filter"
@@ -600,6 +614,17 @@ def rank_and_filter(state: AgentState) -> dict:
         f" | completion_tokens={_usage.get('completion_tokens', 0)}"
         f" | total_tokens={_usage.get('total_tokens', 0)}"
         f" | latency_ms={_latency_ms}"
+    )
+    llm_requests_total.labels(agent="product", node="rank_and_filter").inc()
+    llm_duration_seconds.labels(agent="product", node="rank_and_filter").observe(_latency_s)
+    llm_tokens_total.labels(agent="product", node="rank_and_filter", token_type="prompt").inc(
+        _usage.get("prompt_tokens", 0)
+    )
+    llm_tokens_total.labels(agent="product", node="rank_and_filter", token_type="completion").inc(
+        _usage.get("completion_tokens", 0)
+    )
+    llm_tokens_total.labels(agent="product", node="rank_and_filter", token_type="total").inc(
+        _usage.get("total_tokens", 0)
     )
     raw = response.content.strip()
 

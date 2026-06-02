@@ -35,6 +35,8 @@ from fastapi.staticfiles import StaticFiles
 
 
 from langchain_core.tracers.context import collect_runs
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+from app.core.metrics import http_requests_total, http_request_duration_seconds
 
 Base.metadata.create_all(bind=engine)
 
@@ -80,12 +82,36 @@ logger = get_logger("app.main")
 
 @app.middleware("http")
 async def request_logging_middleware(request: Request, call_next):
+    import time as _time
+
     request_id = set_request_id()
-    logger.info(f"request_id={request_id} | method={request.method} | path={request.url.path} | REQUEST RECEIVED")
+    _t0 = _time.perf_counter()
+
+    if request.url.path != "/metrics":
+        logger.info(f"request_id={request_id} | method={request.method} | path={request.url.path} | REQUEST RECEIVED")
+
     response = await call_next(request)
-    logger.info(f"request_id={request_id} | status={response.status_code} | RESPONSE RETURNED")
+    _duration = _time.perf_counter() - _t0
+
+    if request.url.path != "/metrics":
+        logger.info(f"request_id={request_id} | status={response.status_code} | RESPONSE RETURNED")
+        http_requests_total.labels(
+            method=request.method,
+            endpoint=request.url.path,
+            status_code=str(response.status_code),
+        ).inc()
+        http_request_duration_seconds.labels(
+            method=request.method,
+            endpoint=request.url.path,
+        ).observe(_duration)
+
     response.headers["X-Request-ID"] = request_id
     return response
+
+
+@app.get("/metrics", include_in_schema=False)
+def metrics_endpoint():
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 def get_current_user_id(request: Request) -> str:
