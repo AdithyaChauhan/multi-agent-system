@@ -5,13 +5,22 @@ from app.agents.state import AgentState
 
 class TestOrderAgentResponseGeneration:
 
-    def test_response_generation_with_tracking(self):
-        """response_generation creates natural language response"""
+    def _mock_order_llm(self, mock_llm, content="Your order has been shipped.", no_tool=True):
+        """Set up llm.bind_tools(...).invoke() for response_generation."""
         mock_response = MagicMock()
-        mock_response.content = "Your order has been shipped via FedEx and will arrive tomorrow."
+        mock_response.content = content
+        mock_response.response_metadata = {
+            "token_usage": {"prompt_tokens": 50, "completion_tokens": 10, "total_tokens": 60}
+        }
+        mock_response.tool_calls = [] if no_tool else [{"id": "c1", "type": "function"}]
+        mock_llm.bind_tools.return_value.invoke.return_value = mock_response
+        mock_llm.invoke.return_value = mock_response
+        return mock_response
 
+    def test_response_generation_with_tracking(self):
+        """response_generation creates natural language response (no tool call path)."""
         with patch("app.agents.order_agent.llm") as mock_llm:
-            mock_llm.invoke.return_value = mock_response
+            self._mock_order_llm(mock_llm, content="Your order has been shipped via FedEx and will arrive tomorrow.")
             from app.agents.order_agent import response_generation
 
             state = AgentState(
@@ -29,11 +38,8 @@ class TestOrderAgentResponseGeneration:
 
     def test_response_generation_without_tracking(self):
         """response_generation works without tracking data"""
-        mock_response = MagicMock()
-        mock_response.content = "Your order is being processed."
-
         with patch("app.agents.order_agent.llm") as mock_llm:
-            mock_llm.invoke.return_value = mock_response
+            self._mock_order_llm(mock_llm, content="Your order is being processed.")
             from app.agents.order_agent import response_generation
 
             state = AgentState(

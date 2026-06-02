@@ -1,4 +1,7 @@
-from typing import TypedDict, Optional, List
+from typing import Annotated, TypedDict, Optional, List
+
+from langchain_core.messages import BaseMessage
+from langgraph.graph.message import add_messages
 
 
 class AgentState(TypedDict, total=False):
@@ -33,6 +36,9 @@ class AgentState(TypedDict, total=False):
     ticket_history: Optional[List[dict]]
     recent_critical_count: int
     priority: Optional[str]
+
+    # ToolNode message channel — required by langgraph.prebuilt.ToolNode
+    messages: Annotated[List[BaseMessage], add_messages]
 
     # Final response
     final_response: Optional[str]

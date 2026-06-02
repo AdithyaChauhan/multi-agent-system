@@ -114,11 +114,16 @@ class TestOrderAgentCompleteFlow:
         assert result["order_data"] is None
 
     def test_flow_response_with_full_tracking(self):
-        """Response generated with complete tracking info"""
+        """Response generated with complete tracking info (no tool call path)."""
         mock_resp = MagicMock()
         mock_resp.content = "Your AirPods order is in Mumbai, arriving tomorrow."
+        mock_resp.response_metadata = {
+            "token_usage": {"prompt_tokens": 50, "completion_tokens": 10, "total_tokens": 60}
+        }
+        mock_resp.tool_calls = []
 
         with patch("app.agents.order_agent.llm") as mock_llm:
+            mock_llm.bind_tools.return_value.invoke.return_value = mock_resp
             mock_llm.invoke.return_value = mock_resp
             from app.agents.order_agent import response_generation
 
@@ -231,13 +236,15 @@ class TestProductAgentCompleteFlow:
         assert prefs["max_price"] == 2000
 
     def test_flow_search_returns_results(self):
-        """Search returns matching products"""
-        products = [
-            {"product_id": "P1", "name": "Toy A", "rating": 4.5, "price": 1000},
-            {"product_id": "P2", "name": "Toy B", "rating": 4.0, "price": 1500},
-        ]
-
-        with patch("app.agents.product_agent.search_products", return_value=products):
+        """do_search_products is now an LLM tool-caller — returns messages."""
+        with patch("app.agents.product_agent.llm") as mock_llm:
+            mock_r = MagicMock()
+            mock_r.content = ""
+            mock_r.response_metadata = {
+                "token_usage": {"prompt_tokens": 50, "completion_tokens": 10, "total_tokens": 60}
+            }
+            mock_r.tool_calls = [{"id": "c1", "type": "function"}]
+            mock_llm.bind_tools.return_value.invoke.return_value = mock_r
             from app.agents.product_agent import do_search_products
 
             state = AgentState(
@@ -249,23 +256,25 @@ class TestProductAgentCompleteFlow:
             )
             result = do_search_products(state)
 
-        assert len(result["search_results"]) == 2
+        assert "messages" in result
 
     def test_flow_search_no_results_triggers_broaden(self):
-        """No results triggers broaden_search flow"""
-        with patch("app.agents.product_agent.search_products", return_value=[]):
-            from app.agents.product_agent import do_search_products
+        """parse_search_results with empty tool result leads to empty search_results."""
+        import json
+        from langchain_core.messages import ToolMessage
+        from app.agents.product_agent import parse_search_results
 
-            state = AgentState(
-                user_message="toys",
-                user_id="u1",
-                session_id="s1",
-                preferences={"category": "Toys & Games", "min_price": 100000},
-                broaden_attempt=0,
-                conversation_history=[],
-            )
-            result = do_search_products(state)
-
+        tool_msg = ToolMessage(content=json.dumps([]), tool_call_id="c1")
+        state = AgentState(
+            user_message="toys",
+            user_id="u1",
+            session_id="s1",
+            preferences={"category": "Toys & Games", "min_price": 100000},
+            broaden_attempt=0,
+            conversation_history=[],
+            messages=[tool_msg],
+        )
+        result = parse_search_results(state)
         assert len(result["search_results"]) == 0
 
     def test_flow_broaden_relaxes_filters(self):
@@ -498,8 +507,16 @@ class TestSupportAgentCompleteFlow:
         assert result["severity"] == "low"
 
     def test_flow_lookup_policy(self):
-        """Policy lookup returns response time"""
-        with patch("app.agents.support_agent.lookup_support_policy", return_value={"response_time": "24 hours"}):
+        """lookup_policy is now an LLM tool-caller; returns messages."""
+        with patch("app.agents.support_agent.llm") as mock_llm:
+            mock_resp = MagicMock()
+            mock_resp.content = ""
+            mock_resp.response_metadata = {
+                "token_usage": {"prompt_tokens": 30, "completion_tokens": 5, "total_tokens": 35}
+            }
+            mock_resp.tool_calls = []
+            mock_llm.bind_tools.return_value.invoke.return_value = mock_resp
+
             from app.agents.support_agent import lookup_policy
 
             state = AgentState(
@@ -512,7 +529,7 @@ class TestSupportAgentCompleteFlow:
             )
             result = lookup_policy(state)
 
-        assert "policy" in result
+        assert "messages" in result
 
     def test_flow_route_critical_to_escalation(self):
         """Critical severity routes to escalation subgraph"""

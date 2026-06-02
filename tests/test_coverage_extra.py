@@ -334,20 +334,48 @@ class TestSupportAgentNodes:
         result = assess_severity(state)
         assert "severity" in result
 
-    def test_lookup_policy_returns_policy(self):
-        from app.agents.support_agent import lookup_policy
+    def test_lookup_policy_returns_messages(self):
+        """lookup_policy is now an LLM tool-caller; returns messages."""
+        with patch("app.agents.support_agent.llm") as mock_llm:
+            mock_response = MagicMock()
+            mock_response.content = ""
+            mock_response.response_metadata = {
+                "token_usage": {"prompt_tokens": 30, "completion_tokens": 5, "total_tokens": 35}
+            }
+            mock_response.tool_calls = []
+            mock_llm.bind_tools.return_value.invoke.return_value = mock_response
 
+            from app.agents.support_agent import lookup_policy
+
+            state = AgentState(
+                user_message="I want a refund",
+                user_id="u1",
+                session_id="s1",
+                support_issue={"category": "refund"},
+                severity="low",
+                conversation_history=[],
+            )
+            result = lookup_policy(state)
+        assert "messages" in result
+
+    def test_parse_policy_extracts_policy(self):
+        """parse_policy reads ToolMessage into state['policy']."""
+        import json
+        from langchain_core.messages import ToolMessage
+        from app.agents.support_agent import parse_policy
+
+        policy = {"auto_resolve": True, "response_time": "24 hours"}
+        tool_msg = ToolMessage(content=json.dumps(policy), tool_call_id="c1")
         state = AgentState(
-            user_message="I want a refund",
+            user_message="refund",
             user_id="u1",
             session_id="s1",
-            support_issue={"category": "refund"},
-            severity="low",
             conversation_history=[],
+            messages=[tool_msg],
         )
-        result = lookup_policy(state)
+        result = parse_policy(state)
         assert "policy" in result
-        assert result["policy"] is not None
+        assert result["policy"]["auto_resolve"] is True
 
     def test_route_by_severity_high(self):
         from app.agents.support_agent import route_by_severity

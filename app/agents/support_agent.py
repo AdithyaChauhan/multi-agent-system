@@ -4,8 +4,10 @@ import re
 import time
 from typing import Literal
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import SystemMessage, HumanMessage
+from langchain_core.messages import SystemMessage, HumanMessage, ToolMessage
+from langchain_core.tools import tool
 from langgraph.graph import StateGraph, END
+from langgraph.prebuilt import ToolNode
 from dotenv import load_dotenv
 
 from app.agents.state import AgentState
@@ -305,17 +307,60 @@ def assess_severity(state: AgentState) -> dict:
     return {"severity": severity}
 
 
+# ── Support policy tool + ToolNode ───────────────────────────────────────────
+
+
+@tool
+def fetch_support_policy(category: str, severity: str) -> str:
+    """
+    Look up the company's support policy for an issue category and severity level.
+    Returns the applicable policy as JSON, including auto-resolve flag,
+    response time, and escalation path.
+    Use this before drafting a resolution to ensure the correct policy is applied.
+    """
+    policy = lookup_support_policy(category, severity)
+    return json.dumps(policy)
+
+
+_support_tools = [fetch_support_policy]
+support_tool_node = ToolNode(_support_tools)
+
+
 def lookup_policy(state: AgentState) -> dict:
-    """Tool node — looks up handling policy for this category + severity."""
+    """LLM tool-caller node: calls fetch_support_policy to get the applicable policy."""
     issue = state.get("support_issue", {})
     severity = state.get("severity", "medium")
     category = issue.get("category", "other")
 
-    policy = lookup_support_policy(category, severity)
+    logger.info(f"request_id={get_request_id()} | Policy lookup | category={category} | severity={severity}")
 
-    logger.info(f"request_id={get_request_id()} | " f"Policy lookup | category={category} | severity={severity}")
+    system_msg = SystemMessage(
+        content="Use the fetch_support_policy tool to retrieve the applicable support policy for this issue."
+    )
+    human_msg = HumanMessage(content=f"Get policy for: category={category}, severity={severity}")
 
-    return {"policy": policy}
+    response = llm.bind_tools(_support_tools).invoke([system_msg, human_msg])
+    return {"messages": [response]}
+
+
+def parse_policy(state: AgentState) -> dict:
+    """Deterministic node: extracts policy dict from ToolMessage into state."""
+    messages = state.get("messages") or []
+    for msg in reversed(messages):
+        if isinstance(msg, ToolMessage):
+            try:
+                policy = json.loads(msg.content)
+                return {"policy": policy}
+            except (json.JSONDecodeError, TypeError):
+                pass
+    return {"policy": {"auto_resolve": False, "response_time": "48 hours"}}
+
+
+def route_to_support_tool(state: AgentState) -> Literal["support_tools", "parse_policy"]:
+    messages = state.get("messages") or []
+    if messages and getattr(messages[-1], "tool_calls", None):
+        return "support_tools"
+    return "parse_policy"
 
 
 def draft_resolution(state: AgentState) -> dict:
@@ -388,6 +433,8 @@ def build_support_agent_graph():
     graph.add_node("ask_for_order", ask_for_order)
     graph.add_node("assess_severity", assess_severity)
     graph.add_node("lookup_policy", lookup_policy)
+    graph.add_node("support_tools", support_tool_node)
+    graph.add_node("parse_policy", parse_policy)
     graph.add_node("escalation_handler", escalation_handler_subgraph)
     graph.add_node("draft_resolution", draft_resolution)
 
@@ -408,6 +455,13 @@ def build_support_agent_graph():
 
     graph.add_conditional_edges(
         "lookup_policy",
+        route_to_support_tool,
+        {"support_tools": "support_tools", "parse_policy": "parse_policy"},
+    )
+    graph.add_edge("support_tools", "parse_policy")
+
+    graph.add_conditional_edges(
+        "parse_policy",
         route_by_severity,
         {
             "high": "escalation_handler",

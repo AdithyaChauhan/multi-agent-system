@@ -3,13 +3,16 @@ import re
 import time
 from typing import Literal
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import SystemMessage, HumanMessage
+from langchain_core.messages import SystemMessage, HumanMessage, ToolMessage
+from langchain_core.tools import tool
 from langgraph.graph import StateGraph, END
+from langgraph.prebuilt import ToolNode
 from dotenv import load_dotenv
 
 from app.agents.state import AgentState
 from app.agents.order_agent_subgraph import shipment_tracking_subgraph
 from app.tools.order_tools import fetch_order_from_db, fetch_user_orders
+from app.tools.shipment_tools import fetch_tracking_info
 from app.core.logger import get_logger, get_request_id
 from app.core.metrics import llm_requests_total, llm_tokens_total, llm_duration_seconds
 
@@ -163,8 +166,30 @@ def respond_not_found(state: AgentState) -> dict:
     }
 
 
+# ── Order tool + ToolNode ─────────────────────────────────────────────────────
+
+
+@tool
+def get_live_tracking(tracking_id: str) -> str:
+    """
+    Fetch live shipment tracking information from the carrier API.
+    Use this when you need real-time delivery status for a tracking ID.
+    Returns carrier, current location, live status, and estimated delivery as JSON.
+    """
+    import json
+
+    info = fetch_tracking_info(tracking_id)
+    if not info:
+        return json.dumps({"error": "No live tracking data available."})
+    return json.dumps(info)
+
+
+_order_tools = [get_live_tracking]
+order_tool_node = ToolNode(_order_tools)
+
+
 def response_generation(state: AgentState) -> dict:
-    """LLM node — generates natural language response"""
+    """LLM node — generates natural language response; can call get_live_tracking tool."""
     order_data = state.get("order_data") or {}
     tracking_data = state.get("tracking_data") or {}
     conversation_history = state.get("conversation_history", [])
@@ -200,13 +225,13 @@ Order details:
 
 User asked: {state.get('user_message')}"""
 
-    messages = [
+    call_messages = [
         SystemMessage(content=RESPONSE_SYSTEM_PROMPT),
         HumanMessage(content=context),
     ]
 
     _t0 = time.perf_counter()
-    response = llm.invoke(messages)
+    response = llm.bind_tools(_order_tools).invoke(call_messages)
     _latency_s = time.perf_counter() - _t0
     _latency_ms = int(_latency_s * 1000)
     _meta = getattr(response, "response_metadata", {})
@@ -229,11 +254,64 @@ User asked: {state.get('user_message')}"""
     llm_tokens_total.labels(agent="order", node="response_generation", token_type="total").inc(
         _usage.get("total_tokens", 0)
     )
-    final_response = response.content.strip()
+
+    # If LLM called the tracking tool, route to ToolNode; otherwise generate final response
+    if getattr(response, "tool_calls", None):
+        logger.info(f"request_id={get_request_id()} | Calling order tool")
+        return {"messages": [response]}
 
     logger.info(f"request_id={get_request_id()} | Response generated")
+    return {"final_response": response.content.strip()}
 
-    return {"final_response": final_response}
+
+def finalize_order_response(state: AgentState) -> dict:
+    """Deterministic node: after ToolNode returns live tracking, generate final response."""
+    import json as _json
+
+    order_data = state.get("order_data") or {}
+    tracking_data = state.get("tracking_data") or {}
+    messages = state.get("messages") or []
+
+    # Collect any live tracking data returned by the tool
+    extra = ""
+    for msg in messages:
+        if isinstance(msg, ToolMessage):
+            try:
+                live = _json.loads(msg.content)
+                if isinstance(live, dict) and "error" not in live:
+                    extra = f"\nLive carrier data: {msg.content}"
+            except (ValueError, TypeError):
+                pass
+
+    history_context = ""
+    conv = state.get("conversation_history", [])
+    if conv:
+        history_context = "\n".join([f"{m['role'].title()}: {m['content']}" for m in conv[-4:]])
+
+    context = f"""
+{"Recent conversation:" + chr(10) + history_context + chr(10) if history_context else ""}
+Order details:
+- Order ID: {order_data.get('order_id')}
+- Product: {order_data.get('product_name')}
+- Status: {order_data.get('status')}
+- Carrier: {tracking_data.get('carrier', 'Not assigned')}
+- Tracking ID: {tracking_data.get('tracking_id', 'N/A')}
+- Live status: {tracking_data.get('live_status', 'N/A')}
+- Current location: {tracking_data.get('current_location', 'N/A')}
+- Estimated delivery: {tracking_data.get('estimated_delivery', 'N/A')}{extra}
+
+User asked: {state.get('user_message')}"""
+
+    response = llm.invoke([SystemMessage(content=RESPONSE_SYSTEM_PROMPT), HumanMessage(content=context)])
+    logger.info(f"request_id={get_request_id()} | Response generated (post-tool)")
+    return {"final_response": response.content.strip()}
+
+
+def route_to_order_tool(state: AgentState) -> Literal["order_tools", "end"]:
+    messages = state.get("messages") or []
+    if messages and getattr(messages[-1], "tool_calls", None):
+        return "order_tools"
+    return "end"
 
 
 # ==================== ROUTING ====================
@@ -270,6 +348,8 @@ def build_order_agent_graph():
     graph.add_node("respond_not_found", respond_not_found)
     graph.add_node("shipment_tracking", shipment_tracking_subgraph)
     graph.add_node("response_generation", response_generation)
+    graph.add_node("order_tools", order_tool_node)
+    graph.add_node("finalize_order_response", finalize_order_response)
 
     graph.set_entry_point("check_order_id")
 
@@ -296,7 +376,13 @@ def build_order_agent_graph():
     graph.add_edge("ask_which_order", END)
     graph.add_edge("respond_not_found", END)
     graph.add_edge("shipment_tracking", "response_generation")
-    graph.add_edge("response_generation", END)
+    graph.add_conditional_edges(
+        "response_generation",
+        route_to_order_tool,
+        {"order_tools": "order_tools", "end": END},
+    )
+    graph.add_edge("order_tools", "finalize_order_response")
+    graph.add_edge("finalize_order_response", END)
 
     return graph.compile()
 
