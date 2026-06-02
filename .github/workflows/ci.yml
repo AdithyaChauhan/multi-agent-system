@@ -268,17 +268,21 @@ jobs:
         id: smoke-test
         if: steps.prereqs.outputs.configured == 'true'
         run: |
-          APP_URL="${{ secrets.APP_URL }}"
-          echo "Hitting health endpoint at $APP_URL/health ..."
+          kubectl port-forward -n multi-agent svc/multi-agent-system-app 8080:80 &
+          PF_PID=$!
+          sleep 5
+          echo "Hitting health endpoint via port-forward..."
           for i in 1 2 3 4 5; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$APP_URL/health" || echo "000")
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/health || echo "000")
             if [ "$STATUS" = "200" ]; then
               echo "Health check passed (HTTP $STATUS)"
+              kill $PF_PID 2>/dev/null || true
               exit 0
             fi
             echo "Attempt $i: HTTP $STATUS — retrying in 10s..."
             sleep 10
           done
+          kill $PF_PID 2>/dev/null || true
           echo "Health check failed after 5 attempts"
           exit 1
 
@@ -286,5 +290,11 @@ jobs:
         if: steps.prereqs.outputs.configured == 'true' && failure() && steps.smoke-test.outcome == 'failure'
         run: |
           echo "Smoke test failed — rolling back Helm release..."
-          helm rollback multi-agent-system --namespace multi-agent
-          echo "Rollback complete"
+          REVISIONS=$(helm history multi-agent-system --namespace multi-agent --max 2 -o json | python3 -c "import sys,json; print(len(json.load(sys.stdin)))")
+          if [ "$REVISIONS" -gt 1 ]; then
+            helm rollback multi-agent-system --namespace multi-agent
+            echo "Rollback complete"
+          else
+            echo "First install — uninstalling instead of rolling back"
+            helm uninstall multi-agent-system --namespace multi-agent
+          fi
