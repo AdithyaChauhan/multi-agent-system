@@ -277,29 +277,54 @@ def extract_preferences(state: AgentState) -> dict:
         prev_subcategory = previous_prefs.get("subcategory")
         new_subcategory = preferences.get("subcategory")
 
-        # If category is unchanged and only brand differs, the LLM may infer the wrong
-        # subcategory from the brand name (e.g. Samsung → earphones when context is TVs).
-        # Keep the previous subcategory in that case.
+        # Guard: if only brand changed (no type change), don't let LLM's brand-name inference
+        # override the subcategory (e.g. "Samsung" → earphones when context is TVs).
         if (
             new_category == prev_category
             and prev_subcategory
             and new_subcategory
             and new_subcategory != prev_subcategory
-            and not preferences.get("type")  # no explicit type change
-            and preferences.get("brand") is not None  # only brand was specified
+            and not preferences.get("type")
+            and preferences.get("brand") is not None
         ):
             new_subcategory = prev_subcategory
 
-        preferences = {
-            "category": new_category,
-            "subcategory": new_subcategory or prev_subcategory,
-            "type": preferences.get("type") or previous_prefs.get("type"),
-            "brand": preferences.get("brand"),
-            "max_price": preferences.get("max_price") or previous_prefs.get("max_price"),
-            "min_price": preferences.get("min_price") or previous_prefs.get("min_price"),
-            "keywords": preferences.get("keywords") or previous_prefs.get("keywords"),
-            "unavailable_request": preferences.get("unavailable_request", False),
-        }
+        # Detect genuine subcategory change: LLM explicitly extracted a different subcategory.
+        # null means "not mentioned this turn", not "changed" — so null is not a change.
+        subcategory_changed = (
+            new_subcategory is not None and prev_subcategory is not None and new_subcategory != prev_subcategory
+        )
+
+        if subcategory_changed:
+            # New product type — reset all filters to only what the user re-specified.
+            # e.g. "headphones under 2000" → "show me monitors" should not carry ₹2000 cap.
+            # Exception: if user specified price/brand/rating together with the new subcategory,
+            # those are captured in the current preferences dict and used as-is.
+            preferences = {
+                "category": new_category,
+                "subcategory": new_subcategory,
+                "type": preferences.get("type"),
+                "brand": preferences.get("brand"),
+                "max_price": preferences.get("max_price"),
+                "min_price": preferences.get("min_price"),
+                "min_rating": preferences.get("min_rating"),
+                "keywords": preferences.get("keywords") or [],
+                "unavailable_request": preferences.get("unavailable_request", False),
+            }
+        else:
+            # Same subcategory (or refinement turn) — preserve all previous filters
+            # unless the user explicitly overrode them this turn.
+            preferences = {
+                "category": new_category,
+                "subcategory": new_subcategory or prev_subcategory,
+                "type": preferences.get("type") or previous_prefs.get("type"),
+                "brand": preferences.get("brand") or previous_prefs.get("brand"),
+                "max_price": preferences.get("max_price") or previous_prefs.get("max_price"),
+                "min_price": preferences.get("min_price") or previous_prefs.get("min_price"),
+                "min_rating": preferences.get("min_rating") or previous_prefs.get("min_rating"),
+                "keywords": preferences.get("keywords") or previous_prefs.get("keywords"),
+                "unavailable_request": preferences.get("unavailable_request", False),
+            }
 
     logger.info(f"request_id={get_request_id()} | " f"EXTRACTED: {json.dumps(preferences)}")
 
