@@ -226,10 +226,9 @@ jobs:
 
       - name: Configure kubectl
         if: steps.prereqs.outputs.configured == 'true'
-        uses: azure/k8s-set-context@v4
-        with:
-          method: kubeconfig
-          kubeconfig: ${{ secrets.KUBECONFIG }}
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > /tmp/kubeconfig.yaml
+          echo "KUBECONFIG=/tmp/kubeconfig.yaml" >> $GITHUB_ENV
 
       - name: Deploy with Helm
         id: helm-deploy
