@@ -204,11 +204,16 @@ def auth_gate(state: AgentState) -> dict:
 
 
 def respond_sign_in(state: AgentState) -> dict:
+    intent = state.get("intent", "")
+    if intent == "support":
+        context = "I'd love to help resolve this for you! To raise a support ticket we need to verify your account and find your order."
+    else:
+        context = "I'd love to help you with your order!"
     return {
         "final_response": (
-            "To track your orders, you need to sign in first.\n\n"
-            "👆 Click the **Sign In** button at the top of the page to continue with Google.\n\n"
-            "After signing in, your conversation will be saved and you can pick up right where you left off!"
+            f"{context}\n\n"
+            "Please sign in first using the **Sign In** button at the top of the page.\n\n"
+            "It only takes a moment with Google, and your conversation will be saved so you can continue right where you left off."
         )
     }
 
@@ -228,8 +233,8 @@ def route_after_auth_gate(state: AgentState) -> Literal["order_agent", "product_
     intent = state.get("intent", "")
     is_anonymous = user_id.startswith("anon-")
 
-    # Only orders require authentication
-    if intent == "order" and is_anonymous:
+    # Orders and support require authentication (both need verified customer + DB orders)
+    if intent in ("order", "support") and is_anonymous:
         return "sign_in"
 
     if intent == "order":
