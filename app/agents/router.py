@@ -180,7 +180,20 @@ def classify_intent_and_extract(state: AgentState) -> dict:
     }
 
 
-_GREETINGS = {"hi", "hello", "hey", "hiya", "howdy", "greetings", "good morning", "good afternoon", "good evening", "sup", "what's up", "whats up"}
+_GREETINGS = {
+    "hi",
+    "hello",
+    "hey",
+    "hiya",
+    "howdy",
+    "greetings",
+    "good morning",
+    "good afternoon",
+    "good evening",
+    "sup",
+    "what's up",
+    "whats up",
+}
 
 
 def ask_for_clarification(state: AgentState) -> dict:

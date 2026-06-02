@@ -9,7 +9,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
   # ─────────────────────────────────────────────────────────────────
@@ -37,7 +37,7 @@ jobs:
         run: flake8 app/ tests/ eval/
 
   # ─────────────────────────────────────────────────────────────────
-  # Stage 2 — Unit Tests (70 % coverage threshold)
+  # Stage 2 — Unit Tests (80% coverage threshold)
   # ─────────────────────────────────────────────────────────────────
   test:
     name: Unit Tests
