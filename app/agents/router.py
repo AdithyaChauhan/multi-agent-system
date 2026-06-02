@@ -180,17 +180,25 @@ def classify_intent_and_extract(state: AgentState) -> dict:
     }
 
 
+_GREETINGS = {"hi", "hello", "hey", "hiya", "howdy", "greetings", "good morning", "good afternoon", "good evening", "sup", "what's up", "whats up"}
+
+
 def ask_for_clarification(state: AgentState) -> dict:
+    user_message = state.get("user_message", "").strip().lower().rstrip("!.,")
     conversation_history = state.get("conversation_history", [])
 
-    # If there's product history, likely a follow-up that wasn't understood
+    if user_message in _GREETINGS:
+        return {
+            "final_response": "Hi there! I'm your shopping assistant. I can help you:\n\n• 🛍️ Find products\n• 📦 Track your orders\n• 🛠️ Resolve support issues\n\nWhat can I help you with today?"
+        }
+
     if conversation_history:
         return {
             "final_response": "I didn't quite understand that. Are you looking for a product, checking an order, or need support?"
         }
 
     return {
-        "final_response": "I'm a shopping assistant. I can help you find products, track orders, or resolve support issues. What are you looking for?"
+        "final_response": "Hi! I'm a shopping assistant. I can help you find products, track orders, or resolve support issues. What are you looking for?"
     }
 
 
