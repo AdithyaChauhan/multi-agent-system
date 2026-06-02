@@ -246,12 +246,13 @@ jobs:
         if: steps.prereqs.outputs.configured == 'true'
         run: |
           IMAGE_REPO=$(echo "ghcr.io/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_TAG="sha-$(echo '${{ github.sha }}' | cut -c1-7)"
           helm upgrade --install multi-agent-system ./helm \
             --namespace multi-agent \
             --create-namespace \
             --values helm/values.yaml \
             --values helm/values-prod.yaml \
-            --set app.image.tag=${{ github.sha }} \
+            --set app.image.tag=$IMAGE_TAG \
             --set app.image.repository=$IMAGE_REPO \
             --set app.image.pullSecrets[0]=ghcr-secret \
             --set-string secrets.openaiApiKey=${{ secrets.OPENAI_API_KEY }} \
