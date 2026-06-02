@@ -242,6 +242,11 @@ jobs:
             --values helm/values-prod.yaml \
             --set app.image.tag=${{ github.sha }} \
             --set app.image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
+            --set-string secrets.openaiApiKey=${{ secrets.OPENAI_API_KEY }} \
+            --set-string secrets.langchainApiKey=${{ secrets.LANGCHAIN_API_KEY }} \
+            --set-string secrets.jwtSecretKey=${{ secrets.JWT_SECRET_KEY }} \
+            --set-string secrets.googleClientId=${{ secrets.GOOGLE_CLIENT_ID }} \
+            --set-string secrets.googleClientSecret=${{ secrets.GOOGLE_CLIENT_SECRET }} \
             --timeout 5m \
             --wait
 
