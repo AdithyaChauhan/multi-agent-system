@@ -169,7 +169,7 @@ EXTRACTION_SYSTEM_PROMPT = f"""Extract product search preferences. Return JSON o
 Catalog (use exact subcategory names):
 {PROMPT_CATALOG}
 
-Output schema: {{"category": str|null, "subcategory": str|null, "type": str|null, "brand": str|null, "max_price": int|null, "min_price": int|null, "keywords": [str], "unavailable_request": bool}}
+Output schema: {{"category": str|null, "subcategory": str|null, "type": str|null, "brand": str|null, "max_price": int|null, "min_price": int|null, "min_rating": float|null, "keywords": [str], "unavailable_request": bool}}
 
 Type variants (Electronics only):
 - headphones: neckband | tws earbuds | wired earphones | over-ear headphones
@@ -185,19 +185,20 @@ Rules:
 - Normalize: pencil/pen/highlighter/eraser/ruler/marker/sketch pad→stationery (Office Products), paintbrush/canvas/palette→art supplies (Office Products)
 - Normalize: phone charger/mobile charger→subcategory: charger, keywords: ["USB"] (NOT "phone" — avoids matching AA battery chargers)
 - keywords: features not covered by subcategory/type (calling, noise cancellation, 4K, wireless)
+- min_rating: set when user asks for quality — "best rated"/"highly rated"/"top rated" → 4.0, "at least 4.5 stars" → 4.5, explicit number like "4 star and above" → 4.0; null otherwise
 - Generic category browsing (no specific product): category only, subcategory: null, keywords: []
 - Vague browsing (product list, show me products, what do you have): category: null, keywords: [], unavailable_request: false
 - unavailable_request TRUE: laptops, smartphones, tablets, clothing, shoes, furniture, food, books, toys, sports equipment
 - Never output string "null" — use JSON null
 
 Examples:
-"mixer grinder under 3000" → {{"category": "Home & Kitchen", "subcategory": "mixer grinder", "type": null, "brand": null, "max_price": 3000, "min_price": null, "keywords": [], "unavailable_request": false}}
-"JBL bluetooth speaker under 2000" → {{"category": "Electronics", "subcategory": "speakers", "type": "bluetooth speaker", "brand": "JBL", "max_price": 2000, "min_price": null, "keywords": [], "unavailable_request": false}}
-"neckband under 2000" → {{"category": "Electronics", "subcategory": "headphones", "type": "neckband", "brand": null, "max_price": 2000, "min_price": null, "keywords": [], "unavailable_request": false}}
-"wireless mouse" → {{"category": "Computers & Accessories", "subcategory": "mouse", "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": ["wireless"], "unavailable_request": false}}
-"iphone cable" → {{"category": "Computers & Accessories", "subcategory": "cable", "type": null, "brand": null, "max_price": null, "min_price": null, "keywords": ["lightning"], "unavailable_request": false}}
-"laptop under 50000" → {{"category": null, "subcategory": null, "type": null, "brand": null, "max_price": 50000, "min_price": null, "keywords": ["laptop"], "unavailable_request": true}}
-"geyser under 5000" → {{"category": "Home & Kitchen", "subcategory": "water heater", "type": null, "brand": null, "max_price": 5000, "min_price": null, "keywords": [], "unavailable_request": false}}
+"mixer grinder under 3000" → {{"category": "Home & Kitchen", "subcategory": "mixer grinder", "type": null, "brand": null, "max_price": 3000, "min_price": null, "min_rating": null, "keywords": [], "unavailable_request": false}}
+"best rated JBL bluetooth speaker under 2000" → {{"category": "Electronics", "subcategory": "speakers", "type": "bluetooth speaker", "brand": "JBL", "max_price": 2000, "min_price": null, "min_rating": 4.0, "keywords": [], "unavailable_request": false}}
+"top rated neckband under 2000" → {{"category": "Electronics", "subcategory": "headphones", "type": "neckband", "brand": null, "max_price": 2000, "min_price": null, "min_rating": 4.0, "keywords": [], "unavailable_request": false}}
+"wireless mouse" → {{"category": "Computers & Accessories", "subcategory": "mouse", "type": null, "brand": null, "max_price": null, "min_price": null, "min_rating": null, "keywords": ["wireless"], "unavailable_request": false}}
+"4.5 star and above air fryer" → {{"category": "Home & Kitchen", "subcategory": "air fryer", "type": null, "brand": null, "max_price": null, "min_price": null, "min_rating": 4.5, "keywords": [], "unavailable_request": false}}
+"laptop under 50000" → {{"category": null, "subcategory": null, "type": null, "brand": null, "max_price": 50000, "min_price": null, "min_rating": null, "keywords": ["laptop"], "unavailable_request": true}}
+"geyser under 5000" → {{"category": "Home & Kitchen", "subcategory": "water heater", "type": null, "brand": null, "max_price": 5000, "min_price": null, "min_rating": null, "keywords": [], "unavailable_request": false}}
 
 Respond ONLY with valid JSON."""
 
@@ -439,6 +440,7 @@ def do_search_products(state: AgentState) -> dict:
         brand=prefs.get("brand"),
         max_price=prefs.get("max_price"),
         min_price=prefs.get("min_price"),
+        min_rating=prefs.get("min_rating"),
         keywords=prefs.get("keywords") or [],
         limit=10,
     )
@@ -643,8 +645,7 @@ def rank_and_filter(state: AgentState) -> dict:
                 f"- For feature requests (e.g. 'best battery', 'calling feature', 'noise cancellation'), "
                 f"rank products that match those features first.\n"
                 f"- Include any product that is a direct or close match.\n"
-                f"- If the products listed are entirely unrelated to the request, call search_product_catalog "
-                f"with more specific parameters to fetch better candidates.\n"
+                f"- Return [] only if the products are entirely unrelated to the request.\n"
                 f"- Otherwise, return ONLY a JSON array of 1-based indices, most relevant first. Max 5 products.\n"
                 f"Example: [3, 1, 7, 2, 5]"
             )
@@ -715,7 +716,7 @@ def rank_and_filter(state: AgentState) -> dict:
 
 
 def finalize_ranking(state: AgentState) -> dict:
-    """Deterministic node — uses tool-returned products as final ranking after rank_and_filter called search."""
+    """Deterministic node — uses tool-returned products as final candidates when rank_and_filter called search."""
     messages = state.get("messages") or []
     for msg in reversed(messages):
         if isinstance(msg, ToolMessage):
@@ -728,8 +729,7 @@ def finalize_ranking(state: AgentState) -> dict:
                     return {"ranked_products": products[:5]}
             except (json.JSONDecodeError, TypeError):
                 pass
-    fallback = (state.get("search_results") or [])[:5]
-    return {"ranked_products": fallback}
+    return {"ranked_products": (state.get("search_results") or [])[:5]}
 
 
 def route_to_rank_tool(state: AgentState) -> Literal["rank_tools", "product_enrichment"]:

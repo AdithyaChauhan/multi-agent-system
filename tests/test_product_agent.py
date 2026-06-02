@@ -105,9 +105,27 @@ class TestSearchProducts:
             brand="boAt",
             max_price=2000,
             min_price=None,
+            min_rating=None,
             keywords=["calling"],
             limit=10,
         )
+
+    def test_search_passes_min_rating(self):
+        """do_search_products forwards min_rating to search_products when set."""
+        with patch("app.agents.product_agent.search_products", return_value=[]) as mock_search:
+            from app.agents.product_agent import do_search_products
+
+            state = AgentState(
+                user_message="best rated air fryer",
+                user_id="test-user",
+                session_id="test-session",
+                preferences={"category": "Home & Kitchen", "subcategory": "air fryer", "min_rating": 4.0},
+                conversation_history=[],
+            )
+            do_search_products(state)
+
+        call_kwargs = mock_search.call_args.kwargs
+        assert call_kwargs["min_rating"] == 4.0
 
     def test_search_empty_results(self):
         """do_search_products returns empty search_results when DB finds nothing."""

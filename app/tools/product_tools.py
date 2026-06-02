@@ -14,6 +14,7 @@ def search_products(
     brand: Optional[str] = None,
     max_price: Optional[int] = None,
     min_price: Optional[int] = None,
+    min_rating: Optional[float] = None,
     keywords: Optional[List[str]] = None,
     limit: int = 20,
 ) -> List[dict]:
@@ -27,6 +28,7 @@ def search_products(
         brand: Brand name
         max_price: Maximum price in paise/cents
         min_price: Minimum price in paise/cents
+        min_rating: Minimum product rating (e.g. 4.0 for "best rated")
         keywords: List of keywords to search in name/description/attributes
         limit: Maximum results to return
     """
@@ -60,6 +62,8 @@ def search_products(
             query = query.filter(Product.price <= max_price)
         if min_price is not None:
             query = query.filter(Product.price >= min_price)
+        if min_rating is not None:
+            query = query.filter(Product.rating >= min_rating)
 
         # Keyword search in name, brand, and tags
         if keywords:
