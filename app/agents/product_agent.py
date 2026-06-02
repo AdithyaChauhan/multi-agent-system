@@ -210,7 +210,7 @@ def extract_preferences(state: AgentState) -> dict:
     history_context = ""
     if conversation_history:
         recent = conversation_history[-2:]
-        history_context = "\n".join([f"{msg['role'].title()}: {msg['content']}" for msg in recent])
+        history_context = "\n".join([f"{msg['role'].title()}: {msg['content'][:400]}" for msg in recent])
 
     if history_context:
         full_prompt = (
@@ -233,7 +233,8 @@ def extract_preferences(state: AgentState) -> dict:
     response = llm.invoke(messages)
     _latency_s = time.perf_counter() - _t0
     _latency_ms = int(_latency_s * 1000)
-    _usage = response.response_metadata.get("token_usage", {})
+    _meta = getattr(response, "response_metadata", {})
+    _usage = _meta.get("token_usage", {}) if isinstance(_meta, dict) else {}
     logger.info(
         f"request_id={get_request_id()} | LLM_USAGE | agent=product | node=extract_preferences"
         f" | prompt_tokens={_usage.get('prompt_tokens', 0)}"
@@ -577,10 +578,10 @@ def rank_and_filter(state: AgentState) -> dict:
     if not search_results:
         return {"ranked_products": []}
 
-    candidates = search_results[:20]
+    candidates = search_results[:10]
     product_list = "\n".join(
         [
-            f"{i+1}. {p['name'][:70]} | Price: ₹{p['price']} | Rating: {p['rating']} | Brand: {p.get('brand', 'N/A')}"
+            f"{i+1}. {p['name'][:60]} | ₹{p['price']} | {p['rating']}★ | {p.get('brand', 'N/A')}"
             for i, p in enumerate(candidates)
         ]
     )
@@ -607,7 +608,8 @@ def rank_and_filter(state: AgentState) -> dict:
     response = llm.invoke(messages)
     _latency_s = time.perf_counter() - _t0
     _latency_ms = int(_latency_s * 1000)
-    _usage = response.response_metadata.get("token_usage", {})
+    _meta = getattr(response, "response_metadata", {})
+    _usage = _meta.get("token_usage", {}) if isinstance(_meta, dict) else {}
     logger.info(
         f"request_id={get_request_id()} | LLM_USAGE | agent=product | node=rank_and_filter"
         f" | prompt_tokens={_usage.get('prompt_tokens', 0)}"

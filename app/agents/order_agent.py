@@ -209,7 +209,8 @@ User asked: {state.get('user_message')}"""
     response = llm.invoke(messages)
     _latency_s = time.perf_counter() - _t0
     _latency_ms = int(_latency_s * 1000)
-    _usage = response.response_metadata.get("token_usage", {})
+    _meta = getattr(response, "response_metadata", {})
+    _usage = _meta.get("token_usage", {}) if isinstance(_meta, dict) else {}
     logger.info(
         f"request_id={get_request_id()} | LLM_USAGE | agent=order | node=response_generation"
         f" | prompt_tokens={_usage.get('prompt_tokens', 0)}"

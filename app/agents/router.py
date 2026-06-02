@@ -115,7 +115,7 @@ def classify_intent_and_extract(state: AgentState) -> dict:
     history_context = ""
     if conversation_history:
         recent = conversation_history[-2:]
-        history_context = "\n".join([f"{msg['role'].title()}: {msg['content']}" for msg in recent])
+        history_context = "\n".join([f"{msg['role'].title()}: {msg['content'][:300]}" for msg in recent])
 
     prompt = user_message
     if history_context:
@@ -132,7 +132,8 @@ def classify_intent_and_extract(state: AgentState) -> dict:
     )
     _latency_s = time.perf_counter() - _t0
     _latency_ms = int(_latency_s * 1000)
-    _usage = response.response_metadata.get("token_usage", {})
+    _meta = getattr(response, "response_metadata", {})
+    _usage = _meta.get("token_usage", {}) if isinstance(_meta, dict) else {}
     logger.info(
         f"request_id={get_request_id()} | LLM_USAGE | agent=router | node=classify_intent"
         f" | prompt_tokens={_usage.get('prompt_tokens', 0)}"
