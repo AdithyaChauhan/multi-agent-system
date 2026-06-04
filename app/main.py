@@ -17,6 +17,8 @@ from app.models.message import Message
 
 from app.agents.router import router_graph
 
+_session_preferences: dict = {}
+
 from app.schemas.chat import ChatRequest, SessionMessagesResponse, ChatResponse
 from app.core.logger import get_logger, set_request_id, get_request_id
 from app.core.config import SESSION_EXPIRY_MINUTES
@@ -250,6 +252,7 @@ def chat(
                     "user_id": user_id,
                     "session_id": session.session_id,
                     "conversation_history": conversation_history,
+                    "preferences": _session_preferences.get(session.session_id),
                 },
                 config={
                     "tags": [f"user:{user_id}", f"session:{session.session_id}"],
@@ -264,6 +267,9 @@ def chat(
 
         langsmith_run_id = str(cb.traced_runs[0].id) if cb.traced_runs else None
         logger.info(f"request_id={get_request_id()} | langsmith_run_id={langsmith_run_id}")
+
+        if graph_result.get("preferences"):
+            _session_preferences[session.session_id] = graph_result["preferences"]
 
         final_response = graph_result.get("final_response", "Something went wrong.")
         logger.info(f"request_id={get_request_id()} | Graph completed | final_response_preview={final_response[:80]}")

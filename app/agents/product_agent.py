@@ -495,6 +495,9 @@ def broaden_search(state: AgentState) -> dict:
             if prefs.get(filter_to_relax):
                 relaxed.append(filter_to_relax)
                 prefs[filter_to_relax] = None
+                if filter_to_relax == "subcategory" and prefs.get("brand"):
+                    relaxed.append("brand")
+                    prefs["brand"] = None
                 break
     else:
         return {"broaden_attempt": attempt, "filters_exhausted": True}
