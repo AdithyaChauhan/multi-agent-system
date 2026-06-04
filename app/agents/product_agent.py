@@ -207,39 +207,23 @@ def extract_preferences(state: AgentState) -> dict:
     """LLM node — extracts structured preferences from user message."""
     user_message = state.get("user_message", "")
     conversation_history = state.get("conversation_history", [])
-    current_prefs = state.get("preferences") or {}
 
-    # Build active context block from persisted preferences — tells the LLM what's already set.
-    active_context = ""
-    if current_prefs.get("subcategory"):
-        parts = [f"subcategory: {current_prefs['subcategory']}"]
-        if current_prefs.get("brand"):
-            parts.append(f"brand: {current_prefs['brand']}")
-        if current_prefs.get("max_price"):
-            parts.append(f"max_price: {current_prefs['max_price']}")
-        if current_prefs.get("type"):
-            parts.append(f"type: {current_prefs['type']}")
-        active_context = "Active session state: " + ", ".join(parts)
+    # Last 2 messages (prev user + last assistant) is enough to detect follow-ups.
+    # The last assistant response is what the user is refining — no need for deeper history.
+    history_context = ""
+    if conversation_history:
+        recent = conversation_history[-2:]
+        history_context = "\n".join([f"{msg['role'].title()}: {msg['content'][:400]}" for msg in recent])
 
-    if conversation_history or active_context:
-        history_context = ""
-        if conversation_history:
-            recent = conversation_history[-2:]
-            history_context = "\n".join([f"{msg['role'].title()}: {msg['content'][:300]}" for msg in recent])
-
-        prompt_parts = []
-        if active_context:
-            prompt_parts.append(active_context)
-        if history_context:
-            prompt_parts.append(f"Recent conversation:\n{history_context}")
-        prompt_parts.append(f"User said: \"{user_message}\"")
-        prompt_parts.append(
-            "Task: extract ONLY what changed or was newly mentioned. "
-            "If the message is a refinement (price, brand, feature), set subcategory=null — "
-            "the active subcategory carries over automatically. "
-            "Only set subcategory if the user explicitly names a different product type."
+    if history_context:
+        full_prompt = (
+            f"Recent conversation:\n{history_context}\n\n"
+            f"Current message: {user_message}\n\n"
+            f"Follow-up rules:\n"
+            f"- If the user is refining the SAME product (e.g. changing price, brand, or adding a feature), preserve subcategory from history.\n"
+            f"- If the user mentions a DIFFERENT product type, extract fresh preferences — do NOT carry over subcategory from history.\n"
+            f"CRITICAL: When user says 'what about [Brand]', keep the same subcategory from history — do NOT infer subcategory from brand name."
         )
-        full_prompt = "\n\n".join(prompt_parts)
     else:
         full_prompt = user_message
 
