@@ -495,9 +495,6 @@ def broaden_search(state: AgentState) -> dict:
             if prefs.get(filter_to_relax):
                 relaxed.append(filter_to_relax)
                 prefs[filter_to_relax] = None
-                if filter_to_relax == "subcategory" and prefs.get("brand"):
-                    relaxed.append("brand")
-                    prefs["brand"] = None
                 break
     else:
         return {"broaden_attempt": attempt, "filters_exhausted": True}
@@ -681,7 +678,7 @@ def rank_and_filter(state: AgentState) -> dict:
     ]
 
     _t0 = time.perf_counter()
-    response = llm.bind_tools([search_product_catalog]).invoke(messages)
+    response = llm.invoke(messages)
     _latency_s = time.perf_counter() - _t0
     _latency_ms = int(_latency_s * 1000)
     _meta = getattr(response, "response_metadata", {})
