@@ -215,17 +215,8 @@ def extract_preferences(state: AgentState) -> dict:
         recent = conversation_history[-2:]
         history_context = "\n".join([f"{msg['role'].title()}: {msg['content'][:400]}" for msg in recent])
 
-    current_prefs = state.get("preferences") or {}
-    active_hint = ""
-    if current_prefs.get("subcategory"):
-        active_hint = (
-            f"ACTIVE: User is currently browsing subcategory='{current_prefs['subcategory']}'. "
-            f"A refinement message should keep this subcategory — only change it if a different product is explicitly named.\n\n"
-        )
-
     if history_context:
         full_prompt = (
-            f"{active_hint}"
             f"Recent conversation:\n{history_context}\n\n"
             f"Current message: {user_message}\n\n"
             f"Follow-up rules:\n"
@@ -234,7 +225,7 @@ def extract_preferences(state: AgentState) -> dict:
             f"CRITICAL: When user says 'what about [Brand]', keep the same subcategory from history — do NOT infer subcategory from brand name."
         )
     else:
-        full_prompt = f"{active_hint}{user_message}" if active_hint else user_message
+        full_prompt = user_message
 
     messages = [
         SystemMessage(content=EXTRACTION_SYSTEM_PROMPT),
