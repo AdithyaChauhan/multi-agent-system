@@ -5,7 +5,7 @@ import copy
 import time
 from typing import Literal
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import SystemMessage, HumanMessage, ToolMessage
+from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_core.tools import tool
 from langgraph.graph import StateGraph, END
 from langgraph.prebuilt import ToolNode
@@ -24,43 +24,7 @@ logger = get_logger("app.agents.product_agent")
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=os.getenv("OPENAI_API_KEY"))
 
 
-def get_catalog_structure() -> str:
-    """Load category/subcategory structure from DB dynamically"""
-    from app.db.database import SessionLocal
-    from app.models.product import Product
 
-    db = SessionLocal()
-    try:
-        rows = (
-            db.query(Product.category, Product.subcategory)
-            .distinct()
-            .filter(Product.category.isnot(None))
-            .order_by(Product.category, Product.subcategory)
-            .all()
-        )
-
-        structure = {}
-        for category, subcategory in rows:
-            if category not in structure:
-                structure[category] = set()
-            if subcategory:
-                structure[category].add(subcategory)
-
-        lines = []
-        for cat, subs in sorted(structure.items()):
-            lines.append(f"{cat}:")
-            for sub in sorted(subs):
-                lines.append(f"  - {sub}")
-
-        return "\n".join(lines)
-    except Exception:  # pragma: no cover
-        return ""
-    finally:
-        db.close()
-
-
-# Load once at startup — returns empty string if DB is unavailable (e.g. during tests)
-CATALOG_STRUCTURE = get_catalog_structure()
 
 
 SERVED_CATEGORIES = {"Electronics", "Computers & Accessories", "Home & Kitchen", "Office Products"}
@@ -449,8 +413,6 @@ def search_product_catalog(
     return json.dumps(slim)
 
 
-rank_tool_node = ToolNode([search_product_catalog])
-
 
 def do_search_products(state: AgentState) -> dict:
     """Deterministic node — reads preferences from state and calls search_products directly."""
@@ -702,10 +664,6 @@ def rank_and_filter(state: AgentState) -> dict:
         _usage.get("total_tokens", 0)
     )
 
-    if getattr(response, "tool_calls", None):
-        logger.info(f"request_id={get_request_id()} | rank_and_filter calling search tool for better candidates")
-        return {"messages": [response]}
-
     raw = response.content.strip()
 
     try:
@@ -740,30 +698,6 @@ def rank_and_filter(state: AgentState) -> dict:
     return {"ranked_products": ranked}
 
 
-def finalize_ranking(state: AgentState) -> dict:
-    """Deterministic node — uses tool-returned products as final candidates when rank_and_filter called search."""
-    messages = state.get("messages") or []
-    for msg in reversed(messages):
-        if isinstance(msg, ToolMessage):
-            try:
-                products = json.loads(msg.content)
-                if isinstance(products, list) and products:
-                    logger.info(
-                        f"request_id={get_request_id()} | finalize_ranking | {len(products)} products from tool"
-                    )
-                    return {"ranked_products": products[:5]}
-            except (json.JSONDecodeError, TypeError):
-                pass
-    return {"ranked_products": (state.get("search_results") or [])[:5]}
-
-
-def route_to_rank_tool(state: AgentState) -> Literal["rank_tools", "product_enrichment"]:
-    messages = state.get("messages") or []
-    if messages and getattr(messages[-1], "tool_calls", None):
-        return "rank_tools"
-    return "product_enrichment"
-
-
 def route_after_broaden(state: AgentState) -> Literal["retry_search", "no_results"]:
     return "no_results" if state.get("filters_exhausted") else "retry_search"
 
@@ -781,8 +715,6 @@ def build_product_agent_graph():
     graph.add_node("broaden_search", broaden_search)
     graph.add_node("respond_no_results", respond_no_results)
     graph.add_node("rank_and_filter", rank_and_filter)
-    graph.add_node("rank_tools", rank_tool_node)
-    graph.add_node("finalize_ranking", finalize_ranking)
     graph.add_node("product_enrichment", product_enrichment_subgraph)
     graph.add_node("format_recommendations", format_recommendations)
 
@@ -802,13 +734,7 @@ def build_product_agent_graph():
         "broaden_search", route_after_broaden, {"retry_search": "search_products", "no_results": "respond_no_results"}
     )
 
-    graph.add_conditional_edges(
-        "rank_and_filter",
-        route_to_rank_tool,
-        {"rank_tools": "rank_tools", "product_enrichment": "product_enrichment"},
-    )
-    graph.add_edge("rank_tools", "finalize_ranking")
-    graph.add_edge("finalize_ranking", "product_enrichment")
+    graph.add_edge("rank_and_filter", "product_enrichment")
 
     graph.add_edge("product_enrichment", "format_recommendations")
     graph.add_edge("ask_for_preferences", END)

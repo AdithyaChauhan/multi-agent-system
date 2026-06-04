@@ -485,15 +485,14 @@ class TestProductAgentExtra:
         assert "preferences" in result
 
     def test_rank_and_filter_with_results(self):
-        """rank_and_filter uses bind_tools; with tool_calls=[] it returns ranked_products directly."""
+        """rank_and_filter invokes llm directly and returns ranked_products."""
         search_results = [
             {"product_id": "P1", "name": "JBL Go 2 Speaker", "price": 2499, "rating": 4.5, "brand": "JBL"},
             {"product_id": "P2", "name": "boAt Stone 200", "price": 1299, "rating": 4.2, "brand": "boAt"},
         ]
         mock_r = self._llm_mock("[1, 2]")
-        mock_r.tool_calls = []  # no tool call → parse ranking indices and return ranked_products
         with patch("app.agents.product_agent.llm") as mock_llm:
-            mock_llm.bind_tools.return_value.invoke.return_value = mock_r
+            mock_llm.invoke.return_value = mock_r
             from app.agents.product_agent import rank_and_filter
 
             state = AgentState(

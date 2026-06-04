@@ -137,9 +137,10 @@ class TestLoadConversationHistory:
         msg2.content = "Hi there"
 
         mock_db = MagicMock()
+        # desc() + limit returns newest-first; load_conversation_history reverses to chronological
         mock_db.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.return_value = [
-            msg1,
             msg2,
+            msg1,
         ]
 
         result = load_conversation_history(mock_db, "sess-1")
