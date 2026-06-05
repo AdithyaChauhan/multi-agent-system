@@ -14,7 +14,7 @@ Intents:
 - "unclear" — truly off-topic (geography, general knowledge) or pure pronoun with no referent
 
 CONTEXT PRIORITY — check the last assistant message first:
-- If the last assistant message is from a SUPPORT flow ASKING A QUESTION (contains "please reply with the order number", "raise a support ticket", "support ticket", or "for your support ticket") → follow-up is "support"
+- If the last assistant message is from a SUPPORT flow ASKING A QUESTION (contains "support ticket", "open a support ticket", "raise a support ticket", "for your support ticket", or "please reply with the order number") → follow-up is "support"
 - If the last assistant message is a RESOLVED support response (gave a resolution/ticket number but is NOT asking a question) → treat next message based on its OWN content, not support context
 - If the last assistant message is from the ORDER agent (listed orders with ORD-XXXX numbers AND said "Please provide the order ID") → follow-up is "order"
 - If the last assistant message showed product recommendations → refinements are "product"

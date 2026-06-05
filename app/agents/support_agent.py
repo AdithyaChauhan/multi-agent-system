@@ -182,7 +182,14 @@ def classify_issue(state: AgentState) -> dict:
         logger.error(f"request_id={get_request_id()} | Parse error | {str(e)}")
         issue = {"category": "other", "order_id": None, "description": user_message[:200]}
 
-    # Also check router-extracted order_id as fallback
+    # Only keep order_id if it's actually mentioned in the current message
+    # (prevents the LLM from pulling order IDs out of conversation history)
+    if issue.get("order_id"):
+        raw_id = str(issue["order_id"]).replace("ORD-", "").strip()
+        if raw_id not in user_message and issue["order_id"] not in user_message:
+            issue["order_id"] = None
+
+    # Router-extracted order_id as last-resort fallback (already from current message)
     if not issue.get("order_id") and state.get("order_id"):
         issue["order_id"] = state.get("order_id")
 
@@ -268,7 +275,7 @@ def ask_for_order(state: AgentState) -> dict:
 
     if not user_orders:
         msg = (
-            "I'd be happy to help! To raise a support ticket, I need the order this is about.\n\n"
+            "I'd be happy to help! To open a support ticket, I need the order this is about.\n\n"
             "I couldn't find any orders on your account. "
             "Could you double-check and provide the order number (e.g. ORD-1234)?"
         )
@@ -286,7 +293,7 @@ def ask_for_order(state: AgentState) -> dict:
             if had_invalid_id
             else "To raise a support ticket, I need to know which order this is about.\n\nHere are your recent orders:\n\n"
         )
-        msg = f"{prefix}{order_lines}{footer}\n\nPlease reply with the order number you need help with."
+        msg = f"{prefix}{order_lines}{footer}\n\nPlease reply with the order number to open a support ticket."
 
     logger.info(f"request_id={get_request_id()} | Asking user for order")
     return {"final_response": msg}
@@ -298,7 +305,7 @@ _LEGAL_THREAT_KEYWORDS = {"sue", "lawsuit", "lawyer", "attorney", "court", "lega
 def assess_severity(state: AgentState) -> dict:
     """Deterministic node — business severity based on issue category and legal threats."""
     issue = state.get("support_issue", {})
-    support_order = state.get("support_order", {})
+    support_order = state.get("support_order") or {}
     user_message = state.get("user_message", "").lower()
 
     has_legal_threat = any(kw in user_message for kw in _LEGAL_THREAT_KEYWORDS)
@@ -350,7 +357,7 @@ def lookup_policy(state: AgentState) -> dict:
 def draft_resolution(state: AgentState) -> dict:
     """LLM node — calls fetch_support_policy to retrieve policy, then drafts a resolution."""
     issue = state.get("support_issue", {})
-    support_order = state.get("support_order", {})
+    support_order = state.get("support_order") or {}
     severity = state.get("severity", "low")
     category = issue.get("category", "other")
 
@@ -404,7 +411,7 @@ def draft_resolution(state: AgentState) -> dict:
 def finalize_draft(state: AgentState) -> dict:
     """LLM node — after fetch_support_policy tool call, generates the final resolution draft."""
     issue = state.get("support_issue", {})
-    support_order = state.get("support_order", {})
+    support_order = state.get("support_order") or {}
     severity = state.get("severity", "low")
     category = issue.get("category", "other")
 
