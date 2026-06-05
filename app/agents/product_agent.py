@@ -8,7 +8,6 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_core.tools import tool
 from langgraph.graph import StateGraph, END
-from langgraph.prebuilt import ToolNode
 from dotenv import load_dotenv
 
 from app.agents.state import AgentState
@@ -22,9 +21,6 @@ load_dotenv()
 logger = get_logger("app.agents.product_agent")
 
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=os.getenv("OPENAI_API_KEY"))
-
-
-
 
 
 SERVED_CATEGORIES = {"Electronics", "Computers & Accessories", "Home & Kitchen", "Office Products"}
@@ -411,7 +407,6 @@ def search_product_catalog(
         for p in results
     ]
     return json.dumps(slim)
-
 
 
 def do_search_products(state: AgentState) -> dict:

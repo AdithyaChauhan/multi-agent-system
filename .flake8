@@ -14,4 +14,5 @@ exclude =
     app/db/seed_reviews_specs.py
 per-file-ignores =
     app/evaluation/*.py:E402
+    app/main.py:E402
     tests/*.py:F401,F811
