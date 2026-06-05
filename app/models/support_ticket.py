@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, Enum as SQLEnum, ForeignKey
+from sqlalchemy import Boolean, Column, String, DateTime, Enum as SQLEnum, ForeignKey
 from sqlalchemy.sql import func
 from app.db.database import Base
 import enum
@@ -41,6 +41,7 @@ class SupportTicket(Base):
 
     description = Column(String, nullable=False)
     resolution = Column(String, nullable=True)
+    safety_alert = Column(Boolean, nullable=True, default=False)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     resolved_at = Column(DateTime(timezone=True), nullable=True)

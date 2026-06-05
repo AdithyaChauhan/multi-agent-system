@@ -16,8 +16,31 @@ from app.models.session import Session
 from app.models.message import Message
 
 from app.agents.router import router_graph
+from app.tools.support_tools import create_support_ticket
 
 _session_preferences: dict = {}
+
+_SAFETY_KEYWORDS = {
+    "fire", "smoke", "burning", "burn",
+    "electric shock", "electrocuted",
+    "injury", "injured",
+    "poison", "poisoned", "toxic",
+    "choking", "choke",
+    "hospital", "ambulance",
+    "emergency services", "call 911",
+    "danger",
+}
+
+_SAFETY_RESPONSE = (
+    "We take safety seriously. If you're in immediate danger, please call emergency services. "
+    "We've flagged your message and a human team member will follow up with you."
+)
+
+
+def _is_safety_emergency(message: str) -> bool:
+    lowered = message.lower()
+    return any(kw in lowered for kw in _SAFETY_KEYWORDS)
+
 
 from app.schemas.chat import ChatRequest, SessionMessagesResponse, ChatResponse
 from app.core.logger import get_logger, set_request_id, get_request_id
@@ -238,6 +261,27 @@ def chat(
         db.commit()
 
         logger.info(f"request_id={get_request_id()} | User message stored | session_id={session.session_id}")
+
+        # Safety gate — exits before any agent or LLM call
+        if _is_safety_emergency(chat_request.message):
+            logger.warning(
+                f"request_id={get_request_id()} | SAFETY_GATE triggered | user_id={user_id} | message={chat_request.message[:100]}"
+            )
+            create_support_ticket(
+                user_id=user_id,
+                severity="critical",
+                category="other",
+                description=f"[SAFETY_ALERT] {chat_request.message[:500]}",
+                safety_alert=True,
+            )
+            assistant_message = Message(
+                session_id=session.session_id, role="assistant", content=_SAFETY_RESPONSE
+            )
+            db.add(assistant_message)
+            db.commit()
+            response.headers["X-Session-ID"] = session.session_id
+            response.headers["X-User-ID"] = user_id
+            return ChatResponse(session_id=session.session_id, user_id=user_id, response=_SAFETY_RESPONSE)
 
         # Invoke the router graph with LangSmith tracking
         logger.info(f"request_id={get_request_id()} | Invoking router")
