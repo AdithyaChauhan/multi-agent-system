@@ -66,15 +66,22 @@ Respond ONLY with valid JSON."""
 RESOLUTION_SYSTEM_PROMPT = """You are a customer support agent drafting resolutions for low-severity issues.
 
 Given:
+- Order details (including status)
 - Issue description
 - Category
 - Company policy
 
 Draft a helpful, empathetic response that:
 1. Acknowledges the issue
-2. Provides solution based on policy
+2. Provides solution based on policy AND order status
 3. Offers next steps
 4. Maintains professional, friendly tone
+
+Cancellation rules (check order status first):
+- "processing": confirm cancellation is possible, advise they will receive confirmation
+- "shipped" / "out_for_delivery" / "in_transit": cancellation is NOT possible once shipped — offer return/refund instead
+- "delivered": cannot cancel — offer return within policy window
+- "cancelled": inform the order is already cancelled, nothing further needed
 
 Keep response under 150 words. Be specific and actionable.
 IMPORTANT:
@@ -178,6 +185,17 @@ def fetch_order_for_support(state: AgentState) -> dict:
     user_id = state.get("user_id", "")
     issue = state.get("support_issue", {})
     order_id = issue.get("order_id")
+
+    # Normalize bare numbers to ORD-XXXX (e.g. "9903" → "ORD-9903")
+    if order_id and str(order_id).strip().isdigit():
+        order_id = f"ORD-{order_id.strip()}"
+
+    # Also check current user message for bare numbers if LLM missed it
+    if not order_id:
+        user_message = state.get("user_message", "")
+        match = re.search(r'\b(\d+)\b', user_message)
+        if match:
+            order_id = f"ORD-{match.group(1)}"
 
     # Also check conversation history for ORD-XXXX pattern if LLM missed it
     if not order_id:
@@ -293,6 +311,7 @@ def draft_resolution(state: AgentState) -> dict:
 
     prompt = (
         f"Order: {support_order.get('order_id')} — {support_order.get('product_name', 'your product')}\n"
+        f"Order Status: {support_order.get('status', 'unknown')}\n"
         f"Issue: {issue.get('description')}\n"
         f"Category: {category}, Severity: {severity}\n\n"
         f"Use the fetch_support_policy tool to retrieve the applicable policy, "
@@ -346,6 +365,7 @@ def finalize_draft(state: AgentState) -> dict:
 
     context_prompt = (
         f"Order: {support_order.get('order_id')} — {support_order.get('product_name', 'the product')}\n"
+        f"Order Status: {support_order.get('status', 'unknown')}\n"
         f"Issue: {issue.get('description')}\n"
         f"Category: {category.replace('_', ' ')}, Severity: {severity}\n\n"
         f"Using the policy retrieved above, draft a helpful and empathetic response for the customer."

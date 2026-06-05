@@ -21,11 +21,12 @@ from app.tools.support_tools import create_support_ticket
 _session_preferences: dict = {}
 
 _SAFETY_KEYWORDS = {
-    "fire", "smoke", "burning", "burn",
+    "fire", "smoke", "burning", "burn", "burnt",
     "electric shock", "electrocuted",
-    "injury", "injured",
+    "injury", "injured", "injuring", "hurt", "hurting",
+    "wound", "wounded", "bleeding",
     "poison", "poisoned", "toxic",
-    "choking", "choke",
+    "choking", "choke", "unconscious",
     "hospital", "ambulance",
     "emergency services", "call 911",
     "danger",
