@@ -65,6 +65,9 @@ History: "Here are smartwatches under 3000..." | Message: "under 2000"
 History: "To raise a support ticket, I need to know which order... Please reply with the order number." | Message: "the iphone one"
 → {"intent": "support", "confidence": 0.95, "order_id": null}
 
+History: "To raise a support ticket, I need to know which order this is about... Please reply with the order number to open a support ticket." | Message: "ORD-2002"
+→ {"intent": "support", "confidence": 0.95, "order_id": "ORD-2002"}
+
 History: "I couldn't find that order. Here are your orders: 1. ORD-9904 Samsung 43 inch 4K Smart TV... Please reply with the order number." | Message: "samsung tv"
 → {"intent": "support", "confidence": 0.95, "order_id": "ORD-9904"}
 
