@@ -181,8 +181,12 @@ def extract_preferences(state: AgentState) -> dict:
             f"Current message: {user_message}\n\n"
             f"Follow-up rules:\n"
             f"- If the user is refining the SAME product (e.g. changing price, brand, or adding a feature), preserve subcategory from history.\n"
-            f"- If the user mentions a DIFFERENT product type, extract fresh preferences — do NOT carry over subcategory from history.\n"
-            f"CRITICAL: When user says 'what about [Brand]', keep the same subcategory from history — do NOT infer subcategory from brand name."
+            f"- If the user mentions a COMPLETELY DIFFERENT product (different category or type — e.g. 'heater' after earphones, 'fan' after smartwatch), treat as ENTIRELY NEW search. Set brand=null, max_price=null, keywords=[] unless the user explicitly stated them NOW.\n"
+            f"- 'product list', 'show me products', 'what do you have' with no specific product → {{\"category\": null, \"subcategory\": null, \"keywords\": [], \"unavailable_request\": false}}\n"
+            f"CRITICAL: When user says 'what about [Brand]', keep the same subcategory from history — do NOT infer subcategory from brand name.\n\n"
+            f"Example — category switch:\n"
+            f"History: 'Samsung Earphones ₹499...' | Message: 'what do you have in heaters'\n"
+            f"→ {{\"category\": \"Home & Kitchen\", \"subcategory\": \"room heater\", \"brand\": null, \"max_price\": null, \"keywords\": []}}"
         )
     else:
         full_prompt = user_message
@@ -255,7 +259,15 @@ def extract_preferences(state: AgentState) -> dict:
             new_subcategory is not None and prev_subcategory is not None and new_subcategory != prev_subcategory
         )
 
-        if subcategory_changed:
+        # Category-level switch (e.g. Electronics → Home & Kitchen) always resets everything.
+        category_changed = (
+            new_category is not None and prev_category is not None and new_category != prev_category
+        )
+
+        # Fully vague browsing (product list, show me products): treat as fresh start.
+        vague_browse = not new_category and not new_subcategory and not preferences.get("keywords")
+
+        if subcategory_changed or category_changed or vague_browse:
             # New product type — reset all filters to only what the user re-specified.
             # e.g. "headphones under 2000" → "show me monitors" should not carry ₹2000 cap.
             # Exception: if user specified price/brand/rating together with the new subcategory,
@@ -282,7 +294,7 @@ def extract_preferences(state: AgentState) -> dict:
                 "max_price": preferences.get("max_price") or previous_prefs.get("max_price"),
                 "min_price": preferences.get("min_price") or previous_prefs.get("min_price"),
                 "min_rating": preferences.get("min_rating") or previous_prefs.get("min_rating"),
-                "keywords": preferences.get("keywords") or previous_prefs.get("keywords"),
+                "keywords": preferences.get("keywords") if preferences.get("keywords") else [],
                 "unavailable_request": preferences.get("unavailable_request", False),
             }
 
