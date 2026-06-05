@@ -58,14 +58,21 @@ def assign_priority(state: AgentState) -> dict:
 def create_ticket_node(state: AgentState) -> dict:
     """Create support ticket in database, skipping if one already exists for this order."""
     issue = state.get("support_issue", {})
+    support_order = state.get("support_order") or {}
     user_id = state.get("user_id", "")
     severity = state.get("severity", "medium")
     priority = state.get("priority", "P2")
     policy = state.get("policy", {})
 
+    # Always use the validated order_id from support_order (fetch_order_for_support normalised it)
+    order_id = support_order.get("order_id") or issue.get("order_id")
+    # Belt-and-suspenders: normalize bare digits (e.g. "2001" → "ORD-2001")
+    if order_id and str(order_id).strip().isdigit():
+        order_id = f"ORD-{str(order_id).strip()}"
+
     # Deduplicate: don't create a second ticket for the same open order
-    if issue.get("order_id"):
-        existing = get_open_ticket_for_order(user_id, issue["order_id"])
+    if order_id:
+        existing = get_open_ticket_for_order(user_id, order_id)
         if existing:
             logger.info(
                 f"request_id={get_request_id()} | Duplicate ticket suppressed | existing={existing['ticket_id']}"
@@ -84,7 +91,7 @@ def create_ticket_node(state: AgentState) -> dict:
         severity=severity,
         category=issue.get("category", "other"),
         description=f"[{priority}] {issue.get('description', '')}",
-        order_id=issue.get("order_id"),
+        order_id=order_id,
     )
 
     logger.info(

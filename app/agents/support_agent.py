@@ -92,6 +92,24 @@ IMPORTANT:
 - Be direct and helpful"""
 
 
+_POLICY_QUESTION_PHRASES = [
+    "return policy", "refund policy", "warranty policy", "exchange policy",
+    "what is your policy", "whats your policy", "what's your policy",
+    "how do returns work", "how do i return", "when can i return",
+    "how long to return", "how long do i have", "can i return",
+    "what is your return", "what's your return", "how does the refund",
+]
+
+_POLICY_RESPONSE = (
+    "Here's a quick summary of our policies:\n\n"
+    "**Returns:** Most items can be returned within 30 days of delivery in original condition.\n"
+    "**Refunds:** Processed within 3-5 business days after we receive the return.\n"
+    "**Defective items:** Replacement or full refund — no questions asked.\n"
+    "**Damaged delivery:** Report within 48 hours for priority resolution.\n\n"
+    "If you have a specific order you'd like help with, just share the order number and I'll get started."
+)
+
+
 # ==================== MAIN FLOW NODES ====================
 
 
@@ -168,9 +186,13 @@ def classify_issue(state: AgentState) -> dict:
     if not issue.get("order_id") and state.get("order_id"):
         issue["order_id"] = state.get("order_id")
 
+    # Deterministic policy-question detection — bypasses order lookup entirely
+    msg_lower = user_message.lower()
+    issue["is_policy_question"] = any(phrase in msg_lower for phrase in _POLICY_QUESTION_PHRASES)
+
     logger.info(
         f"request_id={get_request_id()} | "
-        f"Classified issue | category={issue.get('category')} | order_id={issue.get('order_id')}"
+        f"Classified issue | category={issue.get('category')} | order_id={issue.get('order_id')} | policy_q={issue.get('is_policy_question')}"
     )
 
     return {"support_issue": issue}
@@ -279,19 +301,27 @@ def ask_for_order(state: AgentState) -> dict:
     return {"final_response": msg}
 
 
+_LEGAL_THREAT_KEYWORDS = {"sue", "lawsuit", "lawyer", "attorney", "court", "legal action", "consumer court", "solicitor"}
+
+
 def assess_severity(state: AgentState) -> dict:
-    """Deterministic node — business severity based on issue category."""
+    """Deterministic node — business severity based on issue category and legal threats."""
     issue = state.get("support_issue", {})
     support_order = state.get("support_order", {})
+    user_message = state.get("user_message", "").lower()
 
-    if issue.get("category") in ("defective_product", "damaged_delivery", "wrong_item"):
+    has_legal_threat = any(kw in user_message for kw in _LEGAL_THREAT_KEYWORDS)
+
+    if has_legal_threat or issue.get("category") in (
+        "defective_product", "damaged_delivery", "wrong_item", "refund_request"
+    ):
         severity = "medium"
     else:
         severity = "low"
 
     logger.info(
         f"request_id={get_request_id()} | "
-        f"Assessed severity | severity={severity} | order_id={support_order.get('order_id')}"
+        f"Assessed severity | severity={severity} | legal_threat={has_legal_threat} | order_id={support_order.get('order_id')}"
     )
 
     return {"severity": severity}
@@ -433,7 +463,20 @@ def route_to_draft_tool(state: AgentState) -> Literal["draft_tools", "end"]:
     return "end"
 
 
+def answer_policy_question(state: AgentState) -> dict:
+    """Short-circuit node — answers generic policy questions without order lookup."""
+    logger.info(f"request_id={get_request_id()} | Answering policy question directly")
+    return {"final_response": _POLICY_RESPONSE}
+
+
 # ==================== ROUTING ====================
+
+
+def route_after_classify(state: AgentState) -> Literal["fetch_order", "answer_policy"]:
+    issue = state.get("support_issue", {})
+    if issue.get("is_policy_question"):
+        return "answer_policy"
+    return "fetch_order"
 
 
 def route_after_order_fetch(state: AgentState) -> Literal["found", "not_found", "reroute"]:
@@ -459,6 +502,7 @@ def build_support_agent_graph():
     graph = StateGraph(AgentState)
 
     graph.add_node("classify_issue", classify_issue)
+    graph.add_node("answer_policy_question", answer_policy_question)
     graph.add_node("fetch_order_for_support", fetch_order_for_support)
     graph.add_node("ask_for_order", ask_for_order)
     graph.add_node("assess_severity", assess_severity)
@@ -471,7 +515,11 @@ def build_support_agent_graph():
 
     graph.set_entry_point("classify_issue")
 
-    graph.add_edge("classify_issue", "fetch_order_for_support")
+    graph.add_conditional_edges(
+        "classify_issue",
+        route_after_classify,
+        {"fetch_order": "fetch_order_for_support", "answer_policy": "answer_policy_question"},
+    )
 
     graph.add_conditional_edges(
         "fetch_order_for_support",
@@ -504,6 +552,7 @@ def build_support_agent_graph():
 
     graph.add_edge("escalation_handler", END)
     graph.add_edge("ask_for_order", END)
+    graph.add_edge("answer_policy_question", END)
     graph.add_edge("reroute_exit", END)
 
     return graph.compile()

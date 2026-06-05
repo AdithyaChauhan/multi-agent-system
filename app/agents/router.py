@@ -30,7 +30,7 @@ ROUTER_SYSTEM_PROMPT = """Classify user intent for a customer service app. Use c
 Intents:
 - "order" — order status, tracking, delivery, shipping, listing orders ("my orders", "show my orders", "order history"). If assistant asked for order ID and user provides one → "order"
 - "product" — ANY shopping, browsing, recommendations, refinement of a previous product search, vague catalog browsing ("product list", "show products", "what do you have", "appliances", "electronics"), or a bare product name ("tv", "fan", "mouse", "heater", "headphones", "speaker")
-- "support" — complaints, refunds, returns, defective items, broken products
+- "support" — complaints, refunds, returns, defective items, broken products, or general policy questions ("return policy", "refund policy", "warranty", "how do returns work", "can I return")
 - "unclear" — truly off-topic (geography, general knowledge) or pure pronoun with no referent
 
 CONTEXT PRIORITY — check the last assistant message first:
@@ -39,6 +39,7 @@ CONTEXT PRIORITY — check the last assistant message first:
 - If the last assistant message is from the ORDER agent (listed orders with ORD-XXXX numbers AND said "Please provide the order ID") → follow-up is "order"
 - If the last assistant message showed product recommendations → refinements are "product"
 - "support" context only applies when support is actively asking a clarification question
+- POLICY QUESTIONS always map to "support" regardless of prior context — "return policy", "refund policy", "how do returns work", "can I return", "what is your warranty"
 
 Product follow-up rules (if history shows a product search, ALWAYS classify as "product"):
 - Price only: "under 2000", "cheaper", "between 1000 and 2000"
@@ -84,6 +85,12 @@ History: "I've created a support ticket TKT-XXXX for your damaged Samsung TV..."
 
 History: "You have multiple orders: • ORD-2005 Logitech... Please provide the order ID." | Message: "1001"
 → {"intent": "order", "confidence": 0.95, "order_id": "ORD-1001"}
+
+Message: "What's your return policy?"
+→ {"intent": "support", "confidence": 0.9, "order_id": null}
+
+History: "Your order ORD-2002 has shipped and is currently in transit..." | Message: "Whats your return policy"
+→ {"intent": "support", "confidence": 0.9, "order_id": null}
 
 Message: "tv"
 → {"intent": "product", "confidence": 0.95, "order_id": null}
