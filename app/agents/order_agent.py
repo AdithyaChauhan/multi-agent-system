@@ -136,11 +136,12 @@ def ask_which_order(state: AgentState) -> dict:
 
     logger.info(f"request_id={get_request_id()} | Asking user to select from {len(user_orders)} orders")
 
-    # Show up to 5 most recent orders
-    order_list = "\n".join([f"• **{o['order_id']}** - {o['product_name']} ({o['status']})" for o in user_orders[:5]])
+    shown = user_orders[:5]
+    order_list = "\n".join([f"• **{o['order_id']}** - {o['product_name']} ({o['status']})" for o in shown])
+    footer = f"\n\n_(showing {len(shown)} most recent of {len(user_orders)} orders)_" if len(user_orders) > 5 else ""
 
     return {
-        "final_response": f"You have multiple orders. Which one would you like to check?\n\n{order_list}\n\nPlease provide the order ID."
+        "final_response": f"You have multiple orders. Which one would you like to check?\n\n{order_list}{footer}\n\nPlease provide the order ID."
     }
 
 

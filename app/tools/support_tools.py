@@ -10,6 +10,7 @@ def create_support_ticket(
     category: str,
     description: str,
     order_id: Optional[str] = None,
+    safety_alert: bool = False,
 ) -> dict:
     """
     Create a support ticket in the database.
@@ -36,6 +37,7 @@ def create_support_ticket(
             status=TicketStatus.open,
             category=IssueCategory[category.lower()],
             description=description,
+            safety_alert=safety_alert,
         )
 
         db.add(ticket)
@@ -112,6 +114,33 @@ def get_user_ticket_history(user_id: str, limit: int = 10) -> List[dict]:
             for t in tickets
         ]
 
+    finally:
+        db.close()
+
+
+def get_open_ticket_for_order(user_id: str, order_id: str) -> Optional[dict]:
+    """Return the most recent open/in-progress ticket for this order, or None."""
+    db = SessionLocal()
+    try:
+        ticket = (
+            db.query(SupportTicket)
+            .filter(
+                SupportTicket.user_id == user_id,
+                SupportTicket.order_id == order_id,
+                SupportTicket.status.in_([TicketStatus.open, TicketStatus.in_progress]),
+            )
+            .order_by(SupportTicket.created_at.desc())
+            .first()
+        )
+        if not ticket:
+            return None
+        return {
+            "ticket_id": ticket.ticket_id,
+            "severity": ticket.severity.value,
+            "category": ticket.category.value,
+            "status": ticket.status.value,
+            "created_at": ticket.created_at.isoformat(),
+        }
     finally:
         db.close()
 

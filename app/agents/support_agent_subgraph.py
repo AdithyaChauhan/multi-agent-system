@@ -9,7 +9,7 @@ Handles high-severity issues (medium/critical) with:
 
 from langgraph.graph import StateGraph, END
 from app.agents.state import AgentState
-from app.tools.support_tools import create_support_ticket, get_user_ticket_history
+from app.tools.support_tools import create_support_ticket, get_user_ticket_history, get_open_ticket_for_order
 from app.core.logger import get_logger, get_request_id
 
 logger = get_logger("app.agents.support_agent_subgraph")
@@ -56,12 +56,27 @@ def assign_priority(state: AgentState) -> dict:
 
 
 def create_ticket_node(state: AgentState) -> dict:
-    """Create support ticket in database"""
+    """Create support ticket in database, skipping if one already exists for this order."""
     issue = state.get("support_issue", {})
     user_id = state.get("user_id", "")
     severity = state.get("severity", "medium")
     priority = state.get("priority", "P2")
     policy = state.get("policy", {})
+
+    # Deduplicate: don't create a second ticket for the same open order
+    if issue.get("order_id"):
+        existing = get_open_ticket_for_order(user_id, issue["order_id"])
+        if existing:
+            logger.info(
+                f"request_id={get_request_id()} | Duplicate ticket suppressed | existing={existing['ticket_id']}"
+            )
+            return {
+                "final_response": (
+                    f"You already have an open ticket **{existing['ticket_id']}** for this order. "
+                    f"Our support team will be in touch within the agreed timeframe. "
+                    f"Is there anything else I can help you with?"
+                )
+            }
 
     # Create ticket
     ticket = create_support_ticket(

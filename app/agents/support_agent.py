@@ -84,24 +84,6 @@ IMPORTANT:
 - Address the user directly as "you"
 - Be direct and helpful"""
 
-# Product categories that carry higher physical risk
-HIGH_RISK_PRODUCT_KEYWORDS = [
-    "baby",
-    "infant",
-    "toddler",
-    "child",
-    "toy",
-    "heater",
-    "iron",
-    "kettle",
-    "fryer",
-    "blender",
-    "pressure",
-    "gas",
-    "electric",
-    "induction",
-]
-
 
 # ==================== MAIN FLOW NODES ====================
 
@@ -236,72 +218,38 @@ def ask_for_order(state: AgentState) -> dict:
             "Could you double-check and provide the order number (e.g. ORD-1234)?"
         )
     else:
+        shown = user_orders[:5]
         order_lines = "\n".join(
             [
                 f"{i+1}. **{o['order_id']}** — {o['product_name'][:60]} ({o['status'].title()})"
-                for i, o in enumerate(user_orders[:5])
+                for i, o in enumerate(shown)
             ]
         )
+        footer = f"\n_(showing {len(shown)} most recent of {len(user_orders)} orders)_" if len(user_orders) > 5 else ""
         prefix = (
             f"I couldn't find order **{issue['order_id']}** on your account. "
             if had_invalid_id
-            else "To raise a support ticket, I need to know which order this is about.\n\n"
-            "Here are your recent orders:\n\n"
+            else "To raise a support ticket, I need to know which order this is about.\n\nHere are your recent orders:\n\n"
         )
-        msg = f"{prefix}" f"{order_lines}\n\n" f"Please reply with the order number you need help with."
+        msg = f"{prefix}{order_lines}{footer}\n\nPlease reply with the order number you need help with."
 
     logger.info(f"request_id={get_request_id()} | Asking user for order")
     return {"final_response": msg}
 
 
 def assess_severity(state: AgentState) -> dict:
-    """
-    Deterministic node — severity based on:
-    1. Critical keywords in user message
-    2. Physical risk of the actual product ordered
-    3. Issue category
-    """
-    user_message = state.get("user_message", "").lower()
+    """Deterministic node — business severity based on issue category."""
     issue = state.get("support_issue", {})
     support_order = state.get("support_order", {})
 
-    critical_message_keywords = [
-        "urgent",
-        "emergency",
-        "danger",
-        "safety",
-        "injury",
-        "hurt",
-        "burn",
-        "child",
-        "baby",
-        "toddler",
-        "hospital",
-        "poison",
-        "toxic",
-        "choking",
-        "fire",
-        "smoke",
-        "electric shock",
-    ]
-
-    product_name = (support_order.get("product_name") or "").lower()
-    product_is_high_risk = any(kw in product_name for kw in HIGH_RISK_PRODUCT_KEYWORDS)
-
-    if any(kw in user_message for kw in critical_message_keywords):
-        severity = "critical"
-    elif product_is_high_risk and issue.get("category") in ("defective_product", "damaged_delivery"):
-        # e.g. defective heater or broken baby toy → critical regardless of wording
-        severity = "critical"
-    elif issue.get("category") in ("defective_product", "damaged_delivery", "wrong_item"):
+    if issue.get("category") in ("defective_product", "damaged_delivery", "wrong_item"):
         severity = "medium"
     else:
         severity = "low"
 
     logger.info(
         f"request_id={get_request_id()} | "
-        f"Assessed severity | severity={severity} | product_high_risk={product_is_high_risk} | "
-        f"order_id={support_order.get('order_id')}"
+        f"Assessed severity | severity={severity} | order_id={support_order.get('order_id')}"
     )
 
     return {"severity": severity}
@@ -391,7 +339,21 @@ def draft_resolution(state: AgentState) -> dict:
 
 def finalize_draft(state: AgentState) -> dict:
     """LLM node — after fetch_support_policy tool call, generates the final resolution draft."""
-    messages = state.get("messages") or []
+    issue = state.get("support_issue", {})
+    support_order = state.get("support_order", {})
+    severity = state.get("severity", "low")
+    category = issue.get("category", "other")
+
+    context_prompt = (
+        f"Order: {support_order.get('order_id')} — {support_order.get('product_name', 'the product')}\n"
+        f"Issue: {issue.get('description')}\n"
+        f"Category: {category.replace('_', ' ')}, Severity: {severity}\n\n"
+        f"Using the policy retrieved above, draft a helpful and empathetic response for the customer."
+    )
+
+    tool_messages = state.get("messages") or []
+    messages = [SystemMessage(content=RESOLUTION_SYSTEM_PROMPT), HumanMessage(content=context_prompt)] + tool_messages
+
     _t0 = time.perf_counter()
     response = llm.invoke(messages)
     _latency_s = time.perf_counter() - _t0
