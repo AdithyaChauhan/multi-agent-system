@@ -40,7 +40,7 @@ ISSUE CATEGORIES:
 - "refund_request": Want money back
 - "other": Anything else
 
-Extract order ID if present (ORD-1234, order #1234, etc.)
+Extract order ID ONLY if explicitly stated in the CURRENT message (ORD-1234, order #1234, "order 2001", etc.). Do NOT infer order ID from conversation history.
 
 Return JSON:
 {
@@ -473,7 +473,13 @@ def route_after_classify(state: AgentState) -> Literal["fetch_order", "answer_po
 def route_after_order_fetch(state: AgentState) -> Literal["found", "not_found", "reroute"]:
     if state.get("reroute_to_order"):
         return "reroute"
-    return "found" if state.get("support_order") else "not_found"
+    if state.get("support_order"):
+        return "found"
+    # Legal threats escalate immediately even without an order — no ticket FK needed
+    user_message = state.get("user_message", "").lower()
+    if any(kw in user_message for kw in _LEGAL_THREAT_KEYWORDS):
+        return "found"
+    return "not_found"
 
 
 def reroute_exit(state: AgentState) -> dict:

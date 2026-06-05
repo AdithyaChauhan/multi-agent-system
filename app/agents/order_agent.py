@@ -26,13 +26,20 @@ llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3, api_key=os.getenv("OPENAI
 RESPONSE_SYSTEM_PROMPT = """You are a customer service agent for an e-commerce store.
 Generate a concise (1-3 sentence) response about the customer's order using ONLY the data below.
 
-Rules:
+Status rules:
 - "delivered": confirm the order has been delivered; mention tracking ID if available.
 - "shipped" / "out_for_delivery": state the current status and estimated delivery if present.
 - "processing": say the order is being prepared / will ship soon.
+- "cancelled": inform the order is already cancelled; nothing further needed.
 - If live tracking data is "N/A" or missing, rely on the DB status field only.
 - NEVER suggest the customer check the website or their account — give the answer directly.
-- NEVER invent carrier names, locations, or dates that are not in the data."""
+- NEVER invent carrier names, locations, or dates that are not in the data.
+
+Cancellation rules (when user asks to cancel):
+- "processing": confirm cancellation can be arranged.
+- "shipped" / "out_for_delivery" / "in_transit": cancellation is NOT possible — offer to help with a return once it arrives.
+- "delivered": cancellation is NOT possible — offer to return within our 30-day policy window.
+- "cancelled": inform the order is already cancelled."""
 
 
 # ==================== HELPER FUNCTIONS ====================
@@ -212,10 +219,10 @@ def response_generation(state: AgentState) -> dict:
     tracking_data = state.get("tracking_data") or {}
     conversation_history = state.get("conversation_history", [])
 
-    # Deterministic short-circuit for delivered orders — no LLM needed,
-    # avoids "check your account" hallucinations when tracking data is N/A.
+    # Deterministic short-circuit for delivered orders — skip if user is asking to cancel.
+    user_intent = (state.get("user_message") or "").lower()
     status = (order_data.get("status") or "").lower()
-    if status == "delivered":
+    if status == "delivered" and "cancel" not in user_intent:
         product = order_data.get("product_name", "Your order")
         tracking_id = tracking_data.get("tracking_id") or order_data.get("tracking_id")
         msg = f"Good news! **{product}** (Order {order_data.get('order_id')}) has been delivered."
