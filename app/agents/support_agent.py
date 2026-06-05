@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 
 from app.agents.state import AgentState
 from app.agents.support_agent_subgraph import escalation_handler_subgraph
-from app.tools.support_tools import lookup_support_policy
+from app.tools.support_tools import lookup_support_policy, get_open_ticket_for_order
 from app.tools.order_tools import fetch_order_from_db, fetch_user_orders
 from app.core.logger import get_logger, get_request_id
 from app.core.metrics import llm_requests_total, llm_tokens_total, llm_duration_seconds
@@ -176,6 +176,25 @@ def classify_issue(state: AgentState) -> dict:
     return {"support_issue": issue}
 
 
+_COMPLAINT_KEYWORDS = {
+    "broken", "damaged", "wrong", "missing", "refund", "return",
+    "not working", "stopped working", "defective", "cracked",
+    "faulty", "malfunction", "cancel", "complaint", "issue",
+    "problem", "help", "support", "hurt", "bleed", "fire",
+}
+
+
+def _is_bare_order_lookup(message: str) -> bool:
+    """True when the message is just an order ID or bare number with no complaint context."""
+    stripped = message.strip()
+    if re.match(r'^\d+$', stripped):
+        return True
+    if re.match(r'^ORD-?\d+$', stripped, re.IGNORECASE):
+        return True
+    words = set(stripped.lower().split())
+    return len(stripped) < 20 and not words.intersection(_COMPLAINT_KEYWORDS)
+
+
 def fetch_order_for_support(state: AgentState) -> dict:
     """
     Fetches the order the support ticket is about.
@@ -210,6 +229,11 @@ def fetch_order_for_support(state: AgentState) -> dict:
         order = fetch_order_from_db(order_id, user_id)
         if order:
             logger.info(f"request_id={get_request_id()} | Support order fetched | order_id={order_id}")
+            # Reroute to order agent if message is a bare lookup with no existing ticket
+            user_message = state.get("user_message", "")
+            if _is_bare_order_lookup(user_message) and not get_open_ticket_for_order(user_id, order_id):
+                logger.info(f"request_id={get_request_id()} | Bare order lookup — rerouting to order agent | order_id={order_id}")
+                return {"support_order": order, "reroute_to_order": True}
             return {"support_order": order}
         else:
             logger.info(f"request_id={get_request_id()} | Order not found or not owned | order_id={order_id}")
@@ -412,8 +436,15 @@ def route_to_draft_tool(state: AgentState) -> Literal["draft_tools", "end"]:
 # ==================== ROUTING ====================
 
 
-def route_after_order_fetch(state: AgentState) -> Literal["found", "not_found"]:
+def route_after_order_fetch(state: AgentState) -> Literal["found", "not_found", "reroute"]:
+    if state.get("reroute_to_order"):
+        return "reroute"
     return "found" if state.get("support_order") else "not_found"
+
+
+def reroute_exit(state: AgentState) -> dict:
+    """Exit node — signals main.py to re-invoke the order agent."""
+    return {}
 
 
 def route_by_severity(state: AgentState) -> Literal["high", "low"]:
@@ -436,6 +467,7 @@ def build_support_agent_graph():
     graph.add_node("draft_resolution", draft_resolution)
     graph.add_node("draft_tools", draft_tool_node)
     graph.add_node("finalize_draft", finalize_draft)
+    graph.add_node("reroute_exit", reroute_exit)
 
     graph.set_entry_point("classify_issue")
 
@@ -447,6 +479,7 @@ def build_support_agent_graph():
         {
             "found": "assess_severity",
             "not_found": "ask_for_order",
+            "reroute": "reroute_exit",
         },
     )
 
@@ -471,6 +504,7 @@ def build_support_agent_graph():
 
     graph.add_edge("escalation_handler", END)
     graph.add_edge("ask_for_order", END)
+    graph.add_edge("reroute_exit", END)
 
     return graph.compile()
 

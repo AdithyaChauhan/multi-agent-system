@@ -40,5 +40,8 @@ class AgentState(TypedDict, total=False):
     # ToolNode message channel — required by langgraph.prebuilt.ToolNode
     messages: Annotated[List[BaseMessage], add_messages]
 
+    # Reroute signal — support agent sets this when bare order lookup detected
+    reroute_to_order: Optional[bool]
+
     # Final response
     final_response: Optional[str]

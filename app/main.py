@@ -16,6 +16,7 @@ from app.models.session import Session
 from app.models.message import Message
 
 from app.agents.router import router_graph
+from app.agents.order_agent import order_agent_graph
 from app.tools.support_tools import create_support_ticket
 
 _session_preferences: dict = {}
@@ -316,7 +317,20 @@ def chat(
         if graph_result.get("preferences"):
             _session_preferences[session.session_id] = graph_result["preferences"]
 
-        final_response = graph_result.get("final_response", "Something went wrong.")
+        # Support agent detected a bare order lookup — re-invoke order agent directly
+        if graph_result.get("reroute_to_order"):
+            support_order = graph_result.get("support_order") or {}
+            logger.info(f"request_id={get_request_id()} | Rerouting to order agent | order_id={support_order.get('order_id')}")
+            order_result = order_agent_graph.invoke({
+                "user_message": chat_request.message,
+                "user_id": user_id,
+                "session_id": session.session_id,
+                "conversation_history": conversation_history,
+                "order_id": support_order.get("order_id"),
+            })
+            final_response = order_result.get("final_response", "Something went wrong.")
+        else:
+            final_response = graph_result.get("final_response", "Something went wrong.")
         logger.info(f"request_id={get_request_id()} | Graph completed | final_response_preview={final_response[:80]}")
 
         # Store the assistant response

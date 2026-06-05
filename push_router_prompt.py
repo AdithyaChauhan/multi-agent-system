@@ -62,6 +62,9 @@ History: "You have multiple orders: • ORD-9902 boAt Rockerz 450... Please prov
 History: "I've created a support ticket TKT-XXXX for your damaged Samsung TV..." | Message: "what about my iphone order"
 → {"intent": "order", "confidence": 0.9, "order_id": null}
 
+History: "You have multiple orders: • ORD-2005 Logitech... Please provide the order ID." | Message: "1001"
+→ {"intent": "order", "confidence": 0.95, "order_id": "ORD-1001"}
+
 Message: "tv"
 → {"intent": "product", "confidence": 0.95, "order_id": null}
 
