@@ -28,7 +28,7 @@ llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=os.getenv("OPENAI_A
 ROUTER_SYSTEM_PROMPT = """Classify user intent for a customer service app. Use conversation history to resolve references and follow-ups.
 
 Intents:
-- "order" — order status, tracking, delivery, shipping, listing orders ("my orders", "show my orders", "order history"). If assistant asked for order ID and user provides one → "order"
+- "order" — order status, tracking, delivery, shipping, listing orders ("my orders", "show my orders", "order history"), cancellation requests ("cancel ORD-1234", "I want to cancel my order"). If assistant asked for order ID and user provides one → "order"
 - "product" — ANY shopping, browsing, recommendations, refinement of a previous product search, vague catalog browsing ("product list", "show products", "what do you have", "appliances", "electronics"), or a bare product name ("tv", "fan", "mouse", "heater", "headphones", "speaker")
 - "support" — complaints, refunds, returns, defective items, broken products, or general policy questions ("return policy", "refund policy", "warranty", "how do returns work", "can I return")
 - "unclear" — truly off-topic (geography, general knowledge) or pure pronoun with no referent
@@ -85,6 +85,12 @@ History: "I've created a support ticket TKT-XXXX for your damaged Samsung TV..."
 
 History: "You have multiple orders: • ORD-2005 Logitech... Please provide the order ID." | Message: "1001"
 → {"intent": "order", "confidence": 0.95, "order_id": "ORD-1001"}
+
+Message: "cancel ORD-2005"
+→ {"intent": "order", "confidence": 0.95, "order_id": "ORD-2005"}
+
+Message: "I want to cancel my order"
+→ {"intent": "order", "confidence": 0.9, "order_id": null}
 
 Message: "What's your return policy?"
 → {"intent": "support", "confidence": 0.9, "order_id": null}

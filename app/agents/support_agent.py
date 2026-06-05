@@ -238,15 +238,6 @@ def fetch_order_for_support(state: AgentState) -> dict:
         if match:
             order_id = f"ORD-{match.group(1)}"
 
-    # Also check conversation history for ORD-XXXX pattern if LLM missed it
-    if not order_id:
-        conversation_history = state.get("conversation_history", [])
-        for msg in reversed(conversation_history[-6:]):
-            match = re.search(r'\bORD-\d+\b', msg.get("content", ""), re.IGNORECASE)
-            if match:
-                order_id = match.group().upper()
-                break
-
     if order_id:
         order = fetch_order_from_db(order_id, user_id)
         if order:

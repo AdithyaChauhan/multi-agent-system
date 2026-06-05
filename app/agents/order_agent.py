@@ -153,17 +153,34 @@ def fetch_order(state: AgentState) -> dict:
     order = fetch_order_from_db(order_id, user_id)
 
     if not order:
-        return {"order_data": None}
+        user_orders = fetch_user_orders(user_id)
+        return {"order_data": None, "user_orders": user_orders}
 
     return {"order_data": order}
 
 
 def respond_not_found(state: AgentState) -> dict:
-    """Order not found for this user"""
+    """Order not found — show the user their actual orders."""
     order_id = state.get("order_id")
+    user_orders = state.get("user_orders") or []
     logger.info(f"request_id={get_request_id()} | Order not found: {order_id}")
+
+    if not user_orders:
+        return {
+            "final_response": f"I couldn't find order **{order_id}** on your account. Please double-check the order ID."
+        }
+
+    shown = user_orders[:5]
+    order_lines = "\n".join(
+        [f"{i+1}. **{o['order_id']}** — {o['product_name'][:60]} ({o['status'].title()})" for i, o in enumerate(shown)]
+    )
+    footer = f"\n_(showing {len(shown)} most recent of {len(user_orders)} orders)_" if len(user_orders) > 5 else ""
     return {
-        "final_response": f"I couldn't find order **{order_id}** on your account. Please double-check the order ID."
+        "final_response": (
+            f"I couldn't find order **{order_id}** on your account. "
+            f"Here are your recent orders:\n\n{order_lines}{footer}\n\n"
+            f"Please reply with the order number you need help with."
+        )
     }
 
 
