@@ -168,7 +168,6 @@ Respond ONLY with valid JSON."""
 def extract_preferences(state: AgentState) -> dict:
     """LLM node — extracts structured preferences from user message."""
     user_message = state.get("user_message", "")
-    conversation_history = state.get("conversation_history", [])
 
     # Extract from the current message only — no history passed to LLM.
     # Context preservation (brand/price inheritance across turns) is handled entirely

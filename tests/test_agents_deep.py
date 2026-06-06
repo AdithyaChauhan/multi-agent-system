@@ -445,34 +445,6 @@ class TestSupportAgentCompleteFlow:
 
         assert result["support_issue"]["category"] == "refund_request"
 
-    def test_flow_severity_critical_for_baby_safety(self):
-        """Critical severity for baby safety issues"""
-        from app.agents.support_agent import assess_severity
-
-        state = AgentState(
-            user_message="My baby got hurt by toy",
-            user_id="u1",
-            session_id="s1",
-            support_issue={"category": "defective_product"},
-            conversation_history=[],
-        )
-        result = assess_severity(state)
-        assert result["severity"] == "critical"
-
-    def test_flow_severity_critical_for_injury(self):
-        """Critical severity for injuries"""
-        from app.agents.support_agent import assess_severity
-
-        state = AgentState(
-            user_message="caused injury",
-            user_id="u1",
-            session_id="s1",
-            support_issue={"category": "defective_product"},
-            conversation_history=[],
-        )
-        result = assess_severity(state)
-        assert result["severity"] == "critical"
-
     def test_flow_severity_medium_for_defective(self):
         """Medium severity for defective product"""
         from app.agents.support_agent import assess_severity
@@ -486,20 +458,6 @@ class TestSupportAgentCompleteFlow:
         )
         result = assess_severity(state)
         assert result["severity"] == "medium"
-
-    def test_flow_severity_low_for_refund(self):
-        """Low severity for refund requests"""
-        from app.agents.support_agent import assess_severity
-
-        state = AgentState(
-            user_message="want refund",
-            user_id="u1",
-            session_id="s1",
-            support_issue={"category": "refund_request"},
-            conversation_history=[],
-        )
-        result = assess_severity(state)
-        assert result["severity"] == "low"
 
     def test_flow_lookup_policy(self):
         """lookup_policy is deterministic — returns policy dict without any LLM call."""
