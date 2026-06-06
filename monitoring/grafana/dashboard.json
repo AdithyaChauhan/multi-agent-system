@@ -56,12 +56,40 @@
     {
       "title": "Average Response Time",
       "type": "timeseries",
-      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
       "targets": [{
         "datasource": {"type": "loki"},
         "expr": "sum(count_over_time({job=\"multiagent-app\"} |= \"RESPONSE RETURNED\" [1m]))",
         "legendFormat": "Responses/min"
       }]
+    },
+    {
+      "title": "LLM Token Consumption",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+      "targets": [
+        {
+          "datasource": {"type": "prometheus"},
+          "expr": "sum(rate(llm_tokens_total{token_type=\"total\"}[5m])) by (agent)",
+          "legendFormat": "{{agent}}"
+        },
+        {
+          "datasource": {"type": "prometheus"},
+          "expr": "sum(rate(llm_tokens_total{token_type=\"prompt\"}[5m]))",
+          "legendFormat": "prompt"
+        },
+        {
+          "datasource": {"type": "prometheus"},
+          "expr": "sum(rate(llm_tokens_total{token_type=\"completion\"}[5m]))",
+          "legendFormat": "completion"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {"lineWidth": 2}
+        }
+      }
     }
   ],
   "time": {"from": "now-6h", "to": "now"},
