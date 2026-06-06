@@ -90,18 +90,18 @@
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "rate(llm_tokens_total{token_type=\"total\"}[1m]) * 60",
-          "legendFormat": "{{agent}} total tokens/min"
+          "expr": "sum(rate(llm_tokens_total{token_type=\"total\"}[1m])) by (agent) * 60",
+          "legendFormat": "{{agent}} total"
         },
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "rate(llm_tokens_total{token_type=\"prompt\"}[1m]) * 60",
-          "legendFormat": "{{agent}} prompt tokens/min"
+          "expr": "sum(rate(llm_tokens_total{token_type=\"prompt\"}[1m])) by (agent) * 60",
+          "legendFormat": "{{agent}} prompt"
         },
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "rate(llm_tokens_total{token_type=\"completion\"}[1m]) * 60",
-          "legendFormat": "{{agent}} completion tokens/min"
+          "expr": "sum(rate(llm_tokens_total{token_type=\"completion\"}[1m])) by (agent) * 60",
+          "legendFormat": "{{agent}} completion"
         }
       ]
     },
@@ -119,7 +119,7 @@
       },
       "targets": [{
         "datasource": {"type": "loki", "uid": "loki"},
-        "expr": "{job=\"multiagent-app\"}",
+        "expr": "{job=\"multiagent-app\", level=~\".+\"}",
         "legendFormat": ""
       }]
     }
