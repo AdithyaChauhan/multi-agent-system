@@ -98,7 +98,7 @@ CATALOG_BLURB = build_catalog_blurb()
 # not what happens to be in the DB. Update this when subcategories are added via migration.
 PROMPT_CATALOG = (
     "Electronics: Cameras & Photography | adapter | battery | cable | camera accessory"
-    " | charger | headphones | memory card | pen | phone case | phone stand | power bank"
+    " | calculators | charger | headphones | memory card | pen | phone case | phone stand | power bank"
     " | projector | screen protector | selfie stick | set top box | smartwatch | speakers"
     " | streaming device | tv | tv mount | tv remote\n"
     "Computers & Accessories: adapter | cable | drawing tablet | external hdd | external ssd"
@@ -112,7 +112,7 @@ PROMPT_CATALOG = (
     " | room heater | roti maker | sandwich maker | sealing machine | sewing machine"
     " | storage organizer | toaster | vacuum cleaner | waffle maker | water filter"
     " | water heater | water purifier | yogurt maker\n"
-    "Office Products: art supplies | office electronics | stationery"
+    "Office Products: art supplies | stationery"
 )
 
 # Generic relaxation order for all categories
@@ -148,7 +148,7 @@ Rules:
 - min_rating: set when user asks for quality — "best rated"/"highly rated"/"top rated" → 4.0, "at least 4.5 stars" → 4.5, explicit number like "4 star and above" → 4.0; null otherwise
 - Generic category browsing (no specific product): category only, subcategory: null, keywords: []
 - Vague browsing (product list, show me products, what do you have): category: null, keywords: [], unavailable_request: false
-- unavailable_request TRUE: laptops, smartphones, tablets, clothing, shoes, furniture, food, books, toys, sports equipment
+- unavailable_request: true when the product cannot be mapped to any subcategory in the catalog above. Use the most common real-world interpretation for ambiguous words (e.g. "table" = dining/coffee table → furniture, not drawing tablet; "mobile" = phone → not phone case). false when it maps to a catalog subcategory even approximately.
 - Never output string "null" — use JSON null
 
 Examples:
@@ -168,28 +168,12 @@ def extract_preferences(state: AgentState) -> dict:
     user_message = state.get("user_message", "")
     conversation_history = state.get("conversation_history", [])
 
-    # Last 2 messages (prev user + last assistant) is enough to detect follow-ups.
-    # The last assistant response is what the user is refining — no need for deeper history.
-    history_context = ""
-    if conversation_history:
-        recent = conversation_history[-2:]
-        history_context = "\n".join([f"{msg['role'].title()}: {msg['content'][:400]}" for msg in recent])
-
-    if history_context:
-        full_prompt = (
-            f"Recent conversation:\n{history_context}\n\n"
-            f"Current message: {user_message}\n\n"
-            f"Follow-up rules:\n"
-            f"- If the user is refining the SAME product (e.g. changing price, brand, or adding a feature), preserve subcategory from history.\n"
-            f"- If the user mentions a COMPLETELY DIFFERENT product (different category or type — e.g. 'heater' after earphones, 'fan' after smartwatch), treat as ENTIRELY NEW search. Set brand=null, max_price=null, keywords=[] unless the user explicitly stated them NOW.\n"
-            f"- 'product list', 'show me products', 'what do you have' with no specific product → {{\"category\": null, \"subcategory\": null, \"keywords\": [], \"unavailable_request\": false}}\n"
-            f"CRITICAL: When user says 'what about [Brand]', keep the same subcategory from history — do NOT infer subcategory from brand name.\n\n"
-            f"Example — category switch:\n"
-            f"History: 'Samsung Earphones ₹499...' | Message: 'what do you have in heaters'\n"
-            f"→ {{\"category\": \"Home & Kitchen\", \"subcategory\": \"room heater\", \"brand\": null, \"max_price\": null, \"keywords\": []}}"
-        )
-    else:
-        full_prompt = user_message
+    # Extract from the current message only — no history passed to LLM.
+    # Context preservation (brand/price inheritance across turns) is handled entirely
+    # by the Python merge logic below, not by the LLM. Passing history here caused
+    # the LLM to map unrelated product names (e.g. "table" after "mouse") to the
+    # previous subcategory instead of extracting them fresh.
+    full_prompt = user_message
 
     messages = [
         SystemMessage(content=EXTRACTION_SYSTEM_PROMPT),
@@ -233,8 +217,22 @@ def extract_preferences(state: AgentState) -> dict:
         logger.error(f"request_id={get_request_id()} | " f"Preference parse error | raw={raw} | error={str(e)}")
         preferences = {"category": None, "keywords": [], "unavailable_request": False}
 
-    # Merge with previous preferences — preserve context across turns
+    logger.info(f"request_id={get_request_id()} | RAW_LLM: {json.dumps(preferences)}")
+
+    # Brand-only refinement override: if the LLM set unavailable_request=true but
+    # also extracted a brand (and no product keywords), this is a brand-switch on an
+    # existing search — not an unavailable product. Clear the flag so the merge can
+    # inherit the previous subcategory (e.g. "what about Bajaj" after "mixer grinder").
     previous_prefs = state.get("preferences") or {}
+    if (
+        preferences.get("unavailable_request")
+        and preferences.get("brand")
+        and not preferences.get("keywords")
+        and previous_prefs.get("subcategory")
+    ):
+        preferences["unavailable_request"] = False
+
+    # Merge with previous preferences — preserve context across turns
     if previous_prefs and not preferences.get("unavailable_request"):
         new_category = preferences.get("category") or previous_prefs.get("category")
         prev_category = previous_prefs.get("category")
@@ -267,7 +265,11 @@ def extract_preferences(state: AgentState) -> dict:
         # Fully vague browsing (product list, show me products): treat as fresh start.
         vague_browse = not new_category and not new_subcategory and not preferences.get("keywords")
 
-        if subcategory_changed or category_changed or vague_browse:
+        # New specific product after a keyword/feature-only turn that stored no subcategory.
+        # e.g. "with calling feature" stores subcategory=null; then "calculator" is a new search.
+        new_specific_product = bool(new_subcategory and not prev_subcategory)
+
+        if subcategory_changed or category_changed or vague_browse or new_specific_product:
             # New product type — reset all filters to only what the user re-specified.
             # e.g. "headphones under 2000" → "show me monitors" should not carry ₹2000 cap.
             # Exception: if user specified price/brand/rating together with the new subcategory,
@@ -286,9 +288,28 @@ def extract_preferences(state: AgentState) -> dict:
         else:
             # Same subcategory (or refinement turn) — preserve all previous filters
             # unless the user explicitly overrode them this turn.
+            # Don't inherit subcategory if the new query has keywords — keyword search
+            # signals a new product intent, not a refinement (e.g. "table" after "mouse").
+            inherit_subcategory = not preferences.get("keywords")
+
+            # Safety: only inherit subcategory if the user's message contains a word from it
+            # OR the user explicitly set a refinement signal (brand/price/rating/type).
+            # Blocks cases where LLM extracts nothing specific but we'd silently reuse
+            # the previous subcategory — e.g. "table" after "mouse" inheriting subcategory: mouse.
+            if inherit_subcategory and prev_subcategory and new_subcategory is None:
+                has_explicit_signal = bool(
+                    preferences.get("brand") or preferences.get("type") or
+                    preferences.get("max_price") or preferences.get("min_price") or
+                    preferences.get("min_rating")
+                )
+                if not has_explicit_signal:
+                    msg_words = set(user_message.lower().split())
+                    prev_sub_words = set(prev_subcategory.lower().replace("-", " ").split())
+                    if not msg_words & prev_sub_words:
+                        inherit_subcategory = False
             preferences = {
                 "category": new_category,
-                "subcategory": new_subcategory or prev_subcategory,
+                "subcategory": new_subcategory or (prev_subcategory if inherit_subcategory else None),
                 "type": preferences.get("type") or previous_prefs.get("type"),
                 "brand": preferences.get("brand") or previous_prefs.get("brand"),
                 "max_price": preferences.get("max_price") or previous_prefs.get("max_price"),
@@ -314,66 +335,38 @@ def ask_for_preferences(state: AgentState) -> dict:
     return {"final_response": f"What are you looking for? Here's what we carry:\n\n{CATALOG_BLURB}"}
 
 
-def _unavailable_suggestion(user_message: str, preferences: dict) -> str:
-    """Return a short, targeted suggestion when a user asks for something we don't carry."""
-    query = (user_message + " " + " ".join(preferences.get("keywords") or [])).lower()
+_UNAVAILABLE_SYSTEM_PROMPT = f"""You are a helpful shopping assistant. The user asked for a product we don't carry.
+Our catalog:
+{CATALOG_BLURB}
 
-    if any(
-        w in query
-        for w in ["phone", "smartphone", "mobile", "iphone", "android", "galaxy", "oneplus phone", "samsung phone"]
-    ):
-        return (
-            "We don't carry smartphones. "
-            "We do have **phone accessories** — cases, chargers, power banks, and phone stands."
-        )
-    if any(w in query for w in ["laptop", "notebook", "macbook", "chromebook"]):
-        return (
-            "We don't carry laptops. "
-            "We do have **computer accessories** — mouse, keyboard, monitors, and laptop bags."
-        )
-    if any(w in query for w in ["tablet", "ipad", "surface"]):
-        return "We don't carry tablets. " "We do have **computer accessories** — keyboards, mouse, and adapters."
-    if any(
-        w in query
-        for w in [
-            "soap",
-            "shampoo",
-            "hygiene",
-            "lotion",
-            "cream",
-            "toothpaste",
-            "detergent",
-            "cleanser",
-            "grooming",
-            "skincare",
-        ]
-    ):
-        return (
-            "We don't carry personal care items. "
-            "We do have **Home & Kitchen appliances** — mixer grinders, air fryers, room heaters, and more."
-        )
-    if any(w in query for w in ["cloth", "shirt", "dress", "pant", "shoe", "apparel", "fashion", "wear"]):
-        return "We don't carry clothing or footwear."
-    if any(w in query for w in ["furniture", "sofa", "chair", "table", "bed", "shelf", "wardrobe"]):
-        return "We don't carry furniture."
-    if any(w in query for w in ["food", "grocery", "snack", "drink", "beverage", "vegetable", "fruit"]):
-        return "We don't carry food or groceries."
-    if any(w in query for w in ["book", "novel", "textbook", "magazine"]):
-        return "We don't carry books."
-    if any(w in query for w in ["toy", "doll", "lego", "puzzle", "board game"]):
-        return "We don't carry toys. " "We do have **art supplies and stationery** if you're interested."
+Write a 2-sentence response:
+1. Acknowledge we don't carry what they asked for (one short sentence).
+2. Suggest the single most relevant category or product type from our catalog as a question — e.g. "Would you like to see our smartwatches?" or "Can I help you find a Home & Kitchen appliance instead?". If nothing is relevant, ask if they'd like to browse the full catalog.
 
-    # Generic fallback — show the full blurb
-    return f"We don't carry that in our catalog. Here's what we do have:\n\n{CATALOG_BLURB}"
+Plain text only, no markdown headers, no bullet lists."""
 
 
 def handle_unavailable_products(state: AgentState) -> dict:
     logger.info(f"request_id={get_request_id()} | Unavailable category requested")
-    suggestion = _unavailable_suggestion(
-        state.get("user_message", ""),
-        state.get("preferences") or {},
-    )
-    return {"final_response": suggestion}
+    user_message = state.get("user_message", "")
+    query = user_message.lower()
+
+    # Keep targeted redirects only where we have a genuine alternative to point to
+    if any(w in query for w in ["phone", "smartphone", "mobile", "iphone", "android", "galaxy"]):
+        return {"final_response": "We don't carry smartphones. We do have **phone accessories** — cases, chargers, power banks, and phone stands."}
+    if any(w in query for w in ["laptop", "notebook", "macbook", "chromebook"]):
+        return {"final_response": "We don't carry laptops. We do have **computer accessories** — mouse, keyboard, monitors, and laptop bags."}
+    if any(w in query for w in ["tablet", "ipad", "surface"]):
+        return {"final_response": "We don't carry tablets. We do have **computer accessories** — keyboards, mouse, and adapters."}
+
+    # LLM picks the most relevant suggestion from the catalog
+    _t0 = time.perf_counter()
+    response = llm.invoke([
+        SystemMessage(content=_UNAVAILABLE_SYSTEM_PROMPT),
+        HumanMessage(content=f'User asked for: "{user_message}"'),
+    ])
+    logger.info(f"request_id={get_request_id()} | unavailable_suggestion | latency_ms={int((time.perf_counter()-_t0)*1000)}")
+    return {"final_response": response.content.strip()}
 
 
 # ── Product search tool + ToolNode ───────────────────────────────────────────
@@ -564,8 +557,13 @@ def format_recommendations(state: AgentState) -> dict:
                 relevant = any(any(kw.lower() in p.get("name", "").lower() for kw in specific_keywords) for p in ranked)
                 if not relevant:
                     original_query = " ".join(specific_keywords)
-                    suggestion = _unavailable_suggestion(original_query, {"keywords": specific_keywords})
-                    return {"final_response": (f"I couldn't find '{original_query}' in our catalog. " f"{suggestion}")}
+                    _t0 = time.perf_counter()
+                    _resp = llm.invoke([
+                        SystemMessage(content=_UNAVAILABLE_SYSTEM_PROMPT),
+                        HumanMessage(content=f'User asked for: "{original_query}"'),
+                    ])
+                    logger.info(f"request_id={get_request_id()} | unavailable_suggestion | latency_ms={int((time.perf_counter()-_t0)*1000)}")
+                    return {"final_response": _resp.content.strip()}
 
     lines = []
     if relaxed:
@@ -598,13 +596,13 @@ def route_after_extraction(state: AgentState) -> Literal["search", "ask", "unava
     if prefs.get("unavailable_request"):
         return "unavailable"
 
-    if not prefs.get("category"):
-        # Specific request with no matching category = not in catalog
-        if prefs.get("keywords"):
-            return "unavailable"
-        return "ask"
-
-    return "search"
+    # Search if there's any signal — category, subcategory, brand, or keywords.
+    # Only fall back to "ask" when the LLM found nothing at all (pure vague browse).
+    has_signal = bool(
+        prefs.get("category") or prefs.get("subcategory") or
+        prefs.get("keywords") or prefs.get("brand")
+    )
+    return "search" if has_signal else "ask"
 
 
 def route_after_search(state: AgentState) -> Literal["rank", "broaden"]:
