@@ -16,9 +16,3 @@ scrape_configs:
         labels:
           job: multiagent-app
           __path__: /logs/app.log
-    pipeline_stages:
-      - regex:
-          expression: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d+ \| (?P<level>\w+) \| (?P<service>[a-zA-Z0-9_.]+) \|'
-      - labels:
-          level:
-          service:
