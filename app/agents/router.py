@@ -30,7 +30,7 @@ ROUTER_SYSTEM_PROMPT = """Classify user intent for a customer service app. Use c
 Intents:
 - "order" — order status, tracking, delivery, shipping, listing orders ("my orders", "show my orders", "order history"), cancellation requests ("cancel ORD-1234", "I want to cancel my order"). If assistant asked for order ID and user provides one → "order"
 - "product" — ANY shopping, browsing, recommendations, refinement of a previous product search, vague catalog browsing ("product list", "show products", "what do you have", "appliances", "electronics"), or any bare noun that could reasonably be a physical product — even household items, furniture, food, clothing ("blanket", "table", "shirt") — the product agent handles out-of-catalog items
-- "support" — complaints, refunds, returns, defective items, broken products, or general policy questions ("return policy", "refund policy", "warranty", "how do returns work", "can I return")
+- "support" — complaints, refunds, returns, defective items, broken products, general policy questions ("return policy", "refund policy", "warranty", "how do returns work", "can I return"), or data/privacy requests ("delete my data", "remove my account", "GDPR", "personal data", "data deletion", "privacy request")
 - "unclear" — ONLY for genuine off-topic messages (geography, general knowledge, jokes) or a pure pronoun/demonstrative with zero referent. Do NOT use unclear for bare nouns — even if the word seems unrelated to prior context, a bare noun is almost always a new product request → use "product"
 
 CONTEXT PRIORITY — check the last assistant message first:
@@ -113,6 +113,12 @@ History: "Here are my top mouse recommendations..." | Message: "table"
 
 Message: "it" (no clear referent in history)
 → {"intent": "unclear", "confidence": 0.3, "order_id": null}
+
+Message: "Please delete all my personal data"
+→ {"intent": "support", "confidence": 0.95, "order_id": null}
+
+Message: "I want to remove my account"
+→ {"intent": "support", "confidence": 0.9, "order_id": null}
 
 Respond ONLY with valid JSON:
 {"intent": "order"|"product"|"support"|"unclear", "confidence": 0.0-1.0, "order_id": "ORD-1234"|null}"""

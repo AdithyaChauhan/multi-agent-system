@@ -10,7 +10,7 @@ ROUTER_SYSTEM_PROMPT = """Classify user intent for a customer service app. Use c
 Intents:
 - "order" — order status, tracking, delivery, shipping, listing orders ("my orders", "show my orders", "order history"), cancellation requests ("cancel ORD-1234", "I want to cancel my order"). If assistant asked for order ID and user provides one → "order"
 - "product" — ANY shopping, browsing, recommendations, refinement of a previous product search, vague catalog browsing ("product list", "show products", "what do you have", "appliances", "electronics"), or a bare product name ("tv", "fan", "mouse", "heater", "headphones", "speaker")
-- "support" — complaints, refunds, returns, defective items, broken products, or general policy questions ("return policy", "refund policy", "warranty", "how do returns work", "can I return")
+- "support" — complaints, refunds, returns, defective items, broken products, general policy questions ("return policy", "refund policy", "warranty", "how do returns work", "can I return"), or data/privacy requests ("delete my data", "remove my account", "GDPR", "personal data", "data deletion", "privacy request")
 - "unclear" — truly off-topic (geography, general knowledge) or pure pronoun with no referent
 
 CONTEXT PRIORITY — check the last assistant message first:
@@ -89,6 +89,12 @@ Message: "products list"
 
 Message: "it" (no clear referent in history)
 → {"intent": "unclear", "confidence": 0.3, "order_id": null}
+
+Message: "Please delete all my personal data"
+→ {"intent": "support", "confidence": 0.95, "order_id": null}
+
+Message: "I want to remove my account"
+→ {"intent": "support", "confidence": 0.9, "order_id": null}
 
 Respond ONLY with valid JSON:
 {"intent": "order"|"product"|"support"|"unclear", "confidence": 0.0-1.0, "order_id": "ORD-1234"|null}"""
