@@ -119,7 +119,7 @@
       },
       "targets": [{
         "datasource": {"type": "loki", "uid": "loki"},
-        "expr": "{job=\"multiagent-app\", level=~\".+\"}",
+        "expr": "{job=\"multiagent-app\"} | pattern `<_> | <level> | <service> | <_>`",
         "legendFormat": ""
       }]
     }
