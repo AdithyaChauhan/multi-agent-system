@@ -30,17 +30,17 @@
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "increase(agent_requests_total{agent=\"order\"}[1h])",
+          "expr": "agent_requests_total{agent=\"order\"}",
           "legendFormat": "Order"
         },
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "increase(agent_requests_total{agent=\"product\"}[1h])",
+          "expr": "agent_requests_total{agent=\"product\"}",
           "legendFormat": "Product"
         },
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "increase(agent_requests_total{agent=\"support\"}[1h])",
+          "expr": "agent_requests_total{agent=\"support\"}",
           "legendFormat": "Support"
         }
       ]
