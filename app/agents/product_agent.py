@@ -115,13 +115,15 @@ PROMPT_CATALOG = (
     "Office Products: art supplies | stationery"
 )
 
-# Generic relaxation order for all categories
+# Generic relaxation order for all categories.
+# keywords before subcategory: a missing feature keyword (e.g. "noise cancelling") shouldn't
+# erase the subcategory — try without the keyword first, then widen to the full subcategory.
 RELAXATION_ORDER = [
     "type",
     "price_increase",
     "brand",
-    "subcategory",
     "keywords",
+    "subcategory",
 ]
 
 EXTRACTION_SYSTEM_PROMPT = f"""Extract product search preferences. Return JSON only.
@@ -262,18 +264,33 @@ def extract_preferences(state: AgentState) -> dict:
             new_category is not None and prev_category is not None and new_category != prev_category
         )
 
-        # Fully vague browsing (product list, show me products): treat as fresh start.
-        vague_browse = not new_category and not new_subcategory and not preferences.get("keywords")
+        # Fully vague browsing: LLM found no product signal AND no filters in the new message.
+        # Check raw extraction (not post-inheritance new_category) so this fires correctly even
+        # mid-session — e.g. "show me something" / "" after a session with min_price=100000.
+        vague_browse = (
+            not preferences.get("category")
+            and not preferences.get("subcategory")
+            and not preferences.get("keywords")
+            and not preferences.get("brand")
+            and preferences.get("max_price") is None
+            and preferences.get("min_price") is None
+            and preferences.get("min_rating") is None
+        )
 
         # New specific product after a keyword/feature-only turn that stored no subcategory.
         # e.g. "with calling feature" stores subcategory=null; then "calculator" is a new search.
         new_specific_product = bool(new_subcategory and not prev_subcategory)
 
-        if subcategory_changed or category_changed or vague_browse or new_specific_product:
+        if vague_browse:
+            # Wipe all accumulated context — show the catalog and let the user start fresh.
+            preferences = {
+                "category": None, "subcategory": None, "type": None, "brand": None,
+                "max_price": None, "min_price": None, "min_rating": None,
+                "keywords": [], "unavailable_request": False,
+            }
+        elif subcategory_changed or category_changed or new_specific_product:
             # New product type — reset all filters to only what the user re-specified.
             # e.g. "headphones under 2000" → "show me monitors" should not carry ₹2000 cap.
-            # Exception: if user specified price/brand/rating together with the new subcategory,
-            # those are captured in the current preferences dict and used as-is.
             preferences = {
                 "category": new_category,
                 "subcategory": new_subcategory,
@@ -567,7 +584,7 @@ def format_recommendations(state: AgentState) -> dict:
 
     lines = []
     if relaxed:
-        lines.append(f"Note — I could not find an exact match, so I relaxed: {', '.join(relaxed)}.\n")
+        lines.append(f"Note — I couldn't find an exact match, so I relaxed: {', '.join(relaxed)}.\n")
         lines.append("Here are the closest options:\n")
     else:
         lines.append("Here are my top recommendations for you:\n")

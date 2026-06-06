@@ -1,4 +1,5 @@
 import os
+import re
 import uuid
 from datetime import datetime, timezone, timedelta
 from contextlib import asynccontextmanager
@@ -41,7 +42,12 @@ _SAFETY_RESPONSE = (
 
 def _is_safety_emergency(message: str) -> bool:
     lowered = message.lower()
-    return any(kw in lowered for kw in _SAFETY_KEYWORDS)
+    for kw in _SAFETY_KEYWORDS:
+        # Match whole-word only; exclude hyphenated brand names (e.g. "Fire-Boltt")
+        pattern = r"(?<![a-zA-Z])" + re.escape(kw) + r"(?![a-zA-Z\-])"
+        if re.search(pattern, lowered):
+            return True
+    return False
 
 
 from app.schemas.chat import ChatRequest, SessionMessagesResponse, ChatResponse
