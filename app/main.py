@@ -312,6 +312,9 @@ def chat(
                         "user_id": user_id,
                         "session_id": session.session_id,
                         "request_id": get_request_id(),
+                        # thread_id groups all turns of one session for LangSmith
+                        # thread-level evaluators (Knowledge Retention, User Satisfaction, etc.)
+                        "thread_id": session.session_id,
                     },
                     "run_name": f"chat_request_{get_request_id()[:8]}",
                 },
