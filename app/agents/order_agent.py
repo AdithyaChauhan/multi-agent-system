@@ -15,6 +15,7 @@ from app.tools.order_tools import fetch_order_from_db, fetch_user_orders
 from app.tools.shipment_tools import fetch_tracking_info
 from app.core.logger import get_logger, get_request_id
 from app.core.metrics import llm_requests_total, llm_tokens_total, llm_duration_seconds
+from app.core.prompt_loader import load_prompt, PROMPT_VERSIONS
 
 load_dotenv()
 
@@ -250,13 +251,22 @@ Order details:
 
 User asked: {state.get('user_message')}"""
 
+    _order_prompt_version = PROMPT_VERSIONS.get("order-response-prompt", "latest")
+    _order_system_prompt, _order_commit_hash = load_prompt("order-response-prompt", _order_prompt_version)
+    if not _order_system_prompt:
+        _order_system_prompt = RESPONSE_SYSTEM_PROMPT
+        _order_commit_hash = "fallback"
+
     call_messages = [
-        SystemMessage(content=RESPONSE_SYSTEM_PROMPT),
+        SystemMessage(content=_order_system_prompt),
         HumanMessage(content=context),
     ]
 
     _t0 = time.perf_counter()
-    response = llm.bind_tools(_order_tools).invoke(call_messages)
+    response = llm.bind_tools(_order_tools).invoke(
+        call_messages,
+        config={"metadata": {"prompt_name": "order-response-prompt", "prompt_version": _order_commit_hash}},
+    )
     _latency_s = time.perf_counter() - _t0
     _latency_ms = int(_latency_s * 1000)
     _meta = getattr(response, "response_metadata", {})
@@ -327,7 +337,15 @@ Order details:
 
 User asked: {state.get('user_message')}"""
 
-    response = llm.invoke([SystemMessage(content=RESPONSE_SYSTEM_PROMPT), HumanMessage(content=context)])
+    _fv = PROMPT_VERSIONS.get("order-response-prompt", "latest")
+    _fs, _fh = load_prompt("order-response-prompt", _fv)
+    if not _fs:
+        _fs = RESPONSE_SYSTEM_PROMPT
+        _fh = "fallback"
+    response = llm.invoke(
+        [SystemMessage(content=_fs), HumanMessage(content=context)],
+        config={"metadata": {"prompt_name": "order-response-prompt", "prompt_version": _fh}},
+    )
     logger.info(f"request_id={get_request_id()} | Response generated (post-tool)")
     return {"final_response": response.content.strip()}
 

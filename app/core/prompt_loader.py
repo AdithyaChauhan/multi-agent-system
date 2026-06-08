@@ -53,4 +53,7 @@ def prewarm_prompts() -> None:
 PROMPT_VERSIONS = {
     "router-classification-prompt": os.getenv("ROUTER_PROMPT_VERSION", "latest"),
     "support-classification-prompt": os.getenv("SUPPORT_PROMPT_VERSION", "latest"),
+    "support-resolution-prompt": os.getenv("SUPPORT_RESOLUTION_PROMPT_VERSION", "latest"),
+    "order-response-prompt": os.getenv("ORDER_RESPONSE_PROMPT_VERSION", "latest"),
+    "product-extraction-prompt": os.getenv("PRODUCT_EXTRACTION_PROMPT_VERSION", "latest"),
 }

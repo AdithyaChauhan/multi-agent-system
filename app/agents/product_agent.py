@@ -15,6 +15,7 @@ from app.agents.product_agent_subgraph import product_enrichment_subgraph
 from app.tools.product_tools import search_products
 from app.core.logger import get_logger, get_request_id
 from app.core.metrics import llm_requests_total, llm_tokens_total, llm_duration_seconds
+from app.core.prompt_loader import load_prompt, PROMPT_VERSIONS
 
 load_dotenv()
 
@@ -176,13 +177,22 @@ def extract_preferences(state: AgentState) -> dict:
     # previous subcategory instead of extracting them fresh.
     full_prompt = user_message
 
+    _ext_version = PROMPT_VERSIONS.get("product-extraction-prompt", "latest")
+    _ext_prompt, _ext_hash = load_prompt("product-extraction-prompt", _ext_version)
+    if not _ext_prompt:
+        _ext_prompt = EXTRACTION_SYSTEM_PROMPT
+        _ext_hash = "fallback"
+
     messages = [
-        SystemMessage(content=EXTRACTION_SYSTEM_PROMPT),
+        SystemMessage(content=_ext_prompt),
         HumanMessage(content=full_prompt),
     ]
 
     _t0 = time.perf_counter()
-    response = llm.invoke(messages)
+    response = llm.invoke(
+        messages,
+        config={"metadata": {"prompt_name": "product-extraction-prompt", "prompt_version": _ext_hash}},
+    )
     _latency_s = time.perf_counter() - _t0
     _latency_ms = int(_latency_s * 1000)
     _meta = getattr(response, "response_metadata", {})

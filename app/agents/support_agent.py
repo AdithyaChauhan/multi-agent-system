@@ -370,13 +370,22 @@ def draft_resolution(state: AgentState) -> dict:
         f"then draft a helpful, empathetic resolution for the customer."
     )
 
+    _res_version = PROMPT_VERSIONS.get("support-resolution-prompt", "latest")
+    _res_prompt, _res_hash = load_prompt("support-resolution-prompt", _res_version)
+    if not _res_prompt:
+        _res_prompt = RESOLUTION_SYSTEM_PROMPT
+        _res_hash = "fallback"
+
     messages = [
-        SystemMessage(content=RESOLUTION_SYSTEM_PROMPT),
+        SystemMessage(content=_res_prompt),
         HumanMessage(content=prompt),
     ]
 
     _t0 = time.perf_counter()
-    response = llm.bind_tools([fetch_support_policy]).invoke(messages)
+    response = llm.bind_tools([fetch_support_policy]).invoke(
+        messages,
+        config={"metadata": {"prompt_name": "support-resolution-prompt", "prompt_version": _res_hash}},
+    )
     _latency_s = time.perf_counter() - _t0
     _latency_ms = int(_latency_s * 1000)
     _meta = getattr(response, "response_metadata", {})
@@ -423,11 +432,20 @@ def finalize_draft(state: AgentState) -> dict:
         f"Using the policy retrieved above, draft a helpful and empathetic response for the customer."
     )
 
+    _rv = PROMPT_VERSIONS.get("support-resolution-prompt", "latest")
+    _rp, _rh = load_prompt("support-resolution-prompt", _rv)
+    if not _rp:
+        _rp = RESOLUTION_SYSTEM_PROMPT
+        _rh = "fallback"
+
     tool_messages = state.get("messages") or []
-    messages = [SystemMessage(content=RESOLUTION_SYSTEM_PROMPT), HumanMessage(content=context_prompt)] + tool_messages
+    messages = [SystemMessage(content=_rp), HumanMessage(content=context_prompt)] + tool_messages
 
     _t0 = time.perf_counter()
-    response = llm.invoke(messages)
+    response = llm.invoke(
+        messages,
+        config={"metadata": {"prompt_name": "support-resolution-prompt", "prompt_version": _rh}},
+    )
     _latency_s = time.perf_counter() - _t0
     _latency_ms = int(_latency_s * 1000)
     _meta = getattr(response, "response_metadata", {})
