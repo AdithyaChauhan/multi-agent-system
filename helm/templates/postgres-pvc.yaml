@@ -4,6 +4,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: {{ include "multi-agent.fullname" . }}-postgres-data
   namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/resource-policy: keep
   labels:
     {{- include "multi-agent.labels" . | nindent 4 }}
     app.kubernetes.io/component: postgres
