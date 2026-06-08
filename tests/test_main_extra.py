@@ -1,6 +1,6 @@
 """
 Extra tests for app/main.py — covers JWT auth path, session helpers,
-expired session, and the /messages endpoint.
+expired session, the /messages endpoint, and per-turn feedback helpers.
 """
 
 import uuid
@@ -10,7 +10,15 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from app.main import app, get_current_user_id, get_or_create_session, get_or_create_user, load_conversation_history
+from app.main import (
+    app,
+    get_current_user_id,
+    get_or_create_session,
+    get_or_create_user,
+    load_conversation_history,
+    _get_langsmith_client,
+    _submit_turn_feedback,
+)
 from app.core.jwt_utils import create_access_token
 
 client = TestClient(app, raise_server_exceptions=False)
@@ -279,3 +287,85 @@ class TestRootEndpoint:
         response = client.get("/", follow_redirects=False)
         assert response.status_code in (302, 307, 308)
         assert "/static/chat.html" in response.headers.get("location", "")
+
+
+# ── _get_langsmith_client ─────────────────────────────────────────────────────
+
+
+class TestGetLangsmithClient:
+    def setup_method(self):
+        import app.main as m
+
+        m._LANGSMITH_CLIENT = None  # reset singleton before each test
+
+    def test_returns_client_when_key_set(self):
+        mock_client = MagicMock()
+        with patch.dict("os.environ", {"LANGCHAIN_API_KEY": "lsv2_test_key"}):
+            with patch("langsmith.Client", return_value=mock_client):
+                result = _get_langsmith_client()
+        assert result is mock_client
+
+    def test_returns_none_when_no_key(self):
+        with patch.dict("os.environ", {}, clear=True):
+            import app.main as m
+
+            m._LANGSMITH_CLIENT = None
+            # Remove both key vars from env
+            with patch("os.getenv", return_value=None):
+                result = _get_langsmith_client()
+        assert result is None
+
+    def test_singleton_not_reinitialised(self):
+        existing = MagicMock()
+        import app.main as m
+
+        m._LANGSMITH_CLIENT = existing
+        result = _get_langsmith_client()
+        assert result is existing
+
+
+# ── _submit_turn_feedback ────────────────────────────────────────────────────
+
+
+class TestSubmitTurnFeedback:
+    def _mock_client(self):
+        return MagicMock()
+
+    def test_calls_create_feedback_three_times(self):
+        mock_client = self._mock_client()
+        with patch("app.main._get_langsmith_client", return_value=mock_client):
+            _submit_turn_feedback("run-id-001", "show headphones", "Here are three headphones you might like.")
+        assert mock_client.create_feedback.call_count == 3
+
+    def test_quality_zero_for_short_response(self):
+        mock_client = self._mock_client()
+        with patch("app.main._get_langsmith_client", return_value=mock_client):
+            _submit_turn_feedback("run-id-002", "hi", "Ok")
+        calls = {c.kwargs["key"]: c.kwargs["score"] for c in mock_client.create_feedback.call_args_list}
+        assert calls["response_quality"] == 0.0
+
+    def test_relevance_penalised_for_fallback_response(self):
+        mock_client = self._mock_client()
+        fallback = "I didn't quite understand your request. Are you looking for a product?"
+        with patch("app.main._get_langsmith_client", return_value=mock_client):
+            _submit_turn_feedback("run-id-003", "xyz", fallback)
+        calls = {c.kwargs["key"]: c.kwargs["score"] for c in mock_client.create_feedback.call_args_list}
+        assert calls["relevance"] == 0.5
+
+    def test_conciseness_decays_for_long_response(self):
+        mock_client = self._mock_client()
+        long_text = "word " * 700  # ~3500 chars
+        with patch("app.main._get_langsmith_client", return_value=mock_client):
+            _submit_turn_feedback("run-id-004", "q", long_text)
+        calls = {c.kwargs["key"]: c.kwargs["score"] for c in mock_client.create_feedback.call_args_list}
+        assert calls["conciseness"] == 0.0
+
+    def test_no_error_when_client_is_none(self):
+        with patch("app.main._get_langsmith_client", return_value=None):
+            _submit_turn_feedback("run-id-005", "hi", "response")  # must not raise
+
+    def test_no_error_when_run_id_is_empty(self):
+        mock_client = self._mock_client()
+        with patch("app.main._get_langsmith_client", return_value=mock_client):
+            _submit_turn_feedback("", "hi", "response")  # must not raise
+        mock_client.create_feedback.assert_not_called()
