@@ -116,6 +116,30 @@ PROMPT_CATALOG = (
     "Office Products: art supplies | stationery"
 )
 
+# All catalog subcategories, longest-first so multi-word names ("usb hub", "air fryer")
+# match before single-word prefixes ("hub", "fryer").
+_ALL_SUBCATEGORIES: list[str] = sorted(
+    {
+        s.strip()
+        for line in PROMPT_CATALOG.split("\n")
+        for part in (line.split(":", 1)[1:] or [""])
+        for s in part.split("|")
+        if s.strip()
+    },
+    key=len,
+    reverse=True,
+)
+
+
+def _subcategory_in_message(message: str) -> str | None:
+    """Return the first catalog subcategory found verbatim in message, else None."""
+    m = message.lower()
+    for sub in _ALL_SUBCATEGORIES:
+        if sub in m:
+            return sub
+    return None
+
+
 # Generic relaxation order for all categories.
 # keywords before subcategory: a missing feature keyword (e.g. "noise cancelling") shouldn't
 # erase the subcategory — try without the keyword first, then widen to the full subcategory.
@@ -246,6 +270,16 @@ def extract_preferences(state: AgentState) -> dict:
         and previous_prefs.get("subcategory")
     ):
         preferences["unavailable_request"] = False
+
+    # Subcategory guard: if the LLM still flags unavailable_request but the user's
+    # message contains a known catalog subcategory, the product is in scope — specs
+    # like "4K" or "ethernet" should not trigger unavailable.
+    if preferences.get("unavailable_request"):
+        found_sub = _subcategory_in_message(user_message)
+        if found_sub:
+            preferences["unavailable_request"] = False
+            if not preferences.get("subcategory"):
+                preferences["subcategory"] = found_sub
 
     # Merge with previous preferences — preserve context across turns
     if previous_prefs and not preferences.get("unavailable_request"):
