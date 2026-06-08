@@ -46,7 +46,6 @@ app:
 
 postgres:
   persistence:
-    size: 50Gi
     storageClass: standard   # adjust to your cluster's storage class
 
   resources:
@@ -56,19 +55,6 @@ postgres:
     limits:
       cpu: 1000m
       memory: 1Gi
-
-monitoring:
-  grafana:
-    persistence:
-      size: 10Gi
-
-  loki:
-    persistence:
-      size: 20Gi
-
-  prometheus:
-    persistence:
-      size: 20Gi
 
 config:
   googleRedirectUri: "https://multi-agent.yourdomain.com/auth/callback"
