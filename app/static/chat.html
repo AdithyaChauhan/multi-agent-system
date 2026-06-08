@@ -265,9 +265,6 @@
                 <button class="quick-btn" onclick="quickAction('what is your return policy')">
                     <span class="qicon">↩️</span> Return Policy
                 </button>
-                <button class="quick-btn" onclick="quickAction('I need help with an issue')">
-                    <span class="qicon">🎫</span> Raise a Ticket
-                </button>
             </div>
             <div class="sidebar-spacer"></div>
             <div class="sidebar-card">
@@ -426,7 +423,7 @@
         const sendButton = document.getElementById('sendButton');
 
         function showWelcome() {
-            addMessage("Hi! I'm your AI shopping assistant. Ask me about your orders, products, or raise a support ticket.", 'assistant');
+            addMessage("Hi! I'm your AI shopping assistant. Ask me about your orders, products, or support issues.", 'assistant');
         }
 
         async function sendMessage() {

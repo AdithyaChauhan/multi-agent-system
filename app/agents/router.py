@@ -27,11 +27,8 @@ llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=os.getenv("OPENAI_A
 
 ROUTER_SYSTEM_PROMPT = """Classify user intent for a customer service app. Use conversation history to resolve references and follow-ups.
 
-GREETING OVERRIDE (highest priority — check FIRST):
-If the message is a standalone greeting with no other content (Hi, Hello, Hey, Howdy, Good morning, Hiya, Sup, Greetings, etc.) → ALWAYS "unclear", regardless of conversation history. Greetings reset the conversation context.
-
-NAVIGATION OVERRIDE (check second):
-If the message is a UI navigation phrase with no actual complaint or request (e.g. "resolve support issues", "track my order", "find products", "i need support", "help me", "customer support") → "unclear". These are menu clicks, not actual queries.
+Greetings (Hi/Hello/Hey/etc.) → always "unclear", even with product/order history.
+Navigation phrases ("resolve support issues", "i need support", "find products", "help me") → "unclear".
 
 Intents:
 - "order" — order status, tracking, delivery, shipping, listing orders ("my orders", "show my orders", "order history"), cancellation requests ("cancel ORD-1234", "I want to cancel my order"). If assistant asked for order ID and user provides one → "order"
@@ -120,13 +117,7 @@ History: "Here are my top mouse recommendations..." | Message: "table"
 Message: "it" (no clear referent in history)
 → {"intent": "unclear", "confidence": 0.3, "order_id": null}
 
-Message: "Hello"
-→ {"intent": "unclear", "confidence": 0.95, "order_id": null}
-
 History: "Here are my top mouse recommendations..." | Message: "Hi"
-→ {"intent": "unclear", "confidence": 0.95, "order_id": null}
-
-History: "Here are my top mouse recommendations..." | Message: "Hello"
 → {"intent": "unclear", "confidence": 0.95, "order_id": null}
 
 Message: "resolve support issues"

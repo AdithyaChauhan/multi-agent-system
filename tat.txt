@@ -1,196 +1,33 @@
-===== 1: List my orders =====
-You have multiple orders. Which one would you like to check?
+===== 1: Product – wireless mouse under 1000 =====
+Here are my top recommendations for you:
 
-• **ORD-2005** - Logitech M221 Wireless Mouse (cancelled)
-• **ORD-2004** - Croma 500W Mixer Grinder (delivered)
-• **ORD-2003** - Fire-Boltt Phoenix Smartwatch (shipped)
-• **ORD-2002** - Mi 108cm Full HD Android LED TV (shipped)
-• **ORD-2001** - boAt Rockerz 255 Pro+ (delivered)
+1. Logitech M221 Wireless Mouse, Silent Buttons, 2.4 GHz with USB Mini Receiver, 1000 DPI Optical Tracking, 18-Month Battery Life, Ambidextrous PC / Mac / Laptop - Charcoal Grey by Logitech
+   Price: ₹799 | Rating: 4.4/5
+   "I am using it from 1 month" — Kshitij
 
-_(showing 5 most recent of 7 orders)_
+2. Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, 12 Month Life Battery, Compatible with Windows, Mac, Chromebook/PC/Laptop by Logitech
+   Price: ₹699 | Rating: 4.5/5
+   "It's little small for big hands. But best available in the market." — Chandrashekar SK
 
-Please provide the order ID.
-
-===== 2: Check status of order 2003 (bare number, shipped) =====
-Your order for the Fire-Boltt Phoenix Smartwatch (ORD-2003) has been shipped and is currently out for delivery. It is expected to arrive by June 4, 2026, and you can track it using the ID TRK-1003.
-
-===== 3: Check status of ORD-2004 (delivered) =====
-Good news! **Croma 500W Mixer Grinder** (Order ORD-2004) has been delivered. Tracking reference: TRK-1004.
-
-===== 4: Cancel shipped order ORD-2003 (should refuse) =====
-Cancellation is not possible for order ORD-2003 as it has already been shipped and is out for delivery. However, I can assist you with a return once it arrives.
-
-===== 5: Cancel delivered order ORD-2004 (should refuse with return offer) =====
-Cancellation is not possible for order ORD-2004 as it has already been delivered. However, you can return it within our 30-day policy window.
-
-===== 6: Cancel already cancelled order ORD-2005 (should say already cancelled) =====
-Order ORD-2005 has already been cancelled, so no further action is needed.
-
-===== 7: Refund request for delivered order ORD-2001 (should create ticket) =====
-I've created a support ticket: **TKT-19FD893F**
-
-**Issue:** Refund request for order 2001
-**Category:** Refund Request
-**Priority:** P2
-**Response Time:** 2-3 days
-
-Our support team will review this and contact you. You'll receive email updates at your registered address.
-
-===== 8: Damaged product with order ID ORD-2001 (should create ticket) =====
-You already have an open ticket **TKT-19FD893F** for this order. Our support team will be in touch within the agreed timeframe. Is there anything else I can help you with?
-
-===== 9: Duplicate report for ORD-2001 (should return existing ticket) =====
-You already have an open ticket **TKT-19FD893F** for this order. Our support team will be in touch within the agreed timeframe. Is there anything else I can help you with?
-
-===== 10: Damaged product without order ID (should ask for order) =====
-To raise a support ticket, I need to know which order this is about.
-
-Here are your recent orders:
-
-1. **ORD-2005** — Logitech M221 Wireless Mouse (Cancelled)
-2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)
-3. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)
-4. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)
-5. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)
-_(showing 5 most recent of 7 orders)_
-
-Please reply with the order number to open a support ticket.
-
-===== 11: Wrong item, then provide order ID (multi-turn) =====
-I've created a support ticket: **TKT-F693E046**
-
-**Issue:** Received the wrong item
-**Category:** Wrong Item
-**Priority:** P2
-**Response Time:** 24 hours
-
-Our support team will review this and contact you. You'll receive email updates at your registered address.
---- turn 2 ---
-Your order **ORD-2002** for the Mi 108cm Full HD Android LED TV has been shipped and is currently in transit. It is at the Delhi Sorting Facility, with an estimated delivery date of June 6, 2026.
-
-===== 12: General return policy question (should answer directly, no order needed) =====
-Here's a quick summary of our policies:
-
-**Returns:** Most items can be returned within 30 days of delivery in original condition.
-**Refunds:** Processed within 3-5 business days after we receive the return.
-**Defective items:** Replacement or full refund — no questions asked.
-**Damaged delivery:** Report within 48 hours for priority resolution.
-
-If you have a specific order you'd like help with, just share the order number and I'll get started.
-
-===== 13: GDPR data deletion request (should route to support, not unclear) =====
-I didn't quite understand that. Are you looking for a product, checking an order, or need support?
-
-===== 14: Legal threat (should escalate, not auto-resolve) =====
-I've created a support ticket: **TKT-1FE176F2**
-
-**Issue:** User is threatening legal action if a refund is not processed
-**Category:** Refund Request
-**Priority:** P2
-**Response Time:** 2-3 days
-
-Our support team will review this and contact you. You'll receive email updates at your registered address.
-
-===== 15: Missing parts complaint (should auto-resolve) =====
-I’m sorry to hear that your remote control is missing from your order! Since your TV has already shipped, we can’t cancel the order, but we can definitely help you get a replacement for the remote. 
-
-Please allow up to 48 hours for us to process your request. Once we confirm the details, we’ll send out a replacement remote to you. 
-
-If you have any other questions or need further assistance, just let me know!
-
-===== 16: User refuses bot solution twice (should escalate after second refusal) =====
-To raise a support ticket, I need to know which order this is about.
-
-Here are your recent orders:
-
-1. **ORD-2005** — Logitech M221 Wireless Mouse (Cancelled)
-2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)
-3. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)
-4. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)
-5. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)
-_(showing 5 most recent of 7 orders)_
-
-Please reply with the order number to open a support ticket.
---- turn 2 ---
-To raise a support ticket, I need to know which order this is about.
-
-Here are your recent orders:
-
-1. **ORD-2005** — Logitech M221 Wireless Mouse (Cancelled)
-2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)
-3. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)
-4. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)
-5. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)
-_(showing 5 most recent of 7 orders)_
-
-Please reply with the order number to open a support ticket.
---- turn 3 ---
-To raise a support ticket, I need to know which order this is about.
-
-Here are your recent orders:
-
-1. **ORD-2005** — Logitech M221 Wireless Mouse (Cancelled)
-2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)
-3. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)
-4. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)
-5. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)
-_(showing 5 most recent of 7 orders)_
-
-Please reply with the order number to open a support ticket.
-
-===== 17: Bare number 1001 late in session (existing ticket for ORD-2001 may confuse) =====
-I understand you want to speak with someone about your order, but since it has already been delivered, we can't cancel it. However, if you have any concerns or issues with the product, you can return it within our policy window for a refund or exchange.
-
-To help you better, please provide a valid order number or any details about your concern. If you prefer to talk to a human, I recommend reaching out to our customer support team directly. They typically respond within 48 hours. Let me know how else I can assist you!
-
-===== 18: Non-existent order (should show user's orders) =====
-I couldn't find order **ORD-9999** on your account. 1. **ORD-2005** — Logitech M221 Wireless Mouse (Cancelled)
-2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)
-3. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)
-4. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)
-5. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)
-_(showing 5 most recent of 7 orders)_
-
-Please reply with the order number to open a support ticket.
-
-===== 19: Very vague support request (should ask for order) =====
-To raise a support ticket, I need to know which order this is about.
-
-Here are your recent orders:
-
-1. **ORD-2005** — Logitech M221 Wireless Mouse (Cancelled)
-2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)
-3. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)
-4. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)
-5. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)
-_(showing 5 most recent of 7 orders)_
-
-Please reply with the order number to open a support ticket.
-
-===== 20: Mixed intent – return headphones for ORD-2001 =====
-You already have an open ticket **TKT-19FD893F** for this order. Our support team will be in touch within the agreed timeframe. Is there anything else I can help you with?
-
-=== Final tickets for demo-user-1 ===
-  ticket_id   | order_id |    category    | safety_alert |          created_at           
---------------+----------+----------------+--------------+-------------------------------
- TKT-1FE176F2 |          | refund_request | f            | 2026-06-05 12:44:51.549875+00
- TKT-F693E046 | ORD-2003 | wrong_item     | f            | 2026-06-05 12:44:38.462541+00
- TKT-19FD893F | ORD-2001 | refund_request | f            | 2026-06-05 12:44:29.743534+00
-(3 rows)
+3. Logitech B170 Wireless Mouse, 2.4 GHz with USB Nano Receiver, Optical Tracking, 12-Months Battery Life, Ambidextrous, PC/Mac/Laptop - Black by Logitech
+   Price: ₹599 | Rating: 4.4/5
+   "Hi guys! Bought this yesterday" — Anand
 
 
-=== SCORECARD ===
-PASS (16): 1, 2, 3, 4, 5, 6, 7, 8(dedup✓), 9, 10, 12, 14, 15, 18, 19, 20
-PARTIAL (2):
-  11 - turn 1 creates ticket (correct) but for ORD-2003 from session context bleed; turn 2 goes to order agent
-  17 - bare 1001 works in fresh sessions; in long 20-test session, context noise confuses order agent response
-FAIL (2):
-  13 - GDPR deletion → router unclear (structural gap — no intent for privacy requests)
-  16 - "My order is late" + repeated refusals → no human escalation path (structural gap)
+===== 2: Product – what about Logitech (brand switch) =====
+Here are my top recommendations for you:
 
-Notes:
-  - All 3 previously failing critical tests (7 refund ticket, 12 return policy, 14 legal threat) now PASS
-  - Tests 4/5/6 cancellation handling fully fixed (order agent now handles cancel correctly)
-  - Tests 10/11 turn 1 history-bleed fixed (order_id no longer extracted from history)
-  - Test 18 (not found) now shows order list
-  - Tests 11/17 contamination issues are test-suite artifacts (long shared session); both pass in isolated sessions
+1. Logitech M221 Wireless Mouse, Silent Buttons, 2.4 GHz with USB Mini Receiver, 1000 DPI Optical Tracking, 18-Month Battery Life, Ambidextrous PC / Mac / Laptop - Charcoal Grey by Logitech
+   Price: ₹799 | Rating: 4.4/5
+   "I am using it from 1 month" — Kshitij
+
+2. Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, 12 Month Life Battery, Compatible with Windows, Mac, Chromebook/PC/Laptop by Logitech
+   Price: ₹699 | Rating: 4.5/5
+   "It's little small for big hands. But best available in the market." — Chandrashekar SK
+
+3. Logitech B170 Wireless Mouse, 2.4 GHz with USB Nano Receiver, Optical Tracking, 12-Months Battery Life, Ambidextrous, PC/Mac/Laptop - Black by Logitech
+   Price: ₹599 | Rating: 4.4/5
+   "Hi guys! Bought this yesterday" — Anand
+
+
+===== 3: Product – under 800 (price refinement) =====
