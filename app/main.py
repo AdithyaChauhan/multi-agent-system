@@ -1,5 +1,6 @@
 import os
 import re
+import threading
 import uuid
 from datetime import datetime, timezone, timedelta
 from contextlib import asynccontextmanager
@@ -87,6 +88,68 @@ from fastapi.staticfiles import StaticFiles
 from langchain_core.tracers.context import collect_runs
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 from app.core.metrics import http_requests_total, http_request_duration_seconds
+
+_LANGSMITH_CLIENT = None
+_LANGSMITH_CLIENT_LOCK = threading.Lock()
+
+
+def _get_langsmith_client():
+    global _LANGSMITH_CLIENT
+    if _LANGSMITH_CLIENT is None:
+        with _LANGSMITH_CLIENT_LOCK:
+            if _LANGSMITH_CLIENT is None:
+                try:
+                    from langsmith import Client
+
+                    lc_key = os.getenv("LANGCHAIN_API_KEY") or os.getenv("LANGSMITH_API_KEY")
+                    if lc_key:
+                        _LANGSMITH_CLIENT = Client(api_key=lc_key)
+                except Exception:
+                    pass
+    return _LANGSMITH_CLIENT
+
+
+def _submit_turn_feedback(run_id: str, user_message: str, response_text: str) -> None:
+    """
+    Submit lightweight per-turn feedback scores to LangSmith via create_feedback().
+    Runs in a daemon thread so it never blocks the HTTP response.
+
+    Dimensions:
+      - response_quality : 1.0 if response is non-trivial and error-free, else 0.0
+      - relevance        : 1.0 if agent gave a substantive reply, 0.5 if generic fallback
+      - conciseness      : 1.0 if ≤ 800 chars, decays linearly above that
+    """
+    try:
+        client = _get_langsmith_client()
+        if not client or not run_id:
+            return
+
+        text = response_text.strip()
+        text_lower = text.lower()
+
+        # response_quality: non-trivial length + no server error strings
+        error_phrases = ["something went wrong", "internal server error", "traceback", "http 500"]
+        quality = 0.0 if len(text) < 20 or any(e in text_lower for e in error_phrases) else 1.0
+
+        # relevance: penalise the generic "I didn't understand" fallback
+        generic_fallbacks = [
+            "i didn't quite understand",
+            "are you looking for a product",
+        ]
+        relevance = 0.5 if any(f in text_lower for f in generic_fallbacks) else 1.0
+
+        # conciseness: full score up to 800 chars, linear decay to 0 at 3000 chars
+        conciseness = max(0.0, min(1.0, 1.0 - (len(text) - 800) / 2200)) if len(text) > 800 else 1.0
+
+        for key, score in [
+            ("response_quality", quality),
+            ("relevance", relevance),
+            ("conciseness", conciseness),
+        ]:
+            client.create_feedback(run_id=run_id, key=key, score=round(score, 4))
+
+    except Exception:
+        pass  # feedback is non-critical — never let it affect the user response
 
 Base.metadata.create_all(bind=engine)
 
@@ -364,6 +427,14 @@ def chat(
         else:
             final_response = graph_result.get("final_response", "Something went wrong.")
         logger.info(f"request_id={get_request_id()} | Graph completed | final_response_preview={final_response[:80]}")
+
+        # Submit per-turn feedback scores to LangSmith (fire-and-forget, non-blocking)
+        if langsmith_run_id:
+            threading.Thread(
+                target=_submit_turn_feedback,
+                args=(langsmith_run_id, chat_request.message, final_response),
+                daemon=True,
+            ).start()
 
         # Store the assistant response
         assistant_message = Message(
