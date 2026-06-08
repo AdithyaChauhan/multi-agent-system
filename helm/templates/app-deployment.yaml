@@ -42,8 +42,14 @@ spec:
                 name: {{ include "multi-agent.configMapName" . }}
             - secretRef:
                 name: {{ include "multi-agent.secretName" . }}
-          # DATABASE_URL is composed from the in-cluster postgres service name
+          # DATABASE_URL is composed from the in-cluster postgres service name.
+          # POSTGRES_PASSWORD must appear in env: (not just envFrom:) for $(VAR) substitution to work.
           env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "multi-agent.secretName" . }}
+                  key: POSTGRES_PASSWORD
             - name: DATABASE_URL
               value: "postgresql://{{ .Values.postgres.auth.username }}:$(POSTGRES_PASSWORD)@{{ include "multi-agent.postgresServiceName" . }}:{{ .Values.postgres.service.port }}/{{ .Values.postgres.auth.database }}"
           livenessProbe:
