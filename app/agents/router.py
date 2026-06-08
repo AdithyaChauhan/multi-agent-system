@@ -27,11 +27,17 @@ llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=os.getenv("OPENAI_A
 
 ROUTER_SYSTEM_PROMPT = """Classify user intent for a customer service app. Use conversation history to resolve references and follow-ups.
 
+GREETING OVERRIDE (highest priority — check FIRST):
+If the message is a standalone greeting with no other content (Hi, Hello, Hey, Howdy, Good morning, Hiya, Sup, Greetings, etc.) → ALWAYS "unclear", regardless of conversation history. Greetings reset the conversation context.
+
+NAVIGATION OVERRIDE (check second):
+If the message is a UI navigation phrase with no actual complaint or request (e.g. "resolve support issues", "track my order", "find products", "i need support", "help me", "customer support") → "unclear". These are menu clicks, not actual queries.
+
 Intents:
 - "order" — order status, tracking, delivery, shipping, listing orders ("my orders", "show my orders", "order history"), cancellation requests ("cancel ORD-1234", "I want to cancel my order"). If assistant asked for order ID and user provides one → "order"
 - "product" — ANY shopping, browsing, recommendations, refinement of a previous product search, vague catalog browsing ("product list", "show products", "what do you have", "appliances", "electronics"), or any bare noun that could reasonably be a physical product — even household items, furniture, food, clothing ("blanket", "table", "shirt") — the product agent handles out-of-catalog items
-- "support" — complaints, refunds, returns, defective items, broken products, general policy questions ("return policy", "refund policy", "warranty", "how do returns work", "can I return"), or data/privacy requests ("delete my data", "remove my account", "GDPR", "personal data", "data deletion", "privacy request")
-- "unclear" — ONLY for genuine off-topic messages (geography, general knowledge, jokes) or a pure pronoun/demonstrative with zero referent. Do NOT use unclear for bare nouns — even if the word seems unrelated to prior context, a bare noun is almost always a new product request → use "product"
+- "support" — actual complaints, refunds, returns, defective items, broken products, general policy questions ("return policy", "refund policy", "warranty", "how do returns work", "can I return"), or data/privacy requests ("delete my data", "remove my account", "GDPR", "personal data", "data deletion", "privacy request"). Must contain an actual issue, not just a navigation phrase.
+- "unclear" — standalone greetings, navigation phrases, genuine off-topic messages (geography, general knowledge, jokes), or a pure pronoun/demonstrative with zero referent. Do NOT use unclear for bare nouns — even if the word seems unrelated to prior context, a bare noun is almost always a new product request → use "product"
 
 CONTEXT PRIORITY — check the last assistant message first:
 - If the last assistant message is from a SUPPORT flow ASKING A QUESTION (contains "support ticket", "open a support ticket", "raise a support ticket", "for your support ticket", or "please reply with the order number") → follow-up is "support"
@@ -113,6 +119,21 @@ History: "Here are my top mouse recommendations..." | Message: "table"
 
 Message: "it" (no clear referent in history)
 → {"intent": "unclear", "confidence": 0.3, "order_id": null}
+
+Message: "Hello"
+→ {"intent": "unclear", "confidence": 0.95, "order_id": null}
+
+History: "Here are my top mouse recommendations..." | Message: "Hi"
+→ {"intent": "unclear", "confidence": 0.95, "order_id": null}
+
+History: "Here are my top mouse recommendations..." | Message: "Hello"
+→ {"intent": "unclear", "confidence": 0.95, "order_id": null}
+
+Message: "resolve support issues"
+→ {"intent": "unclear", "confidence": 0.9, "order_id": null}
+
+Message: "i need support"
+→ {"intent": "unclear", "confidence": 0.85, "order_id": null}
 
 Message: "Please delete all my personal data"
 → {"intent": "support", "confidence": 0.95, "order_id": null}
