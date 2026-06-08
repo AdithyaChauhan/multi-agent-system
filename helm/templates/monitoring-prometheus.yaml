@@ -22,6 +22,8 @@ data:
         metrics_path: /metrics
 ---
 {{- if .Values.monitoring.prometheus.persistence.enabled }}
+{{- $existingPromPvc := lookup "v1" "PersistentVolumeClaim" .Release.Namespace (printf "%s-prometheus-data" (include "multi-agent.fullname" .)) }}
+{{- if not $existingPromPvc }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -38,6 +40,7 @@ spec:
   resources:
     requests:
       storage: {{ .Values.monitoring.prometheus.persistence.size }}
+{{- end }}
 ---
 {{- end }}
 apiVersion: apps/v1

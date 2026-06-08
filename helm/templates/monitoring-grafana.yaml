@@ -46,6 +46,8 @@ data:
           foldersFromFilesStructure: false
   dashboard.json: |
 {{ .Files.Get "dashboards/dashboard.json" | indent 4 }}
+{{- $existingGrafanaPvc := lookup "v1" "PersistentVolumeClaim" .Release.Namespace (printf "%s-grafana-data" (include "multi-agent.fullname" .)) }}
+{{- if not $existingGrafanaPvc }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -63,6 +65,7 @@ spec:
   resources:
     requests:
       storage: {{ .Values.monitoring.grafana.persistence.size }}
+{{- end }}
 ---
 apiVersion: apps/v1
 kind: Deployment

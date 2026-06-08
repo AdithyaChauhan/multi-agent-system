@@ -1,4 +1,6 @@
 {{- if and .Values.postgres.enabled .Values.postgres.persistence.enabled }}
+{{- $existing := lookup "v1" "PersistentVolumeClaim" .Release.Namespace (printf "%s-postgres-data" (include "multi-agent.fullname" .)) }}
+{{- if not $existing }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -18,4 +20,5 @@ spec:
   resources:
     requests:
       storage: {{ .Values.postgres.persistence.size }}
+{{- end }}
 {{- end }}

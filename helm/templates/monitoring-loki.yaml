@@ -1,4 +1,6 @@
 {{- if .Values.monitoring.enabled }}
+{{- $existingLokiPvc := lookup "v1" "PersistentVolumeClaim" .Release.Namespace (printf "%s-loki-data" (include "multi-agent.fullname" .)) }}
+{{- if not $existingLokiPvc }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -16,6 +18,7 @@ spec:
   resources:
     requests:
       storage: {{ .Values.monitoring.loki.persistence.size }}
+{{- end }}
 ---
 apiVersion: apps/v1
 kind: Deployment
