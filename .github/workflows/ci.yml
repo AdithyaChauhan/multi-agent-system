@@ -209,22 +209,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4.2.2
 
+      # Helm validation runs unconditionally — proves charts are correct even without a live cluster
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Helm lint
+        run: helm lint ./helm --values helm/values.yaml
+
+      - name: Helm template (dry-run rendering)
+        run: |
+          helm template multi-agent-system ./helm \
+            --values helm/values.yaml \
+            --set app.image.tag=sha-dryrun \
+            --set secrets.openaiApiKey=ci-mock \
+            --set secrets.langchainApiKey=ci-mock \
+            --set secrets.jwtSecretKey=ci-mock \
+            --set secrets.googleClientId=ci-mock \
+            --set secrets.googleClientSecret=ci-mock \
+            --set postgres.auth.password=ci-mock \
+          > /dev/null && echo "Helm template rendered successfully"
+
       - name: Check deployment prerequisites
         id: prereqs
         run: |
           if [ -z "$KUBECONFIG_SECRET" ]; then
-            echo "::warning::KUBECONFIG secret is not set — skipping Kubernetes deployment."
-            echo "To enable: add KUBECONFIG (base64-encoded kubeconfig) as a repository secret."
+            echo "::warning::KUBECONFIG secret is not set — skipping live deployment (helm lint/template above passed)."
+            echo "To enable live deploy: add KUBECONFIG (base64-encoded kubeconfig) as a repository secret."
             echo "configured=false" >> $GITHUB_OUTPUT
           else
             echo "configured=true" >> $GITHUB_OUTPUT
           fi
         env:
           KUBECONFIG_SECRET: ${{ secrets.KUBECONFIG }}
-
-      - name: Install Helm
-        if: steps.prereqs.outputs.configured == 'true'
-        uses: azure/setup-helm@v4
 
       - name: Configure kubectl
         if: steps.prereqs.outputs.configured == 'true'
