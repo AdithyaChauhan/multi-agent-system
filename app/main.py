@@ -77,6 +77,7 @@ from app.core.jwt_utils import verify_access_token
 from app.api.auth import router as auth_router
 
 from app.db.seed import seed_demo_data
+
 # from app.db.seed_products import seed_demo_products
 # from app.db.seed_reviews_specs import seed_reviews_and_specs
 
