@@ -9,7 +9,9 @@ class TestExtractPreferences:
         mock_response = MagicMock()
         mock_response.content = '{"category": "Toys & Games", "keywords": ["toys"], "brand": null, "min_price": null, "max_price": null, "subcategory": null, "unavailable_request": false}'
 
-        with patch("app.agents.product_agent.llm") as mock_llm:
+        with patch("app.agents.product_agent.load_prompt", return_value=(None, None)), patch(
+            "app.agents.product_agent.llm"
+        ) as mock_llm:
             mock_llm.invoke.return_value = mock_response
             from app.agents.product_agent import extract_preferences
 
