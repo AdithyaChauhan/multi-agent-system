@@ -151,7 +151,7 @@ Rules:
 - min_rating: set when user asks for quality — "best rated"/"highly rated"/"top rated" → 4.0, "at least 4.5 stars" → 4.5, explicit number like "4 star and above" → 4.0; null otherwise
 - Generic category browsing (no specific product): category only, subcategory: null, keywords: []
 - Vague browsing (product list, show me products, what do you have): category: null, keywords: [], unavailable_request: false
-- unavailable_request: true when the product cannot be mapped to any subcategory in the catalog above. Use the most common real-world interpretation for ambiguous words (e.g. "table" = dining/coffee table → furniture, not drawing tablet; "mobile" = phone → not phone case). false when it maps to a catalog subcategory even approximately.
+- unavailable_request: true ONLY when the product TYPE is genuinely absent from the catalog — e.g. laptops, phones/smartphones, tablets, clothing, food, furniture, vehicles. DO NOT set true for specs (4K, ethernet, HDMI), brands (Sony, Apple, Samsung), price adjectives (cheap, affordable, budget), or features — these are keywords/filters on a valid subcategory. If the subcategory maps to the catalog even approximately, set false.
 - Never output string "null" — use JSON null
 
 Examples:
@@ -162,6 +162,10 @@ Examples:
 "4.5 star and above air fryer" → {{"category": "Home & Kitchen", "subcategory": "air fryer", "type": null, "brand": null, "max_price": null, "min_price": null, "min_rating": 4.5, "keywords": [], "unavailable_request": false}}
 "laptop under 50000" → {{"category": null, "subcategory": null, "type": null, "brand": null, "max_price": 50000, "min_price": null, "min_rating": null, "keywords": ["laptop"], "unavailable_request": true}}
 "geyser under 5000" → {{"category": "Home & Kitchen", "subcategory": "water heater", "type": null, "brand": null, "max_price": 5000, "min_price": null, "min_rating": null, "keywords": [], "unavailable_request": false}}
+"4K monitor" → {{"category": "Computers & Accessories", "subcategory": "monitor", "type": null, "brand": null, "max_price": null, "min_price": null, "min_rating": null, "keywords": ["4K"], "unavailable_request": false}}
+"USB hub with ethernet" → {{"category": "Computers & Accessories", "subcategory": "usb hub", "type": null, "brand": null, "max_price": null, "min_price": null, "min_rating": null, "keywords": ["ethernet"], "unavailable_request": false}}
+"Sony headphones under 5000" → {{"category": "Electronics", "subcategory": "headphones", "type": null, "brand": "Sony", "max_price": 5000, "min_price": null, "min_rating": null, "keywords": [], "unavailable_request": false}}
+"affordable headphones" → {{"category": "Electronics", "subcategory": "headphones", "type": null, "brand": null, "max_price": null, "min_price": null, "min_rating": null, "keywords": [], "unavailable_request": false}}
 
 Respond ONLY with valid JSON."""
 
