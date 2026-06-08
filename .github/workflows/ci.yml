@@ -89,10 +89,12 @@ jobs:
     needs: test
 
     env:
+      EVAL_OPENAI_API_KEY: ${{ secrets.EVAL_OPENAI_API_KEY }}
       OPENAI_API_KEY: ci-mock-key
       LANGCHAIN_API_KEY: ${{ secrets.LANGCHAIN_API_KEY }}
       DEEPEVAL_TELEMETRY_OPT_OUT: "YES"
-      # RUN_LIVE_EVAL is intentionally NOT set → fixture mode
+      # RUN_LIVE_EVAL not set — app responses come from fixture_response in dataset.json.
+      # GEval uses EVAL_OPENAI_API_KEY (separate from the app key) to judge those responses.
 
     steps:
       - uses: actions/checkout@v4.2.2

@@ -93,11 +93,22 @@ IMPORTANT:
 
 
 _POLICY_QUESTION_PHRASES = [
-    "return policy", "refund policy", "warranty policy", "exchange policy",
-    "what is your policy", "whats your policy", "what's your policy",
-    "how do returns work", "how do i return", "when can i return",
-    "how long to return", "how long do i have", "can i return",
-    "what is your return", "what's your return", "how does the refund",
+    "return policy",
+    "refund policy",
+    "warranty policy",
+    "exchange policy",
+    "what is your policy",
+    "whats your policy",
+    "what's your policy",
+    "how do returns work",
+    "how do i return",
+    "when can i return",
+    "how long to return",
+    "how long do i have",
+    "can i return",
+    "what is your return",
+    "what's your return",
+    "how does the refund",
 ]
 
 _POLICY_RESPONSE = (
@@ -206,10 +217,27 @@ def classify_issue(state: AgentState) -> dict:
 
 
 _COMPLAINT_KEYWORDS = {
-    "broken", "damaged", "wrong", "missing", "refund", "return",
-    "not working", "stopped working", "defective", "cracked",
-    "faulty", "malfunction", "cancel", "complaint", "issue",
-    "problem", "help", "support", "hurt", "bleed", "fire",
+    "broken",
+    "damaged",
+    "wrong",
+    "missing",
+    "refund",
+    "return",
+    "not working",
+    "stopped working",
+    "defective",
+    "cracked",
+    "faulty",
+    "malfunction",
+    "cancel",
+    "complaint",
+    "issue",
+    "problem",
+    "help",
+    "support",
+    "hurt",
+    "bleed",
+    "fire",
 }
 
 
@@ -252,7 +280,9 @@ def fetch_order_for_support(state: AgentState) -> dict:
             # Reroute to order agent if message is a bare lookup with no existing ticket
             user_message = state.get("user_message", "")
             if _is_bare_order_lookup(user_message) and not get_open_ticket_for_order(user_id, order_id):
-                logger.info(f"request_id={get_request_id()} | Bare order lookup — rerouting to order agent | order_id={order_id}")
+                logger.info(
+                    f"request_id={get_request_id()} | Bare order lookup — rerouting to order agent | order_id={order_id}"
+                )
                 return {"support_order": order, "reroute_to_order": True}
             return {"support_order": order}
         else:
@@ -299,7 +329,16 @@ def ask_for_order(state: AgentState) -> dict:
     return {"final_response": msg}
 
 
-_LEGAL_THREAT_KEYWORDS = {"sue", "lawsuit", "lawyer", "attorney", "court", "legal action", "consumer court", "solicitor"}
+_LEGAL_THREAT_KEYWORDS = {
+    "sue",
+    "lawsuit",
+    "lawyer",
+    "attorney",
+    "court",
+    "legal action",
+    "consumer court",
+    "solicitor",
+}
 
 
 def assess_severity(state: AgentState) -> dict:
@@ -311,7 +350,10 @@ def assess_severity(state: AgentState) -> dict:
     has_legal_threat = any(kw in user_message for kw in _LEGAL_THREAT_KEYWORDS)
 
     if has_legal_threat or issue.get("category") in (
-        "defective_product", "damaged_delivery", "wrong_item", "refund_request"
+        "defective_product",
+        "damaged_delivery",
+        "wrong_item",
+        "refund_request",
     ):
         severity = "medium"
     else:

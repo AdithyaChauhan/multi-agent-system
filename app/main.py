@@ -23,14 +23,31 @@ from app.tools.support_tools import create_support_ticket
 _session_preferences: dict = {}
 
 _SAFETY_KEYWORDS = {
-    "fire", "smoke", "burning", "burn", "burnt",
-    "electric shock", "electrocuted",
-    "injury", "injured", "injuring", "hurt", "hurting",
-    "wound", "wounded", "bleeding",
-    "poison", "poisoned", "toxic",
-    "choking", "choke", "unconscious",
-    "hospital", "ambulance",
-    "emergency services", "call 911",
+    "fire",
+    "smoke",
+    "burning",
+    "burn",
+    "burnt",
+    "electric shock",
+    "electrocuted",
+    "injury",
+    "injured",
+    "injuring",
+    "hurt",
+    "hurting",
+    "wound",
+    "wounded",
+    "bleeding",
+    "poison",
+    "poisoned",
+    "toxic",
+    "choking",
+    "choke",
+    "unconscious",
+    "hospital",
+    "ambulance",
+    "emergency services",
+    "call 911",
     "danger",
 }
 
@@ -230,7 +247,11 @@ def get_or_create_session(db, session_id: Optional[str], user_id: str) -> Sessio
 def load_conversation_history(db, session_id: str, limit: int = 20) -> list:
     """Load the most recent messages for the session in chronological order."""
     messages = (
-        db.query(Message).filter(Message.session_id == session_id).order_by(Message.created_at.desc()).limit(limit).all()
+        db.query(Message)
+        .filter(Message.session_id == session_id)
+        .order_by(Message.created_at.desc())
+        .limit(limit)
+        .all()
     )
     return [{"role": msg.role, "content": msg.content} for msg in reversed(messages)]
 
@@ -282,9 +303,7 @@ def chat(
                 description=f"[SAFETY_ALERT] {chat_request.message[:500]}",
                 safety_alert=True,
             )
-            assistant_message = Message(
-                session_id=session.session_id, role="assistant", content=_SAFETY_RESPONSE
-            )
+            assistant_message = Message(session_id=session.session_id, role="assistant", content=_SAFETY_RESPONSE)
             db.add(assistant_message)
             db.commit()
             response.headers["X-Session-ID"] = session.session_id
@@ -329,14 +348,18 @@ def chat(
         # Support agent detected a bare order lookup — re-invoke order agent directly
         if graph_result.get("reroute_to_order"):
             support_order = graph_result.get("support_order") or {}
-            logger.info(f"request_id={get_request_id()} | Rerouting to order agent | order_id={support_order.get('order_id')}")
-            order_result = order_agent_graph.invoke({
-                "user_message": chat_request.message,
-                "user_id": user_id,
-                "session_id": session.session_id,
-                "conversation_history": conversation_history,
-                "order_id": support_order.get("order_id"),
-            })
+            logger.info(
+                f"request_id={get_request_id()} | Rerouting to order agent | order_id={support_order.get('order_id')}"
+            )
+            order_result = order_agent_graph.invoke(
+                {
+                    "user_message": chat_request.message,
+                    "user_id": user_id,
+                    "session_id": session.session_id,
+                    "conversation_history": conversation_history,
+                    "order_id": support_order.get("order_id"),
+                }
+            )
             final_response = order_result.get("final_response", "Something went wrong.")
         else:
             final_response = graph_result.get("final_response", "Something went wrong.")

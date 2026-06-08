@@ -269,9 +269,7 @@ def extract_preferences(state: AgentState) -> dict:
         )
 
         # Category-level switch (e.g. Electronics → Home & Kitchen) always resets everything.
-        category_changed = (
-            new_category is not None and prev_category is not None and new_category != prev_category
-        )
+        category_changed = new_category is not None and prev_category is not None and new_category != prev_category
 
         # Fully vague browsing: LLM found no product signal AND no filters in the new message.
         # Check raw extraction (not post-inheritance new_category) so this fires correctly even
@@ -293,9 +291,15 @@ def extract_preferences(state: AgentState) -> dict:
         if vague_browse:
             # Wipe all accumulated context — show the catalog and let the user start fresh.
             preferences = {
-                "category": None, "subcategory": None, "type": None, "brand": None,
-                "max_price": None, "min_price": None, "min_rating": None,
-                "keywords": [], "unavailable_request": False,
+                "category": None,
+                "subcategory": None,
+                "type": None,
+                "brand": None,
+                "max_price": None,
+                "min_price": None,
+                "min_rating": None,
+                "keywords": [],
+                "unavailable_request": False,
             }
         elif subcategory_changed or category_changed or new_specific_product:
             # New product type — reset all filters to only what the user re-specified.
@@ -324,9 +328,11 @@ def extract_preferences(state: AgentState) -> dict:
             # the previous subcategory — e.g. "table" after "mouse" inheriting subcategory: mouse.
             if inherit_subcategory and prev_subcategory and new_subcategory is None:
                 has_explicit_signal = bool(
-                    preferences.get("brand") or preferences.get("type") or
-                    preferences.get("max_price") or preferences.get("min_price") or
-                    preferences.get("min_rating")
+                    preferences.get("brand")
+                    or preferences.get("type")
+                    or preferences.get("max_price")
+                    or preferences.get("min_price")
+                    or preferences.get("min_rating")
                 )
                 if not has_explicit_signal:
                     msg_words = set(user_message.lower().split())
@@ -379,19 +385,29 @@ def handle_unavailable_products(state: AgentState) -> dict:
 
     # Keep targeted redirects only where we have a genuine alternative to point to
     if any(w in query for w in ["phone", "smartphone", "mobile", "iphone", "android", "galaxy"]):
-        return {"final_response": "We don't carry smartphones. We do have **phone accessories** — cases, chargers, power banks, and phone stands."}
+        return {
+            "final_response": "We don't carry smartphones. We do have **phone accessories** — cases, chargers, power banks, and phone stands."
+        }
     if any(w in query for w in ["laptop", "notebook", "macbook", "chromebook"]):
-        return {"final_response": "We don't carry laptops. We do have **computer accessories** — mouse, keyboard, monitors, and laptop bags."}
+        return {
+            "final_response": "We don't carry laptops. We do have **computer accessories** — mouse, keyboard, monitors, and laptop bags."
+        }
     if any(w in query for w in ["tablet", "ipad", "surface"]):
-        return {"final_response": "We don't carry tablets. We do have **computer accessories** — keyboards, mouse, and adapters."}
+        return {
+            "final_response": "We don't carry tablets. We do have **computer accessories** — keyboards, mouse, and adapters."
+        }
 
     # LLM picks the most relevant suggestion from the catalog
     _t0 = time.perf_counter()
-    response = llm.invoke([
-        SystemMessage(content=_UNAVAILABLE_SYSTEM_PROMPT),
-        HumanMessage(content=f'User asked for: "{user_message}"'),
-    ])
-    logger.info(f"request_id={get_request_id()} | unavailable_suggestion | latency_ms={int((time.perf_counter()-_t0)*1000)}")
+    response = llm.invoke(
+        [
+            SystemMessage(content=_UNAVAILABLE_SYSTEM_PROMPT),
+            HumanMessage(content=f'User asked for: "{user_message}"'),
+        ]
+    )
+    logger.info(
+        f"request_id={get_request_id()} | unavailable_suggestion | latency_ms={int((time.perf_counter()-_t0)*1000)}"
+    )
     return {"final_response": response.content.strip()}
 
 
@@ -584,11 +600,15 @@ def format_recommendations(state: AgentState) -> dict:
                 if not relevant:
                     original_query = " ".join(specific_keywords)
                     _t0 = time.perf_counter()
-                    _resp = llm.invoke([
-                        SystemMessage(content=_UNAVAILABLE_SYSTEM_PROMPT),
-                        HumanMessage(content=f'User asked for: "{original_query}"'),
-                    ])
-                    logger.info(f"request_id={get_request_id()} | unavailable_suggestion | latency_ms={int((time.perf_counter()-_t0)*1000)}")
+                    _resp = llm.invoke(
+                        [
+                            SystemMessage(content=_UNAVAILABLE_SYSTEM_PROMPT),
+                            HumanMessage(content=f'User asked for: "{original_query}"'),
+                        ]
+                    )
+                    logger.info(
+                        f"request_id={get_request_id()} | unavailable_suggestion | latency_ms={int((time.perf_counter()-_t0)*1000)}"
+                    )
                     return {"final_response": _resp.content.strip()}
 
     lines = []
@@ -624,10 +644,7 @@ def route_after_extraction(state: AgentState) -> Literal["search", "ask", "unava
 
     # Search if there's any signal — category, subcategory, brand, or keywords.
     # Only fall back to "ask" when the LLM found nothing at all (pure vague browse).
-    has_signal = bool(
-        prefs.get("category") or prefs.get("subcategory") or
-        prefs.get("keywords") or prefs.get("brand")
-    )
+    has_signal = bool(prefs.get("category") or prefs.get("subcategory") or prefs.get("keywords") or prefs.get("brand"))
     return "search" if has_signal else "ask"
 
 

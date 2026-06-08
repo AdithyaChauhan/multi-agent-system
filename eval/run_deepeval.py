@@ -22,7 +22,6 @@ import json
 import os
 import subprocess
 import sys
-import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -30,8 +29,10 @@ import yaml
 
 # Disable deepeval telemetry before importing deepeval
 os.environ.setdefault("DEEPEVAL_TELEMETRY_OPT_OUT", "YES")
-# Prevent deepeval from hard-failing on missing OpenAI key for custom metrics
-os.environ.setdefault("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY", "ci-fixture-mode-no-llm"))
+# EVAL_OPENAI_API_KEY is a dedicated key for GEval (separate from the app's OPENAI_API_KEY).
+# Falls back to OPENAI_API_KEY, then a dummy so deepeval doesn't hard-fail on import.
+_EVAL_KEY = os.getenv("EVAL_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY") or "ci-fixture-mode-no-llm"
+os.environ["OPENAI_API_KEY"] = _EVAL_KEY
 
 from deepeval import evaluate as deepeval_evaluate  # noqa: E402
 from deepeval.metrics import BaseMetric  # noqa: E402
@@ -57,45 +58,45 @@ RUN_LIVE_EVAL = os.getenv("RUN_LIVE_EVAL", "false").lower() == "true"
 
 def _make_metrics(rel_threshold: float, cor_threshold: float) -> tuple:
     """
-    Return (relevancy_metric, correctness_metric) for the current eval mode.
+    Return (relevancy_metric, correctness_metric).
 
-    Live mode  → DeepEval GEval backed by an LLM judge (gpt-4o-mini).
-    Fixture/CI → Rule-based deterministic metrics (no LLM calls).
+    Always attempts GEval (LLM judge via gpt-4o-mini) — falls back to rule-based
+    only if GEval cannot be initialised (e.g. deepeval version mismatch).
+    The app's actual_output comes from fixture_response (CI) or the live API
+    (RUN_LIVE_EVAL=true), but the evaluator is always LLM-based when possible.
     """
-    if RUN_LIVE_EVAL:
-        try:
-            from deepeval.metrics import GEval
-            from deepeval.test_case import LLMTestCaseParams
+    try:
+        from deepeval.metrics import GEval
+        from deepeval.test_case import LLMTestCaseParams
 
-            return (
-                GEval(
-                    name="answer_relevancy",
-                    criteria=(
-                        "Does the response directly and accurately address the user's "
-                        "query without hallucinating or going off-topic?"
-                    ),
-                    evaluation_params=[LLMTestCaseParams.INPUT, LLMTestCaseParams.ACTUAL_OUTPUT],
-                    threshold=rel_threshold,
-                    model="gpt-4o-mini",
+        return (
+            GEval(
+                name="answer_relevancy",
+                criteria=(
+                    "Does the response directly and accurately address the user's "
+                    "query without hallucinating or going off-topic?"
                 ),
-                GEval(
-                    name="correctness",
-                    criteria=(
-                        "Is the response factually correct, well-formed, and free of "
-                        "error messages? Penalise vague, empty, or one-line responses."
-                    ),
-                    evaluation_params=[LLMTestCaseParams.INPUT, LLMTestCaseParams.ACTUAL_OUTPUT],
-                    threshold=cor_threshold,
-                    model="gpt-4o-mini",
+                evaluation_params=[LLMTestCaseParams.INPUT, LLMTestCaseParams.ACTUAL_OUTPUT],
+                threshold=rel_threshold,
+                model="gpt-4o-mini",
+            ),
+            GEval(
+                name="correctness",
+                criteria=(
+                    "Is the response factually correct, well-formed, and free of "
+                    "error messages? Penalise vague, empty, or one-line responses."
                 ),
-            )
-        except Exception as exc:
-            print(f"  [WARN] GEval init failed ({exc}) — falling back to rule-based metrics")
-
-    return (
-        AnswerRelevancyMetric(threshold=rel_threshold),
-        CorrectnessMetric(threshold=cor_threshold),
-    )
+                evaluation_params=[LLMTestCaseParams.INPUT, LLMTestCaseParams.ACTUAL_OUTPUT],
+                threshold=cor_threshold,
+                model="gpt-4o-mini",
+            ),
+        )
+    except Exception as exc:
+        print(f"  [WARN] GEval unavailable ({exc}) — falling back to rule-based metrics")
+        return (
+            AnswerRelevancyMetric(threshold=rel_threshold),
+            CorrectnessMetric(threshold=cor_threshold),
+        )
 
 
 # ── Custom rule-based metrics (no LLM — deterministic for CI) ────────────────
@@ -346,11 +347,7 @@ def create_langsmith_experiment(
         ds = _get_or_create_langsmith_dataset(client, dataset_name)
 
         # Upsert test cases (keyed by tc_id in metadata to avoid duplicates)
-        existing_ids = {
-            e.metadata.get("tc_id")
-            for e in client.list_examples(dataset_id=ds.id)
-            if e.metadata
-        }
+        existing_ids = {e.metadata.get("tc_id") for e in client.list_examples(dataset_id=ds.id) if e.metadata}
         new_tcs = [tc for tc in dataset_data if tc["id"] not in existing_ids]
         if new_tcs:
             client.create_examples(
@@ -381,11 +378,7 @@ def create_langsmith_experiment(
             actual = (run.outputs or {}).get("response", "").lower()
             contains = (example.outputs or {}).get("expected_contains", [])
             nc = (example.outputs or {}).get("expected_not_contains", [])
-            score = (
-                sum(1 for p in contains if p.lower() in actual) / len(contains)
-                if contains
-                else 1.0
-            )
+            score = sum(1 for p in contains if p.lower() in actual) / len(contains) if contains else 1.0
             violations = [p for p in nc if p.lower() in actual]
             score = max(0.0, score - 0.15 * len(violations))
             return {"key": "answer_relevancy", "score": round(score, 4)}
@@ -605,10 +598,10 @@ def main() -> None:
     rel_threshold = thresholds["answer_relevancy"]["threshold"]
     cor_threshold = thresholds["correctness"]["threshold"]
 
-    evaluator_mode = "GEval (LLM judge — gpt-4o-mini)" if RUN_LIVE_EVAL else "Rule-based (deterministic — no LLM)"
-    print(f"Dataset  : {len(dataset)} test cases")
-    print(f"Metrics  : answer_relevancy ≥ {rel_threshold}  |  correctness ≥ {cor_threshold}")
-    print(f"Evaluator: {evaluator_mode}\n")
+    print(f"Dataset   : {len(dataset)} test cases")
+    print(f"Metrics   : answer_relevancy ≥ {rel_threshold}  |  correctness ≥ {cor_threshold}")
+    print("Evaluator : GEval (LLM judge — gpt-4o-mini)  [rule-based fallback if API unavailable]")
+    print(f"App mode  : {'Live (real LLM responses)' if RUN_LIVE_EVAL else 'Fixture (stored responses)'}\n")
 
     # Build LLMTestCase objects
     test_cases: list[LLMTestCase] = []
@@ -637,8 +630,15 @@ def main() -> None:
     for tc, tc_data in zip(test_cases, dataset):
         rel_m, cor_m = _make_metrics(rel_threshold, cor_threshold)
 
-        r = rel_m.measure(tc)
-        c = cor_m.measure(tc)
+        try:
+            r = rel_m.measure(tc)
+            c = cor_m.measure(tc)
+        except Exception as exc:
+            print(f"  [WARN] GEval measure failed ({exc}) — using rule-based fallback for {tc_data['id']}")
+            rel_m = AnswerRelevancyMetric(threshold=rel_threshold)
+            cor_m = CorrectnessMetric(threshold=cor_threshold)
+            r = rel_m.measure(tc)
+            c = cor_m.measure(tc)
 
         relevancy_scores.append(r)
         correctness_scores.append(c)
@@ -664,9 +664,7 @@ def main() -> None:
     # Run deepeval evaluate() for framework-level integration
     print("\nRunning deepeval evaluate()...")
     try:
-        eval_kwargs: dict = dict(
-            metrics=list(_make_metrics(rel_threshold, cor_threshold))
-        )
+        eval_kwargs: dict = dict(metrics=list(_make_metrics(rel_threshold, cor_threshold)))
         if _DEEPEVAL_V4:
             eval_kwargs["async_config"] = AsyncConfig(run_async=False)
             eval_kwargs["display_config"] = DisplayConfig(
