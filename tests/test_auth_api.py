@@ -1,3 +1,4 @@
+import uuid
 import pytest
 from fastapi.testclient import TestClient
 from app.main import app
@@ -60,5 +61,12 @@ class TestDemoLogin:
     def test_demo_login_existing_user(self, client):
         client.post("/auth/demo-login", json={"user_id": "existing-user"})
         response = client.post("/auth/demo-login", json={"user_id": "existing-user"})
+        assert response.status_code == 200
+        assert "access_token" in response.json()
+
+    def test_demo_login_creates_new_user(self, client):
+        # Use a guaranteed-fresh user_id so the new-user creation path always executes
+        fresh_id = f"fresh-{uuid.uuid4()}"
+        response = client.post("/auth/demo-login", json={"user_id": fresh_id})
         assert response.status_code == 200
         assert "access_token" in response.json()

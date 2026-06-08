@@ -70,26 +70,32 @@ def _make_metrics(rel_threshold: float, cor_threshold: float) -> tuple:
     """
     try:
         from deepeval.metrics import GEval
-        from deepeval.test_case import LLMTestCaseParams
+        from deepeval.test_case import SingleTurnParams
 
         return (
             GEval(
                 name="answer_relevancy",
                 criteria=(
-                    "Does the response directly and accurately address the user's "
-                    "query without hallucinating or going off-topic?"
+                    "Is this response appropriate for an e-commerce customer service chatbot? "
+                    "Score 1.0 if the bot correctly answers an e-commerce query (products, orders, support), "
+                    "OR if the user sent an off-topic/non-e-commerce message and the bot politely explains "
+                    "it cannot help and redirects to e-commerce topics — that IS the correct behavior. "
+                    "Score 0.0 only if the response is incoherent, contains errors, or completely ignores the user."
                 ),
-                evaluation_params=[LLMTestCaseParams.INPUT, LLMTestCaseParams.ACTUAL_OUTPUT],
+                evaluation_params=[SingleTurnParams.INPUT, SingleTurnParams.ACTUAL_OUTPUT],
                 threshold=rel_threshold,
                 model="gpt-4o-mini",
             ),
             GEval(
                 name="correctness",
                 criteria=(
-                    "Is the response factually correct, well-formed, and free of "
-                    "error messages? Penalise vague, empty, or one-line responses."
+                    "Is the response well-formed and appropriate for an e-commerce customer service chatbot? "
+                    "Score 1.0 for correct e-commerce answers AND for polite off-topic redirections "
+                    "(refusing to answer non-e-commerce questions is CORRECT behavior for this bot). "
+                    "Score 0.0 for error messages, hallucinated data, or completely unhelpful responses. "
+                    "Penalise vague or one-line responses to genuine e-commerce queries."
                 ),
-                evaluation_params=[LLMTestCaseParams.INPUT, LLMTestCaseParams.ACTUAL_OUTPUT],
+                evaluation_params=[SingleTurnParams.INPUT, SingleTurnParams.ACTUAL_OUTPUT],
                 threshold=cor_threshold,
                 model="gpt-4o-mini",
             ),

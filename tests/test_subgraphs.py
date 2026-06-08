@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from app.agents.state import AgentState
 
 
@@ -193,3 +193,174 @@ class TestProductSubgraph:
         )
         result = compute_score(state)
         assert "ranked_products" in result
+
+    def test_compute_score_empty_products(self):
+        from app.agents.product_agent_subgraph import compute_score
+
+        state = AgentState(
+            user_message="q",
+            user_id="u",
+            session_id="s",
+            ranked_products=[],
+            conversation_history=[],
+        )
+        result = compute_score(state)
+        assert result == {"ranked_products": []}
+
+    def test_compute_score_price_branches(self):
+        from app.agents.product_agent_subgraph import compute_score
+
+        products = [
+            {
+                "product_id": "P1",
+                "name": "Cheap",
+                "rating": 3.0,
+                "avg_review_rating": 3.0,
+                "price": 100,
+                "specs_dict": {},
+                "description": "",
+                "tags": [],
+                "brand": "",
+            },
+            {
+                "product_id": "P2",
+                "name": "Mid",
+                "rating": 3.0,
+                "avg_review_rating": 3.0,
+                "price": 600,
+                "specs_dict": {},
+                "description": "",
+                "tags": [],
+                "brand": "",
+            },
+            {
+                "product_id": "P3",
+                "name": "Good",
+                "rating": 3.0,
+                "avg_review_rating": 3.0,
+                "price": 800,
+                "specs_dict": {},
+                "description": "",
+                "tags": [],
+                "brand": "",
+            },
+            {
+                "product_id": "P4",
+                "name": "Over",
+                "rating": 3.0,
+                "avg_review_rating": 3.0,
+                "price": 1500,
+                "specs_dict": {},
+                "description": "",
+                "tags": [],
+                "brand": "",
+            },
+        ]
+        state = AgentState(
+            user_message="q",
+            user_id="u",
+            session_id="s",
+            ranked_products=products,
+            preferences={"max_price": 1000},
+            conversation_history=[],
+        )
+        result = compute_score(state)
+        scores = {p["product_id"]: p["price_score"] for p in result["ranked_products"]}
+        assert scores["P1"] == 0.4  # too cheap (<50%)
+        assert scores["P2"] == 0.7  # 50-70% of budget
+        assert scores["P3"] == 1.0  # 70-100% of budget
+        assert scores["P4"] == 0.0  # over budget
+
+    def test_compute_score_keywords_brand_type(self):
+        from app.agents.product_agent_subgraph import compute_score
+
+        products = [
+            {
+                "product_id": "P1",
+                "name": "Sony Wireless Neckband",
+                "rating": 4.0,
+                "avg_review_rating": 4.0,
+                "price": 1000,
+                "specs_dict": {"connectivity": "wireless", "type": "neckband"},
+                "description": "wireless neckband headphones",
+                "tags": ["wireless", "neckband"],
+                "brand": "Sony",
+                "type": "neckband",
+            }
+        ]
+        state = AgentState(
+            user_message="q",
+            user_id="u",
+            session_id="s",
+            ranked_products=products,
+            preferences={"keywords": ["wireless"], "brand": "Sony", "type": "neckband"},
+            conversation_history=[],
+        )
+        result = compute_score(state)
+        p = result["ranked_products"][0]
+        assert p["brand_match_score"] == 1.0
+        assert p["spec_match_score"] > 0
+        assert p["tag_match_score"] > 0
+        assert p["title_match_score"] > 0
+        assert p["type_match_score"] == 1.0
+
+
+class TestSupportSubgraph:
+
+    def _make_state(self, **kwargs):
+        defaults = dict(
+            user_message="damaged item",
+            user_id="u1",
+            session_id="s1",
+            conversation_history=[],
+            support_issue={"category": "defective", "order_id": None},
+            support_order={},
+        )
+        defaults.update(kwargs)
+        return AgentState(**defaults)
+
+    def test_assign_priority_critical_single(self):
+        from app.agents.support_agent_subgraph import assign_priority
+
+        result = assign_priority(self._make_state(severity="critical", recent_critical_count=0))
+        assert result["priority"] == "P1"
+
+    def test_assign_priority_low(self):
+        from app.agents.support_agent_subgraph import assign_priority
+
+        result = assign_priority(self._make_state(severity="low", recent_critical_count=0))
+        assert result["priority"] == "P3"
+
+    def test_create_ticket_bare_digit_order_normalised(self):
+        from app.agents.support_agent_subgraph import create_ticket_node
+
+        with patch("app.agents.support_agent_subgraph.get_open_ticket_for_order", return_value=None), patch(
+            "app.agents.support_agent_subgraph.create_support_ticket",
+            return_value={"ticket_id": "TKT-001", "status": "open"},
+        ):
+            result = create_ticket_node(
+                self._make_state(
+                    support_issue={"category": "defective", "order_id": "2001", "description": "broken"},
+                    support_order={"order_id": "2001"},
+                    severity="medium",
+                    priority="P2",
+                    policy={},
+                )
+            )
+        assert "final_response" in result
+
+    def test_create_ticket_duplicate_suppressed(self):
+        from app.agents.support_agent_subgraph import create_ticket_node
+
+        existing_ticket = {"ticket_id": "TKT-EXISTING"}
+        with patch("app.agents.support_agent_subgraph.get_open_ticket_for_order", return_value=existing_ticket):
+            result = create_ticket_node(
+                self._make_state(
+                    support_issue={"category": "defective", "order_id": "ORD-2001"},
+                    support_order={"order_id": "ORD-2001"},
+                    severity="medium",
+                    priority="P2",
+                    policy={},
+                )
+            )
+        assert "TKT-EXISTING" in result["final_response"]
