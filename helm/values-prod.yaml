@@ -7,7 +7,7 @@
 # =============================================================================
 
 app:
-  replicaCount: 2
+  replicaCount: 1
 
   image:
     pullPolicy: Always     # always pull the latest SHA-tagged image

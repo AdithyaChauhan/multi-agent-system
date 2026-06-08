@@ -301,7 +301,7 @@ jobs:
             --set-string secrets.googleClientSecret=${{ secrets.GOOGLE_CLIENT_SECRET }} \
             --set-string postgres.auth.password=${{ secrets.POSTGRES_PASSWORD }} \
             --set-string monitoring.grafana.adminPassword=${{ secrets.GRAFANA_ADMIN_PASSWORD }} \
-            --timeout 5m \
+            --timeout 10m \
             --wait
 
       - name: Smoke test — health check
