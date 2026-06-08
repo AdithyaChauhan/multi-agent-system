@@ -232,8 +232,28 @@ jobs:
           echo "${{ secrets.KUBECONFIG }}" | base64 -d > /tmp/kubeconfig.yaml
           echo "KUBECONFIG=/tmp/kubeconfig.yaml" >> $GITHUB_ENV
 
-      - name: Create ghcr.io image pull secret
+      - name: Check cluster connectivity
         if: steps.prereqs.outputs.configured == 'true'
+        id: connectivity
+        run: |
+          SERVER=$(python3 -c "import yaml; c=yaml.safe_load(open('/tmp/kubeconfig.yaml')); print(c['clusters'][0]['cluster']['server'])" 2>/dev/null || echo "")
+          if [ -z "$SERVER" ]; then
+            echo "::warning::Could not parse cluster server from kubeconfig — skipping deployment."
+            echo "reachable=false" >> $GITHUB_OUTPUT
+          else
+            HOST=$(echo "$SERVER" | sed 's~https://~~' | cut -d: -f1)
+            PORT=$(echo "$SERVER" | sed 's~https://~~' | cut -d: -f2)
+            if timeout 5 bash -c "cat < /dev/null > /dev/tcp/$HOST/$PORT" 2>/dev/null; then
+              echo "Cluster at $SERVER is reachable."
+              echo "reachable=true" >> $GITHUB_OUTPUT
+            else
+              echo "::warning::Kubernetes cluster at $SERVER is not reachable from this runner — skipping deployment."
+              echo "reachable=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Create ghcr.io image pull secret
+        if: steps.prereqs.outputs.configured == 'true' && steps.connectivity.outputs.reachable == 'true'
         run: |
           kubectl create namespace multi-agent --dry-run=client -o yaml | kubectl apply -f -
           kubectl create secret docker-registry ghcr-secret \
@@ -245,7 +265,7 @@ jobs:
 
       - name: Deploy with Helm
         id: helm-deploy
-        if: steps.prereqs.outputs.configured == 'true'
+        if: steps.prereqs.outputs.configured == 'true' && steps.connectivity.outputs.reachable == 'true'
         run: |
           IMAGE_REPO=$(echo "ghcr.io/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
           IMAGE_TAG="sha-$(echo '${{ github.sha }}' | cut -c1-7)"
@@ -268,7 +288,7 @@ jobs:
 
       - name: Smoke test — health check
         id: smoke-test
-        if: steps.prereqs.outputs.configured == 'true'
+        if: steps.prereqs.outputs.configured == 'true' && steps.connectivity.outputs.reachable == 'true'
         run: |
           kubectl port-forward -n multi-agent svc/multi-agent-system-app 8080:80 &
           PF_PID=$!
@@ -289,7 +309,7 @@ jobs:
           exit 1
 
       - name: Rollback on smoke-test failure
-        if: steps.prereqs.outputs.configured == 'true' && failure() && steps.smoke-test.outcome == 'failure'
+        if: steps.prereqs.outputs.configured == 'true' && steps.connectivity.outputs.reachable == 'true' && failure() && steps.smoke-test.outcome == 'failure'
         run: |
           echo "Smoke test failed — rolling back Helm release..."
           REVISIONS=$(helm history multi-agent-system --namespace multi-agent --max 2 -o json | python3 -c "import sys,json; print(len(json.load(sys.stdin)))")
