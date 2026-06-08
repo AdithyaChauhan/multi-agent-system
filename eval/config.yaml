@@ -9,8 +9,11 @@ metrics:
     threshold: 0.80
     description: "Response is well-formed, non-empty, and free of error messages"
 
-# LangSmith dataset to push JSON reports into for cumulative history
+# LangSmith dataset to push JSON report summaries into for cumulative history
 langsmith_dataset_name: "multi-agent-ecommerce-eval"
+
+# LangSmith dataset for end-to-end eval experiments (create_langsmith_experiment)
+langsmith_e2e_dataset_name: "multi-agent-ecommerce-e2e-eval"
 
 # Model used for live eval (RUN_LIVE_EVAL=true)
 model: "gpt-4o-mini"

@@ -22,6 +22,7 @@ import json
 import os
 import subprocess
 import sys
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -226,8 +227,21 @@ def get_actual_output(tc_data: dict, config: dict) -> str:
         return ""
 
 
+def _get_or_create_langsmith_dataset(client, dataset_name: str):
+    """Return the named dataset, creating it if it doesn't exist."""
+    existing = list(client.list_datasets(dataset_name=dataset_name))
+    if existing:
+        return existing[0]
+    ds = client.create_dataset(
+        dataset_name=dataset_name,
+        description="Multi-agent e-commerce chatbot evaluation dataset",
+    )
+    print(f"  Created LangSmith dataset '{dataset_name}'")
+    return ds
+
+
 def push_to_langsmith(report: dict, config: dict) -> None:
-    """Push the JSON report as a new example to the LangSmith evaluation dataset."""
+    """Archive the JSON report summary as a LangSmith dataset example for run history."""
     try:
         from langsmith import Client
 
@@ -238,11 +252,7 @@ def push_to_langsmith(report: dict, config: dict) -> None:
 
         client = Client(api_key=lc_key)
         dataset_name = config.get("langsmith_dataset_name", "multi-agent-ecommerce-eval")
-
-        existing = list(client.list_datasets(dataset_name=dataset_name))
-        if not existing:
-            print(f"  [WARN] LangSmith dataset '{dataset_name}' not found — skipping push.")
-            return
+        ds = _get_or_create_langsmith_dataset(client, dataset_name)
 
         client.create_example(
             inputs={
@@ -256,11 +266,122 @@ def push_to_langsmith(report: dict, config: dict) -> None:
                 "per_metric_averages": report["per_metric_averages"],
                 "total_samples": report["total_samples"],
             },
-            dataset_id=existing[0].id,
+            dataset_id=ds.id,
         )
         print(f"  Pushed report to LangSmith dataset '{dataset_name}'")
     except Exception as exc:
         print(f"  [WARN] LangSmith push failed: {exc}")
+
+
+def create_langsmith_experiment(
+    dataset_data: list[dict],
+    per_sample: list[dict],
+    config: dict,
+    git_info: dict,
+) -> None:
+    """
+    Create a LangSmith Experiment using client.evaluate().
+
+    1. Upserts the 12 end-to-end test cases into the e2e dataset (keyed by tc_id).
+    2. Runs evaluate() with answer_relevancy and correctness evaluators so results
+       appear in the LangSmith Experiments view for the dataset.
+    """
+    try:
+        from langsmith import Client
+        from langsmith.evaluation import evaluate as ls_evaluate
+
+        lc_key = os.getenv("LANGCHAIN_API_KEY") or os.getenv("LANGSMITH_API_KEY")
+        if not lc_key:
+            print("  [WARN] LANGCHAIN_API_KEY not set — skipping LangSmith experiment.")
+            return
+
+        client = Client(api_key=lc_key)
+        dataset_name = config.get("langsmith_e2e_dataset_name", "multi-agent-ecommerce-e2e-eval")
+        ds = _get_or_create_langsmith_dataset(client, dataset_name)
+
+        # Upsert test cases (keyed by tc_id in metadata to avoid duplicates)
+        existing_ids = {
+            e.metadata.get("tc_id")
+            for e in client.list_examples(dataset_id=ds.id)
+            if e.metadata
+        }
+        new_tcs = [tc for tc in dataset_data if tc["id"] not in existing_ids]
+        if new_tcs:
+            client.create_examples(
+                inputs=[{"user_message": tc["input"]["user_message"]} for tc in new_tcs],
+                outputs=[
+                    {
+                        "expected_contains": tc.get("expected_contains", []),
+                        "expected_not_contains": tc.get("expected_not_contains", []),
+                    }
+                    for tc in new_tcs
+                ],
+                metadata=[{"tc_id": tc["id"], "name": tc["name"]} for tc in new_tcs],
+                dataset_id=ds.id,
+            )
+            print(f"  Upserted {len(new_tcs)} examples into '{dataset_name}'")
+
+        # Map user_message → pre-computed fixture response
+        response_by_msg = {s["input"]: s["actual_output"] for s in per_sample}
+
+        def _target(inputs: dict) -> dict:
+            return {"response": response_by_msg.get(inputs.get("user_message", ""), "")}
+
+        thresholds = config.get("metrics", {})
+        rel_t = thresholds.get("answer_relevancy", {}).get("threshold", 0.75)
+        cor_t = thresholds.get("correctness", {}).get("threshold", 0.80)
+
+        def _answer_relevancy(run, example):
+            actual = (run.outputs or {}).get("response", "").lower()
+            contains = (example.outputs or {}).get("expected_contains", [])
+            nc = (example.outputs or {}).get("expected_not_contains", [])
+            score = (
+                sum(1 for p in contains if p.lower() in actual) / len(contains)
+                if contains
+                else 1.0
+            )
+            violations = [p for p in nc if p.lower() in actual]
+            score = max(0.0, score - 0.15 * len(violations))
+            return {"key": "answer_relevancy", "score": round(score, 4)}
+
+        def _correctness(run, example):
+            actual = (run.outputs or {}).get("response", "").strip()
+            al = actual.lower()
+            contains = (example.outputs or {}).get("expected_contains", [])
+            nc = (example.outputs or {}).get("expected_not_contains", [])
+            score, total = 0.0, 2.0
+            score += 1.0 if len(actual) >= 20 else 0.0
+            score += 0.0 if any(e in al for e in ["something went wrong", "internal server error"]) else 1.0
+            if contains:
+                total += 1
+                score += sum(1 for p in contains if p.lower() in al) / len(contains)
+            if nc:
+                total += 1
+                violations = [p for p in nc if p.lower() in al]
+                score += max(0.0, 1.0 - len(violations) / len(nc))
+            return {"key": "correctness", "score": round(score / total, 4)}
+
+        branch = git_info["branch"]
+        sha = git_info["commit_sha"][:7]
+
+        ls_evaluate(
+            _target,
+            data=dataset_name,
+            evaluators=[_answer_relevancy, _correctness],
+            experiment_prefix=f"deepeval-{branch}",
+            client=client,
+            metadata={
+                "commit_sha": sha,
+                "branch": branch,
+                "eval_mode": "live" if RUN_LIVE_EVAL else "fixture",
+                "answer_relevancy_threshold": rel_t,
+                "correctness_threshold": cor_t,
+            },
+            max_concurrency=1,
+        )
+        print(f"  LangSmith experiment created for '{dataset_name}' (branch={branch} sha={sha})")
+    except Exception as exc:
+        print(f"  [WARN] LangSmith experiment creation failed: {exc}")
 
 
 # ── HTML report generation ────────────────────────────────────────────────────
@@ -579,6 +700,9 @@ def main() -> None:
     # Push to LangSmith
     print("\nPushing report to LangSmith...")
     push_to_langsmith(report, config)
+
+    print("\nCreating LangSmith experiment...")
+    create_langsmith_experiment(dataset, per_sample, config, git_info)
 
     print(f"\nOverall: {'PASS ✓' if overall_pass else 'FAIL ✗'}")
     print(f"{sep}\n")
