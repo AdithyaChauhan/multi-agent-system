@@ -262,20 +262,38 @@ def get_git_info() -> dict:
 
 
 def get_actual_output(tc_data: dict, config: dict) -> str:
-    """Return fixture response (CI) or call the live API (live eval)."""
+    """Return fixture response (CI) or call the live API (live eval).
+
+    For multi-turn test cases (those with conversation_history), prior user
+    turns are replayed within a session so the app has context before the
+    actual test message is sent.
+    """
     if not RUN_LIVE_EVAL:
         return tc_data.get("fixture_response", "")
 
     import httpx
 
     api_url = os.getenv("EVAL_API_URL", config.get("live_eval_api_url", "http://localhost:8000"))
+    headers = {"X-User-ID": "eval-test-user", "Content-Type": "application/json"}
+    prior_turns = [m for m in tc_data["input"].get("conversation_history", []) if m.get("role") == "user"]
+
     try:
-        resp = httpx.post(
-            f"{api_url}/chat",
-            json={"message": tc_data["input"]["user_message"]},
-            headers={"X-User-ID": "eval-test-user", "Content-Type": "application/json"},
-            timeout=30,
-        )
+        session_id = None
+
+        # Replay prior user turns to build session context
+        for turn in prior_turns:
+            payload = {"message": turn["content"]}
+            if session_id:
+                payload["session_id"] = session_id
+            resp = httpx.post(f"{api_url}/chat", json=payload, headers=headers, timeout=30)
+            resp.raise_for_status()
+            session_id = resp.json().get("session_id") or session_id
+
+        # Send the actual test message, re-using the session if one exists
+        payload = {"message": tc_data["input"]["user_message"]}
+        if session_id:
+            payload["session_id"] = session_id
+        resp = httpx.post(f"{api_url}/chat", json=payload, headers=headers, timeout=30)
         resp.raise_for_status()
         return resp.json().get("response", "")
     except Exception as exc:

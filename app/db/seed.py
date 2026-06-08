@@ -7,7 +7,7 @@ from app.core.logger import get_logger
 logger = get_logger("app.db.seed")
 
 
-DEMO_USERS = ["demo-user-1", "demo-user-2", "demo-user-3", "test-user-99"]
+DEMO_USERS = ["demo-user-1", "demo-user-2", "demo-user-3", "test-user-99", "eval-test-user"]
 
 DEMO_ORDERS = [
     # demo-user-1
@@ -26,11 +26,15 @@ DEMO_ORDERS = [
     {"order_id": "ORD-5001", "user_id": "demo-user-3", "product_name": "JBL Go 2 Bluetooth Speaker", "status": "delivered", "carrier": "BlueDart", "tracking_id": "TRK-5001"},
     {"order_id": "ORD-5002", "user_id": "demo-user-3", "product_name": "Bajaj Deluxe Room Heater", "status": "processing", "carrier": None, "tracking_id": None},
     # test-user-99
-    {"order_id": "ORD-9901", "user_id": "test-user-99", "product_name": "iPhone 15 Pro Max", "status": "shipped", "carrier": "FakeExpress", "tracking_id": "TRK-9901"},
-    {"order_id": "ORD-9902", "user_id": "test-user-99", "product_name": "boAt Rockerz 450 Bluetooth Headphones", "status": "delivered", "carrier": "DTDC", "tracking_id": "TRK-9902"},
-    {"order_id": "ORD-9903", "user_id": "test-user-99", "product_name": "Philips Air Purifier AC1215", "status": "delivered", "carrier": "BlueDart", "tracking_id": "TRK-9903"},
-    {"order_id": "ORD-9904", "user_id": "test-user-99", "product_name": "Samsung 43 inch 4K Smart TV", "status": "out_for_delivery", "carrier": "FakeExpress", "tracking_id": "TRK-9904"},
-    {"order_id": "ORD-9905", "user_id": "test-user-99", "product_name": "Bajaj Rex 500W Mixer Grinder", "status": "processing", "carrier": None, "tracking_id": None},
+    {"order_id": "ORD-T901", "user_id": "test-user-99", "product_name": "iPhone 15 Pro Max", "status": "shipped", "carrier": "FakeExpress", "tracking_id": "TRK-T901"},
+    {"order_id": "ORD-T902", "user_id": "test-user-99", "product_name": "boAt Rockerz 450 Bluetooth Headphones", "status": "delivered", "carrier": "DTDC", "tracking_id": "TRK-T902"},
+    {"order_id": "ORD-T903", "user_id": "test-user-99", "product_name": "Philips Air Purifier AC1215", "status": "delivered", "carrier": "BlueDart", "tracking_id": "TRK-T903"},
+    {"order_id": "ORD-T904", "user_id": "test-user-99", "product_name": "Samsung 43 inch 4K Smart TV", "status": "out_for_delivery", "carrier": "FakeExpress", "tracking_id": "TRK-T904"},
+    {"order_id": "ORD-T905", "user_id": "test-user-99", "product_name": "Bajaj Rex 500W Mixer Grinder", "status": "processing", "carrier": None, "tracking_id": None},
+    # eval-test-user (used by automated evaluation — ORD-9901 referenced by eval dataset tc_008)
+    {"order_id": "ORD-9901", "user_id": "eval-test-user", "product_name": "boAt Rockerz 255 Pro+", "status": "shipped", "carrier": "BlueDart", "tracking_id": "TRK-E001"},
+    {"order_id": "ORD-E002", "user_id": "eval-test-user", "product_name": "Logitech M221 Wireless Mouse", "status": "delivered", "carrier": "DTDC", "tracking_id": "TRK-E002"},
+    {"order_id": "ORD-E003", "user_id": "eval-test-user", "product_name": "Fire-Boltt Phoenix Smartwatch", "status": "out_for_delivery", "carrier": "FakeExpress", "tracking_id": "TRK-E003"},
 ]
 
 
