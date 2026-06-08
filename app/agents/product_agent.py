@@ -284,6 +284,18 @@ def extract_preferences(state: AgentState) -> dict:
             and preferences.get("min_rating") is None
         )
 
+        # Price-comparative refinement ("cheaper", "less expensive", etc.) returns nothing from
+        # the extraction LLM because there's no specific number. Don't reset context for these —
+        # reduce the previous max_price by 30% so the search narrows within the same subcategory.
+        _price_down_words = {"cheaper", "less expensive", "lower price", "more affordable", "budget option", "budget"}
+        _user_msg_lower = state.get("user_message", "").lower()
+        if vague_browse and prev_subcategory and any(w in _user_msg_lower for w in _price_down_words):
+            vague_browse = False
+            preferences["category"] = prev_category
+            preferences["subcategory"] = prev_subcategory
+            if previous_prefs.get("max_price"):
+                preferences["max_price"] = int(previous_prefs["max_price"] * 0.7)
+
         # New specific product after a keyword/feature-only turn that stored no subcategory.
         # e.g. "with calling feature" stores subcategory=null; then "calculator" is a new search.
         new_specific_product = bool(new_subcategory and not prev_subcategory)

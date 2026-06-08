@@ -259,7 +259,14 @@ def ask_for_clarification(state: AgentState) -> dict:
 
     if conversation_history:
         return {
-            "final_response": "I'm your shopping assistant — I can only help with product searches, order tracking, and support requests. What can I help you with?"
+            "final_response": (
+                "I'm a customer service assistant for this e-commerce platform, so I'm not able to help with that.\n\n"
+                "Here's what I can help you with:\n"
+                "• **Product recommendations** — electronics, home appliances, accessories\n"
+                "• **Order tracking** — status, shipment, delivery estimates\n"
+                "• **Support** — returns, refunds, complaints\n\n"
+                "Is there anything shopping-related I can assist you with?"
+            )
         }
 
     return {
