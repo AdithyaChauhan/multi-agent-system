@@ -76,7 +76,7 @@ from app.core.jwt_utils import verify_access_token
 # Import auth router
 from app.api.auth import router as auth_router
 
-# from app.db.seed import seed_demo_data
+from app.db.seed import seed_demo_data
 # from app.db.seed_products import seed_demo_products
 # from app.db.seed_reviews_specs import seed_reviews_and_specs
 
@@ -154,7 +154,7 @@ def _submit_turn_feedback(run_id: str, user_message: str, response_text: str) ->
 
 Base.metadata.create_all(bind=engine)
 
-# seed_demo_data()
+seed_demo_data()
 # seed_demo_products()
 # seed_reviews_and_specs()
 
