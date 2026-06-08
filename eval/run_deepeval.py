@@ -26,6 +26,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import yaml
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Disable deepeval telemetry before importing deepeval
 os.environ.setdefault("DEEPEVAL_TELEMETRY_OPT_OUT", "YES")
@@ -327,15 +330,18 @@ def create_langsmith_experiment(
     git_info: dict,
 ) -> None:
     """
-    Create a LangSmith Experiment using client.evaluate().
+    Create a LangSmith Experiment using client.evaluate() with LLM-based evaluators.
 
-    1. Upserts the 12 end-to-end test cases into the e2e dataset (keyed by tc_id).
-    2. Runs evaluate() with answer_relevancy and correctness evaluators so results
-       appear in the LangSmith Experiments view for the dataset.
+    1. Upserts test cases into the e2e dataset (keyed by tc_id).
+    2. Runs evaluate() with three LLM evaluators (relevance, conciseness, correctness)
+       via ChatOpenAI — token usage is visible in LangSmith Experiments.
+    3. Submits feedback scores via client.create_feedback() linked to each run ID.
     """
     try:
         from langsmith import Client
         from langsmith.evaluation import evaluate as ls_evaluate
+        from langchain_openai import ChatOpenAI
+        from langchain_core.prompts import ChatPromptTemplate
 
         lc_key = os.getenv("LANGCHAIN_API_KEY") or os.getenv("LANGSMITH_API_KEY")
         if not lc_key:
@@ -356,6 +362,7 @@ def create_langsmith_experiment(
                     {
                         "expected_contains": tc.get("expected_contains", []),
                         "expected_not_contains": tc.get("expected_not_contains", []),
+                        "fixture_response": tc.get("fixture_response", ""),
                     }
                     for tc in new_tcs
                 ],
@@ -370,43 +377,83 @@ def create_langsmith_experiment(
         def _target(inputs: dict) -> dict:
             return {"response": response_by_msg.get(inputs.get("user_message", ""), "")}
 
+        branch = git_info["branch"]
+        sha = git_info["commit_sha"][:7]
         thresholds = config.get("metrics", {})
         rel_t = thresholds.get("answer_relevancy", {}).get("threshold", 0.75)
         cor_t = thresholds.get("correctness", {}).get("threshold", 0.80)
 
-        def _answer_relevancy(run, example):
-            actual = (run.outputs or {}).get("response", "").lower()
-            contains = (example.outputs or {}).get("expected_contains", [])
-            nc = (example.outputs or {}).get("expected_not_contains", [])
-            score = sum(1 for p in contains if p.lower() in actual) / len(contains) if contains else 1.0
-            violations = [p for p in nc if p.lower() in actual]
-            score = max(0.0, score - 0.15 * len(violations))
-            return {"key": "answer_relevancy", "score": round(score, 4)}
+        # LLM-based evaluators — OPENAI_API_KEY already set from EVAL_OPENAI_API_KEY at module top.
+        # Each evaluator calls gpt-4o-mini through LangChain so token usage appears in LangSmith.
+        _eval_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
-        def _correctness(run, example):
-            actual = (run.outputs or {}).get("response", "").strip()
-            al = actual.lower()
-            contains = (example.outputs or {}).get("expected_contains", [])
-            nc = (example.outputs or {}).get("expected_not_contains", [])
-            score, total = 0.0, 2.0
-            score += 1.0 if len(actual) >= 20 else 0.0
-            score += 0.0 if any(e in al for e in ["something went wrong", "internal server error"]) else 1.0
-            if contains:
-                total += 1
-                score += sum(1 for p in contains if p.lower() in al) / len(contains)
-            if nc:
-                total += 1
-                violations = [p for p in nc if p.lower() in al]
-                score += max(0.0, 1.0 - len(violations) / len(nc))
-            return {"key": "correctness", "score": round(score / total, 4)}
+        _relevance_prompt = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    "Evaluate whether the chatbot response directly addresses the user query. "
+                    "Reply with ONLY a decimal score: 1.0 = fully relevant, 0.5 = partially, 0.0 = irrelevant.",
+                ),
+                ("human", "Query: {query}\n\nResponse: {response}"),
+            ]
+        )
+        _conciseness_prompt = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    "Evaluate whether the chatbot response is concise. "
+                    "Reply with ONLY a decimal score: 1.0 = clear and brief (1-4 sentences), "
+                    "0.7 = slightly verbose, 0.3 = excessively long or padded.",
+                ),
+                ("human", "Query: {query}\n\nResponse: {response}"),
+            ]
+        )
+        _correctness_prompt = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    "Evaluate whether the chatbot response is factually correct and well-formed. "
+                    "Reply with ONLY a decimal score: 1.0 = correct and helpful, "
+                    "0.5 = partially correct, 0.0 = wrong or contains errors.",
+                ),
+                ("human", "Query: {query}\n\nResponse: {response}"),
+            ]
+        )
 
-        branch = git_info["branch"]
-        sha = git_info["commit_sha"][:7]
+        def _relevance_evaluator(run, example):
+            try:
+                prediction = (run.outputs or {}).get("response", "")
+                user_msg = (example.inputs or {}).get("user_message", "")
+                result = _eval_llm.invoke(_relevance_prompt.format_messages(query=user_msg, response=prediction))
+                return {"key": "relevance", "score": min(1.0, max(0.0, float(result.content.strip())))}
+            except Exception as exc:
+                print(f"  [WARN] relevance evaluator failed: {exc}")
+                return {"key": "relevance", "score": 0.5}
 
-        ls_evaluate(
+        def _conciseness_evaluator(run, example):
+            try:
+                prediction = (run.outputs or {}).get("response", "")
+                user_msg = (example.inputs or {}).get("user_message", "")
+                result = _eval_llm.invoke(_conciseness_prompt.format_messages(query=user_msg, response=prediction))
+                return {"key": "conciseness", "score": min(1.0, max(0.0, float(result.content.strip())))}
+            except Exception as exc:
+                print(f"  [WARN] conciseness evaluator failed: {exc}")
+                return {"key": "conciseness", "score": 0.5}
+
+        def _correctness_evaluator(run, example):
+            try:
+                prediction = (run.outputs or {}).get("response", "")
+                user_msg = (example.inputs or {}).get("user_message", "")
+                result = _eval_llm.invoke(_correctness_prompt.format_messages(query=user_msg, response=prediction))
+                return {"key": "correctness", "score": min(1.0, max(0.0, float(result.content.strip())))}
+            except Exception as exc:
+                print(f"  [WARN] correctness evaluator failed: {exc}")
+                return {"key": "correctness", "score": 0.5}
+
+        results = ls_evaluate(
             _target,
             data=dataset_name,
-            evaluators=[_answer_relevancy, _correctness],
+            evaluators=[_relevance_evaluator, _conciseness_evaluator, _correctness_evaluator],
             experiment_prefix=f"deepeval-{branch}",
             client=client,
             metadata={
@@ -418,6 +465,29 @@ def create_langsmith_experiment(
             },
             max_concurrency=1,
         )
+
+        # Submit feedback scores via create_feedback() linked to each run ID
+        feedback_count = 0
+        try:
+            for row in results:
+                run_id = row["run"].id
+                eval_results = row["evaluation_results"]
+                # eval_results is a dict {"results": [...]} in langsmith 0.8+
+                items = (
+                    eval_results["results"] if isinstance(eval_results, dict) else getattr(eval_results, "results", [])
+                )
+                for er in items:
+                    if isinstance(er, dict):
+                        key, score, comment = er.get("key", ""), er.get("score", 0.5), er.get("comment", "") or ""
+                    else:
+                        key, score, comment = er.key, er.score, getattr(er, "comment", None) or ""
+                    if key:
+                        client.create_feedback(run_id=run_id, key=key, score=score, comment=comment)
+                        feedback_count += 1
+        except Exception as exc:
+            print(f"  [WARN] create_feedback failed: {exc}")
+
+        print(f"  Submitted {feedback_count} feedback scores via create_feedback()")
         print(f"  LangSmith experiment created for '{dataset_name}' (branch={branch} sha={sha})")
     except Exception as exc:
         print(f"  [WARN] LangSmith experiment creation failed: {exc}")

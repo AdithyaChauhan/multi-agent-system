@@ -197,7 +197,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────
   deploy:
     name: Deploy to Kubernetes
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: push-image
     # Explicitly require push-image to have SUCCEEDED (not just skipped/failed)
     # Without needs.push-image.result == 'success', GitHub may run this job
