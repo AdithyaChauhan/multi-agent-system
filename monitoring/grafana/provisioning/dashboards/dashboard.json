@@ -184,6 +184,10 @@
       "type": "timeseries"
     },
     {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Filter by request_id, agent (e.g. app.agents.router), or level (INFO / ERROR)",
       "gridPos": {
         "h": 10,
