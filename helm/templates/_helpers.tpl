@@ -83,3 +83,10 @@ Internal service name for the mock carrier API.
 {{- define "multi-agent.mockApiServiceName" -}}
 {{- include "multi-agent.fullname" . }}-mock-api
 {{- end }}
+
+{{/*
+Internal service name for Prometheus.
+*/}}
+{{- define "multi-agent.prometheusServiceName" -}}
+{{- include "multi-agent.fullname" . }}-prometheus
+{{- end }}

@@ -176,5 +176,22 @@ monitoring:
         cpu: 200m
         memory: 128Mi
 
+  prometheus:
+    image:
+      repository: prom/prometheus
+      tag: "v2.47.0"
+    service:
+      port: 9090
+    persistence:
+      enabled: true
+      size: 5Gi
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
+
 # ── Global labels added to every resource ────────────────────────────────────
 commonLabels: {}

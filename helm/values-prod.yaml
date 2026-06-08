@@ -66,5 +66,9 @@ monitoring:
     persistence:
       size: 20Gi
 
+  prometheus:
+    persistence:
+      size: 20Gi
+
 config:
   googleRedirectUri: "https://multi-agent.yourdomain.com/auth/callback"

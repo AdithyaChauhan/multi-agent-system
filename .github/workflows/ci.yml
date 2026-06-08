@@ -227,6 +227,7 @@ jobs:
             --set secrets.googleClientId=ci-mock \
             --set secrets.googleClientSecret=ci-mock \
             --set postgres.auth.password=ci-mock \
+            --set monitoring.grafana.adminPassword=ci-mock \
           > /dev/null && echo "Helm template rendered successfully"
 
       - name: Check deployment prerequisites
@@ -299,6 +300,7 @@ jobs:
             --set-string secrets.googleClientId=${{ secrets.GOOGLE_CLIENT_ID }} \
             --set-string secrets.googleClientSecret=${{ secrets.GOOGLE_CLIENT_SECRET }} \
             --set-string postgres.auth.password=${{ secrets.POSTGRES_PASSWORD }} \
+            --set-string monitoring.grafana.adminPassword=${{ secrets.GRAFANA_ADMIN_PASSWORD }} \
             --timeout 5m \
             --wait
 
