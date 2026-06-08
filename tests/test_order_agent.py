@@ -195,9 +195,9 @@ class TestFinalizeOrderResponse:
         mock_resp = MagicMock()
         mock_resp.content = "Delivered yesterday."
 
-        with patch(
-            "app.agents.order_agent.load_prompt", return_value=("Hub system prompt", "abc123")
-        ), patch("app.agents.order_agent.llm") as mock_llm:
+        with patch("app.agents.order_agent.load_prompt", return_value=("Hub system prompt", "abc123")), patch(
+            "app.agents.order_agent.llm"
+        ) as mock_llm:
             mock_llm.invoke.return_value = mock_resp
             from app.agents.order_agent import finalize_order_response
 
