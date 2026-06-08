@@ -52,6 +52,52 @@ EVAL_DIR = REPO_ROOT / "eval"
 RUN_LIVE_EVAL = os.getenv("RUN_LIVE_EVAL", "false").lower() == "true"
 
 
+# ── Metric factory ───────────────────────────────────────────────────────────
+
+
+def _make_metrics(rel_threshold: float, cor_threshold: float) -> tuple:
+    """
+    Return (relevancy_metric, correctness_metric) for the current eval mode.
+
+    Live mode  → DeepEval GEval backed by an LLM judge (gpt-4o-mini).
+    Fixture/CI → Rule-based deterministic metrics (no LLM calls).
+    """
+    if RUN_LIVE_EVAL:
+        try:
+            from deepeval.metrics import GEval
+            from deepeval.test_case import LLMTestCaseParams
+
+            return (
+                GEval(
+                    name="answer_relevancy",
+                    criteria=(
+                        "Does the response directly and accurately address the user's "
+                        "query without hallucinating or going off-topic?"
+                    ),
+                    evaluation_params=[LLMTestCaseParams.INPUT, LLMTestCaseParams.ACTUAL_OUTPUT],
+                    threshold=rel_threshold,
+                    model="gpt-4o-mini",
+                ),
+                GEval(
+                    name="correctness",
+                    criteria=(
+                        "Is the response factually correct, well-formed, and free of "
+                        "error messages? Penalise vague, empty, or one-line responses."
+                    ),
+                    evaluation_params=[LLMTestCaseParams.INPUT, LLMTestCaseParams.ACTUAL_OUTPUT],
+                    threshold=cor_threshold,
+                    model="gpt-4o-mini",
+                ),
+            )
+        except Exception as exc:
+            print(f"  [WARN] GEval init failed ({exc}) — falling back to rule-based metrics")
+
+    return (
+        AnswerRelevancyMetric(threshold=rel_threshold),
+        CorrectnessMetric(threshold=cor_threshold),
+    )
+
+
 # ── Custom rule-based metrics (no LLM — deterministic for CI) ────────────────
 
 
@@ -559,8 +605,10 @@ def main() -> None:
     rel_threshold = thresholds["answer_relevancy"]["threshold"]
     cor_threshold = thresholds["correctness"]["threshold"]
 
-    print(f"Dataset : {len(dataset)} test cases")
-    print(f"Metrics : answer_relevancy ≥ {rel_threshold}  |  correctness ≥ {cor_threshold}\n")
+    evaluator_mode = "GEval (LLM judge — gpt-4o-mini)" if RUN_LIVE_EVAL else "Rule-based (deterministic — no LLM)"
+    print(f"Dataset  : {len(dataset)} test cases")
+    print(f"Metrics  : answer_relevancy ≥ {rel_threshold}  |  correctness ≥ {cor_threshold}")
+    print(f"Evaluator: {evaluator_mode}\n")
 
     # Build LLMTestCase objects
     test_cases: list[LLMTestCase] = []
@@ -587,8 +635,7 @@ def main() -> None:
 
     print("Evaluating test cases:")
     for tc, tc_data in zip(test_cases, dataset):
-        rel_m = AnswerRelevancyMetric(threshold=rel_threshold)
-        cor_m = CorrectnessMetric(threshold=cor_threshold)
+        rel_m, cor_m = _make_metrics(rel_threshold, cor_threshold)
 
         r = rel_m.measure(tc)
         c = cor_m.measure(tc)
@@ -618,10 +665,7 @@ def main() -> None:
     print("\nRunning deepeval evaluate()...")
     try:
         eval_kwargs: dict = dict(
-            metrics=[
-                AnswerRelevancyMetric(threshold=rel_threshold),
-                CorrectnessMetric(threshold=cor_threshold),
-            ]
+            metrics=list(_make_metrics(rel_threshold, cor_threshold))
         )
         if _DEEPEVAL_V4:
             eval_kwargs["async_config"] = AsyncConfig(run_async=False)
