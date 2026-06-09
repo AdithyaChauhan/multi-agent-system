@@ -49,7 +49,20 @@ def prewarm_prompts() -> None:
         logger.info(f"Prompt pre-warm | {name} | {status}")
 
 
-# Prompt version config — change version here to switch without code change
+# Prompt version config — set env var to a commit hash to pin a specific version.
+# "latest" always uses the newest push.
+#
+# product-extraction-prompt commits:
+#   76fc2fcdbb31ca3c  ← v2 compressed rules (current latest)
+#   fe87f99f7100f833  ← v1 original
+#
+# router-classification-prompt commits:
+#   7407d626586f4ce0  ← v2 compressed rules (current latest)
+#   1d5d71f9f6570a6f  ← v1 original
+#
+# To roll back: set env var to the v1 hash, e.g.
+#   PRODUCT_EXTRACTION_PROMPT_VERSION=fe87f99f7100f833
+#   ROUTER_PROMPT_VERSION=1d5d71f9f6570a6f
 PROMPT_VERSIONS = {
     "router-classification-prompt": os.getenv("ROUTER_PROMPT_VERSION", "latest"),
     "support-classification-prompt": os.getenv("SUPPORT_PROMPT_VERSION", "latest"),

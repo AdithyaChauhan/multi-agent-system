@@ -153,30 +153,28 @@ RELAXATION_ORDER = [
 
 EXTRACTION_SYSTEM_PROMPT = f"""Extract product search preferences. Return JSON only.
 
-Catalog (use exact subcategory names):
+Catalog:
 {PROMPT_CATALOG}
 
-Output schema: {{"category": str|null, "subcategory": str|null, "type": str|null, "brand": str|null, "max_price": int|null, "min_price": int|null, "min_rating": float|null, "keywords": [str], "unavailable_request": bool}}
+Schema: {{"category":str|null,"subcategory":str|null,"type":str|null,"brand":str|null,"max_price":int|null,"min_price":int|null,"min_rating":float|null,"keywords":[str],"unavailable_request":bool}}
 
-Type variants (Electronics only):
-- headphones: neckband | tws earbuds | wired earphones | over-ear headphones
-- speakers: bluetooth speaker | soundbar | home theatre
-- tv: smart tv
-- mouse/keyboard: wired | wireless | gaming | mechanical | bluetooth (null if unspecified)
-- cable/adapter: type=null — use keywords for HDMI/USB-C/lightning specifics
-- Home & Kitchen: type always null
+Types (Electronics only; null if unspecified):
+headphones: neckband|tws earbuds|wired earphones|over-ear headphones
+speakers: bluetooth speaker|soundbar|home theatre  tv: smart tv
+mouse/keyboard: wired|wireless|gaming|mechanical|bluetooth
+cable/adapter/H&K: type=null, use keywords for HDMI/USB-C/lightning specifics
 
 Rules:
-- subcategory must exactly match catalog above
-- Normalize: mice→mouse, earbuds/earphones→headphones+type, telly→tv, adaptor→adapter, geyser→water heater, AC→air conditioner
-- Normalize: pencil/pen/highlighter/eraser/ruler/marker/sketch pad→stationery (Office Products), paintbrush/canvas/palette→art supplies (Office Products)
-- Normalize: phone charger/mobile charger→subcategory: charger, keywords: ["USB"] (NOT "phone" — avoids matching AA battery chargers)
-- keywords: features not covered by subcategory/type (calling, noise cancellation, 4K, wireless)
-- min_rating: set when user asks for quality — "best rated"/"highly rated"/"top rated" → 4.0, "at least 4.5 stars" → 4.5, explicit number like "4 star and above" → 4.0; null otherwise
-- Generic category browsing (no specific product): category only, subcategory: null, keywords: []
-- Vague browsing (product list, show me products, what do you have): category: null, keywords: [], unavailable_request: false
-- unavailable_request: true ONLY when the product TYPE is genuinely absent from the catalog — e.g. laptops, phones/smartphones, tablets, clothing, food, furniture, vehicles. DO NOT set true for specs (4K, ethernet, HDMI), brands (Sony, Apple, Samsung), price adjectives (cheap, affordable, budget), or features — these are keywords/filters on a valid subcategory. If the subcategory maps to the catalog even approximately, set false.
-- Never output string "null" — use JSON null
+- Exact catalog subcategory names only
+- mice→mouse; earbuds/earphones→headphones+type; telly→tv; adaptor→adapter; geyser→water heater; AC→air conditioner
+- pencil/pen/highlighter/eraser/ruler/marker/sketch pad→stationery; paintbrush/canvas/palette→art supplies
+- phone/mobile charger→sub:charger, keywords:["USB"]
+- keywords: features beyond subcategory/type (calling, noise cancellation, 4K, wireless)
+- best/highly/top rated→min_rating:4.0; "4.5 stars"→4.5; "4 stars and above"→4.0; null otherwise
+- Category-only browse: subcategory null, keywords []
+- Vague browse (show products/what do you have): category null, unavailable_request false
+- unavailable_request true ONLY for absent types (laptops, phones, tablets, clothing, food, furniture) — not for brands, specs, or features
+- JSON null only, never string "null"
 
 Examples:
 "mixer grinder under 3000" → {{"category": "Home & Kitchen", "subcategory": "mixer grinder", "type": null, "brand": null, "max_price": 3000, "min_price": null, "min_rating": null, "keywords": [], "unavailable_request": false}}

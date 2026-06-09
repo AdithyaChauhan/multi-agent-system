@@ -31,30 +31,27 @@ Greetings (Hi/Hello/Hey/etc.) → always "unclear", even with product/order hist
 Navigation phrases ("resolve support issues", "i need support", "find products", "help me") → "unclear".
 
 Intents:
-- "order" — order status, tracking, delivery, shipping, listing orders ("my orders", "show my orders", "order history"), cancellation requests ("cancel ORD-1234", "I want to cancel my order"). If assistant asked for order ID and user provides one → "order"
-- "product" — ANY shopping, browsing, recommendations, refinement of a previous product search, vague catalog browsing ("product list", "show products", "what do you have", "appliances", "electronics"), or any bare noun that could reasonably be a physical product — even household items, furniture, food, clothing ("blanket", "table", "shirt") — the product agent handles out-of-catalog items
-- "support" — actual complaints, refunds, returns, defective items, broken products, general policy questions ("return policy", "refund policy", "warranty", "how do returns work", "can I return"), or data/privacy requests ("delete my data", "remove my account", "GDPR", "personal data", "data deletion", "privacy request"). Must contain an actual issue, not just a navigation phrase.
-- "unclear" — standalone greetings, navigation phrases, genuine off-topic messages (geography, general knowledge, jokes), or a pure pronoun/demonstrative with zero referent. Do NOT use unclear for bare nouns — even if the word seems unrelated to prior context, a bare noun is almost always a new product request → use "product"
+- "order": status, tracking, delivery, listing orders ("my orders", "order history"), cancellation. If assistant asked for order ID and user provides one → "order"
+- "product": shopping, browsing, recommendations, product refinement, catalog browse ("show products", "what do you have", "electronics"), any bare noun (even furniture, food, clothing) — product agent handles out-of-catalog
+- "support": complaints, refunds, returns, defective items, policy questions ("return policy", "warranty", "can I return"), data/privacy ("delete my data", "GDPR"). Must be an actual issue, not a navigation phrase.
+- "unclear": standalone greetings, navigation phrases, off-topic (geography, jokes), pure pronoun with no referent. Bare nouns → "product" not "unclear"
 
-CONTEXT PRIORITY — check the last assistant message first:
-- If the last assistant message is from a SUPPORT flow ASKING A QUESTION (contains "support ticket", "open a support ticket", "raise a support ticket", "for your support ticket", or "please reply with the order number") → follow-up is "support"
-- If the last assistant message is a RESOLVED support response (gave a resolution/ticket number but is NOT asking a question) → treat next message based on its OWN content, not support context
-- If the last assistant message is from the ORDER agent (listed orders with ORD-XXXX numbers AND said "Please provide the order ID") → follow-up is "order"
-- If the last assistant message showed product recommendations (contains "Here are" or "recommendations") → the NEXT message is ALWAYS "product" — even a completely different or out-of-catalog item ("blanket" after "tv", "table" after "mouse")
-- "support" context only applies when support is actively asking a clarification question
-- POLICY QUESTIONS always map to "support" regardless of prior context — "return policy", "refund policy", "how do returns work", "can I return", "what is your warranty"
+CONTEXT PRIORITY (check last assistant message first):
+- Support asking a question (contains "support ticket"/"please reply with the order number") → follow-up is "support"
+- Support resolved (gave resolution/ticket but NOT asking a question) → classify next message on its own content
+- Order agent listed orders + "Please provide the order ID" → follow-up is "order"
+- Product recommendations ("Here are"/"recommendations") → next message is always "product", even out-of-catalog items
+- Policy questions always map to "support" regardless of prior context
 
-Product follow-up rules (if history shows a product search, ALWAYS classify as "product"):
-- Price only: "under 2000", "cheaper", "between 1000 and 2000"
-- Brand only: "what about Sony", "show me Bajaj"
-- Feature: "ones with calling feature", "wireless ones", "show more"
-- Any bare noun or noun phrase that could be a product (even if not in catalog): "table", "blanket", "shirt" → "product", the product agent handles out-of-catalog items
-- Any refinement of prior search → "product", confidence >= 0.9
+Product follow-up (history shows product search → always "product"):
+- Price: "under 2000", "cheaper", "between 1000 and 2000"
+- Brand: "what about Sony", "show me Bajaj"
+- Feature: "with calling feature", "wireless ones", "show more"
+- Any bare noun (even out-of-catalog): "table", "blanket", "shirt" → "product"
 
-Support follow-up rules (only when last assistant message is actively asking a support clarification):
-- Product name reply: "the iphone one", "samsung tv", "the headphones" → "support"
+Support follow-up (only when support is actively asking a clarification question):
+- Product name: "the iphone one", "samsung tv", "the headphones" → "support"
 - Bare number: "9901", "2002" → "support"
-- Any reply to support's open question → "support"
 
 Order ID: extract if present (ORD-1234, order #1234, "the first one", "the shipped one").
 "list/show my orders" → order_id: null.
