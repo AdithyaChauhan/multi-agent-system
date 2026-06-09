@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi.responses import RedirectResponse
 
 from fastapi import FastAPI, HTTPException, Header, Request, Response
+from sqlalchemy.exc import OperationalError
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 
@@ -455,10 +456,20 @@ def chat(
     except HTTPException:
         db.rollback()
         raise
+    except OperationalError as e:
+        logger.error(f"request_id={get_request_id()} | DB_ERROR | {str(e)}")
+        db.rollback()
+        raise HTTPException(
+            status_code=503,
+            detail="We're experiencing technical difficulties. Please try again in a moment.",
+        )
     except Exception as e:
         logger.error(f"request_id={get_request_id()} | ERROR | {str(e)}")
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(
+            status_code=500,
+            detail="Something went wrong on our end. Please try again.",
+        )
     finally:
         db.close()
 
