@@ -57,3 +57,29 @@ def fetch_user_orders(user_id: str) -> List[dict]:
 
     finally:
         db.close()
+
+
+def cancel_order_in_db(order_id: str, user_id: str) -> bool:
+    """
+    Set an order's status to 'cancelled'. Only succeeds for orders in 'processing' status
+    that belong to the given user. Returns True on success, False otherwise.
+    """
+    db = SessionLocal()
+    try:
+        order = (
+            db.query(Order)
+            .filter(Order.order_id == order_id, Order.user_id == user_id, Order.status == "processing")
+            .first()
+        )
+        if not order:
+            logger.info(
+                f"request_id={get_request_id()} | Cancel failed — not found or not cancellable"
+                f" | order_id={order_id} | user_id={user_id}"
+            )
+            return False
+        order.status = "cancelled"
+        db.commit()
+        logger.info(f"request_id={get_request_id()} | Order cancelled | order_id={order_id}")
+        return True
+    finally:
+        db.close()
