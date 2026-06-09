@@ -45,8 +45,10 @@ app:
       periodSeconds: 10
 
 postgres:
+  enabled: false   # managed via postgres-standalone.yaml; CI never touches the DB
+
   persistence:
-    storageClass: standard   # adjust to your cluster's storage class
+    storageClass: standard
 
   resources:
     requests:
