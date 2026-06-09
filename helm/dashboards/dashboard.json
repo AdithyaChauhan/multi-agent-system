@@ -210,7 +210,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "{job=\"multiagent-app\", filename=\"/logs/app.log\"}",
+          "expr": "{namespace=\"multi-agent\", container=\"app\"}",
           "legendFormat": ""
         }
       ],
