@@ -1,0 +1,49 @@
+name: LLM Evaluation
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_url:
+        description: "App URL to evaluate against"
+        required: false
+        default: "http://localhost:8000"
+
+jobs:
+  evaluate:
+    name: LLM Evaluation (live)
+    runs-on: [self-hosted, minikube]
+
+    env:
+      EVAL_OPENAI_API_KEY: ${{ secrets.EVAL_OPENAI_API_KEY }}
+      LANGCHAIN_API_KEY: ${{ secrets.LANGCHAIN_API_KEY }}
+      DEEPEVAL_TELEMETRY_OPT_OUT: "YES"
+      RUN_LIVE_EVAL: "true"
+      EVAL_API_URL: ${{ github.event.inputs.api_url || 'http://localhost:8000' }}
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5.6.0
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Verify app is reachable
+        run: |
+          curl -sf ${{ env.EVAL_API_URL }}/health || (echo "App not reachable at ${{ env.EVAL_API_URL }}"; exit 1)
+
+      - name: Run DeepEval evaluation
+        run: python eval/run_deepeval.py
+
+      - name: Upload evaluation reports
+        uses: actions/upload-artifact@v4.6.2
+        if: always()
+        with:
+          name: eval-reports
+          path: |
+            eval/reports/eval_report.json
+            eval/reports/eval_report.html
