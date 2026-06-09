@@ -1,4 +1,42 @@
 {{- if .Values.monitoring.enabled }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "multi-agent.fullname" . }}-promtail
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "multi-agent.labels" . | nindent 4 }}
+    app.kubernetes.io/component: promtail
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "multi-agent.fullname" . }}-promtail
+  labels:
+    {{- include "multi-agent.labels" . | nindent 4 }}
+    app.kubernetes.io/component: promtail
+rules:
+  - apiGroups: [""]
+    resources: ["nodes", "nodes/proxy", "services", "endpoints", "pods"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "multi-agent.fullname" . }}-promtail
+  labels:
+    {{- include "multi-agent.labels" . | nindent 4 }}
+    app.kubernetes.io/component: promtail
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "multi-agent.fullname" . }}-promtail
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "multi-agent.fullname" . }}-promtail
+    namespace: {{ .Release.Namespace }}
+---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -18,7 +56,7 @@ spec:
         {{- include "multi-agent.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: promtail
     spec:
-      serviceAccountName: default
+      serviceAccountName: {{ include "multi-agent.fullname" . }}-promtail
       containers:
         - name: promtail
           image: "{{ .Values.monitoring.promtail.image.repository }}:{{ .Values.monitoring.promtail.image.tag }}"
