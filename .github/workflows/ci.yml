@@ -100,21 +100,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4.2.2
 
-      - name: Set up Python
-        uses: actions/setup-python@v5.6.0
-        with:
-          python-version: "3.12"
-          cache: pip
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      # Dependencies are pre-installed on the self-hosted runner.
+      # Uncomment the steps below if you need to install them fresh (e.g. after adding new packages):
+      # - name: Set up Python
+      #   uses: actions/setup-python@v5.6.0
+      #   with:
+      #     python-version: "3.12"
+      # - name: Install dependencies
+      #   run: pip install -r requirements.txt
 
       - name: Verify app is reachable
         run: |
           curl -sf http://localhost:8000/health || (echo "docker-compose app not running at localhost:8000"; exit 1)
 
       - name: Run DeepEval evaluation
-        run: python eval/run_deepeval.py
+        run: python3 eval/run_deepeval.py
 
       - name: Upload evaluation reports
         uses: actions/upload-artifact@v4.6.2
