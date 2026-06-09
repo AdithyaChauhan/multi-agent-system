@@ -308,12 +308,14 @@ jobs:
         id: smoke-test
         if: steps.prereqs.outputs.configured == 'true' && steps.connectivity.outputs.reachable == 'true'
         run: |
-          kubectl port-forward -n multi-agent svc/multi-agent-system-app 8080:80 &
+          # Use a high port to avoid conflicts with any existing local port-forwards
+          PF_PORT=19080
+          kubectl port-forward -n multi-agent svc/multi-agent-system-app ${PF_PORT}:80 &
           PF_PID=$!
           sleep 5
-          echo "Hitting health endpoint via port-forward..."
+          echo "Hitting health endpoint via port-forward on :${PF_PORT}..."
           for i in 1 2 3 4 5; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/health || echo "000")
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:${PF_PORT}/health || echo "000")
             if [ "$STATUS" = "200" ]; then
               echo "Health check passed (HTTP $STATUS)"
               kill $PF_PID 2>/dev/null || true
