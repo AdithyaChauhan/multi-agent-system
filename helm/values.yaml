@@ -7,6 +7,7 @@
 # ── FastAPI application ───────────────────────────────────────────────────────
 app:
   replicaCount: 1
+  databaseUrl: ""   # if set, overrides the in-cluster postgres URL
 
   image:
     repository: ghcr.io/adithyachauhan/multi-agent-system

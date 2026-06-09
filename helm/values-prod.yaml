@@ -8,6 +8,7 @@
 
 app:
   replicaCount: 1
+  databaseUrl: "postgresql://postgres:mypassword@host.minikube.internal:5433/multi_agent_db"
 
   image:
     pullPolicy: Always     # always pull the latest SHA-tagged image
