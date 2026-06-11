@@ -187,6 +187,12 @@
         .order-name { font-size: 0.79rem; color: #777; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
         .status-badge { font-size: 0.72rem; font-weight: 600; padding: 3px 9px; border-radius: 20px; flex-shrink: 0; }
         .order-chevron { color: #ccc; font-size: 1rem; flex-shrink: 0; }
+        .order-show-more {
+            font-size: 0.8rem; color: #667eea; background: none; border: none;
+            cursor: pointer; padding: 4px 0; text-align: left;
+            font-weight: 600; letter-spacing: 0.01em;
+        }
+        .order-show-more:hover { text-decoration: underline; }
 
         /* ── Typing indicator ── */
         .typing-row { display: flex; align-items: flex-start; gap: 10px; }
@@ -322,9 +328,11 @@
         }
 
         function buildOrderCards(orders) {
+            const INITIAL_SHOWN = 5;
             const wrap = document.createElement('div');
             wrap.className = 'order-cards';
-            for (const o of orders) {
+
+            function makeCard(o) {
                 const cfg = STATUS_CONFIG[o.status] || STATUS_CONFIG.pending;
                 const card = document.createElement('div');
                 card.className = 'order-card';
@@ -337,8 +345,25 @@
                     </div>
                     <span class="status-badge" style="background:${cfg.bg};color:${cfg.color}">${cfg.label}</span>
                     <span class="order-chevron">›</span>`;
-                wrap.appendChild(card);
+                return card;
             }
+
+            const visible = orders.slice(0, INITIAL_SHOWN);
+            const hidden = orders.slice(INITIAL_SHOWN);
+
+            for (const o of visible) wrap.appendChild(makeCard(o));
+
+            if (hidden.length > 0) {
+                const btn = document.createElement('button');
+                btn.className = 'order-show-more';
+                btn.textContent = `+ Show ${hidden.length} more order${hidden.length > 1 ? 's' : ''}`;
+                btn.onclick = () => {
+                    for (const o of hidden) wrap.insertBefore(makeCard(o), btn);
+                    btn.remove();
+                };
+                wrap.appendChild(btn);
+            }
+
             return wrap;
         }
 
