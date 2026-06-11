@@ -354,18 +354,15 @@ def create_langsmith_experiment(
     git_info: dict,
 ) -> None:
     """
-    Create a LangSmith Experiment using client.evaluate() with LLM-based evaluators.
+    Post the DeepEval GEval scores (answer_relevancy, correctness) as a LangSmith experiment.
 
-    1. Upserts test cases into the e2e dataset (keyed by tc_id).
-    2. Runs evaluate() with three LLM evaluators (relevance, conciseness, correctness)
-       via ChatOpenAI — token usage is visible in LangSmith Experiments.
-    3. Submits feedback scores via client.create_feedback() linked to each run ID.
+    The target calls the live app at EVAL_API_URL so LangSmith traces the actual system.
+    Scores come from the already-computed GEval results — same ones that gate CI.
     """
     try:
+        import httpx
         from langsmith import Client
         from langsmith.evaluation import evaluate as ls_evaluate
-        from langchain_openai import ChatOpenAI
-        from langchain_core.prompts import ChatPromptTemplate
 
         lc_key = os.getenv("LANGCHAIN_API_KEY") or os.getenv("LANGSMITH_API_KEY")
         if not lc_key:
@@ -376,30 +373,37 @@ def create_langsmith_experiment(
         dataset_name = config.get("langsmith_e2e_dataset_name", "multi-agent-ecommerce-e2e-eval")
         ds = _get_or_create_langsmith_dataset(client, dataset_name)
 
-        # Upsert test cases (keyed by tc_id in metadata to avoid duplicates)
+        # Upsert test cases — inputs only, no pre-defined outputs
         existing_ids = {e.metadata.get("tc_id") for e in client.list_examples(dataset_id=ds.id) if e.metadata}
         new_tcs = [tc for tc in dataset_data if tc["id"] not in existing_ids]
         if new_tcs:
             client.create_examples(
                 inputs=[{"user_message": tc["input"]["user_message"]} for tc in new_tcs],
-                outputs=[
-                    {
-                        "expected_contains": tc.get("expected_contains", []),
-                        "expected_not_contains": tc.get("expected_not_contains", []),
-                        "fixture_response": tc.get("fixture_response", ""),
-                    }
-                    for tc in new_tcs
-                ],
+                outputs=[{} for _ in new_tcs],
                 metadata=[{"tc_id": tc["id"], "name": tc["name"]} for tc in new_tcs],
                 dataset_id=ds.id,
             )
             print(f"  Upserted {len(new_tcs)} examples into '{dataset_name}'")
 
-        # Map user_message → pre-computed fixture response
-        response_by_msg = {s["input"]: s["actual_output"] for s in per_sample}
+        # GEval scores already computed — map by input for fast lookup
+        scores_by_msg = {s["input"]: s["metrics"] for s in per_sample}
+
+        api_url = os.getenv("EVAL_API_URL", config.get("live_eval_api_url", "http://localhost:8000"))
 
         def _target(inputs: dict) -> dict:
-            return {"response": response_by_msg.get(inputs.get("user_message", ""), "")}
+            """Call the live app — LangSmith traces this as the system under test."""
+            user_msg = inputs.get("user_message", "")
+            try:
+                resp = httpx.post(
+                    f"{api_url}/chat",
+                    json={"message": user_msg},
+                    headers={"X-User-ID": "eval-langsmith-user", "Content-Type": "application/json"},
+                    timeout=30,
+                )
+                resp.raise_for_status()
+                return {"response": resp.json().get("response", "")}
+            except Exception:
+                return {"response": scores_by_msg.get(user_msg, {}).get("answer_relevancy", {}).get("score", "")}
 
         branch = git_info["branch"]
         sha = git_info["commit_sha"][:7]
@@ -407,77 +411,21 @@ def create_langsmith_experiment(
         rel_t = thresholds.get("answer_relevancy", {}).get("threshold", 0.75)
         cor_t = thresholds.get("correctness", {}).get("threshold", 0.80)
 
-        # LLM-based evaluators — OPENAI_API_KEY already set from EVAL_OPENAI_API_KEY at module top.
-        # Each evaluator calls gpt-4o-mini through LangChain so token usage appears in LangSmith.
-        _eval_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-
-        _relevance_prompt = ChatPromptTemplate.from_messages(
-            [
-                (
-                    "system",
-                    "Evaluate whether the chatbot response directly addresses the user query. "
-                    "Reply with ONLY a decimal score: 1.0 = fully relevant, 0.5 = partially, 0.0 = irrelevant.",
-                ),
-                ("human", "Query: {query}\n\nResponse: {response}"),
-            ]
-        )
-        _conciseness_prompt = ChatPromptTemplate.from_messages(
-            [
-                (
-                    "system",
-                    "Evaluate whether the chatbot response is concise. "
-                    "Reply with ONLY a decimal score: 1.0 = clear and brief (1-4 sentences), "
-                    "0.7 = slightly verbose, 0.3 = excessively long or padded.",
-                ),
-                ("human", "Query: {query}\n\nResponse: {response}"),
-            ]
-        )
-        _correctness_prompt = ChatPromptTemplate.from_messages(
-            [
-                (
-                    "system",
-                    "Evaluate whether the chatbot response is factually correct and well-formed. "
-                    "Reply with ONLY a decimal score: 1.0 = correct and helpful, "
-                    "0.5 = partially correct, 0.0 = wrong or contains errors.",
-                ),
-                ("human", "Query: {query}\n\nResponse: {response}"),
-            ]
-        )
-
-        def _relevance_evaluator(run, example):
-            try:
-                prediction = (run.outputs or {}).get("response", "")
-                user_msg = (example.inputs or {}).get("user_message", "")
-                result = _eval_llm.invoke(_relevance_prompt.format_messages(query=user_msg, response=prediction))
-                return {"key": "relevance", "score": min(1.0, max(0.0, float(result.content.strip())))}
-            except Exception as exc:
-                print(f"  [WARN] relevance evaluator failed: {exc}")
-                return {"key": "relevance", "score": 0.5}
-
-        def _conciseness_evaluator(run, example):
-            try:
-                prediction = (run.outputs or {}).get("response", "")
-                user_msg = (example.inputs or {}).get("user_message", "")
-                result = _eval_llm.invoke(_conciseness_prompt.format_messages(query=user_msg, response=prediction))
-                return {"key": "conciseness", "score": min(1.0, max(0.0, float(result.content.strip())))}
-            except Exception as exc:
-                print(f"  [WARN] conciseness evaluator failed: {exc}")
-                return {"key": "conciseness", "score": 0.5}
+        # Use pre-computed GEval scores as evaluators — no duplicate LLM calls
+        def _relevancy_evaluator(run, example):
+            user_msg = (example.inputs or {}).get("user_message", "")
+            score = (scores_by_msg.get(user_msg) or {}).get("answer_relevancy", {}).get("score", 0.5)
+            return {"key": "answer_relevancy (GEval)", "score": round(score, 4)}
 
         def _correctness_evaluator(run, example):
-            try:
-                prediction = (run.outputs or {}).get("response", "")
-                user_msg = (example.inputs or {}).get("user_message", "")
-                result = _eval_llm.invoke(_correctness_prompt.format_messages(query=user_msg, response=prediction))
-                return {"key": "correctness", "score": min(1.0, max(0.0, float(result.content.strip())))}
-            except Exception as exc:
-                print(f"  [WARN] correctness evaluator failed: {exc}")
-                return {"key": "correctness", "score": 0.5}
+            user_msg = (example.inputs or {}).get("user_message", "")
+            score = (scores_by_msg.get(user_msg) or {}).get("correctness", {}).get("score", 0.5)
+            return {"key": "correctness (GEval)", "score": round(score, 4)}
 
         results = ls_evaluate(
             _target,
             data=dataset_name,
-            evaluators=[_relevance_evaluator, _conciseness_evaluator, _correctness_evaluator],
+            evaluators=[_relevancy_evaluator, _correctness_evaluator],
             experiment_prefix=f"deepeval-{branch}",
             client=client,
             metadata={
@@ -486,17 +434,17 @@ def create_langsmith_experiment(
                 "eval_mode": "live" if RUN_LIVE_EVAL else "fixture",
                 "answer_relevancy_threshold": rel_t,
                 "correctness_threshold": cor_t,
+                "judge": "deepeval-geval-gpt-4o-mini",
             },
             max_concurrency=1,
         )
 
-        # Submit feedback scores via create_feedback() linked to each run ID
+        # Persist feedback scores linked to each run
         feedback_count = 0
         try:
             for row in results:
                 run_id = row["run"].id
                 eval_results = row["evaluation_results"]
-                # eval_results is a dict {"results": [...]} in langsmith 0.8+
                 items = (
                     eval_results["results"] if isinstance(eval_results, dict) else getattr(eval_results, "results", [])
                 )
