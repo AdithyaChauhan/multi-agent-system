@@ -3,6 +3,7 @@ import re
 import json
 import copy
 import time
+import threading
 from typing import Literal
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
@@ -94,41 +95,76 @@ def build_catalog_blurb() -> str:
 CATALOG_BLURB = build_catalog_blurb()
 
 
-# Controlled catalog for the extraction prompt.
-# This is deliberately static — it defines what the LLM is *allowed* to search,
-# not what happens to be in the DB. Update this when subcategories are added via migration.
-PROMPT_CATALOG = (
-    "Electronics: Cameras & Photography | adapter | battery | cable | camera accessory"
-    " | calculators | charger | headphones | memory card | pen | phone case | phone stand | power bank"
-    " | projector | screen protector | selfie stick | set top box | smartwatch | speakers"
-    " | streaming device | tv | tv mount | tv remote\n"
-    "Computers & Accessories: adapter | cable | drawing tablet | external hdd | external ssd"
-    " | gamepad | ink cartridge | keyboard | laptop bag | memory card | microphone | monitor"
-    " | monitor stand | mouse | pen drive | printer | router | screen protector | ups"
-    " | usb hub | webcam | wifi adapter | wifi range extender\n"
-    "Home & Kitchen: air conditioner | air fryer | air purifier | blender | ceiling fan"
-    " | chopper | coffee maker | egg boiler | electric kettle | frother | garment steamer"
-    " | hand mixer | humidifier | induction | iron | juicer | kitchen scale | kitchen tools"
-    " | lint remover | mixer grinder | pedestal fan | pressure washer | rice cooker"
-    " | room heater | roti maker | sandwich maker | sealing machine | sewing machine"
-    " | storage organizer | toaster | vacuum cleaner | waffle maker | water filter"
-    " | water heater | water purifier | yogurt maker\n"
-    "Office Products: art supplies | stationery"
-)
+_CATALOG_CACHE: dict = {"value": "", "ts": 0.0}
+_CATALOG_LOCK = threading.Lock()
+_CATALOG_TTL = 300  # seconds
+
+
+def _build_prompt_catalog_from_db() -> str:
+    """Query DB for distinct served subcategories and format as extraction catalog string."""
+    from app.db.database import SessionLocal
+    from app.models.product import Product
+
+    db = SessionLocal()
+    try:
+        rows = (
+            db.query(Product.category, Product.subcategory)
+            .filter(
+                Product.category.in_(SERVED_CATEGORIES),
+                Product.subcategory.isnot(None),
+                Product.subcategory.notin_(BLURB_EXCLUDED_SUBCATEGORIES),
+            )
+            .distinct()
+            .order_by(Product.category, Product.subcategory)
+            .all()
+        )
+        cat_map: dict[str, list[str]] = {}
+        for cat, sub in rows:
+            cat_map.setdefault(cat, []).append(sub)
+
+        return "\n".join(
+            f"{cat}: {' | '.join(subs)}" for cat, subs in sorted(cat_map.items())
+        )
+    except Exception:
+        return ""
+    finally:
+        db.close()
+
+
+def get_prompt_catalog() -> str:
+    """Return cached catalog string, refreshing from DB if older than TTL."""
+    now = time.time()
+    with _CATALOG_LOCK:
+        if now - _CATALOG_CACHE["ts"] < _CATALOG_TTL and _CATALOG_CACHE["value"]:
+            return _CATALOG_CACHE["value"]
+        fresh = _build_prompt_catalog_from_db()
+        if fresh:
+            _CATALOG_CACHE["value"] = fresh
+            _CATALOG_CACHE["ts"] = now
+        return _CATALOG_CACHE["value"]
+
+
+# Initialise cache at startup so the first request doesn't pay the DB round-trip.
+PROMPT_CATALOG = get_prompt_catalog()
 
 # All catalog subcategories, longest-first so multi-word names ("usb hub", "air fryer")
 # match before single-word prefixes ("hub", "fryer").
-_ALL_SUBCATEGORIES: list[str] = sorted(
-    {
-        s.strip()
-        for line in PROMPT_CATALOG.split("\n")
-        for part in (line.split(":", 1)[1:] or [""])
-        for s in part.split("|")
-        if s.strip()
-    },
-    key=len,
-    reverse=True,
-)
+def _build_all_subcategories() -> list[str]:
+    catalog = get_prompt_catalog()
+    return sorted(
+        {
+            s.strip()
+            for line in catalog.split("\n")
+            for part in (line.split(":", 1)[1:] or [""])
+            for s in part.split("|")
+            if s.strip()
+        },
+        key=len,
+        reverse=True,
+    )
+
+
+_ALL_SUBCATEGORIES: list[str] = _build_all_subcategories()
 
 
 def _subcategory_in_message(message: str) -> str | None:
@@ -151,10 +187,11 @@ RELAXATION_ORDER = [
     "subcategory",
 ]
 
-EXTRACTION_SYSTEM_PROMPT = f"""Extract product search preferences. Return JSON only.
+def _extraction_system_prompt() -> str:
+    return f"""Extract product search preferences. Return JSON only.
 
 Catalog:
-{PROMPT_CATALOG}
+{get_prompt_catalog()}
 
 Schema: {{"category":str|null,"subcategory":str|null,"type":str|null,"brand":str|null,"max_price":int|null,"min_price":int|null,"min_rating":float|null,"keywords":[str],"unavailable_request":bool}}
 
@@ -206,7 +243,7 @@ def extract_preferences(state: AgentState) -> dict:
     _ext_version = PROMPT_VERSIONS.get("product-extraction-prompt", "latest")
     _ext_prompt, _ext_hash = load_prompt("product-extraction-prompt", _ext_version)
     if not _ext_prompt:
-        _ext_prompt = EXTRACTION_SYSTEM_PROMPT
+        _ext_prompt = _extraction_system_prompt()
         _ext_hash = "fallback"
 
     messages = [

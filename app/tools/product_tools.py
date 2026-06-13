@@ -1,10 +1,43 @@
+import time
+import threading
 from typing import Optional, List
 from sqlalchemy import or_, cast, String
 from app.db.database import SessionLocal
 from app.models.product import Product
 from app.core.logger import get_logger, get_request_id
+from rapidfuzz import process, fuzz
 
 logger = get_logger("app.tools.product_tools")
+
+_BRAND_CACHE: dict = {"brands": [], "ts": 0.0}
+_BRAND_LOCK = threading.Lock()
+_BRAND_TTL = 300  # seconds
+
+
+def _get_known_brands() -> list[str]:
+    now = time.time()
+    with _BRAND_LOCK:
+        if now - _BRAND_CACHE["ts"] < _BRAND_TTL and _BRAND_CACHE["brands"]:
+            return _BRAND_CACHE["brands"]
+        db = SessionLocal()
+        try:
+            rows = db.query(Product.brand).filter(Product.brand.isnot(None)).distinct().all()
+            brands = [r[0] for r in rows if r[0] and len(r[0]) > 2]
+            _BRAND_CACHE["brands"] = brands
+            _BRAND_CACHE["ts"] = now
+            return brands
+        finally:
+            db.close()
+
+
+def _resolve_brand(brand: str) -> str:
+    """Snap a user-typed brand to the closest known brand (typo correction).
+    Returns the original string unchanged if no match scores above 80."""
+    known = _get_known_brands()
+    if not known:
+        return brand
+    result = process.extractOne(brand, known, scorer=fuzz.WRatio, score_cutoff=80)
+    return result[0] if result else brand
 
 
 def search_products(
@@ -51,10 +84,13 @@ def search_products(
         if product_type:
             query = query.filter(Product.type.ilike(f"%{product_type}%"))
         # Filter by brand
-        # Filter by brand — use first meaningful word to handle truncated brand names
+        # Filter by brand — fuzzy-correct typos, then use first meaningful word
         if brand:
-            brand_words = [w for w in brand.replace("&", "").split() if len(w) > 3]
-            search_brand = brand_words[0] if brand_words else brand
+            resolved = _resolve_brand(brand)
+            if resolved != brand:
+                logger.info(f"request_id={get_request_id()} | brand_fuzzy | {brand!r} → {resolved!r}")
+            brand_words = [w for w in resolved.replace("&", "").split() if len(w) > 3]
+            search_brand = brand_words[0] if brand_words else resolved
             query = query.filter(Product.brand.ilike(f"%{search_brand}%"))
 
         # Filter by price range
