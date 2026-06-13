@@ -210,6 +210,27 @@
         .typing span:nth-child(2) { animation-delay: -0.16s; }
         @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
 
+        /* ── Cancel confirm buttons ── */
+        .confirm-actions {
+            display: flex; gap: 8px; margin-top: 10px;
+        }
+        .btn-confirm-yes {
+            background: #dc2626; color: white;
+            border: none; padding: 8px 20px;
+            border-radius: 20px; cursor: pointer;
+            font-size: 0.85rem; font-weight: 600;
+            transition: background 0.2s;
+        }
+        .btn-confirm-yes:hover { background: #b91c1c; }
+        .btn-confirm-no {
+            background: white; color: #374151;
+            border: 1px solid #d1d5db; padding: 8px 20px;
+            border-radius: 20px; cursor: pointer;
+            font-size: 0.85rem; font-weight: 600;
+            transition: background 0.2s;
+        }
+        .btn-confirm-no:hover { background: #f3f4f6; }
+
         /* ── Input ── */
         .input-container {
             background: white; padding: 0.85rem 1rem;
@@ -265,7 +286,7 @@
                 <button class="quick-btn" onclick="quickAction('my orders')">
                     <span class="qicon">📦</span> My Orders
                 </button>
-                <button class="quick-btn" onclick="quickAction('find a product')">
+                <button class="quick-btn" onclick="quickAction('show me your products')">
                     <span class="qicon">🛍️</span> Find a Product
                 </button>
                 <button class="quick-btn" onclick="quickAction('what is your return policy')">
@@ -451,6 +472,54 @@
             addMessage("Hi! I'm your AI shopping assistant. Ask me about your orders, products, or support issues.", 'assistant');
         }
 
+        function addConfirmButtons(msgRow, orderId, productName) {
+            const col = msgRow.querySelector('.msg-col');
+            const actions = document.createElement('div');
+            actions.className = 'confirm-actions';
+
+            const yesBtn = document.createElement('button');
+            yesBtn.className = 'btn-confirm-yes';
+            yesBtn.textContent = 'Yes, cancel it';
+
+            const noBtn = document.createElement('button');
+            noBtn.className = 'btn-confirm-no';
+            noBtn.textContent = 'No, keep it';
+
+            actions.appendChild(yesBtn);
+            actions.appendChild(noBtn);
+            col.appendChild(actions);
+
+            yesBtn.addEventListener('click', async () => {
+                actions.remove();
+                addMessage('Yes, cancel it', 'user');
+                const typingRow = document.createElement('div');
+                typingRow.className = 'typing-row';
+                const ta = document.createElement('div'); ta.className = 'bot-avatar'; ta.textContent = '🤖';
+                const tb = document.createElement('div'); tb.className = 'typing'; tb.innerHTML = '<span></span><span></span><span></span>';
+                typingRow.appendChild(ta); typingRow.appendChild(tb);
+                chatContainer.appendChild(typingRow);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+
+                const headers = { 'Content-Type': 'application/json' };
+                if (token && !isGuest) headers['Authorization'] = `Bearer ${token}`;
+                try {
+                    const res = await fetch('/cancel-order', { method: 'POST', headers, body: JSON.stringify({ order_id: orderId, session_id: sessionId }) });
+                    const data = await res.json();
+                    typingRow.remove();
+                    addMessage(data.message, 'assistant');
+                } catch(e) {
+                    typingRow.remove();
+                    addMessage('Something went wrong. Please try again.', 'assistant');
+                }
+            });
+
+            noBtn.addEventListener('click', () => {
+                actions.remove();
+                addMessage('No, keep it', 'user');
+                addMessage('No problem! Your order is still active.', 'assistant');
+            });
+        }
+
         async function sendMessage() {
             const message = messageInput.value.trim();
             if (!message) return;
@@ -484,7 +553,10 @@
                 if (response.ok) {
                     sessionId = data.session_id;
                     localStorage.setItem('chat_session_id', sessionId);
-                    addMessage(data.response, 'assistant');
+                    const msgRow = addMessage(data.response, 'assistant');
+                    if (data.action && data.action.type === 'confirm_cancel') {
+                        addConfirmButtons(msgRow, data.action.order_id, data.action.product_name);
+                    }
                 } else if (response.status === 401) {
                     localStorage.removeItem('access_token');
                     addMessage('Your session expired. Please sign in again.', 'assistant');

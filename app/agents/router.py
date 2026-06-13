@@ -28,13 +28,13 @@ llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=os.getenv("OPENAI_A
 ROUTER_SYSTEM_PROMPT = """Classify user intent for a customer service app. Use conversation history to resolve references and follow-ups.
 
 Greetings (Hi/Hello/Hey/etc.) → always "unclear", even with product/order history.
-Navigation phrases ("resolve support issues", "i need support", "find products", "help me") → "unclear".
+Navigation phrases with no specific goal ("help me", "get started", "browse") → "unclear".
 
 Intents:
-- "order": status, tracking, delivery, listing orders ("my orders", "order history"), cancellation. If assistant asked for order ID and user provides one → "order"
-- "product": shopping, browsing, recommendations, product refinement, catalog browse ("show products", "what do you have", "electronics"), any bare noun (even furniture, food, clothing) — product agent handles out-of-catalog
-- "support": complaints, refunds, returns, defective items, policy questions ("return policy", "warranty", "can I return"), data/privacy ("delete my data", "GDPR"). Must be an actual issue, not a navigation phrase.
-- "unclear": standalone greetings, navigation phrases, off-topic (geography, jokes), pure pronoun with no referent. Bare nouns → "product" not "unclear"
+- "order": the user wants to know the status of a delivery — tracking, shipment status, estimated arrival, or listing their orders.
+- "product": the user wants to find or learn about something to buy — any item, brand, model name, or general browsing request ("find products", "show me products", "what do you sell"). When genuinely unsure between product and unclear, choose product.
+- "support": the user wants to take action on an order or has a complaint — cancellation, refund, return, wrong item, damage, warranty, data privacy.
+- "unclear": greetings, vague requests with no discernible goal (not delivery, not shopping, not a complaint), off-topic messages, pure pronouns with no referent.
 
 CONTEXT PRIORITY (check last assistant message first):
 - Support asking a question (contains "support ticket"/"please reply with the order number") → follow-up is "support"
@@ -90,44 +90,8 @@ History: "I've created a support ticket TKT-XXXX for your damaged Samsung TV..."
 History: "You have multiple orders: • ORD-2005 Logitech... Please provide the order ID." | Message: "1001"
 → {"intent": "order", "confidence": 0.95, "order_id": "ORD-1001"}
 
-Message: "cancel ORD-2005"
-→ {"intent": "order", "confidence": 0.95, "order_id": "ORD-2005"}
-
-Message: "I want to cancel my order"
-→ {"intent": "order", "confidence": 0.9, "order_id": null}
-
-Message: "What's your return policy?"
-→ {"intent": "support", "confidence": 0.9, "order_id": null}
-
-History: "Your order ORD-2002 has shipped and is currently in transit..." | Message: "Whats your return policy"
-→ {"intent": "support", "confidence": 0.9, "order_id": null}
-
-Message: "tv"
-→ {"intent": "product", "confidence": 0.95, "order_id": null}
-
-Message: "products list"
-→ {"intent": "product", "confidence": 0.95, "order_id": null}
-
 History: "Here are my top mouse recommendations..." | Message: "table"
 → {"intent": "product", "confidence": 0.9, "order_id": null}
-
-Message: "it" (no clear referent in history)
-→ {"intent": "unclear", "confidence": 0.3, "order_id": null}
-
-History: "Here are my top mouse recommendations..." | Message: "Hi"
-→ {"intent": "unclear", "confidence": 0.95, "order_id": null}
-
-Message: "resolve support issues"
-→ {"intent": "unclear", "confidence": 0.9, "order_id": null}
-
-Message: "i need support"
-→ {"intent": "unclear", "confidence": 0.85, "order_id": null}
-
-Message: "Please delete all my personal data"
-→ {"intent": "support", "confidence": 0.95, "order_id": null}
-
-Message: "I want to remove my account"
-→ {"intent": "support", "confidence": 0.9, "order_id": null}
 
 Respond ONLY with valid JSON:
 {"intent": "order"|"product"|"support"|"unclear", "confidence": 0.0-1.0, "order_id": "ORD-1234"|null}"""
@@ -138,15 +102,8 @@ def classify_intent_and_extract(state: AgentState) -> dict:
     user_message = state["user_message"]
     conversation_history = state.get("conversation_history", [])
 
-    # Load prompt from LangSmith Hub
-    version = PROMPT_VERSIONS.get("router-classification-prompt", "latest")
-    system_prompt, commit_hash = load_prompt("router-classification-prompt", version)
-
-    # Fallback to hardcoded if hub fails
-    if not system_prompt:
-        logger.warning(f"request_id={get_request_id()} | Using fallback router prompt")
-        system_prompt = ROUTER_SYSTEM_PROMPT
-        commit_hash = "fallback"
+    system_prompt = ROUTER_SYSTEM_PROMPT
+    commit_hash = "hardcoded"
 
     # Router only needs the last assistant message to apply context-priority rules.
     # Last 2 messages (prev user + last assistant) is sufficient — no need for full history.
@@ -207,13 +164,22 @@ def classify_intent_and_extract(state: AgentState) -> dict:
     # Safety override: if LLM returned unclear but recent history contains product
     # responses, the user is in a shopping session — treat as a new product request.
     # Handles ambiguous bare nouns (blanket, milk, book) that the LLM misclassifies.
+    # Does NOT apply to navigation phrases or greetings — those stay as unclear.
+    _NAVIGATION_PHRASES = {
+        "find a product", "find products", "find product",
+        "i need help", "i need support", "help me", "help",
+        "resolve support issues", "get support", "what can you do",
+        "what do you do", "get started", "browse", "browse products",
+    }
     if intent == "unclear":
-        history = state.get("conversation_history") or []
-        recent_assistant = [m["content"] for m in history[-4:] if m.get("role") == "assistant"]
-        if any("Here are" in m or "recommendations" in m or "don't carry" in m for m in recent_assistant):
-            intent = "product"
-            confidence = 0.8
-            logger.info(f"request_id={get_request_id()} | unclear→product override (active product session)")
+        msg_normalized = user_message.strip().lower().rstrip("!.,?")
+        if msg_normalized not in _GREETINGS and msg_normalized not in _NAVIGATION_PHRASES:
+            history = state.get("conversation_history") or []
+            recent_assistant = [m["content"] for m in history[-4:] if m.get("role") == "assistant"]
+            if any("Here are" in m or "recommendations" in m or "don't carry" in m for m in recent_assistant):
+                intent = "product"
+                confidence = 0.8
+                logger.info(f"request_id={get_request_id()} | unclear→product override (active product session)")
 
     if intent in ("order", "product", "support"):
         agent_requests_total.labels(agent=intent).inc()
@@ -245,30 +211,19 @@ _GREETINGS = {
 }
 
 
+_CLARIFY_SYSTEM = """You are a shopping assistant for an e-commerce platform. You help with three things: finding products, tracking orders, and resolving support issues.
+
+Respond in 1-2 short sentences only. If the user greeted you or was vague, say hello and ask what they need. If they asked what you can do, name your three capabilities. If they said something off-topic, say you handle shopping tasks only and name the three things you do."""
+
+
 def ask_for_clarification(state: AgentState) -> dict:
-    user_message = state.get("user_message", "").strip().lower().rstrip("!.,")
-    conversation_history = state.get("conversation_history", [])
-
-    if user_message in _GREETINGS:
-        return {
-            "final_response": "Hi there! I'm your shopping assistant. I can help you:\n\n• 🛍️ Find products\n• 📦 Track your orders\n• 🛠️ Resolve support issues\n\nWhat can I help you with today?"
-        }
-
-    if conversation_history:
-        return {
-            "final_response": (
-                "I'm a customer service assistant for this e-commerce platform, so I'm not able to help with that.\n\n"
-                "Here's what I can help you with:\n"
-                "• **Product recommendations** — electronics, home appliances, accessories\n"
-                "• **Order tracking** — status, shipment, delivery estimates\n"
-                "• **Support** — returns, refunds, complaints\n\n"
-                "Is there anything shopping-related I can assist you with?"
-            )
-        }
-
-    return {
-        "final_response": "Hi! I'm a shopping assistant. I can help you find products, track orders, or resolve support issues. What are you looking for?"
-    }
+    user_message = state.get("user_message", "")
+    messages = [
+        SystemMessage(content=_CLARIFY_SYSTEM),
+        HumanMessage(content=user_message),
+    ]
+    response = llm.invoke(messages)
+    return {"final_response": response.content.strip()}
 
 
 def auth_gate(state: AgentState) -> dict:

@@ -30,3 +30,4 @@ class ChatResponse(BaseModel):
     session_id: str
     user_id: str
     response: str
+    action: Optional[dict] = None

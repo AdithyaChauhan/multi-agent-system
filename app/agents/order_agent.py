@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 from app.agents.state import AgentState
 from app.agents.order_agent_subgraph import shipment_tracking_subgraph
-from app.tools.order_tools import fetch_order_from_db, fetch_user_orders, cancel_order_in_db
+from app.tools.order_tools import fetch_order_from_db, fetch_user_orders
 from app.tools.shipment_tools import fetch_tracking_info
 from app.core.logger import get_logger, get_request_id
 from app.core.metrics import llm_requests_total, llm_tokens_total, llm_duration_seconds
@@ -34,16 +34,7 @@ Status rules:
 - "cancelled": inform the order is already cancelled; nothing further needed.
 - If live tracking data is "N/A" or missing, rely on the DB status field only.
 - NEVER suggest the customer check the website or their account — give the answer directly.
-- NEVER invent carrier names, locations, or dates that are not in the data.
-
-Cancellation rules (when user asks to cancel):
-- "processing" + user has NOT yet confirmed: ask the user to confirm ("Please confirm if you'd like to proceed").
-- "processing" + user IS confirming (said "yes", "confirm", "go ahead", "do it", "please cancel"): CALL the cancel_order tool with the order_id and user_id, then confirm the cancellation in your reply.
-- "shipped" / "out_for_delivery" / "in_transit": cancellation is NOT possible — offer to help with a return once it arrives.
-- "delivered": cancellation is NOT possible — offer to return within our 30-day policy window.
-- "cancelled": inform the order is already cancelled.
-
-IMPORTANT: You MUST call cancel_order when the user confirms. Do NOT say the order is cancelled without calling the tool first."""
+- NEVER invent carrier names, locations, or dates that are not in the data."""
 
 
 # ==================== HELPER FUNCTIONS ====================
@@ -213,20 +204,7 @@ def get_live_tracking(tracking_id: str) -> str:
     return json.dumps(info)
 
 
-@tool
-def cancel_order(order_id: str, user_id: str) -> str:
-    """
-    Cancel a customer's order. Only works for orders in 'processing' status.
-    Call this when the customer has confirmed they want to cancel their order.
-    Returns a confirmation or an error message.
-    """
-    success = cancel_order_in_db(order_id, user_id)
-    if success:
-        return f"Order {order_id} has been successfully cancelled in the system."
-    return f"Could not cancel order {order_id}. It may not be in 'processing' status or may not belong to this account."
-
-
-_order_tools = [get_live_tracking, cancel_order]
+_order_tools = [get_live_tracking]
 order_tool_node = ToolNode(_order_tools)
 
 
@@ -237,10 +215,8 @@ def response_generation(state: AgentState) -> dict:
     conversation_history = state.get("conversation_history", [])
     user_id = state.get("user_id", "")
 
-    # Deterministic short-circuit for delivered orders — skip if user is asking to cancel.
-    user_intent = (state.get("user_message") or "").lower()
     status = (order_data.get("status") or "").lower()
-    if status == "delivered" and "cancel" not in user_intent:
+    if status == "delivered":
         product = order_data.get("product_name", "Your order")
         tracking_id = tracking_data.get("tracking_id") or order_data.get("tracking_id")
         msg = f"Good news! **{product}** (Order {order_data.get('order_id')}) has been delivered."

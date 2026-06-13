@@ -43,5 +43,8 @@ class AgentState(TypedDict, total=False):
     # Reroute signal — support agent sets this when bare order lookup detected
     reroute_to_order: Optional[bool]
 
+    # Action signal — support agent sets this when user confirmation is needed (e.g. cancel)
+    action_required: Optional[dict]
+
     # Final response
     final_response: Optional[str]

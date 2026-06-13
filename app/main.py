@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi.responses import RedirectResponse
 
 from fastapi import FastAPI, HTTPException, Header, Request, Response
+from pydantic import BaseModel
 from sqlalchemy.exc import OperationalError
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
@@ -21,6 +22,7 @@ from app.models.message import Message
 from app.agents.router import router_graph
 from app.agents.order_agent import order_agent_graph
 from app.tools.support_tools import create_support_ticket
+from app.tools.order_tools import cancel_order_in_db
 
 _session_preferences: dict = {}
 
@@ -451,7 +453,10 @@ def chat(
         response.headers["X-Session-ID"] = session.session_id
         response.headers["X-User-ID"] = user_id
 
-        return ChatResponse(session_id=session.session_id, user_id=user_id, response=final_response)
+        action = graph_result.get("action_required") or (
+            order_result.get("action_required") if graph_result.get("reroute_to_order") else None
+        )
+        return ChatResponse(session_id=session.session_id, user_id=user_id, response=final_response, action=action)
 
     except HTTPException:
         db.rollback()
@@ -470,6 +475,43 @@ def chat(
             status_code=500,
             detail="Something went wrong on our end. Please try again.",
         )
+    finally:
+        db.close()
+
+
+class CancelOrderRequest(BaseModel):
+    order_id: str
+    session_id: str
+
+
+class CancelOrderResponse(BaseModel):
+    success: bool
+    message: str
+
+
+@app.post("/cancel-order", response_model=CancelOrderResponse)
+def cancel_order_endpoint(
+    request_obj: Request,
+    body: CancelOrderRequest,
+):
+    """Deterministic cancel order endpoint — no LLM, no ambiguity. Called from UI confirm button."""
+    user_id = get_current_user_id(request_obj)
+    if user_id.startswith("anon-"):
+        raise HTTPException(status_code=401, detail="Authentication required to cancel orders.")
+
+    db = SessionLocal()
+    try:
+        success = cancel_order_in_db(body.order_id, user_id)
+        if success:
+            msg = f"Order {body.order_id} has been cancelled successfully."
+            # Store confirmation in session history
+            session = db.query(Session).filter(Session.session_id == body.session_id).first()
+            if session:
+                db.add(Message(session_id=session.session_id, role="assistant", content=msg))
+                db.commit()
+            logger.info(f"request_id={get_request_id()} | Order cancelled via endpoint | order_id={body.order_id} | user_id={user_id}")
+            return CancelOrderResponse(success=True, message=msg)
+        return CancelOrderResponse(success=False, message=f"Could not cancel {body.order_id}. It may have already shipped or doesn't belong to your account.")
     finally:
         db.close()
 
