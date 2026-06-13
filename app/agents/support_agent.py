@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 from app.agents.state import AgentState
 from app.agents.support_agent_subgraph import escalation_handler_subgraph
 from app.tools.support_tools import lookup_support_policy, get_open_ticket_for_order
-from app.tools.order_tools import fetch_order_from_db, fetch_user_orders
+from app.tools.order_tools import fetch_order_from_db, fetch_user_orders, cancel_order_in_db
 from app.core.logger import get_logger, get_request_id
 from app.core.metrics import llm_requests_total, llm_tokens_total, llm_duration_seconds
 from app.core.prompt_loader import load_prompt, PROMPT_VERSIONS
@@ -38,6 +38,7 @@ ISSUE CATEGORIES:
 - "damaged_delivery": Package arrived damaged
 - "missing_parts": Product incomplete, missing accessories
 - "refund_request": Want money back
+- "cancellation_request": User wants to cancel an order
 - "other": Anything else
 
 Extract order ID ONLY if explicitly stated in the CURRENT message (ORD-1234, order #1234, "order 2001", etc.). Do NOT infer order ID from conversation history.
@@ -77,11 +78,14 @@ Draft a helpful, empathetic response that:
 3. Offers next steps
 4. Maintains professional, friendly tone
 
-Cancellation rules (check order status first):
-- "processing": confirm cancellation is possible, advise they will receive confirmation
-- "shipped" / "out_for_delivery" / "in_transit": cancellation is NOT possible once shipped — offer return/refund instead
-- "delivered": cannot cancel — offer return within policy window
-- "cancelled": inform the order is already cancelled, nothing further needed
+Cancellation rules (check order status and conversation history):
+- "processing" + user has NOT yet confirmed: tell them cancellation is possible and ask them to confirm ("Shall I go ahead and cancel it?").
+- "processing" + user IS confirming (said "yes", "confirm", "go ahead", "please cancel", "do it"): CALL the cancel_order tool with order_id and user_id, then confirm in your reply.
+- "shipped" / "out_for_delivery" / "in_transit": not possible — offer return once it arrives.
+- "delivered": not possible — offer return within 30-day policy window.
+- "cancelled": inform the order is already cancelled.
+
+IMPORTANT: Call cancel_order only when the user explicitly confirms. Do NOT cancel without confirmation.
 
 Keep response under 150 words. Be specific and actionable.
 IMPORTANT:
@@ -129,13 +133,8 @@ def classify_issue(state: AgentState) -> dict:
     user_message = state.get("user_message", "")
     conversation_history = state.get("conversation_history", [])
 
-    version = PROMPT_VERSIONS.get("support-classification-prompt", "latest")
-    system_prompt, commit_hash = load_prompt("support-classification-prompt", version)
-
-    if not system_prompt:
-        logger.warning(f"request_id={get_request_id()} | Using fallback support prompt")
-        system_prompt = CLASSIFICATION_SYSTEM_PROMPT
-        commit_hash = "fallback"
+    system_prompt = CLASSIFICATION_SYSTEM_PROMPT
+    commit_hash = "hardcoded"
 
     history_context = ""
     if conversation_history:
@@ -200,7 +199,7 @@ def classify_issue(state: AgentState) -> dict:
         if raw_id not in user_message and issue["order_id"] not in user_message:
             issue["order_id"] = None
 
-    # Router-extracted order_id as last-resort fallback (already from current message)
+    # Router-extracted order_id as last-resort fallback (handles pronouns like "cancel it")
     if not issue.get("order_id") and state.get("order_id"):
         issue["order_id"] = state.get("order_id")
 
@@ -255,20 +254,30 @@ def _is_bare_order_lookup(message: str) -> bool:
 def fetch_order_for_support(state: AgentState) -> dict:
     """
     Fetches the order the support ticket is about.
-    - If order_id found in issue: validate it belongs to this user
-    - If not found: load user's order list so ask_for_order can display it
+    Priority: (1) product name match in current message, (2) explicit order ID, (3) history-extracted ID.
     """
     user_id = state.get("user_id", "")
     issue = state.get("support_issue", {})
-    order_id = issue.get("order_id")
+    user_message = state.get("user_message", "")
+    msg_lower = user_message.lower()
 
-    # Normalize bare numbers to ORD-XXXX (e.g. "9903" → "ORD-9903")
+    # Load user orders once — needed for product name matching and fallback listing
+    user_orders = fetch_user_orders(user_id)
+
+    # Priority 1: product name match from current message (beats history-extracted IDs)
+    for order in user_orders:
+        product_words = [w for w in order.get("product_name", "").lower().split() if len(w) > 3]
+        if product_words and any(w in msg_lower for w in product_words):
+            order_obj = fetch_order_from_db(order["order_id"], user_id)
+            if order_obj:
+                logger.info(f"request_id={get_request_id()} | Matched order by product name | order_id={order['order_id']}")
+                return {"support_order": order_obj}
+
+    # Priority 2: explicit order ID from classifier or current message digits
+    order_id = issue.get("order_id")
     if order_id and str(order_id).strip().isdigit():
         order_id = f"ORD-{order_id.strip()}"
-
-    # Also check current user message for bare numbers if LLM missed it
     if not order_id:
-        user_message = state.get("user_message", "")
         match = re.search(r'\b(\d+)\b', user_message)
         if match:
             order_id = f"ORD-{match.group(1)}"
@@ -277,20 +286,13 @@ def fetch_order_for_support(state: AgentState) -> dict:
         order = fetch_order_from_db(order_id, user_id)
         if order:
             logger.info(f"request_id={get_request_id()} | Support order fetched | order_id={order_id}")
-            # Reroute to order agent if message is a bare lookup with no existing ticket
-            user_message = state.get("user_message", "")
             if _is_bare_order_lookup(user_message) and not get_open_ticket_for_order(user_id, order_id):
-                logger.info(
-                    f"request_id={get_request_id()} | Bare order lookup — rerouting to order agent | order_id={order_id}"
-                )
+                logger.info(f"request_id={get_request_id()} | Bare order lookup — rerouting to order agent | order_id={order_id}")
                 return {"support_order": order, "reroute_to_order": True}
             return {"support_order": order}
-        else:
-            logger.info(f"request_id={get_request_id()} | Order not found or not owned | order_id={order_id}")
+        logger.info(f"request_id={get_request_id()} | Order not found or not owned | order_id={order_id}")
 
-    # No valid order found — fetch user's orders so ask_for_order can list them
-    user_orders = fetch_user_orders(user_id)
-    logger.info(f"request_id={get_request_id()} | No order_id | user has {len(user_orders)} orders")
+    logger.info(f"request_id={get_request_id()} | No order resolved | user has {len(user_orders)} orders")
     return {"support_order": None, "user_orders": user_orders}
 
 
@@ -382,7 +384,21 @@ def fetch_support_policy(category: str, severity: str) -> str:
     return json.dumps(policy)
 
 
-draft_tool_node = ToolNode([fetch_support_policy])
+@tool
+def cancel_order(order_id: str, user_id: str) -> str:
+    """
+    Cancel a customer's order. Only works for orders in 'processing' status.
+    Call this only when the customer has explicitly confirmed they want to cancel.
+    Returns a confirmation or an error message.
+    """
+    success = cancel_order_in_db(order_id, user_id)
+    if success:
+        return f"Order {order_id} has been successfully cancelled."
+    return f"Could not cancel order {order_id}. It may not be in 'processing' status or may not belong to this account."
+
+
+_support_tools = [fetch_support_policy, cancel_order]
+draft_tool_node = ToolNode(_support_tools)
 
 
 def lookup_policy(state: AgentState) -> dict:
@@ -402,29 +418,34 @@ def draft_resolution(state: AgentState) -> dict:
     support_order = state.get("support_order") or {}
     severity = state.get("severity", "low")
     category = issue.get("category", "other")
+    user_id = state.get("user_id", "")
+    conversation_history = state.get("conversation_history", [])
+
+    history_context = ""
+    if conversation_history:
+        recent = conversation_history[-4:]
+        history_context = "Recent conversation:\n" + "\n".join(
+            [f"{m['role'].title()}: {m['content']}" for m in recent]
+        ) + "\n\n"
 
     prompt = (
+        f"{history_context}"
         f"Order: {support_order.get('order_id')} — {support_order.get('product_name', 'your product')}\n"
         f"Order Status: {support_order.get('status', 'unknown')}\n"
+        f"User ID: {user_id}\n"
         f"Issue: {issue.get('description')}\n"
         f"Category: {category}, Severity: {severity}\n\n"
         f"Use the fetch_support_policy tool to retrieve the applicable policy, "
         f"then draft a helpful, empathetic resolution for the customer."
     )
 
-    _res_version = PROMPT_VERSIONS.get("support-resolution-prompt", "latest")
-    _res_prompt, _res_hash = load_prompt("support-resolution-prompt", _res_version)
-    if not _res_prompt:
-        _res_prompt = RESOLUTION_SYSTEM_PROMPT
-        _res_hash = "fallback"
-
     messages = [
-        SystemMessage(content=_res_prompt),
+        SystemMessage(content=RESOLUTION_SYSTEM_PROMPT),
         HumanMessage(content=prompt),
     ]
 
     _t0 = time.perf_counter()
-    response = llm.bind_tools([fetch_support_policy]).invoke(
+    response = llm.bind_tools(_support_tools).invoke(
         messages,
         config={"metadata": {"prompt_name": "support-resolution-prompt", "prompt_version": _res_hash}},
     )
@@ -474,20 +495,11 @@ def finalize_draft(state: AgentState) -> dict:
         f"Using the policy retrieved above, draft a helpful and empathetic response for the customer."
     )
 
-    _rv = PROMPT_VERSIONS.get("support-resolution-prompt", "latest")
-    _rp, _rh = load_prompt("support-resolution-prompt", _rv)
-    if not _rp:
-        _rp = RESOLUTION_SYSTEM_PROMPT
-        _rh = "fallback"
-
     tool_messages = state.get("messages") or []
-    messages = [SystemMessage(content=_rp), HumanMessage(content=context_prompt)] + tool_messages
+    messages = [SystemMessage(content=RESOLUTION_SYSTEM_PROMPT), HumanMessage(content=context_prompt)] + tool_messages
 
     _t0 = time.perf_counter()
-    response = llm.invoke(
-        messages,
-        config={"metadata": {"prompt_name": "support-resolution-prompt", "prompt_version": _rh}},
-    )
+    response = llm.invoke(messages)
     _latency_s = time.perf_counter() - _t0
     _latency_ms = int(_latency_s * 1000)
     _meta = getattr(response, "response_metadata", {})
@@ -537,9 +549,33 @@ def route_after_classify(state: AgentState) -> Literal["fetch_order", "answer_po
     return "fetch_order"
 
 
-def route_after_order_fetch(state: AgentState) -> Literal["found", "not_found", "reroute"]:
+def handle_cancellation(state: AgentState) -> dict:
+    """Deterministic node — handles cancel order request; sets action_required for UI confirmation."""
+    support_order = state.get("support_order") or {}
+    order_id = support_order.get("order_id")
+    status = (support_order.get("status") or "").lower()
+    product = support_order.get("product_name", "your order")
+
+    if status == "processing":
+        return {
+            "final_response": f"Your order **{order_id}** ({product}) is in processing and can still be cancelled.",
+            "action_required": {"type": "confirm_cancel", "order_id": order_id, "product_name": product},
+        }
+    elif status in ("shipped", "out_for_delivery", "in_transit"):
+        return {"final_response": f"Order **{order_id}** has already shipped — cancellation isn't possible. Once it arrives, I can help you initiate a return."}
+    elif status == "delivered":
+        return {"final_response": f"Order **{order_id}** has been delivered and can't be cancelled. You can return it within our 30-day policy window."}
+    elif status == "cancelled":
+        return {"final_response": f"Order **{order_id}** is already cancelled — nothing further needed."}
+    return {"final_response": f"I wasn't able to look up **{order_id}**. Please contact our support team."}
+
+
+def route_after_order_fetch(state: AgentState) -> Literal["found", "not_found", "reroute", "cancellation"]:
     if state.get("reroute_to_order"):
         return "reroute"
+    issue = state.get("support_issue", {})
+    if state.get("support_order") and issue.get("category") == "cancellation_request":
+        return "cancellation"
     if state.get("support_order"):
         return "found"
     # Legal threats escalate immediately even without an order — no ticket FK needed
@@ -569,6 +605,7 @@ def build_support_agent_graph():
     graph.add_node("answer_policy_question", answer_policy_question)
     graph.add_node("fetch_order_for_support", fetch_order_for_support)
     graph.add_node("ask_for_order", ask_for_order)
+    graph.add_node("handle_cancellation", handle_cancellation)
     graph.add_node("assess_severity", assess_severity)
     graph.add_node("lookup_policy", lookup_policy)
     graph.add_node("escalation_handler", escalation_handler_subgraph)
@@ -592,6 +629,7 @@ def build_support_agent_graph():
             "found": "assess_severity",
             "not_found": "ask_for_order",
             "reroute": "reroute_exit",
+            "cancellation": "handle_cancellation",
         },
     )
 
@@ -616,6 +654,7 @@ def build_support_agent_graph():
 
     graph.add_edge("escalation_handler", END)
     graph.add_edge("ask_for_order", END)
+    graph.add_edge("handle_cancellation", END)
     graph.add_edge("answer_policy_question", END)
     graph.add_edge("reroute_exit", END)
 
