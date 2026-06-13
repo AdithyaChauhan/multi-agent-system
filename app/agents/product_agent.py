@@ -588,8 +588,8 @@ def broaden_search(state: AgentState) -> dict:
     else:
         return {"broaden_attempt": attempt, "filters_exhausted": True}
 
-    # Guard: if no specificity remains beyond category, treat as exhausted.
-    has_specificity = prefs.get("subcategory") or prefs.get("brand") or prefs.get("type") or prefs.get("keywords")
+    # Category alone is enough to fetch a candidate set for the ranker.
+    has_specificity = prefs.get("category") or prefs.get("subcategory") or prefs.get("brand") or prefs.get("type") or prefs.get("keywords")
     if not has_specificity:
         return {"broaden_attempt": attempt, "filters_exhausted": True}
 
@@ -680,7 +680,7 @@ def format_recommendations(state: AgentState) -> dict:
                 "range",
             }
             specific_keywords = [kw for kw in original_keywords if kw.lower() not in GENERIC_WORDS]
-            if specific_keywords:
+            if specific_keywords and original_preferences.get("subcategory"):
                 relevant = any(any(kw.lower() in p.get("name", "").lower() for kw in specific_keywords) for p in ranked)
                 if not relevant:
                     original_query = " ".join(specific_keywords)
