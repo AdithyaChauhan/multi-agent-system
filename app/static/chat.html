@@ -489,8 +489,21 @@
             actions.appendChild(noBtn);
             col.appendChild(actions);
 
+            // Lock input while awaiting confirmation
+            messageInput.disabled = true;
+            sendButton.disabled = true;
+            messageInput.placeholder = 'Tap Yes or No above to continue...';
+
+            function unlockInput() {
+                messageInput.disabled = false;
+                sendButton.disabled = false;
+                messageInput.placeholder = 'Type your message...';
+                messageInput.focus();
+            }
+
             yesBtn.addEventListener('click', async () => {
                 actions.remove();
+                unlockInput();
                 addMessage('Yes, cancel it', 'user');
                 const typingRow = document.createElement('div');
                 typingRow.className = 'typing-row';
@@ -515,6 +528,7 @@
 
             noBtn.addEventListener('click', () => {
                 actions.remove();
+                unlockInput();
                 addMessage('No, keep it', 'user');
                 addMessage('No problem! Your order is still active.', 'assistant');
             });
