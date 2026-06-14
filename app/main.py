@@ -456,7 +456,7 @@ def chat(
         action = graph_result.get("action_required") or (
             order_result.get("action_required") if graph_result.get("reroute_to_order") else None
         )
-        return ChatResponse(session_id=session.session_id, user_id=user_id, response=final_response, action=action)
+        return ChatResponse(session_id=session.session_id, user_id=user_id, response=final_response, action=action, run_id=langsmith_run_id)
 
     except HTTPException:
         db.rollback()
@@ -477,6 +477,25 @@ def chat(
         )
     finally:
         db.close()
+
+
+class FeedbackRequest(BaseModel):
+    run_id: str
+    score: int  # 1 = thumbs up, -1 = thumbs down
+
+
+@app.post("/api/feedback")
+def submit_feedback(body: FeedbackRequest):
+    """Submit explicit user thumbs-up/down feedback to LangSmith for the given run."""
+    client = _get_langsmith_client()
+    if not client:
+        raise HTTPException(status_code=503, detail="Feedback service unavailable")
+    try:
+        client.create_feedback(run_id=body.run_id, key="user_feedback", score=body.score)
+        return {"ok": True}
+    except Exception as e:
+        logger.error(f"LangSmith feedback error | run_id={body.run_id} | error={e}")
+        raise HTTPException(status_code=500, detail="Failed to submit feedback")
 
 
 class CancelOrderRequest(BaseModel):

@@ -194,6 +194,20 @@
         }
         .order-show-more:hover { text-decoration: underline; }
 
+        /* ── Feedback buttons ── */
+        .feedback-bar {
+            display: flex; gap: 4px; margin-top: 6px;
+        }
+        .feedback-btn {
+            background: none; border: 1px solid #e0e0e0;
+            border-radius: 6px; cursor: pointer;
+            padding: 2px 7px; font-size: 0.82rem; color: #aaa;
+            transition: all 0.15s; line-height: 1.6;
+        }
+        .feedback-btn:hover { border-color: #667eea; color: #667eea; background: #f5f5ff; }
+        .feedback-btn.active-up { border-color: #22c55e; color: #22c55e; background: #f0fdf4; }
+        .feedback-btn.active-down { border-color: #ef4444; color: #ef4444; background: #fef2f2; }
+
         /* ── Typing indicator ── */
         .typing-row { display: flex; align-items: flex-start; gap: 10px; }
         .typing {
@@ -388,7 +402,7 @@
             return wrap;
         }
 
-        function addMessage(text, className) {
+        function addMessage(text, className, runId) {
             const row = document.createElement('div');
             row.className = `msg-row ${className}`;
 
@@ -419,6 +433,24 @@
 
             col.appendChild(bubble);
 
+            if (className === 'assistant' && runId) {
+                const bar = document.createElement('div');
+                bar.className = 'feedback-bar';
+                const upBtn = document.createElement('button');
+                upBtn.className = 'feedback-btn';
+                upBtn.title = 'Good response';
+                upBtn.textContent = '👍';
+                const downBtn = document.createElement('button');
+                downBtn.className = 'feedback-btn';
+                downBtn.title = 'Bad response';
+                downBtn.textContent = '👎';
+                upBtn.onclick = () => submitFeedback(runId, 1, upBtn, downBtn);
+                downBtn.onclick = () => submitFeedback(runId, -1, downBtn, upBtn);
+                bar.appendChild(upBtn);
+                bar.appendChild(downBtn);
+                col.appendChild(bar);
+            }
+
             const meta = document.createElement('div');
             meta.className = 'msg-meta';
             meta.innerHTML = `<span>${getTime()}</span>${className === 'user' ? '<span class="tick">✓✓</span>' : ''}`;
@@ -428,6 +460,18 @@
             chatContainer.appendChild(row);
             chatContainer.scrollTop = chatContainer.scrollHeight;
             return row;
+        }
+
+        async function submitFeedback(runId, score, activeBtn, otherBtn) {
+            activeBtn.classList.add(score === 1 ? 'active-up' : 'active-down');
+            otherBtn.classList.remove('active-up', 'active-down');
+            try {
+                await fetch('/api/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ run_id: runId, score }),
+                });
+            } catch (_) {}
         }
 
         // ── Auth state ──
@@ -567,7 +611,7 @@
                 if (response.ok) {
                     sessionId = data.session_id;
                     localStorage.setItem('chat_session_id', sessionId);
-                    const msgRow = addMessage(data.response, 'assistant');
+                    const msgRow = addMessage(data.response, 'assistant', data.run_id || null);
                     if (data.action && data.action.type === 'confirm_cancel') {
                         addConfirmButtons(msgRow, data.action.order_id, data.action.product_name);
                     }

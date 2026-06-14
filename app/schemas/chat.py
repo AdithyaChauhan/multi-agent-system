@@ -31,3 +31,4 @@ class ChatResponse(BaseModel):
     user_id: str
     response: str
     action: Optional[dict] = None
+    run_id: Optional[str] = None
