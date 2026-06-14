@@ -211,6 +211,7 @@ Rules:
 - Vague browse (show products/what do you have): category null, unavailable_request false
 - unavailable_request true ONLY for absent types (laptops, phones, tablets, clothing, food, furniture) — not for brands, specs, or features
 - JSON null only, never string "null"
+- Navigation phrases before a product name ("show me", "find me", "get me") are filler — extract the product name as subcategory, not keyword.
 - Need/goal queries: when the user describes a problem, activity, or desired outcome rather than naming a specific product, infer the catalog subcategory that best enables it. This applies to multi-word intent phrases ("something to keep warm", "for the gym"), NOT to bare single nouns that are product names ("table", "chair", "book") — treat those as direct product searches.
 - If the user names a product type not in the catalog (furniture, food, clothing, books, toys), set unavailable_request: true.
 
@@ -419,6 +420,14 @@ def extract_preferences(state: AgentState) -> dict:
                     prev_sub_words = set(prev_subcategory.lower().replace("-", " ").split())
                     if not msg_words & prev_sub_words:
                         inherit_subcategory = False
+            # Inherit previous keywords only for pure price refinements — when the new
+            # message has no subcategory, brand, type, or keywords of its own.
+            # Targets "under 2000" / "under 1500" after a keyword-based search.
+            _new_kw = preferences.get("keywords") or []
+            if not new_subcategory and not preferences.get("brand") and not preferences.get("type") and not _new_kw:
+                _merged_kw = previous_prefs.get("keywords") or []
+            else:
+                _merged_kw = _new_kw
             preferences = {
                 "category": new_category,
                 "subcategory": new_subcategory or (prev_subcategory if inherit_subcategory else None),
@@ -427,7 +436,7 @@ def extract_preferences(state: AgentState) -> dict:
                 "max_price": preferences.get("max_price") or previous_prefs.get("max_price"),
                 "min_price": preferences.get("min_price") or previous_prefs.get("min_price"),
                 "min_rating": preferences.get("min_rating") or previous_prefs.get("min_rating"),
-                "keywords": preferences.get("keywords") if preferences.get("keywords") else [],
+                "keywords": _merged_kw,
                 "unavailable_request": preferences.get("unavailable_request", False),
             }
 
