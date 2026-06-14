@@ -322,6 +322,8 @@ def extract_preferences(state: AgentState) -> dict:
 
         # Guard: if only brand changed (no type change), don't let LLM's brand-name inference
         # override the subcategory (e.g. "Samsung" → earphones when context is TVs).
+        # Only fires when the user's message does not explicitly name a catalog subcategory —
+        # if the user said "bajaj smartwatches", the subcategory change is intentional.
         if (
             new_category == prev_category
             and prev_subcategory
@@ -329,6 +331,7 @@ def extract_preferences(state: AgentState) -> dict:
             and new_subcategory != prev_subcategory
             and not preferences.get("type")
             and preferences.get("brand") is not None
+            and not _subcategory_in_message(user_message)
         ):
             new_subcategory = prev_subcategory
 
@@ -584,25 +587,33 @@ def respond_no_results(state: AgentState) -> dict:
         known_brands = _get_known_brands()
         brand_in_catalog = any(k.lower() == brand.lower() for k in known_brands)
         if brand_in_catalog:
-            label = subcategory or category or "products"
-            return {
-                "final_response": (
-                    f"I couldn't find any {brand} {label} matching your filters. "
-                    f"Try relaxing the price or rating — or let me know if you'd like to see other brands."
-                )
-            }
+            # Check if this brand makes the requested product at all (ignoring filters).
+            brand_has_product = bool(search_products(brand=brand, subcategory=subcategory, limit=1))
+            if brand_has_product:
+                # Brand makes the product but price/rating filters were too tight.
+                label = subcategory or category or "products"
+                return {
+                    "final_response": (
+                        f"I couldn't find any {brand} {label} matching your filters. "
+                        f"Try relaxing the price or rating — or let me know if you'd like to see other brands."
+                    )
+                }
+            # Brand is in our catalog but doesn't make this product — show alternatives.
+            no_carry_msg = f"We carry {brand} but not {subcategory or category or 'that product'}."
+        else:
+            no_carry_msg = f"We don't carry {brand}."
         alternatives = search_products(category=category, subcategory=subcategory, limit=10)
         if alternatives:
             top3 = sorted(alternatives, key=lambda p: p.get("rating") or 0, reverse=True)[:3]
             label = subcategory or category or "products"
-            lines = [f"We don't carry {brand}. Here are our top-rated {label} from brands we stock:\n"]
+            lines = [f"{no_carry_msg} Here are our top-rated {label} from brands we stock:\n"]
             for i, p in enumerate(top3, 1):
                 price = f"₹{p['price']:,}" if p.get("price") else ""
                 rating = f"{p['rating']}/5" if p.get("rating") else ""
                 lines.append(f"{i}. **{p['name']}** by {p.get('brand', '')}")
                 lines.append(f"   {price} | ⭐ {rating}\n")
             return {"final_response": "\n".join(lines)}
-        return {"final_response": f"We don't carry {brand}. Let me know what you need and I can suggest alternatives from brands we stock."}
+        return {"final_response": f"{no_carry_msg} Let me know what you need and I can suggest alternatives from brands we stock."}
 
     return {
         "final_response": (
