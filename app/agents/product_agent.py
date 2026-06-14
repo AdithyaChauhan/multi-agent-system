@@ -7,7 +7,6 @@ import threading
 from typing import Literal
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
-from langchain_core.tools import tool
 from langgraph.graph import StateGraph, END
 from dotenv import load_dotenv
 
@@ -492,49 +491,7 @@ def handle_unavailable_products(state: AgentState) -> dict:
     return {"final_response": response.content.strip()}
 
 
-# ── Product search tool + ToolNode ───────────────────────────────────────────
-
-
-@tool
-def search_product_catalog(
-    category: str = None,
-    subcategory: str = None,
-    brand: str = None,
-    max_price: int = None,
-    min_price: int = None,
-    keywords: list = None,
-    product_type: str = None,
-) -> str:
-    """
-    Search the product catalog database.
-    Returns up to 10 matching products as a JSON array.
-    Use this to find products that match the user's search preferences.
-    """
-    results = search_products(
-        category=category,
-        subcategory=subcategory,
-        product_type=product_type,
-        brand=brand,
-        max_price=max_price,
-        min_price=min_price,
-        keywords=keywords or [],
-        limit=10,
-    )
-    if not results:
-        return json.dumps([])
-    slim = [
-        {
-            "product_id": p["product_id"],
-            "name": p["name"],
-            "price": p["price"],
-            "rating": p["rating"],
-            "brand": p.get("brand", ""),
-            "category": p.get("category"),
-            "subcategory": p.get("subcategory"),
-        }
-        for p in results
-    ]
-    return json.dumps(slim)
+# ── Product search ───────────────────────────────────────────────────────────
 
 
 def do_search_products(state: AgentState) -> dict:
@@ -616,10 +573,10 @@ def format_recommendations(state: AgentState) -> dict:
         return {"final_response": "I found some products but could not rank them."}
 
     top3 = ranked[:3]
-    all_maybe = all(p.get("llm_tier", 0) == 1 for p in top3)
+    all_maybe = all(p.get("llm_tier", 0) == 1 for p in top3) or bool(state.get("keyword_recovery_attempted"))
 
     lines = []
-    if relaxed:
+    if relaxed and not state.get("keyword_recovery_attempted"):
         lines.append(f"Note — I couldn't find an exact match, so I relaxed: {', '.join(relaxed)}.\n")
         lines.append("Here are the closest options:\n")
     elif all_maybe:
@@ -753,8 +710,33 @@ def route_after_rank(state: AgentState) -> Literal["enrich", "broaden"]:
     return "enrich" if ranked else "broaden"
 
 
-def route_after_broaden(state: AgentState) -> Literal["retry_search", "no_results"]:
-    return "no_results" if state.get("filters_exhausted") else "retry_search"
+def route_after_broaden(state: AgentState) -> Literal["retry_search", "keyword_recovery", "no_results"]:
+    if not state.get("filters_exhausted"):
+        return "retry_search"
+    original_kw = (state.get("original_preferences") or {}).get("keywords") or []
+    keywords_were_relaxed = "keywords" in (state.get("relaxed_filters") or [])
+    if original_kw and keywords_were_relaxed and not state.get("keyword_recovery_attempted"):
+        return "keyword_recovery"
+    return "no_results"
+
+
+def keyword_recovery(state: AgentState) -> dict:
+    """Last-resort cross-catalog search using only the user's original keywords.
+    Fires once after full filter exhaustion — finds products under a different
+    subcategory than what was searched (e.g. ethernet adapter for 'usb hub with ethernet').
+    """
+    original_kw = (state.get("original_preferences") or {}).get("keywords") or []
+    logger.info(f"request_id={get_request_id()} | keyword_recovery | keywords={original_kw}")
+    results = search_products(keywords=original_kw, limit=20)
+    if results:
+        return {"search_results": results, "keyword_recovery_attempted": True, "filters_exhausted": False}
+    return {"keyword_recovery_attempted": True, "filters_exhausted": True}
+
+
+def route_after_keyword_recovery(state: AgentState) -> Literal["rank", "no_results"]:
+    if state.get("filters_exhausted") or not state.get("search_results"):
+        return "no_results"
+    return "rank"
 
 
 # GRAPH
@@ -768,6 +750,7 @@ def build_product_agent_graph():
     graph.add_node("handle_unavailable", handle_unavailable_products)
     graph.add_node("search_products", do_search_products)
     graph.add_node("broaden_search", broaden_search)
+    graph.add_node("keyword_recovery", keyword_recovery)
     graph.add_node("respond_no_results", respond_no_results)
     graph.add_node("rank_and_filter", rank_and_filter)
     graph.add_node("product_enrichment", product_enrichment_subgraph)
@@ -786,7 +769,15 @@ def build_product_agent_graph():
     )
 
     graph.add_conditional_edges(
-        "broaden_search", route_after_broaden, {"retry_search": "search_products", "no_results": "respond_no_results"}
+        "broaden_search",
+        route_after_broaden,
+        {"retry_search": "search_products", "keyword_recovery": "keyword_recovery", "no_results": "respond_no_results"},
+    )
+
+    graph.add_conditional_edges(
+        "keyword_recovery",
+        route_after_keyword_recovery,
+        {"rank": "rank_and_filter", "no_results": "respond_no_results"},
     )
 
     graph.add_conditional_edges(

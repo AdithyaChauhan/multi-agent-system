@@ -159,30 +159,6 @@ def get_product_by_id(product_id: str) -> Optional[dict]:
         db.close()
 
 
-def get_all_categories() -> dict:
-    """
-    Returns available product types and their filterable attributes.
-    Used when the user is vague — agent knows what to ask for.
-    """
-    return {
-        "clothes": {
-            "filterable_attributes": ["gender", "section", "size"],
-            "gender_options": ["male", "female", "unisex"],
-            "section_options": ["top", "bottom"],
-            "size_options": ["S", "M", "L", "XL", "XXL"],
-        },
-        "laptop": {
-            "filterable_attributes": ["storage_gb", "ram_gb"],
-            "storage_options": [256, 512, 1024],
-            "ram_options": [8, 16, 32],
-        },
-        "headphones": {
-            "filterable_attributes": ["form_factor", "wireless"],
-            "form_factor_options": ["over-ear", "earbuds", "in-ear"],
-            "wireless_options": [True, False],
-        },
-    }
-
 
 def fetch_reviews(product_id: str) -> list[dict]:
     """

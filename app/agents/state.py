@@ -27,6 +27,7 @@ class AgentState(TypedDict, total=False):
     broaden_attempt: int
     relaxed_filters: Optional[List[str]]
     filters_exhausted: bool
+    keyword_recovery_attempted: bool
 
     # Agent 3 — Support
     support_issue: Optional[dict]
