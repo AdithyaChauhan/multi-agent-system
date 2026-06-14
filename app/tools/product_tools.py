@@ -36,7 +36,7 @@ def _resolve_brand(brand: str) -> str:
     known = _get_known_brands()
     if not known:
         return brand
-    result = process.extractOne(brand, known, scorer=fuzz.WRatio, score_cutoff=80)
+    result = process.extractOne(brand, known, scorer=fuzz.WRatio, score_cutoff=65)
     return result[0] if result else brand
 
 

@@ -32,8 +32,8 @@ Navigation phrases with no specific goal ("help me", "get started", "browse") �
 
 Intents:
 - "order": the user wants to know the status of a delivery — tracking, shipment status, estimated arrival, or listing their orders.
-- "product": the user wants to find or learn about something to buy — any item, brand, model name, or general browsing request ("find products", "show me products", "what do you sell"). When genuinely unsure between product and unclear, choose product.
-- "support": the user wants to take action on an order or has a complaint — cancellation, refund, return, wrong item, damage, warranty, data privacy.
+- "product": the user wants to find or learn about something to buy — any item, brand, model name (even misspelled), general browsing, or a lifestyle/need that a product could solve ("something to keep warm", "for the gym", "to watch movies at home", "gift for someone"). When genuinely unsure between product and unclear, choose product. A bare item or brand name with no complaint context is always "product".
+- "support": the user wants to take action on an existing order or has a complaint — cancellation, refund, return, wrong item delivered, damage, warranty, data privacy. Must include an action word or describe a problem, not just name a product.
 - "unclear": greetings, vague requests with no discernible goal (not delivery, not shopping, not a complaint), off-topic messages, pure pronouns with no referent.
 
 CONTEXT PRIORITY (check last assistant message first):

@@ -212,6 +212,8 @@ Rules:
 - Vague browse (show products/what do you have): category null, unavailable_request false
 - unavailable_request true ONLY for absent types (laptops, phones, tablets, clothing, food, furniture) — not for brands, specs, or features
 - JSON null only, never string "null"
+- Need/goal queries: when the user describes a problem, activity, or desired outcome rather than naming a specific product, infer the catalog subcategory that best enables it. This applies to multi-word intent phrases ("something to keep warm", "for the gym"), NOT to bare single nouns that are product names ("table", "chair", "book") — treat those as direct product searches.
+- If the user names a product type not in the catalog (furniture, food, clothing, books, toys), set unavailable_request: true.
 
 Examples:
 "mixer grinder under 3000" → {{"category": "Home & Kitchen", "subcategory": "mixer grinder", "type": null, "brand": null, "max_price": 3000, "min_price": null, "min_rating": null, "keywords": [], "unavailable_request": false}}
@@ -234,17 +236,11 @@ def extract_preferences(state: AgentState) -> dict:
     user_message = state.get("user_message", "")
 
     # Extract from the current message only — no history passed to LLM.
-    # Context preservation (brand/price inheritance across turns) is handled entirely
-    # by the Python merge logic below, not by the LLM. Passing history here caused
-    # the LLM to map unrelated product names (e.g. "table" after "mouse") to the
-    # previous subcategory instead of extracting them fresh.
+    # Context preservation across turns is handled by the Python merge logic below.
     full_prompt = user_message
 
-    _ext_version = PROMPT_VERSIONS.get("product-extraction-prompt", "latest")
-    _ext_prompt, _ext_hash = load_prompt("product-extraction-prompt", _ext_version)
-    if not _ext_prompt:
-        _ext_prompt = _extraction_system_prompt()
-        _ext_hash = "fallback"
+    _ext_prompt = _extraction_system_prompt()
+    _ext_hash = "hardcoded"
 
     messages = [
         SystemMessage(content=_ext_prompt),
@@ -619,91 +615,19 @@ def format_recommendations(state: AgentState) -> dict:
     if not ranked:
         return {"final_response": "I found some products but could not rank them."}
 
-    # Relevance check — only for specific product keywords
-    if relaxed and "keywords" in relaxed:
-        original_keywords = original_preferences.get("keywords") or []
-        if original_keywords:
-            # Skip check for generic/category-level words
-            GENERIC_WORDS = {
-                "items",
-                "products",
-                "things",
-                "stuff",
-                "good",
-                "best",
-                "something",
-                "show",
-                "me",
-                "under",
-                "below",
-                "above",
-                "kitchen",
-                "home",
-                "baby",
-                "sport",
-                "sports",
-                "toy",
-                "toys",
-                "clothing",
-                "office",
-                "art",
-                "craft",
-                "outdoor",
-                "fitness",
-                "gear",
-                "equipment",
-                "accessories",
-                "supplies",
-                "desk",
-                "indoor",
-                "kids",
-                "children",
-                "adult",
-                "women",
-                "men",
-                "girls",
-                "boys",
-                "need",
-                "want",
-                "looking",
-                "find",
-                "care",
-                "essentials",
-                "essential",
-                "basics",
-                "basic",
-                "type",
-                "kind",
-                "sort",
-                "related",
-                "category",
-                "range",
-            }
-            specific_keywords = [kw for kw in original_keywords if kw.lower() not in GENERIC_WORDS]
-            if specific_keywords and original_preferences.get("subcategory"):
-                relevant = any(any(kw.lower() in p.get("name", "").lower() for kw in specific_keywords) for p in ranked)
-                if not relevant:
-                    original_query = " ".join(specific_keywords)
-                    _t0 = time.perf_counter()
-                    _resp = llm.invoke(
-                        [
-                            SystemMessage(content=_UNAVAILABLE_SYSTEM_PROMPT),
-                            HumanMessage(content=f'User asked for: "{original_query}"'),
-                        ]
-                    )
-                    logger.info(
-                        f"request_id={get_request_id()} | unavailable_suggestion | latency_ms={int((time.perf_counter()-_t0)*1000)}"
-                    )
-                    return {"final_response": _resp.content.strip()}
+    top3 = ranked[:3]
+    all_maybe = all(p.get("llm_tier", 0) == 1 for p in top3)
 
     lines = []
     if relaxed:
         lines.append(f"Note — I couldn't find an exact match, so I relaxed: {', '.join(relaxed)}.\n")
         lines.append("Here are the closest options:\n")
+    elif all_maybe:
+        lines.append("I couldn't find products that exactly match your request, but here are some related options — let me know if any of these work for you or if you'd like me to look for something else:\n")
     else:
         lines.append("Here are my top recommendations for you:\n")
 
-    for i, p in enumerate(ranked[:3], 1):
+    for i, p in enumerate(top3, 1):
         reviews = p.get("reviews") or []
         top_review = ""
         if reviews:
@@ -755,19 +679,18 @@ def rank_and_filter(state: AgentState) -> dict:
     )
 
     messages = [
-        SystemMessage(content="You are a product ranking expert. Return only valid JSON arrays. No explanation."),
+        SystemMessage(content="You are a product relevance classifier. Return only valid JSON. No explanation."),
         HumanMessage(
             content=(
-                f"Rank these products by relevance to the user's request.\n\n"
+                f"Classify each product by how well it matches the user's request.\n\n"
                 f"User request: \"{user_message}\"\n\n"
                 f"Products:\n{product_list}\n\n"
-                f"Rules:\n"
-                f"- For feature requests (e.g. 'best battery', 'calling feature', 'noise cancellation'), "
-                f"rank products that match those features first.\n"
-                f"- Include any product that is a direct or close match.\n"
-                f"- Return [] only if the products are entirely unrelated to the request.\n"
-                f"- Otherwise, return ONLY a JSON array of 1-based indices, most relevant first. Max 5 products.\n"
-                f"Example: [3, 1, 7, 2, 5]"
+                f"For each product, assign:\n"
+                f"- \"relevant\": directly addresses the user's need\n"
+                f"- \"maybe\": right product type but missing a requested spec, feature, or brand\n"
+                f"- \"no\": wrong product category — unrelated to what was asked\n\n"
+                f"Return ONLY a JSON object with three lists of 1-based indices:\n"
+                f'Example: {{"relevant": [3, 7], "maybe": [1, 5], "no": [2, 4, 6, 8]}}'
             )
         ),
     ]
@@ -798,37 +721,36 @@ def rank_and_filter(state: AgentState) -> dict:
     )
 
     raw = response.content.strip()
+    logger.info(f"request_id={get_request_id()} | ranker_raw={raw!r} | candidates={len(candidates)}")
 
     try:
-        match = re.search(r'\[.*?\]', raw, re.DOTALL)
-        if match:
-            indices = json.loads(match.group())
-            if not indices:
-                ranked = candidates[:5]
-            else:
-                seen = set()
-                ranked = []
-                for idx in indices:
-                    if isinstance(idx, int) and 1 <= idx <= len(candidates):
-                        p = candidates[idx - 1]
-                        if p["product_id"] not in seen:
-                            ranked.append(p)
-                            seen.add(p["product_id"])
-                # pad up to 5 with remaining results
-                for p in candidates:
-                    if len(ranked) >= 5:
-                        break
+        match = re.search(r'\{.*\}', raw, re.DOTALL)
+        parsed = json.loads(match.group()) if match else {}
+        relevant_idx = parsed.get("relevant") or []
+        maybe_idx = parsed.get("maybe") or []
+
+        ranked = []
+        seen = set()
+        for tier, idx_list in ((0, relevant_idx), (1, maybe_idx)):
+            for idx in idx_list:
+                if isinstance(idx, int) and 1 <= idx <= len(candidates):
+                    p = candidates[idx - 1]
                     if p["product_id"] not in seen:
-                        ranked.append(p)
+                        ranked.append({**p, "llm_tier": tier})
                         seen.add(p["product_id"])
-        else:
-            ranked = candidates[:5]
+        # ranked stays [] if ranker explicitly put everything in "no" — let broaden handle it
+
     except Exception as e:
         logger.error(f"request_id={get_request_id()} | rank_and_filter parse error | error={e}")
-        ranked = candidates[:5]
+        ranked = [{**p, "llm_tier": 1} for p in candidates[:5]]
 
-    logger.info(f"request_id={get_request_id()} | rank_and_filter | {len(ranked)} products ranked")
+    logger.info(f"request_id={get_request_id()} | rank_and_filter | {len(ranked)} products (tier 0: {sum(1 for p in ranked if p.get('llm_tier')==0)}, tier 1: {sum(1 for p in ranked if p.get('llm_tier')==1)})")
     return {"ranked_products": ranked}
+
+
+def route_after_rank(state: AgentState) -> Literal["enrich", "broaden"]:
+    ranked = state.get("ranked_products") or []
+    return "enrich" if ranked else "broaden"
 
 
 def route_after_broaden(state: AgentState) -> Literal["retry_search", "no_results"]:
@@ -867,7 +789,9 @@ def build_product_agent_graph():
         "broaden_search", route_after_broaden, {"retry_search": "search_products", "no_results": "respond_no_results"}
     )
 
-    graph.add_edge("rank_and_filter", "product_enrichment")
+    graph.add_conditional_edges(
+        "rank_and_filter", route_after_rank, {"enrich": "product_enrichment", "broaden": "broaden_search"}
+    )
 
     graph.add_edge("product_enrichment", "format_recommendations")
     graph.add_edge("ask_for_preferences", END)

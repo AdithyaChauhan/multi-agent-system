@@ -186,8 +186,8 @@ def compute_score(state: AgentState) -> dict:
             }
         )
 
-    # sort by final score descending
-    scored.sort(key=lambda x: x["final_score"], reverse=True)
+    # sort: tier 0 (relevant) before tier 1 (maybe), quality within each tier
+    scored.sort(key=lambda x: (x.get("llm_tier", 1), -x["final_score"]))
 
     # take top 5
     top = scored[:5]
