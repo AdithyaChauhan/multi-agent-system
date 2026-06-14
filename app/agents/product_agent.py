@@ -375,18 +375,25 @@ def extract_preferences(state: AgentState) -> dict:
         new_specific_product = bool(new_subcategory and not prev_subcategory)
 
         if vague_browse:
-            # Wipe all accumulated context — show the catalog and let the user start fresh.
-            preferences = {
-                "category": None,
-                "subcategory": None,
-                "type": None,
-                "brand": None,
-                "max_price": None,
-                "min_price": None,
-                "min_rating": None,
-                "keywords": [],
-                "unavailable_request": False,
-            }
+            has_prev_context = bool(prev_subcategory or prev_category or previous_prefs.get("brand"))
+            if has_prev_context:
+                # User gave no extractable signal but is mid-session — restore previous prefs
+                # rather than wiping. "Show me the cheapest one" / "something else" in context
+                # should continue the current search, not reset to the catalog listing.
+                preferences = {**previous_prefs}
+            else:
+                # Truly no context — show the catalog and let the user start fresh.
+                preferences = {
+                    "category": None,
+                    "subcategory": None,
+                    "type": None,
+                    "brand": None,
+                    "max_price": None,
+                    "min_price": None,
+                    "min_rating": None,
+                    "keywords": [],
+                    "unavailable_request": False,
+                }
         elif subcategory_changed or category_changed or new_specific_product:
             # New product type — reset all filters to only what the user re-specified.
             # e.g. "headphones under 2000" → "show me monitors" should not carry ₹2000 cap.
@@ -404,21 +411,23 @@ def extract_preferences(state: AgentState) -> dict:
         else:
             # Same subcategory (or refinement turn) — preserve all previous filters
             # unless the user explicitly overrode them this turn.
-            # Don't inherit subcategory if the new query has keywords — keyword search
-            # signals a new product intent, not a refinement (e.g. "table" after "mouse").
-            inherit_subcategory = not preferences.get("keywords")
+            # Default to inheriting — keyword descriptors like "black colour" or "wireless"
+            # are refinements, not new product searches. The LLM extracts new subcategories
+            # directly when the user names a new product (e.g. "table" → subcategory:table).
+            inherit_subcategory = True
 
             # Safety: only inherit subcategory if the user's message contains a word from it
-            # OR the user explicitly set a refinement signal (brand/price/rating/type).
-            # Blocks cases where LLM extracts nothing specific but we'd silently reuse
-            # the previous subcategory — e.g. "table" after "mouse" inheriting subcategory: mouse.
-            if inherit_subcategory and prev_subcategory and new_subcategory is None:
+            # OR the user explicitly set a refinement signal (brand/price/rating/type/keywords).
+            # The keywords check is new: "black colour" → keywords=["black"] → is a refinement,
+            # skip word-overlap. Only apply word-overlap when there's truly no extraction signal.
+            if prev_subcategory and new_subcategory is None:
                 has_explicit_signal = bool(
                     preferences.get("brand")
                     or preferences.get("type")
                     or preferences.get("max_price")
                     or preferences.get("min_price")
                     or preferences.get("min_rating")
+                    or preferences.get("keywords")
                 )
                 if not has_explicit_signal:
                     msg_words = set(user_message.lower().split())
@@ -595,14 +604,15 @@ def respond_no_results(state: AgentState) -> dict:
             brand_has_product = bool(search_products(brand=brand, subcategory=subcategory, limit=1))
             if brand_has_product:
                 # Brand makes the product but price/rating filters were too tight.
-                # Keep brand in restored context — user may relax price/rating for this brand.
+                # Clear the constraints we're telling the user to relax — the next turn's
+                # price ("under 3000") should not be intersected with the old tight filters.
                 label = subcategory or category or "products"
                 return {
                     "final_response": (
                         f"I couldn't find any {brand} {label} matching your filters. "
                         f"Try relaxing the price or rating — or let me know if you'd like to see other brands."
                     ),
-                    "preferences": {**original},
+                    "preferences": {**original, "max_price": None, "min_price": None, "min_rating": None},
                 }
             # Brand is in our catalog but doesn't make this product — show alternatives.
             no_carry_msg = f"We carry {brand} but not {subcategory or category or 'that product'}."
