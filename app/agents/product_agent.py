@@ -579,6 +579,10 @@ def respond_no_results(state: AgentState) -> dict:
     logger.info(f"request_id={get_request_id()} | No results after exhausting filters")
     original = state.get("original_preferences") or {}
     brand = original.get("brand")
+    # Restore context from original so follow-up messages (e.g. "under 2000") keep subcategory.
+    # Relaxation strips preferences to null by the time this node fires; without restoration
+    # the next turn has no category/subcategory context and returns unrelated products.
+    _restored = {**original, "brand": None}
 
     if brand:
         subcategory = original.get("subcategory")
@@ -591,12 +595,14 @@ def respond_no_results(state: AgentState) -> dict:
             brand_has_product = bool(search_products(brand=brand, subcategory=subcategory, limit=1))
             if brand_has_product:
                 # Brand makes the product but price/rating filters were too tight.
+                # Keep brand in restored context — user may relax price/rating for this brand.
                 label = subcategory or category or "products"
                 return {
                     "final_response": (
                         f"I couldn't find any {brand} {label} matching your filters. "
                         f"Try relaxing the price or rating — or let me know if you'd like to see other brands."
-                    )
+                    ),
+                    "preferences": {**original},
                 }
             # Brand is in our catalog but doesn't make this product — show alternatives.
             no_carry_msg = f"We carry {brand} but not {subcategory or category or 'that product'}."
@@ -612,14 +618,18 @@ def respond_no_results(state: AgentState) -> dict:
                 rating = f"{p['rating']}/5" if p.get("rating") else ""
                 lines.append(f"{i}. **{p['name']}** by {p.get('brand', '')}")
                 lines.append(f"   {price} | ⭐ {rating}\n")
-            return {"final_response": "\n".join(lines)}
-        return {"final_response": f"{no_carry_msg} Let me know what you need and I can suggest alternatives from brands we stock."}
+            return {"final_response": "\n".join(lines), "preferences": _restored}
+        return {
+            "final_response": f"{no_carry_msg} Let me know what you need and I can suggest alternatives from brands we stock.",
+            "preferences": _restored,
+        }
 
     return {
         "final_response": (
             "I couldn't find any products matching your requirements, "
             "even after relaxing several filters. Try a different category or higher budget."
-        )
+        ),
+        "preferences": _restored,
     }
 
 
