@@ -212,6 +212,7 @@ Rules:
 - unavailable_request true ONLY for absent types (laptops, phones, tablets, clothing, food, furniture) — not for brands, specs, or features
 - JSON null only, never string "null"
 - Navigation phrases before a product name ("show me", "find me", "get me") are filler — extract the product name as subcategory, not keyword.
+- When a message ends with "type" or "ones" after a product qualifier (e.g. "gaming type", "neckband type", "wireless ones", "bluetooth ones"), set type to the qualifier word directly, set subcategory to null, and set unavailable_request to false — even if the qualifier is not an exact catalog type name.
 - Need/goal queries: when the user describes a problem, activity, or desired outcome rather than naming a specific product, infer the catalog subcategory that best enables it. This applies to multi-word intent phrases ("something to keep warm", "for the gym"), NOT to bare single nouns that are product names ("table", "chair", "book") — treat those as direct product searches.
 - If the user names a product type not in the catalog (furniture, food, clothing, books, toys), set unavailable_request: true.
 
@@ -346,6 +347,7 @@ def extract_preferences(state: AgentState) -> dict:
         vague_browse = (
             not preferences.get("category")
             and not preferences.get("subcategory")
+            and not preferences.get("type")
             and not preferences.get("keywords")
             and not preferences.get("brand")
             and preferences.get("max_price") is None
@@ -428,10 +430,17 @@ def extract_preferences(state: AgentState) -> dict:
                 _merged_kw = previous_prefs.get("keywords") or []
             else:
                 _merged_kw = _new_kw
+            _inherited_type = preferences.get("type") or previous_prefs.get("type")
+            _inherited_sub = new_subcategory or (prev_subcategory if inherit_subcategory else None)
+            # When a type adjective is the sole refinement and a subcategory is inherited,
+            # also add the type word to keywords so the name/tag search can match products
+            # whose DB type column is null or unpopulated (e.g. "gaming mouse" by name).
+            if _inherited_type and not new_subcategory and prev_subcategory and inherit_subcategory and not _merged_kw:
+                _merged_kw = [_inherited_type]
             preferences = {
                 "category": new_category,
-                "subcategory": new_subcategory or (prev_subcategory if inherit_subcategory else None),
-                "type": preferences.get("type") or previous_prefs.get("type"),
+                "subcategory": _inherited_sub,
+                "type": _inherited_type,
                 "brand": preferences.get("brand") or previous_prefs.get("brand"),
                 "max_price": preferences.get("max_price") or previous_prefs.get("max_price"),
                 "min_price": preferences.get("min_price") or previous_prefs.get("min_price"),
@@ -636,9 +645,9 @@ def route_after_extraction(state: AgentState) -> Literal["search", "ask", "unava
     if prefs.get("unavailable_request"):
         return "unavailable"
 
-    # Search if there's any signal — category, subcategory, brand, or keywords.
+    # Search if there's any signal — category, subcategory, type, brand, or keywords.
     # Only fall back to "ask" when the LLM found nothing at all (pure vague browse).
-    has_signal = bool(prefs.get("category") or prefs.get("subcategory") or prefs.get("keywords") or prefs.get("brand"))
+    has_signal = bool(prefs.get("category") or prefs.get("subcategory") or prefs.get("type") or prefs.get("keywords") or prefs.get("brand"))
     return "search" if has_signal else "ask"
 
 
