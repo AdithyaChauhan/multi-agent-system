@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 
 from app.agents.state import AgentState
 from app.agents.product_agent_subgraph import product_enrichment_subgraph
-from app.tools.product_tools import search_products
+from app.tools.product_tools import search_products, _get_known_brands
 from app.core.logger import get_logger, get_request_id
 from app.core.metrics import llm_requests_total, llm_tokens_total, llm_duration_seconds
 from app.core.prompt_loader import load_prompt, PROMPT_VERSIONS
@@ -580,6 +580,17 @@ def respond_no_results(state: AgentState) -> dict:
     if brand:
         subcategory = original.get("subcategory")
         category = original.get("category")
+        # Distinguish a brand we stock (filters just too narrow) from one we genuinely don't carry.
+        known_brands = _get_known_brands()
+        brand_in_catalog = any(k.lower() == brand.lower() for k in known_brands)
+        if brand_in_catalog:
+            label = subcategory or category or "products"
+            return {
+                "final_response": (
+                    f"I couldn't find any {brand} {label} matching your filters. "
+                    f"Try relaxing the price or rating — or let me know if you'd like to see other brands."
+                )
+            }
         alternatives = search_products(category=category, subcategory=subcategory, limit=10)
         if alternatives:
             top3 = sorted(alternatives, key=lambda p: p.get("rating") or 0, reverse=True)[:3]
