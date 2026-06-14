@@ -32,11 +32,17 @@ def _get_known_brands() -> list[str]:
 
 def _resolve_brand(brand: str) -> str:
     """Snap a user-typed brand to the closest known brand (typo correction).
-    Returns the original string unchanged if no match scores above 80."""
+    Exact case-insensitive match is tried first — fuzzy only runs when no exact
+    match exists (i.e. genuine typo or unseeded brand). Score cutoff 80 safely
+    catches 1-2 char edits while blocking correctly-spelled brands we don't carry."""
     known = _get_known_brands()
     if not known:
         return brand
-    result = process.extractOne(brand, known, scorer=fuzz.WRatio, score_cutoff=65)
+    brand_lower = brand.lower()
+    for k in known:
+        if k.lower() == brand_lower:
+            return k
+    result = process.extractOne(brand, known, scorer=fuzz.WRatio, score_cutoff=80)
     return result[0] if result else brand
 
 

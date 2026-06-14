@@ -556,6 +556,25 @@ def broaden_search(state: AgentState) -> dict:
 
 def respond_no_results(state: AgentState) -> dict:
     logger.info(f"request_id={get_request_id()} | No results after exhausting filters")
+    original = state.get("original_preferences") or {}
+    brand = original.get("brand")
+
+    if brand:
+        subcategory = original.get("subcategory")
+        category = original.get("category")
+        alternatives = search_products(category=category, subcategory=subcategory, limit=10)
+        if alternatives:
+            top3 = sorted(alternatives, key=lambda p: p.get("rating") or 0, reverse=True)[:3]
+            label = subcategory or category or "products"
+            lines = [f"We don't carry {brand}. Here are our top-rated {label} from brands we stock:\n"]
+            for i, p in enumerate(top3, 1):
+                price = f"₹{p['price']:,}" if p.get("price") else ""
+                rating = f"{p['rating']}/5" if p.get("rating") else ""
+                lines.append(f"{i}. **{p['name']}** by {p.get('brand', '')}")
+                lines.append(f"   {price} | ⭐ {rating}\n")
+            return {"final_response": "\n".join(lines)}
+        return {"final_response": f"We don't carry {brand}. Let me know what you need and I can suggest alternatives from brands we stock."}
+
     return {
         "final_response": (
             "I couldn't find any products matching your requirements, "
