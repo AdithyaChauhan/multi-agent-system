@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 
 from app.db.database import Base, SessionLocal, engine
+from app.db.migrate_schema import ensure_support_ticket_priority_column
 
 from app.models.user import User
 from app.models.session import Session
@@ -157,6 +158,7 @@ def _submit_turn_feedback(run_id: str, user_message: str, response_text: str) ->
 
 
 Base.metadata.create_all(bind=engine)
+ensure_support_ticket_priority_column()
 
 seed_demo_data()
 # seed_demo_products()
@@ -198,33 +200,39 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 logger = get_logger("app.main")
 
 
-@app.middleware("http")
-async def request_logging_middleware(request: Request, call_next):
-    import time as _time
+_enable_request_logging = os.getenv("CI", "").lower() not in {"1", "true", "yes"}
 
-    request_id = set_request_id()
-    _t0 = _time.perf_counter()
+if _enable_request_logging:
 
-    if request.url.path != "/metrics":
-        logger.info(f"request_id={request_id} | method={request.method} | path={request.url.path} | REQUEST RECEIVED")
+    @app.middleware("http")
+    async def request_logging_middleware(request: Request, call_next):
+        import time as _time
 
-    response = await call_next(request)
-    _duration = _time.perf_counter() - _t0
+        request_id = set_request_id()
+        _t0 = _time.perf_counter()
 
-    if request.url.path != "/metrics":
-        logger.info(f"request_id={request_id} | status={response.status_code} | RESPONSE RETURNED")
-        http_requests_total.labels(
-            method=request.method,
-            endpoint=request.url.path,
-            status_code=str(response.status_code),
-        ).inc()
-        http_request_duration_seconds.labels(
-            method=request.method,
-            endpoint=request.url.path,
-        ).observe(_duration)
+        if request.url.path != "/metrics":
+            logger.info(
+                f"request_id={request_id} | method={request.method} | path={request.url.path} | REQUEST RECEIVED"
+            )
 
-    response.headers["X-Request-ID"] = request_id
-    return response
+        response = await call_next(request)
+        _duration = _time.perf_counter() - _t0
+
+        if request.url.path != "/metrics":
+            logger.info(f"request_id={request_id} | status={response.status_code} | RESPONSE RETURNED")
+            http_requests_total.labels(
+                method=request.method,
+                endpoint=request.url.path,
+                status_code=str(response.status_code),
+            ).inc()
+            http_request_duration_seconds.labels(
+                method=request.method,
+                endpoint=request.url.path,
+            ).observe(_duration)
+
+        response.headers["X-Request-ID"] = request_id
+        return response
 
 
 @app.get("/metrics", include_in_schema=False)
@@ -456,7 +464,13 @@ def chat(
         action = graph_result.get("action_required") or (
             order_result.get("action_required") if graph_result.get("reroute_to_order") else None
         )
-        return ChatResponse(session_id=session.session_id, user_id=user_id, response=final_response, action=action, run_id=langsmith_run_id)
+        return ChatResponse(
+            session_id=session.session_id,
+            user_id=user_id,
+            response=final_response,
+            action=action,
+            run_id=langsmith_run_id,
+        )
 
     except HTTPException:
         db.rollback()
@@ -528,9 +542,14 @@ def cancel_order_endpoint(
             if session:
                 db.add(Message(session_id=session.session_id, role="assistant", content=msg))
                 db.commit()
-            logger.info(f"request_id={get_request_id()} | Order cancelled via endpoint | order_id={body.order_id} | user_id={user_id}")
+            logger.info(
+                f"request_id={get_request_id()} | Order cancelled via endpoint | order_id={body.order_id} | user_id={user_id}"
+            )
             return CancelOrderResponse(success=True, message=msg)
-        return CancelOrderResponse(success=False, message=f"Could not cancel {body.order_id}. It may have already shipped or doesn't belong to your account.")
+        return CancelOrderResponse(
+            success=False,
+            message=f"Could not cancel {body.order_id}. It may have already shipped or doesn't belong to your account.",
+        )
     finally:
         db.close()
 

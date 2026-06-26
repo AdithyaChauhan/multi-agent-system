@@ -2,7 +2,7 @@
 Schema migration: Add category/subcategory columns and SSO fields
 """
 
-from sqlalchemy import text
+from sqlalchemy import inspect, text
 from app.db.database import engine
 
 
@@ -57,6 +57,28 @@ def migrate_schema():
 
         conn.commit()
         print("✓ Schema migration complete (with SSO support)")
+
+
+def ensure_support_ticket_priority_column() -> None:
+    """Add missing support_tickets columns when an older SQLite DB is still in use."""
+    inspector = inspect(engine)
+    if "support_tickets" not in inspector.get_table_names():
+        return
+
+    column_names = {column["name"] for column in inspector.get_columns("support_tickets")}
+    additions = {
+        "priority": "VARCHAR",
+        "safety_alert": "BOOLEAN DEFAULT 0",
+    }
+
+    missing_columns = {name: ddl for name, ddl in additions.items() if name not in column_names}
+    if not missing_columns:
+        return
+
+    with engine.connect() as conn:
+        for column_name, ddl in missing_columns.items():
+            conn.execute(text(f"ALTER TABLE support_tickets ADD COLUMN {column_name} {ddl}"))
+        conn.commit()
 
 
 if __name__ == "__main__":

@@ -270,7 +270,9 @@ def fetch_order_for_support(state: AgentState) -> dict:
         if product_words and any(w in msg_lower for w in product_words):
             order_obj = fetch_order_from_db(order["order_id"], user_id)
             if order_obj:
-                logger.info(f"request_id={get_request_id()} | Matched order by product name | order_id={order['order_id']}")
+                logger.info(
+                    f"request_id={get_request_id()} | Matched order by product name | order_id={order['order_id']}"
+                )
                 return {"support_order": order_obj}
 
     # Priority 2: explicit order ID from classifier or current message digits
@@ -287,7 +289,9 @@ def fetch_order_for_support(state: AgentState) -> dict:
         if order:
             logger.info(f"request_id={get_request_id()} | Support order fetched | order_id={order_id}")
             if _is_bare_order_lookup(user_message) and not get_open_ticket_for_order(user_id, order_id):
-                logger.info(f"request_id={get_request_id()} | Bare order lookup — rerouting to order agent | order_id={order_id}")
+                logger.info(
+                    f"request_id={get_request_id()} | Bare order lookup — rerouting to order agent | order_id={order_id}"
+                )
                 return {"support_order": order, "reroute_to_order": True}
             return {"support_order": order}
         logger.info(f"request_id={get_request_id()} | Order not found or not owned | order_id={order_id}")
@@ -420,13 +424,18 @@ def draft_resolution(state: AgentState) -> dict:
     category = issue.get("category", "other")
     user_id = state.get("user_id", "")
     conversation_history = state.get("conversation_history", [])
+    resolution_prompt_version = PROMPT_VERSIONS.get("support-resolution-prompt", "latest")
+    resolution_system_prompt, res_hash = load_prompt("support-resolution-prompt", resolution_prompt_version)
+    if not resolution_system_prompt:
+        resolution_system_prompt = RESOLUTION_SYSTEM_PROMPT
+        res_hash = "fallback"
 
     history_context = ""
     if conversation_history:
         recent = conversation_history[-4:]
-        history_context = "Recent conversation:\n" + "\n".join(
-            [f"{m['role'].title()}: {m['content']}" for m in recent]
-        ) + "\n\n"
+        history_context = (
+            "Recent conversation:\n" + "\n".join([f"{m['role'].title()}: {m['content']}" for m in recent]) + "\n\n"
+        )
 
     prompt = (
         f"{history_context}"
@@ -440,14 +449,14 @@ def draft_resolution(state: AgentState) -> dict:
     )
 
     messages = [
-        SystemMessage(content=RESOLUTION_SYSTEM_PROMPT),
+        SystemMessage(content=resolution_system_prompt),
         HumanMessage(content=prompt),
     ]
 
     _t0 = time.perf_counter()
     response = llm.bind_tools(_support_tools).invoke(
         messages,
-        config={"metadata": {"prompt_name": "support-resolution-prompt", "prompt_version": _res_hash}},
+        config={"metadata": {"prompt_name": "support-resolution-prompt", "prompt_version": res_hash}},
     )
     _latency_s = time.perf_counter() - _t0
     _latency_ms = int(_latency_s * 1000)
@@ -562,9 +571,13 @@ def handle_cancellation(state: AgentState) -> dict:
             "action_required": {"type": "confirm_cancel", "order_id": order_id, "product_name": product},
         }
     elif status in ("shipped", "out_for_delivery", "in_transit"):
-        return {"final_response": f"Order **{order_id}** has already shipped — cancellation isn't possible. Once it arrives, I can help you initiate a return."}
+        return {
+            "final_response": f"Order **{order_id}** has already shipped — cancellation isn't possible. Once it arrives, I can help you initiate a return."
+        }
     elif status == "delivered":
-        return {"final_response": f"Order **{order_id}** has been delivered and can't be cancelled. You can return it within our 30-day policy window."}
+        return {
+            "final_response": f"Order **{order_id}** has been delivered and can't be cancelled. You can return it within our 30-day policy window."
+        }
     elif status == "cancelled":
         return {"final_response": f"Order **{order_id}** is already cancelled — nothing further needed."}
     return {"final_response": f"I wasn't able to look up **{order_id}**. Please contact our support team."}

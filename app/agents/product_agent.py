@@ -121,9 +121,7 @@ def _build_prompt_catalog_from_db() -> str:
         for cat, sub in rows:
             cat_map.setdefault(cat, []).append(sub)
 
-        return "\n".join(
-            f"{cat}: {' | '.join(subs)}" for cat, subs in sorted(cat_map.items())
-        )
+        return "\n".join(f"{cat}: {' | '.join(subs)}" for cat, subs in sorted(cat_map.items()))
     except Exception:
         return ""
     finally:
@@ -148,6 +146,8 @@ PROMPT_CATALOG = get_prompt_catalog()
 
 # All catalog subcategories, longest-first so multi-word names ("usb hub", "air fryer")
 # match before single-word prefixes ("hub", "fryer").
+
+
 def _build_all_subcategories() -> list[str]:
     catalog = get_prompt_catalog()
     return sorted(
@@ -185,6 +185,7 @@ RELAXATION_ORDER = [
     "keywords",
     "subcategory",
 ]
+
 
 def _extraction_system_prompt() -> str:
     return f"""Extract product search preferences. Return JSON only.
@@ -240,8 +241,11 @@ def extract_preferences(state: AgentState) -> dict:
     # Context preservation across turns is handled by the Python merge logic below.
     full_prompt = user_message
 
-    _ext_prompt = _extraction_system_prompt()
-    _ext_hash = "hardcoded"
+    extraction_prompt_version = PROMPT_VERSIONS.get("product-extraction-prompt", "latest")
+    _ext_prompt, _ext_hash = load_prompt("product-extraction-prompt", extraction_prompt_version)
+    if not _ext_prompt:
+        _ext_prompt = _extraction_system_prompt()
+        _ext_hash = "fallback"
 
     messages = [
         SystemMessage(content=_ext_prompt),
@@ -375,25 +379,18 @@ def extract_preferences(state: AgentState) -> dict:
         new_specific_product = bool(new_subcategory and not prev_subcategory)
 
         if vague_browse:
-            has_prev_context = bool(prev_subcategory or prev_category or previous_prefs.get("brand"))
-            if has_prev_context:
-                # User gave no extractable signal but is mid-session — restore previous prefs
-                # rather than wiping. "Show me the cheapest one" / "something else" in context
-                # should continue the current search, not reset to the catalog listing.
-                preferences = {**previous_prefs}
-            else:
-                # Truly no context — show the catalog and let the user start fresh.
-                preferences = {
-                    "category": None,
-                    "subcategory": None,
-                    "type": None,
-                    "brand": None,
-                    "max_price": None,
-                    "min_price": None,
-                    "min_rating": None,
-                    "keywords": [],
-                    "unavailable_request": False,
-                }
+            # Truly vague browsing should reset the search state so the user can start fresh.
+            preferences = {
+                "category": None,
+                "subcategory": None,
+                "type": None,
+                "brand": None,
+                "max_price": None,
+                "min_price": None,
+                "min_rating": None,
+                "keywords": [],
+                "unavailable_request": False,
+            }
         elif subcategory_changed or category_changed or new_specific_product:
             # New product type — reset all filters to only what the user re-specified.
             # e.g. "headphones under 2000" → "show me monitors" should not carry ₹2000 cap.
@@ -572,7 +569,13 @@ def broaden_search(state: AgentState) -> dict:
         return {"broaden_attempt": attempt, "filters_exhausted": True}
 
     # Category alone is enough to fetch a candidate set for the ranker.
-    has_specificity = prefs.get("category") or prefs.get("subcategory") or prefs.get("brand") or prefs.get("type") or prefs.get("keywords")
+    has_specificity = (
+        prefs.get("category")
+        or prefs.get("subcategory")
+        or prefs.get("brand")
+        or prefs.get("type")
+        or prefs.get("keywords")
+    )
     if not has_specificity:
         return {"broaden_attempt": attempt, "filters_exhausted": True}
 
@@ -646,7 +649,6 @@ def respond_no_results(state: AgentState) -> dict:
 def format_recommendations(state: AgentState) -> dict:
     ranked = state.get("ranked_products") or []
     relaxed = state.get("relaxed_filters") or []
-    original_preferences = state.get("original_preferences") or state.get("preferences") or {}
 
     if not ranked:
         return {"final_response": "I found some products but could not rank them."}
@@ -659,7 +661,9 @@ def format_recommendations(state: AgentState) -> dict:
         lines.append(f"Note — I couldn't find an exact match, so I relaxed: {', '.join(relaxed)}.\n")
         lines.append("Here are the closest options:\n")
     elif all_maybe:
-        lines.append("I couldn't find products that exactly match your request, but here are some related options — let me know if any of these work for you or if you'd like me to look for something else:\n")
+        lines.append(
+            "I couldn't find products that exactly match your request, but here are some related options — let me know if any of these work for you or if you'd like me to look for something else:\n"
+        )
     else:
         lines.append("Here are my top recommendations for you:\n")
 
@@ -689,7 +693,13 @@ def route_after_extraction(state: AgentState) -> Literal["search", "ask", "unava
 
     # Search if there's any signal — category, subcategory, type, brand, or keywords.
     # Only fall back to "ask" when the LLM found nothing at all (pure vague browse).
-    has_signal = bool(prefs.get("category") or prefs.get("subcategory") or prefs.get("type") or prefs.get("keywords") or prefs.get("brand"))
+    has_signal = bool(
+        prefs.get("category")
+        or prefs.get("subcategory")
+        or prefs.get("type")
+        or prefs.get("keywords")
+        or prefs.get("brand")
+    )
     return "search" if has_signal else "ask"
 
 
@@ -760,10 +770,17 @@ def rank_and_filter(state: AgentState) -> dict:
     logger.info(f"request_id={get_request_id()} | ranker_raw={raw!r} | candidates={len(candidates)}")
 
     try:
-        match = re.search(r'\{.*\}', raw, re.DOTALL)
-        parsed = json.loads(match.group()) if match else {}
-        relevant_idx = parsed.get("relevant") or []
-        maybe_idx = parsed.get("maybe") or []
+        try:
+            parsed = json.loads(raw)
+        except json.JSONDecodeError:
+            match = re.search(r"(\{.*\}|\[.*\])", raw, re.DOTALL)
+            parsed = json.loads(match.group()) if match else {}
+        if isinstance(parsed, list):
+            relevant_idx = parsed
+            maybe_idx = []
+        else:
+            relevant_idx = parsed.get("relevant") or []
+            maybe_idx = parsed.get("maybe") or []
 
         ranked = []
         seen = set()
@@ -780,7 +797,11 @@ def rank_and_filter(state: AgentState) -> dict:
         logger.error(f"request_id={get_request_id()} | rank_and_filter parse error | error={e}")
         ranked = [{**p, "llm_tier": 1} for p in candidates[:5]]
 
-    logger.info(f"request_id={get_request_id()} | rank_and_filter | {len(ranked)} products (tier 0: {sum(1 for p in ranked if p.get('llm_tier')==0)}, tier 1: {sum(1 for p in ranked if p.get('llm_tier')==1)})")
+    logger.info(
+        f"request_id={get_request_id()} | rank_and_filter | {len(ranked)} products "
+        f"(tier 0: {sum(1 for p in ranked if p.get('llm_tier') == 0)}, "
+        f"tier 1: {sum(1 for p in ranked if p.get('llm_tier') == 1)})"
+    )
     return {"ranked_products": ranked}
 
 
