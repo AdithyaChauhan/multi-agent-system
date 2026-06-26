@@ -47,10 +47,6 @@ class TestChatEndpoint:
         mock_result = {"final_response": "How can I help?"}
 
         with patch("app.main.router_graph.invoke", return_value=mock_result):
-            response = client.post(
-                "/chat",
-                json={"message": "Hello"},
-                headers={"x-user-id": "demo-user-1"}
-            )
+            response = client.post("/chat", json={"message": "Hello"}, headers={"x-user-id": "demo-user-1"})
         assert response.status_code == 200
         assert response.json()["user_id"] == "demo-user-1"

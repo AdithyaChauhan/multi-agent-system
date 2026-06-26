@@ -1,4 +1,8 @@
-from typing import TypedDict, Optional, List
+from typing import Annotated, TypedDict, Optional, List
+
+from langchain_core.messages import BaseMessage
+from langgraph.graph.message import add_messages
+
 
 class AgentState(TypedDict, total=False):
     # Core
@@ -23,6 +27,7 @@ class AgentState(TypedDict, total=False):
     broaden_attempt: int
     relaxed_filters: Optional[List[str]]
     filters_exhausted: bool
+    keyword_recovery_attempted: bool
 
     # Agent 3 — Support
     support_issue: Optional[dict]
@@ -32,6 +37,15 @@ class AgentState(TypedDict, total=False):
     ticket_history: Optional[List[dict]]
     recent_critical_count: int
     priority: Optional[str]
+
+    # ToolNode message channel — required by langgraph.prebuilt.ToolNode
+    messages: Annotated[List[BaseMessage], add_messages]
+
+    # Reroute signal — support agent sets this when bare order lookup detected
+    reroute_to_order: Optional[bool]
+
+    # Action signal — support agent sets this when user confirmation is needed (e.g. cancel)
+    action_required: Optional[dict]
 
     # Final response
     final_response: Optional[str]

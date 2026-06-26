@@ -19,6 +19,7 @@ class TestOrderTools:
 
         with patch("app.tools.order_tools.SessionLocal", return_value=mock_db):
             from app.tools.order_tools import fetch_order_from_db
+
             result = fetch_order_from_db("ORD-2001", "test-user")
 
         assert result["order_id"] == "ORD-2001"
@@ -31,6 +32,7 @@ class TestOrderTools:
 
         with patch("app.tools.order_tools.SessionLocal", return_value=mock_db):
             from app.tools.order_tools import fetch_order_from_db
+
             result = fetch_order_from_db("ORD-9999", "test-user")
 
         assert result is None
@@ -49,6 +51,7 @@ class TestOrderTools:
 
         with patch("app.tools.order_tools.SessionLocal", return_value=mock_db):
             from app.tools.order_tools import fetch_user_orders
+
             result = fetch_user_orders("test-user")
 
         assert len(result) == 1
@@ -66,12 +69,9 @@ class TestSupportTools:
         with patch("app.tools.support_tools.SessionLocal") as mock_session:
             mock_session.return_value = mock_db
             from app.tools.support_tools import create_support_ticket
+
             result = create_support_ticket(
-                user_id="test-user",
-                severity="medium",
-                category="defective_product",
-                description="Product broken",
-                priority="MEDIUM"
+                user_id="test-user", severity="medium", category="defective_product", description="Product broken"
             )
 
         assert "ticket_id" in result
@@ -80,12 +80,14 @@ class TestSupportTools:
     def test_lookup_support_policy_medium_severity(self):
         """Returns correct policy for medium severity"""
         from app.tools.support_tools import lookup_support_policy
+
         result = lookup_support_policy("defective_product", "medium")
         assert "response_time" in result
 
     def test_lookup_support_policy_critical_severity(self):
         """Returns faster response time for critical severity"""
         from app.tools.support_tools import lookup_support_policy
+
         result = lookup_support_policy("defective_product", "critical")
         assert "response_time" in result
 
@@ -96,9 +98,11 @@ class TestSupportTools:
 
         with patch("app.tools.support_tools.SessionLocal", return_value=mock_db):
             from app.tools.support_tools import get_user_ticket_history
+
             result = get_user_ticket_history("test-user")
 
         assert isinstance(result, list)
+
 
 class TestSupportTools:
 
@@ -110,12 +114,9 @@ class TestSupportTools:
             mock_db.close = MagicMock()
 
             from app.tools.support_tools import create_support_ticket
+
             result = create_support_ticket(
-                user_id="test-user",
-                severity="medium",
-                category="defective_product",
-                description="Product broken",
-                priority="MEDIUM"
+                user_id="test-user", severity="medium", category="defective_product", description="Product broken"
             )
 
         assert "ticket_id" in result
@@ -124,12 +125,14 @@ class TestSupportTools:
     def test_lookup_support_policy_returns_dict(self):
         """lookup_support_policy returns policy dict"""
         from app.tools.support_tools import lookup_support_policy
+
         result = lookup_support_policy("defective_product", "medium")
         assert "response_time" in result
 
     def test_lookup_support_policy_critical_severity(self):
         """Returns faster response for critical severity"""
         from app.tools.support_tools import lookup_support_policy
+
         result = lookup_support_policy("defective_product", "critical")
         assert "response_time" in result
 
@@ -140,9 +143,11 @@ class TestSupportTools:
 
         with patch("app.tools.support_tools.SessionLocal", return_value=mock_db):
             from app.tools.support_tools import get_user_ticket_history
+
             result = get_user_ticket_history("test-user")
 
         assert isinstance(result, list)
+
 
 class TestShipmentTools:
 
@@ -151,14 +156,11 @@ class TestShipmentTools:
         with patch("app.tools.shipment_tools.httpx.get") as mock_get:
             mock_response = MagicMock()
             mock_response.status_code = 200
-            mock_response.json.return_value = {
-                "carrier": "FedEx",
-                "status": "In Transit",
-                "location": "Mumbai"
-            }
+            mock_response.json.return_value = {"carrier": "FedEx", "status": "In Transit", "location": "Mumbai"}
             mock_get.return_value = mock_response
 
             from app.tools.shipment_tools import fetch_tracking_info
+
             result = fetch_tracking_info("TRK-001")
 
         assert isinstance(result, dict)
@@ -171,6 +173,7 @@ class TestShipmentTools:
             mock_get.return_value = mock_response
 
             from app.tools.shipment_tools import fetch_tracking_info
+
             result = fetch_tracking_info("TRK-999")
 
         assert result is None
@@ -178,10 +181,12 @@ class TestShipmentTools:
     def test_fetch_tracking_info_handles_connection_error(self):
         """fetch_tracking_info returns None on connection error"""
         import httpx
+
         with patch("app.tools.shipment_tools.httpx.get") as mock_get:
             mock_get.side_effect = httpx.RequestError("Connection failed")
 
             from app.tools.shipment_tools import fetch_tracking_info
+
             result = fetch_tracking_info("TRK-001")
 
         assert result is None
@@ -201,15 +206,13 @@ class TestSupportTools:
         mock_db.commit = MagicMock()
         mock_db.refresh = MagicMock()
 
-        with patch("app.tools.support_tools.SessionLocal", return_value=mock_db), \
-             patch("app.tools.support_tools.SupportTicket", return_value=mock_ticket):
+        with patch("app.tools.support_tools.SessionLocal", return_value=mock_db), patch(
+            "app.tools.support_tools.SupportTicket", return_value=mock_ticket
+        ):
             from app.tools.support_tools import create_support_ticket
+
             result = create_support_ticket(
-                user_id="test-user",
-                severity="medium",
-                category="defective_product",
-                description="Product broken",
-                priority="MEDIUM"
+                user_id="test-user", severity="medium", category="defective_product", description="Product broken"
             )
 
         assert "ticket_id" in result
@@ -217,12 +220,14 @@ class TestSupportTools:
     def test_lookup_support_policy_returns_dict(self):
         """lookup_support_policy returns policy dict"""
         from app.tools.support_tools import lookup_support_policy
+
         result = lookup_support_policy("defective_product", "medium")
         assert "response_time" in result
 
     def test_lookup_support_policy_critical_severity(self):
         """Returns policy for critical severity"""
         from app.tools.support_tools import lookup_support_policy
+
         result = lookup_support_policy("defective_product", "critical")
         assert "response_time" in result
 
@@ -233,6 +238,7 @@ class TestSupportTools:
 
         with patch("app.tools.support_tools.SessionLocal", return_value=mock_db):
             from app.tools.support_tools import get_user_ticket_history
+
             result = get_user_ticket_history("test-user")
 
         assert isinstance(result, list)

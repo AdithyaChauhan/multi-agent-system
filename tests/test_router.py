@@ -19,7 +19,7 @@ class TestRouterClassification:
                 user_message="Where is my order?",
                 user_id="test-user",
                 session_id="test-session",
-                conversation_history=[]
+                conversation_history=[],
             )
             result = classify_intent_and_extract(state)
 
@@ -36,10 +36,7 @@ class TestRouterClassification:
             from app.agents.router import classify_intent_and_extract
 
             state = AgentState(
-                user_message="Show me toys",
-                user_id="test-user",
-                session_id="test-session",
-                conversation_history=[]
+                user_message="Show me toys", user_id="test-user", session_id="test-session", conversation_history=[]
             )
             result = classify_intent_and_extract(state)
 
@@ -58,7 +55,7 @@ class TestRouterClassification:
                 user_message="My product is broken",
                 user_id="test-user",
                 session_id="test-session",
-                conversation_history=[]
+                conversation_history=[],
             )
             result = classify_intent_and_extract(state)
 
@@ -77,7 +74,7 @@ class TestRouterClassification:
                 user_message="Track order ORD-2001",
                 user_id="test-user",
                 session_id="test-session",
-                conversation_history=[]
+                conversation_history=[],
             )
             result = classify_intent_and_extract(state)
 
@@ -93,16 +90,12 @@ class TestRouterClassification:
             from app.agents.router import classify_intent_and_extract
 
             state = AgentState(
-                user_message="Something",
-                user_id="test-user",
-                session_id="test-session",
-                conversation_history=[]
+                user_message="Something", user_id="test-user", session_id="test-session", conversation_history=[]
             )
             result = classify_intent_and_extract(state)
 
         assert result["intent"] == "unclear"
         assert result["confidence"] == 0.0
-
 
 
 class TestRouterAuthGate:
@@ -116,7 +109,7 @@ class TestRouterAuthGate:
             user_id="anon-123",
             session_id="test-session",
             intent="order",
-            conversation_history=[]
+            conversation_history=[],
         )
         result = auth_gate(state)
         assert result == {}
@@ -130,7 +123,7 @@ class TestRouterAuthGate:
             user_id="demo-user-1",
             session_id="test-session",
             intent="order",
-            conversation_history=[]
+            conversation_history=[],
         )
         result = auth_gate(state)
         assert result == {}
@@ -144,7 +137,7 @@ class TestRouterAuthGate:
             user_id="anon-123",
             session_id="test-session",
             intent="order",
-            conversation_history=[]
+            conversation_history=[],
         )
         result = route_after_auth_gate(state)
         assert result == "sign_in"
@@ -158,7 +151,7 @@ class TestRouterAuthGate:
             user_id="anon-123",
             session_id="test-session",
             intent="product",
-            conversation_history=[]
+            conversation_history=[],
         )
         result = route_after_auth_gate(state)
         assert result != "sign_in"

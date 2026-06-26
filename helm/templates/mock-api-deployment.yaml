@@ -1,0 +1,45 @@
+{{- if .Values.mockApi.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "multi-agent.mockApiServiceName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "multi-agent.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mock-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "multi-agent.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: mock-api
+  template:
+    metadata:
+      labels:
+        {{- include "multi-agent.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: mock-api
+    spec:
+      containers:
+        - name: mock-api
+          image: "{{ .Values.mockApi.image.repository }}:{{ .Values.mockApi.image.tag }}"
+          imagePullPolicy: {{ .Values.mockApi.image.pullPolicy }}
+          command: ["uvicorn", "mock_services.carrier_api:app", "--host", "0.0.0.0", "--port", "9000"]
+          ports:
+            - name: http
+              containerPort: 9000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 9000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 9000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.mockApi.resources | nindent 12 }}
+{{- end }}

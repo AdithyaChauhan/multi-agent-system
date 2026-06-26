@@ -29,3 +29,16 @@ data/
 # Coverage
 .coverage
 htmlcov/
+
+# Scratch / working files
+products_dump.txt
+taxonomy_audit.txt
+taxonomy_audit_v2.txt
+zech.txt
+
+# Eval reports (generated artifacts — stored as CI artifacts, not in git)
+eval/reports/*.json
+eval/reports/*.html
+
+# DeepEval local cache
+.deepeval/

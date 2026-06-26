@@ -1,0 +1,339 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, stable, stable_final]
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────
+  # Stage 1 — Lint & Format Check
+  # ─────────────────────────────────────────────────────────────────
+  lint:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5.6.0
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install lint tools
+        run: pip install "flake8==7.3.0" "black==26.5.1"
+
+      - name: Black format check
+        run: black --check --diff app/ tests/ eval/
+
+      - name: Flake8 lint
+        run: flake8 app/ tests/ eval/
+
+  # ─────────────────────────────────────────────────────────────────
+  # Stage 2 — Unit Tests (80% coverage threshold)
+  # ─────────────────────────────────────────────────────────────────
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint
+
+    env:
+      OPENAI_API_KEY: ci-mock-key
+      LANGCHAIN_API_KEY: ci-mock-key
+      LANGCHAIN_TRACING_V2: "false"
+      JWT_SECRET_KEY: ci-test-secret
+      DATABASE_URL: sqlite:///./test.db
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5.6.0
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run unit tests with coverage
+        run: |
+          python -m pytest \
+            -m "not integration" \
+            --cov=app \
+            --cov-report=term-missing \
+            --cov-report=xml:coverage.xml \
+            --cov-fail-under=80 \
+            -v
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4.6.2
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+  # ─────────────────────────────────────────────────────────────────
+  # Stage 3 — LLM Evaluation (live, gates deploy)
+  # Runs on self-hosted runner, hits docker-compose app at localhost:8000.
+  # Deploy only proceeds if this passes.
+  # ─────────────────────────────────────────────────────────────────
+  evaluate:
+    name: LLM Evaluation
+    runs-on: [self-hosted, minikube]
+    needs: test
+
+    env:
+      EVAL_OPENAI_API_KEY: ${{ secrets.EVAL_OPENAI_API_KEY }}
+      LANGCHAIN_API_KEY: ${{ secrets.LANGCHAIN_API_KEY }}
+      DEEPEVAL_TELEMETRY_OPT_OUT: "YES"
+      RUN_LIVE_EVAL: "true"
+      EVAL_API_URL: "http://localhost:8000"
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - name: Verify app is reachable
+        run: |
+          curl -sf http://localhost:8000/health || (echo "docker-compose app not running at localhost:8000"; exit 1)
+
+      - name: Run DeepEval evaluation
+        run: |
+          source /home/admin1/project/multi-agent-system/venv/bin/activate
+          python eval/run_deepeval.py
+
+      - name: Upload evaluation reports
+        uses: actions/upload-artifact@v4.6.2
+        if: always()
+        with:
+          name: eval-reports
+          path: |
+            eval/reports/eval_report.json
+            eval/reports/eval_report.html
+
+  # ─────────────────────────────────────────────────────────────────
+  # Stage 4 — Docker Build
+  # ─────────────────────────────────────────────────────────────────
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: evaluate
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build app image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ─────────────────────────────────────────────────────────────────
+  # Stage 5 — Push to Registry  (stable branch push only)
+  # ─────────────────────────────────────────────────────────────────
+  push-image:
+    name: Push to Registry
+    runs-on: ubuntu-latest
+    needs: docker-build
+    if: needs.docker-build.result == 'success' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/stable' || github.ref == 'refs/heads/stable_final') && github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=sha-
+            type=ref,event=branch
+            type=raw,value=latest
+
+      - name: Build and push app image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ─────────────────────────────────────────────────────────────────
+  # Stage 6 — Deploy to Kubernetes via Helm  (stable branch push only)
+  # Requires KUBECONFIG and APP_URL repository secrets.
+  # Skips gracefully with a warning if secrets are not configured.
+  # ─────────────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: [self-hosted, minikube]
+    needs: push-image
+    # Explicitly require push-image to have SUCCEEDED (not just skipped/failed)
+    # Without needs.push-image.result == 'success', GitHub may run this job
+    # even when push-image was skipped due to its own if-condition being false.
+    if: needs.push-image.result == 'success' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/stable' || github.ref == 'refs/heads/stable_final') && github.event_name == 'push'
+    environment: production
+    continue-on-error: true  # deployment is best-effort; requires a live cluster
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      # Helm validation runs unconditionally — proves charts are correct even without a live cluster
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Helm lint
+        run: helm lint ./helm --values helm/values.yaml
+
+      - name: Helm template (dry-run rendering)
+        run: |
+          helm template multi-agent-system ./helm \
+            --values helm/values.yaml \
+            --set app.image.tag=sha-dryrun \
+            --set secrets.openaiApiKey=ci-mock \
+            --set secrets.langchainApiKey=ci-mock \
+            --set secrets.jwtSecretKey=ci-mock \
+            --set secrets.googleClientId=ci-mock \
+            --set secrets.googleClientSecret=ci-mock \
+            --set postgres.auth.password=ci-mock \
+            --set monitoring.grafana.adminPassword=ci-mock \
+          > /dev/null && echo "Helm template rendered successfully"
+
+      - name: Check deployment prerequisites
+        id: prereqs
+        run: |
+          if [ -z "$KUBECONFIG_SECRET" ]; then
+            echo "::warning::KUBECONFIG secret is not set — skipping live deployment (helm lint/template above passed)."
+            echo "To enable live deploy: add KUBECONFIG (base64-encoded kubeconfig) as a repository secret."
+            echo "configured=false" >> $GITHUB_OUTPUT
+          else
+            echo "configured=true" >> $GITHUB_OUTPUT
+          fi
+        env:
+          KUBECONFIG_SECRET: ${{ secrets.KUBECONFIG }}
+
+      - name: Configure kubectl
+        if: steps.prereqs.outputs.configured == 'true'
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > /tmp/kubeconfig.yaml
+          echo "KUBECONFIG=/tmp/kubeconfig.yaml" >> $GITHUB_ENV
+
+      - name: Check cluster connectivity
+        if: steps.prereqs.outputs.configured == 'true'
+        id: connectivity
+        run: |
+          SERVER=$(python3 -c "import yaml; c=yaml.safe_load(open('/tmp/kubeconfig.yaml')); print(c['clusters'][0]['cluster']['server'])" 2>/dev/null || echo "")
+          if [ -z "$SERVER" ]; then
+            echo "::warning::Could not parse cluster server from kubeconfig — skipping deployment."
+            echo "reachable=false" >> $GITHUB_OUTPUT
+          else
+            HOST=$(echo "$SERVER" | sed 's~https://~~' | cut -d: -f1)
+            PORT=$(echo "$SERVER" | sed 's~https://~~' | cut -d: -f2)
+            if timeout 5 bash -c "cat < /dev/null > /dev/tcp/$HOST/$PORT" 2>/dev/null; then
+              echo "Cluster at $SERVER is reachable."
+              echo "reachable=true" >> $GITHUB_OUTPUT
+            else
+              echo "::warning::Kubernetes cluster at $SERVER is not reachable from this runner — skipping deployment."
+              echo "reachable=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Create ghcr.io image pull secret
+        if: steps.prereqs.outputs.configured == 'true' && steps.connectivity.outputs.reachable == 'true'
+        run: |
+          kubectl create namespace multi-agent --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create secret docker-registry ghcr-secret \
+            --docker-server=ghcr.io \
+            --docker-username=${{ github.actor }} \
+            --docker-password=${{ secrets.GITHUB_TOKEN }} \
+            --namespace=multi-agent \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy with Helm
+        id: helm-deploy
+        if: steps.prereqs.outputs.configured == 'true' && steps.connectivity.outputs.reachable == 'true'
+        run: |
+          IMAGE_REPO=$(echo "ghcr.io/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_TAG="sha-$(echo '${{ github.sha }}' | cut -c1-7)"
+          helm upgrade --install multi-agent-system ./helm \
+            --namespace multi-agent \
+            --create-namespace \
+            --values helm/values.yaml \
+            --values helm/values-prod.yaml \
+            --set app.image.tag=$IMAGE_TAG \
+            --set app.image.repository=$IMAGE_REPO \
+            --set app.image.pullSecrets[0]=ghcr-secret \
+            --set-string secrets.openaiApiKey=${{ secrets.OPENAI_API_KEY }} \
+            --set-string secrets.langchainApiKey=${{ secrets.LANGCHAIN_API_KEY }} \
+            --set-string secrets.jwtSecretKey=${{ secrets.JWT_SECRET_KEY }} \
+            --set-string secrets.googleClientId=${{ secrets.GOOGLE_CLIENT_ID }} \
+            --set-string secrets.googleClientSecret=${{ secrets.GOOGLE_CLIENT_SECRET }} \
+            --set-string postgres.auth.password=${{ secrets.POSTGRES_PASSWORD }} \
+            --set-string monitoring.grafana.adminPassword=${{ secrets.GRAFANA_ADMIN_PASSWORD }} \
+            --timeout 3m
+
+      - name: Smoke test — health check
+        id: smoke-test
+        if: steps.prereqs.outputs.configured == 'true' && steps.connectivity.outputs.reachable == 'true'
+        run: |
+          # Use a high port to avoid conflicts with any existing local port-forwards
+          PF_PORT=19080
+          kubectl port-forward -n multi-agent svc/multi-agent-system-app ${PF_PORT}:80 &
+          PF_PID=$!
+          sleep 15
+          echo "Hitting health endpoint via port-forward on :${PF_PORT}..."
+          for i in 1 2 3 4 5; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:${PF_PORT}/health || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "Health check passed (HTTP $STATUS)"
+              kill $PF_PID 2>/dev/null || true
+              exit 0
+            fi
+            echo "Attempt $i: HTTP $STATUS — retrying in 10s..."
+            sleep 10
+          done
+          kill $PF_PID 2>/dev/null || true
+          echo "Health check failed after 5 attempts"
+          exit 1
+
+      - name: Rollback on smoke-test failure
+        if: steps.prereqs.outputs.configured == 'true' && steps.connectivity.outputs.reachable == 'true' && failure() && steps.smoke-test.outcome == 'failure'
+        run: |
+          echo "Smoke test failed — rolling back Helm release..."
+          REVISIONS=$(helm history multi-agent-system --namespace multi-agent --max 2 -o json | python3 -c "import sys,json; print(len(json.load(sys.stdin)))")
+          if [ "$REVISIONS" -gt 1 ]; then
+            helm rollback multi-agent-system --namespace multi-agent
+            echo "Rollback complete"
+          else
+            echo "First install — uninstalling instead of rolling back"
+            helm uninstall multi-agent-system --namespace multi-agent
+          fi

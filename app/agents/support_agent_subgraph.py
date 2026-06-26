@@ -1,157 +1,148 @@
 """
-Escalation Handler Subgraph — Agent 3 (Support)
+Escalation Handler Subgraph for Agent 3 (Support & Resolution)
 
-Handles HIGH and MEDIUM severity issues:
-  check_history   → is_repeat_complainant (open ticket for same order?)
-  assign_priority → URGENT / HIGH / MEDIUM
-  create_ticket   → duplicate check → create or return existing ticket
+Handles high-severity issues (medium/critical) with:
+1. check_history - Load user's ticket history
+2. assign_priority - Assign P0/P1/P2 based on severity + history
+3. create_ticket - Create support ticket in database
 """
 
 from langgraph.graph import StateGraph, END
 from app.agents.state import AgentState
-from app.tools.support_tools import (
-    create_support_ticket,
-    get_open_ticket_for_order,
-    get_user_ticket_history,
-)
+from app.tools.support_tools import create_support_ticket, get_user_ticket_history, get_open_ticket_for_order
 from app.core.logger import get_logger, get_request_id
 
 logger = get_logger("app.agents.support_agent_subgraph")
 
 
 def check_history(state: AgentState) -> dict:
-    """
-    Checks if the user already has an open ticket for this same order.
-    is_repeat_complainant = True only when an open/in-progress ticket
-    exists for the exact same order_id.
-    """
+    """Check user's ticket history"""
     user_id = state.get("user_id", "")
-    support_order = state.get("support_order") or {}
-    order_id = support_order.get("order_id")
 
-    history = get_user_ticket_history(user_id, limit=10)
+    history = get_user_ticket_history(user_id, limit=5)
 
-    is_repeat = False
-    if order_id:
-        is_repeat = any(
-            t.get("order_id") == order_id and t.get("status") in ("open", "in_progress")
-            for t in history
-        )
+    # Count recent critical tickets
+    recent_critical = sum(1 for t in history if t.get("severity") == "critical")
 
     logger.info(
         f"request_id={get_request_id()} | "
-        f"History check | tickets={len(history)} | is_repeat={is_repeat} | order_id={order_id}"
+        f"Checked history | total_tickets={len(history)} | recent_critical={recent_critical}"
     )
+
     return {
         "ticket_history": history,
-        "recent_critical_count": int(is_repeat),  # reuse existing state field
+        "recent_critical_count": recent_critical,
     }
 
 
 def assign_priority(state: AgentState) -> dict:
-    """
-    Priority matrix:
-      HIGH   + repeat → URGENT
-      HIGH   + first  → HIGH
-      MEDIUM + repeat → HIGH
-      MEDIUM + first  → MEDIUM
-    """
+    """Assign priority based on severity and history"""
     severity = state.get("severity", "medium")
-    is_repeat = bool(state.get("recent_critical_count", 0))
+    recent_critical = state.get("recent_critical_count", 0)
 
-    if severity == "high" and is_repeat:
-        priority = "URGENT"
-    elif severity == "high":
-        priority = "HIGH"
-    elif severity == "medium" and is_repeat:
-        priority = "HIGH"
+    # Escalate priority if user has multiple recent critical issues
+    if severity == "critical" and recent_critical >= 2:
+        priority = "P0"  # Highest priority
+    elif severity == "critical":
+        priority = "P1"
+    elif severity == "medium":
+        priority = "P2"
     else:
-        priority = "MEDIUM"
+        priority = "P3"
 
-    logger.info(
-        f"request_id={get_request_id()} | "
-        f"Priority | severity={severity} | is_repeat={is_repeat} | priority={priority}"
-    )
+    logger.info(f"request_id={get_request_id()} | " f"Assigned priority | priority={priority} | severity={severity}")
+
     return {"priority": priority}
 
 
 def create_ticket_node(state: AgentState) -> dict:
-    """
-    Duplicate check first — if an open ticket already exists for this order,
-    return it instead of creating a new one.
-    Otherwise create a fresh ticket and draft a response.
-    """
+    """Create support ticket in database, skipping if one already exists for this order."""
     issue = state.get("support_issue", {})
     support_order = state.get("support_order") or {}
     user_id = state.get("user_id", "")
     severity = state.get("severity", "medium")
-    priority = state.get("priority", "MEDIUM")
+    priority = state.get("priority", "P2")
     policy = state.get("policy", {})
-    order_id = support_order.get("order_id")
-    product_name = support_order.get("product_name", "your product")
 
-    # ── Duplicate check ──────────────────────────────────────────────────
+    # Always use the validated order_id from support_order (fetch_order_for_support normalised it)
+    order_id = support_order.get("order_id") or issue.get("order_id")
+    # Belt-and-suspenders: normalize bare digits (e.g. "2001" → "ORD-2001")
+    if order_id and str(order_id).strip().isdigit():
+        order_id = f"ORD-{str(order_id).strip()}"
+
+    # Deduplicate: don't create a second ticket for the same open order
     if order_id:
         existing = get_open_ticket_for_order(user_id, order_id)
         if existing:
             logger.info(
-                f"request_id={get_request_id()} | "
-                f"Duplicate ticket found | ticket_id={existing['ticket_id']}"
+                f"request_id={get_request_id()} | Duplicate ticket suppressed | existing={existing['ticket_id']}"
             )
             return {
                 "final_response": (
-                    f"You already have an open ticket **{existing['ticket_id']}** for this order.\n\n"
-                    f"**Status:** {existing['status'].replace('_', ' ').title()}\n"
-                    f"**Priority:** {existing.get('priority') or 'MEDIUM'}\n\n"
-                    f"Our team is already working on it. "
-                    f"You'll be contacted within {policy.get('response_time', '24-48 hours')}."
+                    f"You already have an open ticket **{existing['ticket_id']}** for this order. "
+                    f"Our support team will be in touch within the agreed timeframe. "
+                    f"Is there anything else I can help you with?"
                 )
             }
 
-    # ── Create new ticket ─────────────────────────────────────────────────
+    # Create ticket
     ticket = create_support_ticket(
         user_id=user_id,
         severity=severity,
-        category=issue.get("category", "general_query"),
+        category=issue.get("category", "other"),
         description=f"[{priority}] {issue.get('description', '')}",
-        priority=priority,
         order_id=order_id,
     )
 
     logger.info(
-        f"request_id={get_request_id()} | "
-        f"Ticket created | ticket_id={ticket['ticket_id']} | priority={priority}"
+        f"request_id={get_request_id()} | " f"Ticket created | ticket_id={ticket['ticket_id']} | priority={priority}"
     )
 
-    response_time = policy.get("response_time", "24-48 hours")
-    category_display = (issue.get("category") or "issue").replace("_", " ").title()
-
-    response = (
-        f"I've raised a support ticket for your {category_display.lower()} with "
-        f"**{product_name}**.\n\n"
-        f"**Ticket ID:** {ticket['ticket_id']}\n"
-        f"**Priority:** {priority}\n"
-        f"**Response time:** {response_time}\n\n"
-        f"Our support team will reach out to you within {response_time}. "
-        f"You'll receive updates at your registered email address."
-    )
+    # Format response based on severity
+    if severity == "critical":
+        response = (
+            f"🚨 **URGENT ISSUE ESCALATED** 🚨\n\n"
+            f"Ticket ID: **{ticket['ticket_id']}**\n"
+            f"Priority: **{priority}**\n\n"
+            f"I've immediately flagged this as a critical issue. "
+            f"Our emergency support team will contact you within {policy.get('response_time', '1 hour')} "
+            f"via phone and email.\n\n"
+            f"**Issue:** {issue.get('description')}\n\n"
+            f"If this is a safety emergency, please also contact:\n"
+            f"• Emergency hotline: 1-800-SUPPORT\n"
+            f"• Email: urgent@support.com"
+        )
+    else:
+        category_display = (issue.get("category") or "other").replace("_", " ").title()
+        response = (
+            f"I've created a support ticket: **{ticket['ticket_id']}**\n\n"
+            f"**Issue:** {issue.get('description')}\n"
+            f"**Category:** {category_display}\n"
+            f"**Priority:** {priority}\n"
+            f"**Response Time:** {policy.get('response_time', '24 hours')}\n\n"
+            f"Our support team will review this and contact you. "
+            f"You'll receive email updates at your registered address."
+        )
 
     return {"final_response": response}
 
 
 def build_escalation_subgraph():
+    """Build the escalation handler subgraph"""
     subgraph = StateGraph(AgentState)
 
-    subgraph.add_node("check_history",  check_history)
+    subgraph.add_node("check_history", check_history)
     subgraph.add_node("assign_priority", assign_priority)
-    subgraph.add_node("create_ticket",  create_ticket_node)
+    subgraph.add_node("create_ticket", create_ticket_node)
 
     subgraph.set_entry_point("check_history")
-    subgraph.add_edge("check_history",   "assign_priority")
+
+    subgraph.add_edge("check_history", "assign_priority")
     subgraph.add_edge("assign_priority", "create_ticket")
-    subgraph.add_edge("create_ticket",   END)
+    subgraph.add_edge("create_ticket", END)
 
     return subgraph.compile()
 
 
+# Export the compiled subgraph
 escalation_handler_subgraph = build_escalation_subgraph()

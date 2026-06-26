@@ -1,0 +1,230 @@
+{
+  "id": 1,
+  "panels": [
+    {
+      "description": "Chat API requests per minute",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "unit": "reqpm"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "rate(http_requests_total{endpoint=\"/chat\"}[1m]) * 60",
+          "legendFormat": "requests/min"
+        }
+      ],
+      "title": "Request Volume Over Time",
+      "type": "timeseries"
+    },
+    {
+      "description": "How often each agent is selected by the router",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "displayLabels": [
+          "name",
+          "percent"
+        ],
+        "pieType": "pie"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "increase(agent_requests_total{agent=\"order\"}[1h])",
+          "legendFormat": "Order"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "increase(agent_requests_total{agent=\"product\"}[1h])",
+          "legendFormat": "Product"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "increase(agent_requests_total{agent=\"support\"}[1h])",
+          "legendFormat": "Support"
+        }
+      ],
+      "title": "Agent Selection Distribution",
+      "type": "piechart"
+    },
+    {
+      "description": "Average LLM API call duration per agent, scraped from /metrics",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "unit": "ms"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 3,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "rate(llm_duration_seconds_sum[5m]) / rate(llm_duration_seconds_count[5m]) * 1000",
+          "legendFormat": "{{agent}} / {{node}}"
+        }
+      ],
+      "title": "Average LLM Latency Per Agent (ms)",
+      "type": "timeseries"
+    },
+    {
+      "description": "HTTP 4xx and 5xx responses per minute",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "red",
+            "mode": "fixed"
+          },
+          "unit": "reqpm"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 4,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "rate(http_requests_total{status_code=~\"[45]..\"}[1m]) * 60",
+          "legendFormat": "{{status_code}} errors/min"
+        }
+      ],
+      "title": "Error Rate Over Time",
+      "type": "timeseries"
+    },
+    {
+      "description": "Tokens consumed per agent per minute, scraped from /metrics",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "id": 5,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "rate(llm_tokens_total{token_type=\"total\"}[1m]) * 60",
+          "legendFormat": "{{agent}} total tokens/min"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "rate(llm_tokens_total{token_type=\"prompt\"}[1m]) * 60",
+          "legendFormat": "{{agent}} prompt tokens/min"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "rate(llm_tokens_total{token_type=\"completion\"}[1m]) * 60",
+          "legendFormat": "{{agent}} completion tokens/min"
+        }
+      ],
+      "title": "LLM Token Consumption Over Time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "Filter by request_id, agent (e.g. app.agents.router), or level (INFO / ERROR)",
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "id": 6,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "{namespace=\"multi-agent\", container=\"app\"}",
+          "legendFormat": ""
+        }
+      ],
+      "title": "Application Logs",
+      "type": "logs"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 36,
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "title": "Multi-Agent E-commerce Dashboard",
+  "uid": "multiagent-ecommerce",
+  "version": 1
+}

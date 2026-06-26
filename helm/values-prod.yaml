@@ -1,0 +1,63 @@
+# =============================================================================
+# Production overrides — applied on top of values.yaml in CI:
+#   helm upgrade --install ... -f values.yaml -f values-prod.yaml
+#
+# Secrets are NOT set here; they are injected via --set-string in CI from
+# GitHub Actions secrets, or managed by an external secrets operator.
+# =============================================================================
+
+app:
+  replicaCount: 1
+  databaseUrl: "postgresql://postgres:mypassword@host.minikube.internal:5433/multi_agent_db"
+
+  image:
+    pullPolicy: Always     # always pull the latest SHA-tagged image
+
+  service:
+    type: ClusterIP
+
+  ingress:
+    enabled: true
+    className: nginx
+    # Replace with your actual domain before deploying
+    host: multi-agent.yourdomain.com
+    tls:
+      - hosts:
+          - multi-agent.yourdomain.com
+        secretName: multi-agent-tls
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+
+  probes:
+    liveness:
+      initialDelaySeconds: 45
+      periodSeconds: 30
+    readiness:
+      initialDelaySeconds: 15
+      periodSeconds: 10
+
+postgres:
+  enabled: false   # managed via postgres-standalone.yaml; CI never touches the DB
+
+  persistence:
+    storageClass: standard
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+config:
+  googleRedirectUri: "https://multi-agent.yourdomain.com/auth/callback"

@@ -2,9 +2,11 @@ from pydantic import BaseModel, ConfigDict
 from typing import List, Optional
 from datetime import datetime
 
+
 class ChatRequest(BaseModel):
     message: str
     session_id: Optional[str] = None
+
 
 class MessageResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -15,6 +17,7 @@ class MessageResponse(BaseModel):
     content: str
     created_at: datetime
 
+
 class SessionMessagesResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -22,7 +25,10 @@ class SessionMessagesResponse(BaseModel):
     user_id: str
     messages: List[MessageResponse]
 
+
 class ChatResponse(BaseModel):
     session_id: str
     user_id: str
     response: str
+    action: Optional[dict] = None
+    run_id: Optional[str] = None

@@ -1,11 +1,14 @@
+import os
+
 import httpx
 from typing import Optional
 from app.core.logger import get_logger, get_request_id
 
 logger = get_logger("app.tools.shipment_tools")
 
-import os
-CARRIER_API_BASE = os.getenv("CARRIER_API_URL", "http://mock-carrier-api:9000")
+# Inside Docker the mock API is a separate container — use its service name.
+# Outside Docker (local scripts / tests) fall back to localhost.
+CARRIER_API_BASE = os.getenv("MOCK_CARRIER_API_URL", "http://mock-carrier-api:9000")
 
 
 def fetch_tracking_info(tracking_id: str) -> Optional[dict]:
@@ -23,7 +26,9 @@ def fetch_tracking_info(tracking_id: str) -> Optional[dict]:
             return None
 
         if response.status_code != 200:
-            logger.error(f"request_id={get_request_id()} | Carrier API error | status={response.status_code} | tracking_id={tracking_id}")
+            logger.error(
+                f"request_id={get_request_id()} | Carrier API error | status={response.status_code} | tracking_id={tracking_id}"
+            )
             return None
 
         data = response.json()

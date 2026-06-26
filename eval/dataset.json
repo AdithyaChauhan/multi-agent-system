@@ -1,0 +1,167 @@
+[
+  {
+    "id": "tc_001",
+    "name": "Product: headphones under budget",
+    "input": {
+      "user_message": "I want to buy headphones under 2000",
+      "conversation_history": []
+    },
+    "expected_output": "Headphone product recommendations with prices and ratings",
+    "expected_contains": ["headphone", "₹", "⭐"],
+    "expected_not_contains": ["something went wrong", "i don't understand", "error"],
+    "intent": "product",
+    "fixture_response": "Here are some headphones within your budget of ₹2,000:\n\n1. **boAt Rockerz 450** — ₹1,299 ⭐4.2\n   Over-ear wireless headphones, 15-hour battery life\n\n2. **Sony MDR-ZX110** — ₹699 ⭐4.0\n   Wired over-ear, lightweight and comfortable design\n\n3. **JBL T460BT** — ₹1,699 ⭐4.1\n   Wireless Bluetooth, 11-hour playback, foldable design\n\nWould you like to filter by type (wired/wireless) or brand?"
+  },
+  {
+    "id": "tc_002",
+    "name": "Product: browse smart TVs",
+    "input": {
+      "user_message": "show me some TVs",
+      "conversation_history": []
+    },
+    "expected_output": "TV product recommendations with prices and screen sizes",
+    "expected_contains": ["tv", "₹"],
+    "expected_not_contains": ["something went wrong", "not available", "error"],
+    "intent": "product",
+    "fixture_response": "Here are some Smart TVs we carry:\n\n1. **Samsung 43-inch 4K Smart TV** — ₹27,990 ⭐4.4\n   Crystal 4K, HDR10+, Smart OS with built-in apps\n\n2. **LG 32-inch Full HD Smart TV** — ₹16,490 ⭐4.2\n   Full HD, WebOS, built-in Wi-Fi\n\n3. **Vu 50-inch 4K Smart TV** — ₹24,990 ⭐4.1\n   4K Ultra HD, Android TV, voice control\n\nWould you like to filter by screen size or price range?"
+  },
+  {
+    "id": "tc_003",
+    "name": "Product: wireless mouse (Computers category)",
+    "input": {
+      "user_message": "I need a wireless mouse",
+      "conversation_history": []
+    },
+    "expected_output": "Wireless mouse recommendations with prices",
+    "expected_contains": ["mouse", "₹", "wireless"],
+    "expected_not_contains": ["something went wrong", "error", "not available"],
+    "intent": "product",
+    "fixture_response": "Here are some wireless mice available:\n\n1. **Logitech M235** — ₹1,299 ⭐4.4\n   2.4GHz wireless, up to 12-month battery life\n\n2. **HP X3500** — ₹849 ⭐4.1\n   Ergonomic design, 1600 DPI optical sensor\n\n3. **Dell WM126** — ₹899 ⭐4.2\n   Compact wireless mouse, 12-month battery, plug-and-play\n\nWould you like more options or a specific brand?"
+  },
+  {
+    "id": "tc_004",
+    "name": "Product: air purifier (Home & Kitchen)",
+    "input": {
+      "user_message": "I need an air purifier",
+      "conversation_history": []
+    },
+    "expected_output": "Air purifier recommendations with HEPA filter details and prices",
+    "expected_contains": ["air purifier", "₹"],
+    "expected_not_contains": ["something went wrong", "error"],
+    "intent": "product",
+    "fixture_response": "Here are some air purifiers we carry:\n\n1. **Philips Series 1000 AC1215** — ₹7,995 ⭐4.3\n   HEPA filter, covers 49m², AeraSense technology\n\n2. **Mi Air Purifier 3** — ₹8,999 ⭐4.2\n   OLED display, HEPA filter, smart app control\n\n3. **Honeywell Air Touch A5** — ₹10,990 ⭐4.4\n   HEPA + pre-filter, covers 323 sq ft\n\nWould you like to filter by room coverage area or budget?"
+  },
+  {
+    "id": "tc_005",
+    "name": "Product: laptop bag (Computers category)",
+    "input": {
+      "user_message": "show me laptop bags",
+      "conversation_history": []
+    },
+    "expected_output": "Laptop bag recommendations with capacity and price",
+    "expected_contains": ["laptop", "₹"],
+    "expected_not_contains": ["something went wrong", "error"],
+    "intent": "product",
+    "fixture_response": "Here are some laptop bags available:\n\n1. **Wildcraft Ace 30L Backpack** — ₹1,299 ⭐4.3\n   Fits up to 15.6-inch laptops, water-resistant material\n\n2. **Samsonite Viz Air Plus** — ₹3,499 ⭐4.4\n   Business backpack, USB charging port, padded laptop sleeve\n\n3. **American Tourister Boom** — ₹1,799 ⭐4.2\n   Multiple pockets, ergonomic back support, 15.6-inch fit\n\nWould you like to filter by size or brand?"
+  },
+  {
+    "id": "tc_006",
+    "name": "Product: catalog browse (all electronics)",
+    "input": {
+      "user_message": "show me all electronics",
+      "conversation_history": []
+    },
+    "expected_output": "Overview of electronics categories available",
+    "expected_contains": ["electronics", "headphone"],
+    "expected_not_contains": ["something went wrong", "error", "not available"],
+    "intent": "product",
+    "fixture_response": "Here’s what we carry in Electronics:\n\n• **Headphones & Speakers** — boAt, Sony, JBL, Sennheiser, Bose\n• **Smart TVs** — Samsung, LG, Vu, Mi\n• **Smartwatches** — Apple, Samsung, Noise, boAt\n• **Chargers & Power Banks** — Anker, Mi, Portronics\n• **Cameras & Photography** — Canon, Sony, GoPro\n\nWhat category interests you? I can show specific products!"
+  },
+  {
+    "id": "tc_007",
+    "name": "Order: check order status (generic)",
+    "input": {
+      "user_message": "what is the status of my order",
+      "conversation_history": []
+    },
+    "expected_output": "Lists user orders or asks for order ID",
+    "expected_contains": ["order"],
+    "expected_not_contains": ["something went wrong", "error", "product"],
+    "intent": "order",
+    "fixture_response": "Here are your recent orders:\n\n• **ORD-9901** — iPhone 13 → Shipped\n• **ORD-9902** — boAt Rockerz 450 Headphones → Delivered\n• **ORD-9903** — Philips Air Purifier → Delivered\n• **ORD-9904** — Samsung 43-inch TV → Out for Delivery\n• **ORD-9905** — Bajaj Mixer Grinder → Processing\n\nPlease provide the order ID (e.g., ORD-9901) for detailed tracking information."
+  },
+  {
+    "id": "tc_008",
+    "name": "Order: track specific order ORD-9901",
+    "input": {
+      "user_message": "where is my order ORD-9901",
+      "conversation_history": []
+    },
+    "expected_output": "Order tracking details with carrier and tracking number",
+    "expected_contains": ["ord-9901", "shipped"],
+    "expected_not_contains": ["something went wrong", "error", "not found"],
+    "intent": "order",
+    "fixture_response": "**Order ORD-9901 — iPhone 13 (128GB, Midnight)**\n\n📦 Status: **Shipped**\n🚚 Carrier: BlueDart\n📋 Tracking ID: BD123456789\n\nEstimated delivery: Tomorrow by 8 PM\n\nYour package is on its way! Track it directly on BlueDart’s website using tracking number BD123456789."
+  },
+  {
+    "id": "tc_009",
+    "name": "Support: defective product complaint",
+    "input": {
+      "user_message": "my product is defective and I want a refund",
+      "conversation_history": []
+    },
+    "expected_output": "Asks for order details to raise a support ticket",
+    "expected_contains": ["order", "support ticket"],
+    "expected_not_contains": ["something went wrong", "error", "product recommendation"],
+    "intent": "support",
+    "fixture_response": "I’m sorry to hear your product is defective — I’ll help you resolve this.\n\nTo raise a support ticket and process your refund, I need a few details:\n1. Your **order ID** (e.g., ORD-XXXX)\n2. A brief description of the issue\n\nCould you please share those? Our team will review and initiate the refund process once the ticket is raised."
+  },
+  {
+    "id": "tc_010",
+    "name": "Support: return request",
+    "input": {
+      "user_message": "I want to return my order",
+      "conversation_history": []
+    },
+    "expected_output": "Guides user through return process, asks for order ID",
+    "expected_contains": ["return", "order"],
+    "expected_not_contains": ["something went wrong", "error"],
+    "intent": "support",
+    "fixture_response": "I’d be happy to help you with your return request.\n\nTo get started, please share:\n1. Your **order ID** (e.g., ORD-XXXX)\n2. The **reason for return** (defective item, wrong product, changed mind, etc.)\n\nOur return policy allows returns within **30 days of delivery** for eligible items in original condition."
+  },
+  {
+    "id": "tc_011",
+    "name": "Unclear: off-topic geography question",
+    "input": {
+      "user_message": "what is the capital of France",
+      "conversation_history": []
+    },
+    "expected_output": "Politely redirects to shopping-related topics",
+    "expected_contains": ["help", "order"],
+    "expected_not_contains": ["paris", "france", "geography", "something went wrong"],
+    "intent": "unclear",
+    "fixture_response": "I’m a customer service assistant for this e-commerce platform, so I’m not able to help with general knowledge questions.\n\nHere’s what I can help you with:\n• **Product recommendations** — electronics, home appliances, accessories\n• **Order tracking** — status, shipment, delivery estimates\n• **Support** — returns, refunds, complaints\n\nIs there anything shopping-related I can assist you with?"
+  },
+  {
+    "id": "tc_012",
+    "name": "Product: follow-up refinement (cheaper options)",
+    "input": {
+      "user_message": "show me something cheaper",
+      "conversation_history": [
+        {
+          "role": "user",
+          "content": "I want to buy headphones under 2000"
+        },
+        {
+          "role": "assistant",
+          "content": "Here are some headphones within your budget of ₹2,000:\n1. boAt Rockerz 450 — ₹1,299\n2. JBL T460BT — ₹1,699\nWould you like cheaper options?"
+        }
+      ]
+    },
+    "expected_output": "More affordable headphone options under 1000",
+    "expected_contains": ["₹", "headphone"],
+    "expected_not_contains": ["something went wrong", "error", "i don't understand"],
+    "intent": "product",
+    "fixture_response": "Here are some more affordable headphone options under ₹1,000:\n\n1. **boAt BassHeads 225** — ₹399 ⭐4.1\n   Wired in-ear with mic, tangle-free cable\n\n2. **JBL C50HI** — ₹699 ⭐4.2\n   Wired in-ear, JBL Pure Bass sound, 3-button remote\n\n3. **Sony MDR-EX110AP** — ₹899 ⭐4.3\n   In-ear with mic, neodymium magnet drivers\n\nWould you like to filter further by type or brand?"
+  }
+]

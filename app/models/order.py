@@ -13,5 +13,4 @@ class Order(Base):
     status = Column(String, nullable=False)
     carrier = Column(String, nullable=True)
     tracking_id = Column(String, nullable=True)
-    order_value = Column(Integer, nullable=True, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

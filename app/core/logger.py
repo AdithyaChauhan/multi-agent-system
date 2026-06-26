@@ -3,6 +3,7 @@ import sys
 import uuid
 from logging.handlers import RotatingFileHandler
 from contextvars import ContextVar
+from pathlib import Path
 
 LOG_FORMAT = "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
 LOG_FILE = "logs/app.log"
@@ -21,11 +22,15 @@ def get_logger(name: str) -> logging.Logger:
     stdout_handler = logging.StreamHandler(sys.stdout)
     stdout_handler.setFormatter(formatter)
 
-    file_handler = RotatingFileHandler(LOG_FILE, maxBytes=5_000_000, backupCount=3)
-    file_handler.setFormatter(formatter)
-
     logger.addHandler(stdout_handler)
-    logger.addHandler(file_handler)
+
+    try:
+        Path(LOG_FILE).parent.mkdir(parents=True, exist_ok=True)
+        file_handler = RotatingFileHandler(LOG_FILE, maxBytes=5_000_000, backupCount=3)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+    except (PermissionError, OSError):
+        pass
 
     return logger
 

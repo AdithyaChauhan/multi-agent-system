@@ -8,6 +8,8 @@ from app.models.product import Product
 from app.models.review import Review
 from app.models.spec import Spec
 
+pytestmark = pytest.mark.integration
+
 
 # In-memory SQLite for real DB testing
 @pytest.fixture(scope="module")
@@ -34,7 +36,7 @@ def sqlite_session(sqlite_engine):
             category="Toys & Games",
             description="Fun toy for kids",
             in_stock=True,
-            attributes={}
+            attributes={},
         ),
         Product(
             product_id="TOY-002",
@@ -46,7 +48,7 @@ def sqlite_session(sqlite_engine):
             category="Toys & Games",
             description="Educational building blocks",
             in_stock=True,
-            attributes={}
+            attributes={},
         ),
         Product(
             product_id="HOME-001",
@@ -58,7 +60,7 @@ def sqlite_session(sqlite_engine):
             category="Home & Kitchen",
             description="Non-stick pan",
             in_stock=True,
-            attributes={}
+            attributes={},
         ),
     ]
 
@@ -70,7 +72,7 @@ def sqlite_session(sqlite_engine):
     specs = [
         Spec(spec_id="SPEC-001", product_id="TOY-001", spec_key="Material", spec_value="Wood"),
     ]
-    
+
     for p in products:
         db.add(p)
     for r in reviews:
@@ -89,6 +91,7 @@ class TestProductToolsWithDB:
         """search_products finds products by category"""
         with patch("app.tools.product_tools.SessionLocal", return_value=sqlite_session):
             from app.tools.product_tools import search_products
+
             result = search_products({"category": "Toys & Games"})
         assert isinstance(result, list)
 
@@ -96,6 +99,7 @@ class TestProductToolsWithDB:
         """search_products filters by keywords"""
         with patch("app.tools.product_tools.SessionLocal", return_value=sqlite_session):
             from app.tools.product_tools import search_products
+
             result = search_products({"category": "Toys & Games", "keywords": ["wooden"]})
         assert isinstance(result, list)
 
@@ -103,6 +107,7 @@ class TestProductToolsWithDB:
         """search_products filters by price range"""
         with patch("app.tools.product_tools.SessionLocal", return_value=sqlite_session):
             from app.tools.product_tools import search_products
+
             result = search_products({"category": "Toys & Games", "min_price": 500, "max_price": 2000})
         assert isinstance(result, list)
 
@@ -110,6 +115,7 @@ class TestProductToolsWithDB:
         """search_products handles empty preferences"""
         with patch("app.tools.product_tools.SessionLocal", return_value=sqlite_session):
             from app.tools.product_tools import search_products
+
             result = search_products({})
         assert isinstance(result, list)
 
@@ -117,6 +123,7 @@ class TestProductToolsWithDB:
         """get_product_by_id returns product"""
         with patch("app.tools.product_tools.SessionLocal", return_value=sqlite_session):
             from app.tools.product_tools import get_product_by_id
+
             result = get_product_by_id("TOY-001")
         assert result is not None
         assert result["product_id"] == "TOY-001"
@@ -125,6 +132,7 @@ class TestProductToolsWithDB:
         """get_product_by_id returns None for missing product"""
         with patch("app.tools.product_tools.SessionLocal", return_value=sqlite_session):
             from app.tools.product_tools import get_product_by_id
+
             result = get_product_by_id("NOTEXIST-999")
         assert result is None
 
@@ -132,6 +140,7 @@ class TestProductToolsWithDB:
         """get_all_categories returns categories with counts"""
         with patch("app.tools.product_tools.SessionLocal", return_value=sqlite_session):
             from app.tools.product_tools import get_all_categories
+
             result = get_all_categories()
         assert isinstance(result, dict)
 
@@ -139,6 +148,7 @@ class TestProductToolsWithDB:
         """fetch_reviews returns reviews for product"""
         with patch("app.tools.product_tools.SessionLocal", return_value=sqlite_session):
             from app.tools.product_tools import fetch_reviews
+
             result = fetch_reviews("TOY-001")
         assert isinstance(result, list)
 
@@ -146,6 +156,7 @@ class TestProductToolsWithDB:
         """fetch_reviews returns empty list for product with no reviews"""
         with patch("app.tools.product_tools.SessionLocal", return_value=sqlite_session):
             from app.tools.product_tools import fetch_reviews
+
             result = fetch_reviews("HOME-001")
         assert isinstance(result, list)
 
@@ -153,5 +164,6 @@ class TestProductToolsWithDB:
         """fetch_specs returns specs for product"""
         with patch("app.tools.product_tools.SessionLocal", return_value=sqlite_session):
             from app.tools.product_tools import fetch_specs
+
             result = fetch_specs("TOY-001")
         assert isinstance(result, list)

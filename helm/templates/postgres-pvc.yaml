@@ -1,0 +1,24 @@
+{{- if and .Values.postgres.enabled .Values.postgres.persistence.enabled }}
+{{- $existing := lookup "v1" "PersistentVolumeClaim" .Release.Namespace (printf "%s-postgres-data" (include "multi-agent.fullname" .)) }}
+{{- if not $existing }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "multi-agent.fullname" . }}-postgres-data
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/resource-policy: keep
+  labels:
+    {{- include "multi-agent.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgres
+spec:
+  accessModes:
+    - ReadWriteOnce
+  {{- if .Values.postgres.persistence.storageClass }}
+  storageClassName: {{ .Values.postgres.persistence.storageClass }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.postgres.persistence.size }}
+{{- end }}
+{{- end }}

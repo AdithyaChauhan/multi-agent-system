@@ -2,6 +2,8 @@ import os
 import re
 import json
 import copy
+import time
+import threading
 from typing import Literal
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
@@ -10,235 +12,268 @@ from dotenv import load_dotenv
 
 from app.agents.state import AgentState
 from app.agents.product_agent_subgraph import product_enrichment_subgraph
-from app.tools.product_tools import search_products
+from app.tools.product_tools import search_products, _get_known_brands
 from app.core.logger import get_logger, get_request_id
+from app.core.metrics import llm_requests_total, llm_tokens_total, llm_duration_seconds
 from app.core.prompt_loader import load_prompt, PROMPT_VERSIONS
 
 load_dotenv()
 
 logger = get_logger("app.agents.product_agent")
 
-llm = ChatOpenAI(
-    model="gpt-4o-mini",
-    temperature=0,
-    api_key=os.getenv("OPENAI_API_KEY")
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=os.getenv("OPENAI_API_KEY"))
+
+
+SERVED_CATEGORIES = {"Electronics", "Computers & Accessories", "Home & Kitchen", "Office Products"}
+
+# Subcategories that exist in the DB but are not served — exclude from user-facing blurb
+BLURB_EXCLUDED_SUBCATEGORIES = frozenset(
+    {
+        "smartphone",
+        "laptop",
+        "tablet",
+        "clothing",
+        "shoes",
+        "furniture",
+        "book",
+        "toy",
+        "sports equipment",
+    }
 )
 
-def get_catalog_structure() -> str:
-    """Load category/subcategory structure from DB dynamically"""
-    from app.db.database import SessionLocal
-    from app.models.product import Product
-    from sqlalchemy import distinct
 
-    db = SessionLocal()
-    try:
-        rows = db.query(
-            Product.category,
-            Product.subcategory
-        ).distinct().filter(
-            Product.category.isnot(None)
-        ).order_by(Product.category, Product.subcategory).all()
-
-        structure = {}
-        for category, subcategory in rows:
-            if category not in structure:
-                structure[category] = set()
-            if subcategory:
-                structure[category].add(subcategory)
-
-        lines = []
-        for cat, subs in sorted(structure.items()):
-            lines.append(f"{cat}:")
-            for sub in sorted(subs):
-                lines.append(f"  - {sub}")
-
-        return "\n".join(lines)
-    finally:
-        db.close()
-
-CATEGORY_DESCRIPTIONS = {
-    "Electronics": "TVs, headphones, smartwatches, cameras",
-    "Computers & Accessories": "Cables, chargers, keyboards, mice",
-    "Home & Kitchen": "Appliances, fans, air purifiers, room heaters",
-    "Office Products": "Stationery, paper products",
-}
-
-def get_catalog_summary() -> str:
+def build_catalog_blurb() -> str:
+    """Build catalog blurb from DB — only the 4 categories the system can actually serve."""
     from app.db.database import SessionLocal
     from app.models.product import Product
     from sqlalchemy import func
+
     db = SessionLocal()
     try:
-        rows = db.query(
-            Product.category,
-            func.count(Product.id).label("count")
-        ).filter(
-            Product.category.isnot(None)
-        ).group_by(Product.category).having(
-            func.count(Product.id) >= 10
-        ).order_by(func.count(Product.id).desc()).all()
+        counts = (
+            db.query(Product.category, func.count(Product.product_id).label("cnt"))
+            .filter(Product.category.in_(SERVED_CATEGORIES))
+            .group_by(Product.category)
+            .order_by(func.count(Product.product_id).desc())
+            .all()
+        )
+
+        sub_rows = (
+            db.query(Product.category, Product.subcategory, func.count(Product.product_id).label("cnt"))
+            .filter(
+                Product.category.in_(SERVED_CATEGORIES),
+                Product.subcategory.isnot(None),
+                Product.subcategory.notin_(BLURB_EXCLUDED_SUBCATEGORIES),
+            )
+            .group_by(Product.category, Product.subcategory)
+            .order_by(Product.category, func.count(Product.product_id).desc())
+            .all()
+        )
+
+        subcat_map: dict = {}
+        for cat, sub, _ in sub_rows:
+            if cat not in subcat_map:
+                subcat_map[cat] = []
+            if len(subcat_map[cat]) < 3:
+                subcat_map[cat].append(sub)
+
         lines = []
-        for cat, cnt in rows:
-            desc = CATEGORY_DESCRIPTIONS.get(cat, "")
-            suffix = f" — {desc}" if desc else ""
+        for cat, cnt in counts:
+            subs = subcat_map.get(cat, [])
+            suffix = f" — {', '.join(subs)}" if subs else ""
             lines.append(f"• {cat} ({cnt} products){suffix}")
+
         return "\n".join(lines)
+    except Exception:  # pragma: no cover
+        return ""
     finally:
         db.close()
 
-# Load once at startup
-CATALOG_STRUCTURE = get_catalog_structure()
-CATALOG_SUMMARY = get_catalog_summary()
 
-# Relaxation order: keep the product category as long as possible.
-# Relax brand first (try any brand), then specific features/keywords,
-# then type variant (e.g. neckband → any headphone), then price,
-# and only as a last resort drop the subcategory.
+# Load once at startup — returns empty string if DB is unavailable (e.g. during tests)
+CATALOG_BLURB = build_catalog_blurb()
+
+
+_CATALOG_CACHE: dict = {"value": "", "ts": 0.0}
+_CATALOG_LOCK = threading.Lock()
+_CATALOG_TTL = 300  # seconds
+
+
+def _build_prompt_catalog_from_db() -> str:
+    """Query DB for distinct served subcategories and format as extraction catalog string."""
+    from app.db.database import SessionLocal
+    from app.models.product import Product
+
+    db = SessionLocal()
+    try:
+        rows = (
+            db.query(Product.category, Product.subcategory)
+            .filter(
+                Product.category.in_(SERVED_CATEGORIES),
+                Product.subcategory.isnot(None),
+                Product.subcategory.notin_(BLURB_EXCLUDED_SUBCATEGORIES),
+            )
+            .distinct()
+            .order_by(Product.category, Product.subcategory)
+            .all()
+        )
+        cat_map: dict[str, list[str]] = {}
+        for cat, sub in rows:
+            cat_map.setdefault(cat, []).append(sub)
+
+        return "\n".join(
+            f"{cat}: {' | '.join(subs)}" for cat, subs in sorted(cat_map.items())
+        )
+    except Exception:
+        return ""
+    finally:
+        db.close()
+
+
+def get_prompt_catalog() -> str:
+    """Return cached catalog string, refreshing from DB if older than TTL."""
+    now = time.time()
+    with _CATALOG_LOCK:
+        if now - _CATALOG_CACHE["ts"] < _CATALOG_TTL and _CATALOG_CACHE["value"]:
+            return _CATALOG_CACHE["value"]
+        fresh = _build_prompt_catalog_from_db()
+        if fresh:
+            _CATALOG_CACHE["value"] = fresh
+            _CATALOG_CACHE["ts"] = now
+        return _CATALOG_CACHE["value"]
+
+
+# Initialise cache at startup so the first request doesn't pay the DB round-trip.
+PROMPT_CATALOG = get_prompt_catalog()
+
+# All catalog subcategories, longest-first so multi-word names ("usb hub", "air fryer")
+# match before single-word prefixes ("hub", "fryer").
+def _build_all_subcategories() -> list[str]:
+    catalog = get_prompt_catalog()
+    return sorted(
+        {
+            s.strip()
+            for line in catalog.split("\n")
+            for part in (line.split(":", 1)[1:] or [""])
+            for s in part.split("|")
+            if s.strip()
+        },
+        key=len,
+        reverse=True,
+    )
+
+
+_ALL_SUBCATEGORIES: list[str] = _build_all_subcategories()
+
+
+def _subcategory_in_message(message: str) -> str | None:
+    """Return the first catalog subcategory found verbatim in message, else None."""
+    m = message.lower()
+    for sub in _ALL_SUBCATEGORIES:
+        if sub in m:
+            return sub
+    return None
+
+
+# Generic relaxation order for all categories.
+# keywords before subcategory: a missing feature keyword (e.g. "noise cancelling") shouldn't
+# erase the subcategory — try without the keyword first, then widen to the full subcategory.
 RELAXATION_ORDER = [
-    "brand",
-    "keywords",
     "type",
     "price_increase",
+    "brand",
+    "keywords",
     "subcategory",
 ]
 
-# Words users say that colloquially name a subcategory without using the subcategory
-# name itself. Used by the subcategory-persistence guard so "show me tws earbuds"
-# is recognised as an explicit switch to 'headphones', not a revert-trigger.
-_SUBCATEGORY_SYNONYMS: dict = {
-    "headphones": {"earbuds", "earphone", "earphones", "buds", "airdopes", "tws"},
-    "speakers":   {"soundbar", "speaker", "speakers"},
-}
+def _extraction_system_prompt() -> str:
+    return f"""Extract product search preferences. Return JSON only.
 
-EXTRACTION_SYSTEM_PROMPT = """Extract product search preferences. Return JSON only, omit null/empty fields.
+Catalog:
+{get_prompt_catalog()}
 
-Catalog (EXACT subcategory names):
-Electronics: headphones(neckband|tws earbuds|wired earphones|over-ear) · speakers(bluetooth speaker|soundbar|home theatre) · tv(smart tv) · smartwatch · tv remote · set top box · projector · streaming device · Mobiles & Accessories · GeneralPurposeBatteries & BatteryChargers
-Computers & Accessories: mouse · keyboard · cable · adapter · drawing tablet · external hdd · external ssd · pen drive · usb hub · webcam · router · wifi adapter · wifi range extender · laptop bag · monitor stand · mouse pad · gamepad · microphone · screen protector · speakers · printer · ink cartridge · monitor · ups
-Home & Kitchen(type=null): iron · mixer grinder · blender · electric kettle · air fryer · vacuum cleaner · induction · sandwich maker · toaster · rice cooker · juicer · egg boiler · water purifier · water filter · frother · chopper · hand mixer · garment steamer · kitchen scale · lint remover · coffee maker · room heater · ceiling fan · air purifier · water heater · pedestal fan · humidifier · air conditioner · HomeStorage & Organization
-Office Products: OfficePaperProducts · OfficeElectronics
+Schema: {{"category":str|null,"subcategory":str|null,"type":str|null,"brand":str|null,"max_price":int|null,"min_price":int|null,"min_rating":float|null,"keywords":[str],"unavailable_request":bool}}
 
-Output fields: category, subcategory, type, brand, max_price, min_price, keywords(list), unavailable_request(bool)
+Types (Electronics only; null if unspecified):
+headphones: neckband|tws earbuds|wired earphones|over-ear headphones
+speakers: bluetooth speaker|soundbar|home theatre  tv: smart tv
+mouse/keyboard: wired|wireless|gaming|mechanical|bluetooth
+cable/adapter/H&K: type=null, use keywords for HDMI/USB-C/lightning specifics
 
 Rules:
-- Electronics: subcategory=product class, type=variant from parentheses above
-- Computers: subcategory=specific product; mouse/keyboard type: wired|wireless|gaming|mechanical; wifi dongles→wifi adapter; laptop stands/desks/cooling pads→monitor stand; USB chargers/dongles→adapter; external drives→external hdd; flash drives→pen drive
-- Home & Kitchen: subcategory=appliance name from list above, type=null
-- keywords: features NOT implied by subcategory/type (e.g. "calling", "noise cancellation", "HDMI"). Normalize: blutooth→bluetooth, speker→speaker, mice→mouse
-- unavailable_request=true for: laptops, desktop PCs, tablets(devices), smartphones(devices), clothing, shoes, furniture, food. Price/brand/feature alone NEVER makes unavailable.
-
-Follow-up rules:
-- "what about [Brand]" → keep EXACT prior subcategory, set brand only — never infer subcategory from brand
-- "under [price]"/"cheaper"/"ones with [X]" → keep all prior fields, change only relevant one, unavailable_request=false
-- New product mentioned → extract fresh
+- Exact catalog subcategory names only
+- mice→mouse; earbuds/earphones→headphones+type; telly→tv; adaptor→adapter; geyser→water heater; AC→air conditioner
+- pencil/pen/highlighter/eraser/ruler/marker/sketch pad→stationery; paintbrush/canvas/palette→art supplies
+- phone/mobile charger→sub:charger, keywords:["USB"]
+- keywords: features beyond subcategory/type (calling, noise cancellation, 4K, wireless)
+- best/highly/top rated→min_rating:4.0; "4.5 stars"→4.5; "4 stars and above"→4.0; null otherwise
+- Category-only browse: subcategory null, keywords []
+- Vague browse (show products/what do you have): category null, unavailable_request false
+- unavailable_request true ONLY for absent types (laptops, phones, tablets, clothing, food, furniture) — not for brands, specs, or features
+- JSON null only, never string "null"
+- Navigation phrases before a product name ("show me", "find me", "get me") are filler — extract the product name as subcategory, not keyword.
+- When a message ends with "type" or "ones" after a product qualifier (e.g. "gaming type", "neckband type", "wireless ones", "bluetooth ones"), set type to the qualifier word directly, set subcategory to null, and set unavailable_request to false — even if the qualifier is not an exact catalog type name.
+- Need/goal queries: when the user describes a problem, activity, or desired outcome rather than naming a specific product, infer the catalog subcategory that best enables it. This applies to multi-word intent phrases ("something to keep warm", "for the gym"), NOT to bare single nouns that are product names ("table", "chair", "book") — treat those as direct product searches.
+- If the user names a product type not in the catalog (furniture, food, clothing, books, toys), set unavailable_request: true.
 
 Examples:
-"wireless mouse" → {"category":"Computers & Accessories","subcategory":"mouse","keywords":["wireless"],"unavailable_request":false}
-"neckband under 2000" → {"category":"Electronics","subcategory":"headphones","type":"neckband","max_price":2000,"unavailable_request":false}
-"Samsung smart TV under 15000" → {"category":"Electronics","subcategory":"tv","type":"smart tv","brand":"Samsung","max_price":15000,"unavailable_request":false}
-"mixer grinder under 3000" → {"category":"Home & Kitchen","subcategory":"mixer grinder","max_price":3000,"unavailable_request":false}
-"laptop under 50000" → {"keywords":["laptop"],"unavailable_request":true}
-
-History: "User: mixer grinder under 2000" | Message: "what about Bajaj"
-→ {"category":"Home & Kitchen","subcategory":"mixer grinder","brand":"Bajaj","max_price":2000,"unavailable_request":false}
-
-History: "User: room heater under 2000" | Message: "what about Bajaj"
-→ {"category":"Home & Kitchen","subcategory":"room heater","brand":"Bajaj","max_price":2000,"unavailable_request":false}
-
-History: "User: boAt headphones under 1500" | Message: "under 1000"
-→ {"category":"Electronics","subcategory":"headphones","brand":"boAt","max_price":1000,"unavailable_request":false}
+"mixer grinder under 3000" → {{"category": "Home & Kitchen", "subcategory": "mixer grinder", "type": null, "brand": null, "max_price": 3000, "min_price": null, "min_rating": null, "keywords": [], "unavailable_request": false}}
+"best rated JBL bluetooth speaker under 2000" → {{"category": "Electronics", "subcategory": "speakers", "type": "bluetooth speaker", "brand": "JBL", "max_price": 2000, "min_price": null, "min_rating": 4.0, "keywords": [], "unavailable_request": false}}
+"top rated neckband under 2000" → {{"category": "Electronics", "subcategory": "headphones", "type": "neckband", "brand": null, "max_price": 2000, "min_price": null, "min_rating": 4.0, "keywords": [], "unavailable_request": false}}
+"wireless mouse" → {{"category": "Computers & Accessories", "subcategory": "mouse", "type": null, "brand": null, "max_price": null, "min_price": null, "min_rating": null, "keywords": ["wireless"], "unavailable_request": false}}
+"4.5 star and above air fryer" → {{"category": "Home & Kitchen", "subcategory": "air fryer", "type": null, "brand": null, "max_price": null, "min_price": null, "min_rating": 4.5, "keywords": [], "unavailable_request": false}}
+"laptop under 50000" → {{"category": null, "subcategory": null, "type": null, "brand": null, "max_price": 50000, "min_price": null, "min_rating": null, "keywords": ["laptop"], "unavailable_request": true}}
+"geyser under 5000" → {{"category": "Home & Kitchen", "subcategory": "water heater", "type": null, "brand": null, "max_price": 5000, "min_price": null, "min_rating": null, "keywords": [], "unavailable_request": false}}
+"4K monitor" → {{"category": "Computers & Accessories", "subcategory": "monitor", "type": null, "brand": null, "max_price": null, "min_price": null, "min_rating": null, "keywords": ["4K"], "unavailable_request": false}}
+"USB hub with ethernet" → {{"category": "Computers & Accessories", "subcategory": "usb hub", "type": null, "brand": null, "max_price": null, "min_price": null, "min_rating": null, "keywords": ["ethernet"], "unavailable_request": false}}
+"Sony headphones under 5000" → {{"category": "Electronics", "subcategory": "headphones", "type": null, "brand": "Sony", "max_price": 5000, "min_price": null, "min_rating": null, "keywords": [], "unavailable_request": false}}
+"affordable headphones" → {{"category": "Electronics", "subcategory": "headphones", "type": null, "brand": null, "max_price": null, "min_price": null, "min_rating": null, "keywords": [], "unavailable_request": false}}
 
 Respond ONLY with valid JSON."""
-
-
-def _find_product_anchor(conversation_history: list, recent_user_texts: set) -> str | None:
-    """
-    Scan full conversation history for the most recent user message that preceded
-    a product recommendations response, but has since scrolled out of the [-6:] window.
-    Returns that user message so it can be injected as context for the extraction LLM.
-    """
-    for i in range(len(conversation_history) - 1, -1, -1):
-        msg = conversation_history[i]
-        if msg["role"] != "assistant":
-            continue
-        content = msg["content"]
-        if not any(phrase in content for phrase in (
-            "Here are my top recommendations",
-            "I could not find an exact match",
-            "Here are the closest options",
-        )):
-            continue
-        # Find the user message immediately before this assistant turn
-        for j in range(i - 1, -1, -1):
-            if conversation_history[j]["role"] == "user":
-                user_msg = conversation_history[j]["content"]
-                if user_msg not in recent_user_texts:
-                    return user_msg
-                # Already in window — no need to inject
-                return None
-    return None
 
 
 def extract_preferences(state: AgentState) -> dict:
     """LLM node — extracts structured preferences from user message."""
     user_message = state.get("user_message", "")
-    conversation_history = state.get("conversation_history", [])
 
-    # Keep history so the LLM can resolve follow-up references ("ones", "what about X").
-    # For assistant replies: strip the numbered product list, keep only the intro/outcome lines
-    # (e.g. "Here are my top recommendations for you:"). Arbitrary char-truncation cuts product
-    # names mid-word, leaving misleading keywords like "Bluetooth Call" from a watch name that
-    # cause the LLM to infer the wrong subcategory on the next turn.
-    history_context = ""
-    if conversation_history:
-        recent = conversation_history[-6:]
-        recent_user_texts = {m["content"] for m in recent if m["role"] == "user"}
+    # Extract from the current message only — no history passed to LLM.
+    # Context preservation across turns is handled by the Python merge logic below.
+    full_prompt = user_message
 
-        lines = []
-        for msg in recent:
-            if msg["role"] == "assistant":
-                intro = []
-                for line in msg["content"].split("\n"):
-                    stripped = line.strip()
-                    if stripped and (
-                        (stripped[0].isdigit() and ". " in stripped)
-                        or stripped.startswith("•")
-                    ):
-                        break
-                    intro.append(line)
-                content = "\n".join(intro).strip() or msg["content"][:80]
-            else:
-                content = msg["content"]
-            lines.append(f"{msg['role'].title()}: {content}")
-        history_context = "\n".join(lines)
-
-        # Anchor: when the original product-establishing message has scrolled past
-        # the [-6:] window (e.g. 4+ consecutive price refinements), the LLM loses
-        # the subcategory entirely. Scan the full history for the last user message
-        # that was followed by a product recommendations response and inject it.
-        anchor = _find_product_anchor(conversation_history, recent_user_texts)
-        if anchor:
-            history_context = f"User (prior search): {anchor}\n\n" + history_context
-
-    if history_context:
-        full_prompt = f"Recent conversation:\n{history_context}\n\nCurrent message: {user_message}"
-    else:
-        full_prompt = user_message
-
-    version = PROMPT_VERSIONS.get("product-extraction-prompt", "latest")
-    system_prompt, commit_hash = load_prompt("product-extraction-prompt", version)
-    if not system_prompt:
-        system_prompt = EXTRACTION_SYSTEM_PROMPT
-        commit_hash = "fallback"
+    _ext_prompt = _extraction_system_prompt()
+    _ext_hash = "hardcoded"
 
     messages = [
-        SystemMessage(content=system_prompt),
+        SystemMessage(content=_ext_prompt),
         HumanMessage(content=full_prompt),
     ]
 
+    _t0 = time.perf_counter()
     response = llm.invoke(
         messages,
-        config={"metadata": {"prompt_name": "product-extraction-prompt", "prompt_version": commit_hash}}
+        config={"metadata": {"prompt_name": "product-extraction-prompt", "prompt_version": _ext_hash}},
+    )
+    _latency_s = time.perf_counter() - _t0
+    _latency_ms = int(_latency_s * 1000)
+    _meta = getattr(response, "response_metadata", {})
+    _usage = _meta.get("token_usage", {}) if isinstance(_meta, dict) else {}
+    logger.info(
+        f"request_id={get_request_id()} | LLM_USAGE | agent=product | node=extract_preferences"
+        f" | prompt_tokens={_usage.get('prompt_tokens', 0)}"
+        f" | completion_tokens={_usage.get('completion_tokens', 0)}"
+        f" | total_tokens={_usage.get('total_tokens', 0)}"
+        f" | latency_ms={_latency_ms}"
+    )
+    llm_requests_total.labels(agent="product", node="extract_preferences").inc()
+    llm_duration_seconds.labels(agent="product", node="extract_preferences").observe(_latency_s)
+    llm_tokens_total.labels(agent="product", node="extract_preferences", token_type="prompt").inc(
+        _usage.get("prompt_tokens", 0)
+    )
+    llm_tokens_total.labels(agent="product", node="extract_preferences", token_type="completion").inc(
+        _usage.get("completion_tokens", 0)
+    )
+    llm_tokens_total.labels(agent="product", node="extract_preferences", token_type="total").inc(
+        _usage.get("total_tokens", 0)
     )
     raw = response.content.strip()
 
@@ -250,116 +285,183 @@ def extract_preferences(state: AgentState) -> dict:
         # LLM occasionally returns the string "null" instead of JSON null
         preferences = {k: (None if v == "null" or v == "None" else v) for k, v in preferences.items()}
     except json.JSONDecodeError as e:
-        logger.error(
-            f"request_id={get_request_id()} | "
-            f"Preference parse error | raw={raw} | error={str(e)}"
-        )
+        logger.error(f"request_id={get_request_id()} | " f"Preference parse error | raw={raw} | error={str(e)}")
         preferences = {"category": None, "keywords": [], "unavailable_request": False}
 
-    # Safety: a pure price refinement ("under 1000", "cheaper") with no category
-    # extracted should never be marked unavailable — the LLM occasionally does this
-    # when conversation context includes a support turn before the product turn.
-    # Clear unavailable_request so routing falls through to "ask" at worst.
-    if (preferences.get("unavailable_request")
-            and not preferences.get("category")
-            and not preferences.get("subcategory")
-            and preferences.get("max_price") is not None
-            and conversation_history):
+    logger.info(f"request_id={get_request_id()} | RAW_LLM: {json.dumps(preferences)}")
+
+    # Brand-only refinement override: if the LLM set unavailable_request=true but
+    # also extracted a brand (and no product keywords), this is a brand-switch on an
+    # existing search — not an unavailable product. Clear the flag so the merge can
+    # inherit the previous subcategory (e.g. "what about Bajaj" after "mixer grinder").
+    previous_prefs = state.get("preferences") or {}
+    if (
+        preferences.get("unavailable_request")
+        and preferences.get("brand")
+        and not preferences.get("keywords")
+        and previous_prefs.get("subcategory")
+    ):
         preferences["unavailable_request"] = False
-        logger.info(f"request_id={get_request_id()} | Cleared false-positive unavailable_request on price refinement")
+
+    # Subcategory guard: if the LLM still flags unavailable_request but the user's
+    # message contains a known catalog subcategory, the product is in scope — specs
+    # like "4K" or "ethernet" should not trigger unavailable.
+    if preferences.get("unavailable_request"):
+        found_sub = _subcategory_in_message(user_message)
+        if found_sub:
+            preferences["unavailable_request"] = False
+            if not preferences.get("subcategory"):
+                preferences["subcategory"] = found_sub
 
     # Merge with previous preferences — preserve context across turns
-    previous_prefs = state.get("preferences") or {}
     if previous_prefs and not preferences.get("unavailable_request"):
         new_category = preferences.get("category") or previous_prefs.get("category")
         prev_category = previous_prefs.get("category")
         prev_subcategory = previous_prefs.get("subcategory")
         new_subcategory = preferences.get("subcategory")
 
-        # Subcategory persistence: keep the active subcategory unless the user's current
-        # message explicitly names a new product type. Prevents brand names that span
-        # multiple categories (e.g. "Noise" makes both watches and earbuds) from
-        # flipping subcategory on a message like "what about Noise".
-        category_changed = bool(
-            new_category and prev_category and new_category != prev_category
-        )
-        subcategory_changed = bool(
-            prev_subcategory
+        # Guard: if only brand changed (no type change), don't let LLM's brand-name inference
+        # override the subcategory (e.g. "Samsung" → earphones when context is TVs).
+        # Only fires when the user's message does not explicitly name a catalog subcategory —
+        # if the user said "bajaj smartwatches", the subcategory change is intentional.
+        if (
+            new_category == prev_category
+            and prev_subcategory
             and new_subcategory
             and new_subcategory != prev_subcategory
+            and not preferences.get("type")
+            and preferences.get("brand") is not None
+            and not _subcategory_in_message(user_message)
+        ):
+            new_subcategory = prev_subcategory
+
+        # Detect genuine subcategory change: LLM explicitly extracted a different subcategory.
+        # null means "not mentioned this turn", not "changed" — so null is not a change.
+        subcategory_changed = (
+            new_subcategory is not None and prev_subcategory is not None and new_subcategory != prev_subcategory
         )
-        if subcategory_changed:
-            msg_lower = user_message.lower()
-            # Words from the subcategory name itself ("headphones" → {"headphones"})
-            subcat_words = set(new_subcategory.lower().replace("-", " ").split())
-            # Words from the newly-extracted type ("tws earbuds" → {"tws", "earbuds"})
-            new_type_raw = preferences.get("type") or ""
-            type_words = {
-                w for w in new_type_raw.lower().replace("-", " ").split()
-                if len(w) > 2
+
+        # Category-level switch (e.g. Electronics → Home & Kitchen) always resets everything.
+        category_changed = new_category is not None and prev_category is not None and new_category != prev_category
+
+        # Fully vague browsing: LLM found no product signal AND no filters in the new message.
+        # Check raw extraction (not post-inheritance new_category) so this fires correctly even
+        # mid-session — e.g. "show me something" / "" after a session with min_price=100000.
+        vague_browse = (
+            not preferences.get("category")
+            and not preferences.get("subcategory")
+            and not preferences.get("type")
+            and not preferences.get("keywords")
+            and not preferences.get("brand")
+            and preferences.get("max_price") is None
+            and preferences.get("min_price") is None
+            and preferences.get("min_rating") is None
+        )
+
+        # Price-comparative refinement ("cheaper", "less expensive", etc.) returns nothing from
+        # the extraction LLM because there's no specific number. Don't reset context for these —
+        # reduce the previous max_price by 30% so the search narrows within the same subcategory.
+        _price_down_words = {"cheaper", "less expensive", "lower price", "more affordable", "budget option", "budget"}
+        _user_msg_lower = state.get("user_message", "").lower()
+        if vague_browse and prev_subcategory and any(w in _user_msg_lower for w in _price_down_words):
+            vague_browse = False
+            preferences["category"] = prev_category
+            preferences["subcategory"] = prev_subcategory
+            if previous_prefs.get("max_price"):
+                preferences["max_price"] = int(previous_prefs["max_price"] * 0.7)
+
+        # New specific product after a keyword/feature-only turn that stored no subcategory.
+        # e.g. "with calling feature" stores subcategory=null; then "calculator" is a new search.
+        new_specific_product = bool(new_subcategory and not prev_subcategory)
+
+        if vague_browse:
+            has_prev_context = bool(prev_subcategory or prev_category or previous_prefs.get("brand"))
+            if has_prev_context:
+                # User gave no extractable signal but is mid-session — restore previous prefs
+                # rather than wiping. "Show me the cheapest one" / "something else" in context
+                # should continue the current search, not reset to the catalog listing.
+                preferences = {**previous_prefs}
+            else:
+                # Truly no context — show the catalog and let the user start fresh.
+                preferences = {
+                    "category": None,
+                    "subcategory": None,
+                    "type": None,
+                    "brand": None,
+                    "max_price": None,
+                    "min_price": None,
+                    "min_rating": None,
+                    "keywords": [],
+                    "unavailable_request": False,
+                }
+        elif subcategory_changed or category_changed or new_specific_product:
+            # New product type — reset all filters to only what the user re-specified.
+            # e.g. "headphones under 2000" → "show me monitors" should not carry ₹2000 cap.
+            preferences = {
+                "category": new_category,
+                "subcategory": new_subcategory,
+                "type": preferences.get("type"),
+                "brand": preferences.get("brand"),
+                "max_price": preferences.get("max_price"),
+                "min_price": preferences.get("min_price"),
+                "min_rating": preferences.get("min_rating"),
+                "keywords": preferences.get("keywords") or [],
+                "unavailable_request": preferences.get("unavailable_request", False),
             }
-            # Colloquial synonyms users write instead of the subcategory name
-            synonym_words = _SUBCATEGORY_SYNONYMS.get(new_subcategory.lower(), set())
-            explicitly_mentioned = any(
-                w in msg_lower for w in subcat_words | type_words | synonym_words
-            )
-            if not explicitly_mentioned:
-                new_subcategory = prev_subcategory
-                subcategory_changed = False
-
-        # When subcategory genuinely changes, carry only the type and keywords the
-        # user actually said in the current message. The LLM can inherit keywords
-        # from anchor-injected history (e.g. "bluetooth calling" from a prior watch
-        # turn leaking into an earbuds query), so we filter to message-present words.
-        # When subcategory is stable, carry type and keywords forward across turns.
-        if subcategory_changed or category_changed:
-            carried_type = preferences.get("type")
-            msg_lower_kw = user_message.lower()
-            carried_keywords = [
-                kw for kw in (preferences.get("keywords") or [])
-                if kw.lower() in msg_lower_kw
-            ]
         else:
-            carried_type     = preferences.get("type") or previous_prefs.get("type")
-            carried_keywords = (
-                preferences.get("keywords") or previous_prefs.get("keywords") or []
-            )
+            # Same subcategory (or refinement turn) — preserve all previous filters
+            # unless the user explicitly overrode them this turn.
+            # Default to inheriting — keyword descriptors like "black colour" or "wireless"
+            # are refinements, not new product searches. The LLM extracts new subcategories
+            # directly when the user names a new product (e.g. "table" → subcategory:table).
+            inherit_subcategory = True
 
-                # ─────────────────────────────────────────────────────────────
-        # FORCE CLEAR PRICE on any category or subcategory change
-        if subcategory_changed or category_changed:
-            preferences["max_price"] = None
-            preferences["min_price"] = None
-        # ─────────────────────────────────────────────────────────────
+            # Safety: only inherit subcategory if the user's message contains a word from it
+            # OR the user explicitly set a refinement signal (brand/price/rating/type/keywords).
+            # The keywords check is new: "black colour" → keywords=["black"] → is a refinement,
+            # skip word-overlap. Only apply word-overlap when there's truly no extraction signal.
+            if prev_subcategory and new_subcategory is None:
+                has_explicit_signal = bool(
+                    preferences.get("brand")
+                    or preferences.get("type")
+                    or preferences.get("max_price")
+                    or preferences.get("min_price")
+                    or preferences.get("min_rating")
+                    or preferences.get("keywords")
+                )
+                if not has_explicit_signal:
+                    msg_words = set(user_message.lower().split())
+                    prev_sub_words = set(prev_subcategory.lower().replace("-", " ").split())
+                    if not msg_words & prev_sub_words:
+                        inherit_subcategory = False
+            # Inherit previous keywords only for pure price refinements — when the new
+            # message has no subcategory, brand, type, or keywords of its own.
+            # Targets "under 2000" / "under 1500" after a keyword-based search.
+            _new_kw = preferences.get("keywords") or []
+            if not new_subcategory and not preferences.get("brand") and not preferences.get("type") and not _new_kw:
+                _merged_kw = previous_prefs.get("keywords") or []
+            else:
+                _merged_kw = _new_kw
+            _inherited_type = preferences.get("type") or previous_prefs.get("type")
+            _inherited_sub = new_subcategory or (prev_subcategory if inherit_subcategory else None)
+            # When a type adjective is the sole refinement and a subcategory is inherited,
+            # also add the type word to keywords so the name/tag search can match products
+            # whose DB type column is null or unpopulated (e.g. "gaming mouse" by name).
+            if _inherited_type and not new_subcategory and prev_subcategory and inherit_subcategory and not _merged_kw:
+                _merged_kw = [_inherited_type]
+            preferences = {
+                "category": new_category,
+                "subcategory": _inherited_sub,
+                "type": _inherited_type,
+                "brand": preferences.get("brand") or previous_prefs.get("brand"),
+                "max_price": preferences.get("max_price") or previous_prefs.get("max_price"),
+                "min_price": preferences.get("min_price") or previous_prefs.get("min_price"),
+                "min_rating": preferences.get("min_rating") or previous_prefs.get("min_rating"),
+                "keywords": _merged_kw,
+                "unavailable_request": preferences.get("unavailable_request", False),
+            }
 
-        # Price: no fallback on category/subcategory change — old filters don't apply to new product class
-        if subcategory_changed or category_changed:
-            carried_max_price = preferences.get("max_price")
-            carried_min_price = preferences.get("min_price")
-        else:
-            carried_max_price = preferences.get("max_price") or previous_prefs.get("max_price")
-            carried_min_price = preferences.get("min_price") or previous_prefs.get("min_price")
-
-        preferences = {
-            "category":    new_category,
-            "subcategory": new_subcategory or prev_subcategory,
-            "type":        carried_type,
-            "brand":       preferences.get("brand"),
-            "max_price":   carried_max_price,
-            "min_price":   carried_min_price,
-            "keywords":    carried_keywords,
-            "unavailable_request": preferences.get("unavailable_request", False),
-        }
-
-    # Remove null/empty fields — downstream code uses .get() so missing == None.
-    # Keeps state small and LangSmith traces readable.
-    preferences = {k: v for k, v in preferences.items()
-                   if v is not None and v != [] and v != ""}
-
-    logger.info(
-        f"request_id={get_request_id()} | "
-        f"EXTRACTED: {json.dumps(preferences)}"
-    )
+    logger.info(f"request_id={get_request_id()} | " f"EXTRACTED: {json.dumps(preferences)}")
 
     return {
         "preferences": preferences,
@@ -372,48 +474,73 @@ def extract_preferences(state: AgentState) -> dict:
 
 def ask_for_preferences(state: AgentState) -> dict:
     logger.info(f"request_id={get_request_id()} | Asking for preferences")
-    return {
-        "final_response": f"What are you looking for? Here's what we carry:\n\n{CATALOG_SUMMARY}"
-    }
+    return {"final_response": f"What are you looking for? Here's what we carry:\n\n{CATALOG_BLURB}"}
+
+
+_UNAVAILABLE_SYSTEM_PROMPT = f"""You are a helpful shopping assistant. The user asked for a product we don't carry.
+Our catalog:
+{CATALOG_BLURB}
+
+Write a 2-sentence response:
+1. Acknowledge we don't carry what they asked for (one short sentence).
+2. Suggest the single most relevant category or product type from our catalog as a question — e.g. "Would you like to see our smartwatches?" or "Can I help you find a Home & Kitchen appliance instead?". If nothing is relevant, ask if they'd like to browse the full catalog.
+
+Plain text only, no markdown headers, no bullet lists."""
 
 
 def handle_unavailable_products(state: AgentState) -> dict:
-    user_message = state.get("user_message", "")
     logger.info(f"request_id={get_request_id()} | Unavailable category requested")
-    
-    return {
-        "final_response": (
-            f"I'm sorry, we don't carry that item in our catalog. "
-            f"However, we have a great selection in other categories:\n\n"
-            f"{CATALOG_SUMMARY}\n\n"
-            f"Would you like to explore any of these categories?"
-        )
-    }
+    user_message = state.get("user_message", "")
+    query = user_message.lower()
+
+    # Keep targeted redirects only where we have a genuine alternative to point to
+    if any(w in query for w in ["phone", "smartphone", "mobile", "iphone", "android", "galaxy"]):
+        return {
+            "final_response": "We don't carry smartphones. We do have **phone accessories** — cases, chargers, power banks, and phone stands."
+        }
+    if any(w in query for w in ["laptop", "notebook", "macbook", "chromebook"]):
+        return {
+            "final_response": "We don't carry laptops. We do have **computer accessories** — mouse, keyboard, monitors, and laptop bags."
+        }
+    if any(w in query for w in ["tablet", "ipad", "surface"]):
+        return {
+            "final_response": "We don't carry tablets. We do have **computer accessories** — keyboards, mouse, and adapters."
+        }
+
+    # LLM picks the most relevant suggestion from the catalog
+    _t0 = time.perf_counter()
+    response = llm.invoke(
+        [
+            SystemMessage(content=_UNAVAILABLE_SYSTEM_PROMPT),
+            HumanMessage(content=f'User asked for: "{user_message}"'),
+        ]
+    )
+    logger.info(
+        f"request_id={get_request_id()} | unavailable_suggestion | latency_ms={int((time.perf_counter()-_t0)*1000)}"
+    )
+    return {"final_response": response.content.strip()}
+
+
+# ── Product search ───────────────────────────────────────────────────────────
 
 
 def do_search_products(state: AgentState) -> dict:
+    """Deterministic node — reads preferences from state and calls search_products directly."""
     prefs = state.get("preferences") or {}
-    category = prefs.get("category")
-    subcategory = prefs.get("subcategory")
-    
     logger.info(
-        f"request_id={get_request_id()} | "
-        f"Searching | category={category} | subcategory={subcategory}"
+        f"request_id={get_request_id()} | Searching | category={prefs.get('category')} | subcategory={prefs.get('subcategory')}"
     )
-
-    keywords = prefs.get("keywords") or []
-    
     results = search_products(
-        category=category,
-        subcategory=subcategory,
+        category=prefs.get("category"),
+        subcategory=prefs.get("subcategory"),
         product_type=prefs.get("type"),
         brand=prefs.get("brand"),
         max_price=prefs.get("max_price"),
         min_price=prefs.get("min_price"),
-        keywords=keywords,
+        min_rating=prefs.get("min_rating"),
+        keywords=prefs.get("keywords") or [],
         limit=10,
     )
-
     logger.info(f"request_id={get_request_id()} | Found {len(results)} products")
     return {"search_results": results}
 
@@ -423,39 +550,35 @@ def broaden_search(state: AgentState) -> dict:
     attempt = state.get("broaden_attempt", 0)
     relaxed = list(state.get("relaxed_filters") or [])
 
-    if attempt >= len(RELAXATION_ORDER):
-        return {"broaden_attempt": attempt + 1, "filters_exhausted": True}
+    # Walk forward through the relaxation order until we find a filter we can actually relax.
+    # Using a loop instead of recursion so each graph invocation does one unit of work
+    # and the graph edge (broaden → search_products) handles the retry — traceable in LangSmith.
+    while attempt < len(RELAXATION_ORDER):
+        filter_to_relax = RELAXATION_ORDER[attempt]
+        attempt += 1
 
-    filter_to_relax = RELAXATION_ORDER[attempt]
-
-    if filter_to_relax == "price_increase":
-        if prefs.get("max_price"):
-            old_price = prefs["max_price"]
-            prefs["max_price"] = int(old_price * 1.25)
-            relaxed.append(f"price increased from {old_price} to {prefs['max_price']}")
+        if filter_to_relax == "price_increase":
+            if prefs.get("max_price"):
+                old_price = prefs["max_price"]
+                prefs["max_price"] = int(old_price * 1.25)
+                relaxed.append(f"price increased from {old_price} to {prefs['max_price']}")
+                break
         else:
-            return broaden_search({**state, "broaden_attempt": attempt + 1})
+            if prefs.get(filter_to_relax):
+                relaxed.append(filter_to_relax)
+                prefs[filter_to_relax] = None
+                break
     else:
-        if prefs.get(filter_to_relax):
-            relaxed.append(filter_to_relax)
-            prefs[filter_to_relax] = None
-        else:
-            return broaden_search({**state, "broaden_attempt": attempt + 1})
+        return {"broaden_attempt": attempt, "filters_exhausted": True}
 
-    # Guard: if after relaxation no specificity remains beyond category alone,
-    # the search would return anything in the category — treat as exhausted.
-    has_specificity = (
-        prefs.get("subcategory") or
-        prefs.get("brand") or
-        prefs.get("type") or
-        prefs.get("keywords")
-    )
+    # Category alone is enough to fetch a candidate set for the ranker.
+    has_specificity = prefs.get("category") or prefs.get("subcategory") or prefs.get("brand") or prefs.get("type") or prefs.get("keywords")
     if not has_specificity:
-        return {"broaden_attempt": attempt + 1, "filters_exhausted": True}
+        return {"broaden_attempt": attempt, "filters_exhausted": True}
 
     return {
         "preferences": prefs,
-        "broaden_attempt": attempt + 1,
+        "broaden_attempt": attempt,
         "relaxed_filters": relaxed,
         "filters_exhausted": False,
     }
@@ -463,11 +586,60 @@ def broaden_search(state: AgentState) -> dict:
 
 def respond_no_results(state: AgentState) -> dict:
     logger.info(f"request_id={get_request_id()} | No results after exhausting filters")
+    original = state.get("original_preferences") or {}
+    brand = original.get("brand")
+    # Restore context from original so follow-up messages (e.g. "under 2000") keep subcategory.
+    # Relaxation strips preferences to null by the time this node fires; without restoration
+    # the next turn has no category/subcategory context and returns unrelated products.
+    _restored = {**original, "brand": None}
+
+    if brand:
+        subcategory = original.get("subcategory")
+        category = original.get("category")
+        # Distinguish a brand we stock (filters just too narrow) from one we genuinely don't carry.
+        known_brands = _get_known_brands()
+        brand_in_catalog = any(k.lower() == brand.lower() for k in known_brands)
+        if brand_in_catalog:
+            # Check if this brand makes the requested product at all (ignoring filters).
+            brand_has_product = bool(search_products(brand=brand, subcategory=subcategory, limit=1))
+            if brand_has_product:
+                # Brand makes the product but price/rating filters were too tight.
+                # Clear the constraints we're telling the user to relax — the next turn's
+                # price ("under 3000") should not be intersected with the old tight filters.
+                label = subcategory or category or "products"
+                return {
+                    "final_response": (
+                        f"I couldn't find any {brand} {label} matching your filters. "
+                        f"Try relaxing the price or rating — or let me know if you'd like to see other brands."
+                    ),
+                    "preferences": {**original, "max_price": None, "min_price": None, "min_rating": None},
+                }
+            # Brand is in our catalog but doesn't make this product — show alternatives.
+            no_carry_msg = f"We carry {brand} but not {subcategory or category or 'that product'}."
+        else:
+            no_carry_msg = f"We don't carry {brand}."
+        alternatives = search_products(category=category, subcategory=subcategory, limit=10)
+        if alternatives:
+            top3 = sorted(alternatives, key=lambda p: p.get("rating") or 0, reverse=True)[:3]
+            label = subcategory or category or "products"
+            lines = [f"{no_carry_msg} Here are our top-rated {label} from brands we stock:\n"]
+            for i, p in enumerate(top3, 1):
+                price = f"₹{p['price']:,}" if p.get("price") else ""
+                rating = f"{p['rating']}/5" if p.get("rating") else ""
+                lines.append(f"{i}. **{p['name']}** by {p.get('brand', '')}")
+                lines.append(f"   {price} | ⭐ {rating}\n")
+            return {"final_response": "\n".join(lines), "preferences": _restored}
+        return {
+            "final_response": f"{no_carry_msg} Let me know what you need and I can suggest alternatives from brands we stock.",
+            "preferences": _restored,
+        }
+
     return {
         "final_response": (
             "I couldn't find any products matching your requirements, "
             "even after relaxing several filters. Try a different category or higher budget."
-        )
+        ),
+        "preferences": _restored,
     }
 
 
@@ -479,51 +651,19 @@ def format_recommendations(state: AgentState) -> dict:
     if not ranked:
         return {"final_response": "I found some products but could not rank them."}
 
-# Relevance check — only for specific product keywords
-    if relaxed and "keywords" in relaxed:
-        original_keywords = original_preferences.get("keywords") or []
-        if original_keywords:
-            # Skip check for generic/category-level words
-            GENERIC_WORDS = {
-                "items", "products", "things", "stuff", "good", "best",
-                "something", "show", "me", "under", "below", "above",
-                "kitchen", "home", "baby", "sport", "sports", "toy", "toys",
-                "clothing", "office", "art", "craft", "outdoor", "fitness",
-                "gear", "equipment", "accessories", "supplies", "desk",
-                "indoor", "kids", "children", "adult", "women",
-                "men", "girls", "boys", "need", "want", "looking", "find",
-                "care", "essentials", "essential", "basics", "basic",
-                "type", "kind", "sort", "related", "category", "range"
-            }
-            specific_keywords = [
-                kw for kw in original_keywords
-                if kw.lower() not in GENERIC_WORDS
-            ]
-            if specific_keywords:
-                relevant = any(
-                    any(kw.lower() in p.get("name", "").lower() for kw in specific_keywords)
-                    for p in ranked
-                )
-                if not relevant:
-                    original_query = " ".join(specific_keywords)
-                    return {
-                        "final_response": (
-                            f"I couldn't find '{original_query}' in our catalog. "
-                            f"Our inventory may not carry this specific item.\n\n"
-                            f"We carry:\n{CATALOG_SUMMARY}\n\n"
-                            f"Would you like to explore any of these categories?"
-                        )
-                    }
-                
+    top3 = ranked[:3]
+    all_maybe = all(p.get("llm_tier", 0) == 1 for p in top3) or bool(state.get("keyword_recovery_attempted"))
 
     lines = []
-    if relaxed:
-        lines.append(f"Note — I could not find an exact match, so I relaxed: {', '.join(relaxed)}.\n")
+    if relaxed and not state.get("keyword_recovery_attempted"):
+        lines.append(f"Note — I couldn't find an exact match, so I relaxed: {', '.join(relaxed)}.\n")
         lines.append("Here are the closest options:\n")
+    elif all_maybe:
+        lines.append("I couldn't find products that exactly match your request, but here are some related options — let me know if any of these work for you or if you'd like me to look for something else:\n")
     else:
         lines.append("Here are my top recommendations for you:\n")
 
-    for i, p in enumerate(ranked[:3], 1):
+    for i, p in enumerate(top3, 1):
         reviews = p.get("reviews") or []
         top_review = ""
         if reviews:
@@ -540,16 +680,17 @@ def format_recommendations(state: AgentState) -> dict:
 
 # ROUTING FUNCTIONS (only one of each!)
 
+
 def route_after_extraction(state: AgentState) -> Literal["search", "ask", "unavailable"]:
     prefs = state.get("preferences") or {}
-    
+
     if prefs.get("unavailable_request"):
         return "unavailable"
-    
-    if not prefs.get("category"):
-        return "ask"
-    
-    return "search"
+
+    # Search if there's any signal — category, subcategory, type, brand, or keywords.
+    # Only fall back to "ask" when the LLM found nothing at all (pure vague browse).
+    has_signal = bool(prefs.get("category") or prefs.get("subcategory") or prefs.get("type") or prefs.get("keywords") or prefs.get("brand"))
+    return "search" if has_signal else "ask"
 
 
 def route_after_search(state: AgentState) -> Literal["rank", "broaden"]:
@@ -566,63 +707,119 @@ def rank_and_filter(state: AgentState) -> dict:
         return {"ranked_products": []}
 
     candidates = search_results[:10]
-    product_list = "\n".join([
-        f"{i+1}. {p['name'][:60]} | ₹{p['price']} | {p['rating']}★ | {p.get('brand', '')}"
-        for i, p in enumerate(candidates)
-    ])
+    product_list = "\n".join(
+        [
+            f"{i+1}. {p['name'][:60]} | ₹{p['price']} | {p['rating']}★ | {p.get('brand', 'N/A')}"
+            for i, p in enumerate(candidates)
+        ]
+    )
 
     messages = [
-        SystemMessage(content="Rank products by relevance. Return a JSON array of 1-based indices only."),
-        HumanMessage(content=(
-            f"Request: \"{user_message}\"\n\n"
-            f"Products:\n{product_list}\n\n"
-            f"Return indices most-relevant-first, max 5. [] only if entirely unrelated.\n"
-            f"Example: [3, 1, 2]"
-        )),
+        SystemMessage(content="You are a product relevance classifier. Return only valid JSON. No explanation."),
+        HumanMessage(
+            content=(
+                f"Classify each product by how well it matches the user's request.\n\n"
+                f"User request: \"{user_message}\"\n\n"
+                f"Products:\n{product_list}\n\n"
+                f"For each product, assign:\n"
+                f"- \"relevant\": directly addresses the user's need\n"
+                f"- \"maybe\": right product type but missing a requested spec, feature, or brand\n"
+                f"- \"no\": wrong product category — unrelated to what was asked\n\n"
+                f"Return ONLY a JSON object with three lists of 1-based indices:\n"
+                f'Example: {{"relevant": [3, 7], "maybe": [1, 5], "no": [2, 4, 6, 8]}}'
+            )
+        ),
     ]
 
+    _t0 = time.perf_counter()
     response = llm.invoke(messages)
+    _latency_s = time.perf_counter() - _t0
+    _latency_ms = int(_latency_s * 1000)
+    _meta = getattr(response, "response_metadata", {})
+    _usage = _meta.get("token_usage", {}) if isinstance(_meta, dict) else {}
+    logger.info(
+        f"request_id={get_request_id()} | LLM_USAGE | agent=product | node=rank_and_filter"
+        f" | prompt_tokens={_usage.get('prompt_tokens', 0)}"
+        f" | completion_tokens={_usage.get('completion_tokens', 0)}"
+        f" | total_tokens={_usage.get('total_tokens', 0)}"
+        f" | latency_ms={_latency_ms}"
+    )
+    llm_requests_total.labels(agent="product", node="rank_and_filter").inc()
+    llm_duration_seconds.labels(agent="product", node="rank_and_filter").observe(_latency_s)
+    llm_tokens_total.labels(agent="product", node="rank_and_filter", token_type="prompt").inc(
+        _usage.get("prompt_tokens", 0)
+    )
+    llm_tokens_total.labels(agent="product", node="rank_and_filter", token_type="completion").inc(
+        _usage.get("completion_tokens", 0)
+    )
+    llm_tokens_total.labels(agent="product", node="rank_and_filter", token_type="total").inc(
+        _usage.get("total_tokens", 0)
+    )
+
     raw = response.content.strip()
+    logger.info(f"request_id={get_request_id()} | ranker_raw={raw!r} | candidates={len(candidates)}")
 
     try:
-        match = re.search(r'\[.*?\]', raw, re.DOTALL)
-        if match:
-            indices = json.loads(match.group())
-            if not indices:
-                ranked = candidates[:5]
-            else:
-                seen = set()
-                ranked = []
-                for idx in indices:
-                    if isinstance(idx, int) and 1 <= idx <= len(candidates):
-                        p = candidates[idx - 1]
-                        if p["product_id"] not in seen:
-                            ranked.append(p)
-                            seen.add(p["product_id"])
-                # pad up to 5 with remaining results
-                for p in candidates:
-                    if len(ranked) >= 5:
-                        break
+        match = re.search(r'\{.*\}', raw, re.DOTALL)
+        parsed = json.loads(match.group()) if match else {}
+        relevant_idx = parsed.get("relevant") or []
+        maybe_idx = parsed.get("maybe") or []
+
+        ranked = []
+        seen = set()
+        for tier, idx_list in ((0, relevant_idx), (1, maybe_idx)):
+            for idx in idx_list:
+                if isinstance(idx, int) and 1 <= idx <= len(candidates):
+                    p = candidates[idx - 1]
                     if p["product_id"] not in seen:
-                        ranked.append(p)
+                        ranked.append({**p, "llm_tier": tier})
                         seen.add(p["product_id"])
-        else:
-            ranked = candidates[:5]
+        # ranked stays [] if ranker explicitly put everything in "no" — let broaden handle it
+
     except Exception as e:
         logger.error(f"request_id={get_request_id()} | rank_and_filter parse error | error={e}")
-        ranked = candidates[:5]
+        ranked = [{**p, "llm_tier": 1} for p in candidates[:5]]
 
-    logger.info(f"request_id={get_request_id()} | rank_and_filter | {len(ranked)} products ranked")
+    logger.info(f"request_id={get_request_id()} | rank_and_filter | {len(ranked)} products (tier 0: {sum(1 for p in ranked if p.get('llm_tier')==0)}, tier 1: {sum(1 for p in ranked if p.get('llm_tier')==1)})")
     return {"ranked_products": ranked}
 
 
-def route_after_broaden(state: AgentState) -> Literal["retry_search", "no_results"]:
-    return "no_results" if state.get("filters_exhausted") else "retry_search"
+def route_after_rank(state: AgentState) -> Literal["enrich", "broaden"]:
+    ranked = state.get("ranked_products") or []
+    return "enrich" if ranked else "broaden"
 
 
+def route_after_broaden(state: AgentState) -> Literal["retry_search", "keyword_recovery", "no_results"]:
+    if not state.get("filters_exhausted"):
+        return "retry_search"
+    original_kw = (state.get("original_preferences") or {}).get("keywords") or []
+    keywords_were_relaxed = "keywords" in (state.get("relaxed_filters") or [])
+    if original_kw and keywords_were_relaxed and not state.get("keyword_recovery_attempted"):
+        return "keyword_recovery"
+    return "no_results"
+
+
+def keyword_recovery(state: AgentState) -> dict:
+    """Last-resort cross-catalog search using only the user's original keywords.
+    Fires once after full filter exhaustion — finds products under a different
+    subcategory than what was searched (e.g. ethernet adapter for 'usb hub with ethernet').
+    """
+    original_kw = (state.get("original_preferences") or {}).get("keywords") or []
+    logger.info(f"request_id={get_request_id()} | keyword_recovery | keywords={original_kw}")
+    results = search_products(keywords=original_kw, limit=20)
+    if results:
+        return {"search_results": results, "keyword_recovery_attempted": True, "filters_exhausted": False}
+    return {"keyword_recovery_attempted": True, "filters_exhausted": True}
+
+
+def route_after_keyword_recovery(state: AgentState) -> Literal["rank", "no_results"]:
+    if state.get("filters_exhausted") or not state.get("search_results"):
+        return "no_results"
+    return "rank"
 
 
 # GRAPH
+
 
 def build_product_agent_graph():
     graph = StateGraph(AgentState)
@@ -632,6 +829,7 @@ def build_product_agent_graph():
     graph.add_node("handle_unavailable", handle_unavailable_products)
     graph.add_node("search_products", do_search_products)
     graph.add_node("broaden_search", broaden_search)
+    graph.add_node("keyword_recovery", keyword_recovery)
     graph.add_node("respond_no_results", respond_no_results)
     graph.add_node("rank_and_filter", rank_and_filter)
     graph.add_node("product_enrichment", product_enrichment_subgraph)
@@ -642,26 +840,29 @@ def build_product_agent_graph():
     graph.add_conditional_edges(
         "extract_preferences",
         route_after_extraction,
-        {"search": "search_products", "ask": "ask_for_preferences", "unavailable": "handle_unavailable"}
+        {"search": "search_products", "ask": "ask_for_preferences", "unavailable": "handle_unavailable"},
     )
 
     graph.add_conditional_edges(
-        "search_products",
-        route_after_search,
-        {"rank": "rank_and_filter", "broaden": "broaden_search"}
+        "search_products", route_after_search, {"rank": "rank_and_filter", "broaden": "broaden_search"}
     )
 
     graph.add_conditional_edges(
         "broaden_search",
         route_after_broaden,
-        {"retry_search": "search_products", "no_results": "respond_no_results"}
+        {"retry_search": "search_products", "keyword_recovery": "keyword_recovery", "no_results": "respond_no_results"},
     )
 
     graph.add_conditional_edges(
-        "rank_and_filter",
-        lambda s: "format" if not s.get("ranked_products") else "enrich",
-        {"enrich": "product_enrichment", "format": "format_recommendations"}
+        "keyword_recovery",
+        route_after_keyword_recovery,
+        {"rank": "rank_and_filter", "no_results": "respond_no_results"},
     )
+
+    graph.add_conditional_edges(
+        "rank_and_filter", route_after_rank, {"enrich": "product_enrichment", "broaden": "broaden_search"}
+    )
+
     graph.add_edge("product_enrichment", "format_recommendations")
     graph.add_edge("ask_for_preferences", END)
     graph.add_edge("handle_unavailable", END)

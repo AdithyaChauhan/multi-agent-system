@@ -1,0 +1,286 @@
+Auth: ✓ token obtained
+
+═══ 1. Router Intent Classification ═══
+  ✓  Typo → product (Sony headphones)
+  Response: Here are my top recommendations for you:
+
+1. Sony WI-C100 Wireless Headphones with Customizable Equalizer for Deep Bass & 25 Hrs Battery, DSEE-Upscale, Splash Proof, 360RA, Fast Pair, in-Ear Bluetooth Headset with mic for Phone Calls (Black) by Sony
+   Price: ₹1599 | Rating: 3.6/5
+   "Let me start with something no one writes about.UI:Power On. Hold the center button for 2 seconds and the earphones with say in a Japanese/Indian woman's voice" — Nikhil M.
+
+  ✓  Lifestyle need → room heater
+  Response: Here are my top recommendations for you:
+
+1. Room Heater Warmer Wall-Outlet 400 Watts Electric Handy Room Heater (Room Heaters Home for Bedroom, Reading Books, Work, bathrooms, Rooms, Offices, Home Offices,2022 by Room
+   Price: ₹799 | Rating: 4.3/5
+   "If u have to heat a small room you can definitely use this heater but people need to be near it to feel the heat." — Rajiv Ranjan Singh
+
+2. Amazon Brand - Solimo 2000/1000 Watts Room Heater with Adjustable Thermostat (ISI certified, White colour, Ideal for small to medium room/area) by Amazon
+   Price: ₹1199 | Rating: 4.0/5
+   "Good product under Rs. 1100..Easy to use..." — Amazon Customer
+
+3. Morphy Richards OFR Room Heater, 09 Fin 2000 Watts Oil Filled Room Heater , ISI Approved (OFR 9 Grey) by Morphy
+   Price: ₹6549 | Rating: 4.0/5
+   "During winter it keeps room temperature hot which reduced cold. We really enjoy the product" — S Y
+
+  ✓  Order status by ID → order agent
+  Response: Your order ORD-2003 for the Fire-Boltt Phoenix Smartwatch has been shipped and is currently out for delivery. It is expected to arrive on 2026-06-04, and you can track it using the ID TRK-1003.
+
+  ✓  Cancel request → support (asks which order)
+  Response: To raise a support ticket, I need to know which order this is about.
+
+Here are your recent orders:
+
+1. **ORD-2005** — Logitech M221 Wireless Mouse (Processing)
+2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)
+3. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)
+4. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)
+5. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)
+_(showing 5 most recent of 7 orders)_
+
+Please reply with the order number to open a support ticket.
+
+  ✓  Return request → support ticket/ask
+  Response: To raise a support ticket, I need to know which order this is about.
+
+Here are your recent orders:
+
+1. **ORD-2005** — Logitech M221 Wireless Mouse (Processing)
+2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)
+3. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)
+4. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)
+5. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)
+_(showing 5 most recent of 7 orders)_
+
+Please reply with the order number to open a support ticket.
+
+  ✓  Vague phrase → unclear (not product results)
+  Response: Hello! What do you need help with today?
+
+  ✓  Bare noun after product search → out-of-catalog
+  Response: I'm sorry, but we don't carry tables. Can I help you find a Home & Kitchen appliance instead?
+
+═══ 2. Product Agent ═══
+  ✓  Fuzzy brand: lojitec → Logitech
+  Response: Here are my top recommendations for you:
+
+1. Logitech G402 Hyperion Fury USB Wired Gaming Mouse, 4,000 DPI, Lightweight, 8 Programmable Buttons, Compatible for PC/Mac - Black by Logitech
+   Price: ₹1995 | Rating: 4.6/5
+   "its really good product for gamers i would recommend it" — Madhav Ashokan
+
+2. Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Nano Receiver, 1000 DPI Optical Tracking, 3 Buttons, 24 Month Life Battery, PC/Mac/Laptop - Black by Logitech
+   Price: ₹1295 | Rating: 4.6/5
+   "- excellent piece of wireless mouse- reasonable price and worth every penny- one problem i faced is the scroll stopped working now" — Awesome Shopper
+
+3. Logitech Pebble M350 Wireless Mouse with Bluetooth or USB - Silent, Slim Computer Mouse with Quiet Click for Laptop, Notebook, PC and Mac - Graphite by Logitech
+   Price: ₹1490 | Rating: 4.6/5
+   "It's a good bluetooth mouse. Connects within 1 second. Battery is superb" — Ravi
+
+  ✓  Fuzzy brand: philps → Philips
+  Response: Here are my top recommendations for you:
+
+1. Philips Air Purifier Ac2887/20,Vitashield Intelligent Purification,Long Hepa Filter Life Upto 17000 Hours,Removes 99.9% Airborne Viruses & Bacteria,99.97% Airborne Pollutants,Ideal For Master Bedroom by Philips
+   Price: ₹14499 | Rating: 4.3/5
+   "After going through many reviews and checking multiple brands" — Prasad Kulasekar
+
+2. Philips AC1215/20 Air purifier, removes 99.97% airborne pollutants, 4-stage filtration with True HEPA filter (white) by Philips
+   Price: ₹8799 | Rating: 4.1/5
+   "Here is a try at a review of this product after using it for an year now.Use Case :-I am a NCR resident and the air pollution is as we know one of the worst possible if not the worst. I have it installed in the bedroom" — Tushar A.
+
+  ✓  Fuzzy brand: Samsng → Samsung TV
+  Response: Here are my top recommendations for you:
+
+1. Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED Smart TV UA32T4340BKXXL (Glossy Black) by Samsung
+   Price: ₹13490 | Rating: 4.3/5
+   "Overall good." — Rahman Ali
+
+2. Samsung 108 cm (43 inches) Crystal 4K Neo Series Ultra HD Smart LED TV UA43AUE65AKXXL (Black) by Samsung
+   Price: ₹32990 | Rating: 4.3/5
+   "Before finalizing the AUE60 55"" — Binu
+
+3. Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart LED TV UA43AUE60AKLXL (Black) by Samsung
+   Price: ₹30990 | Rating: 4.3/5
+
+  ✓  Out-of-catalog noun: 'chair' → unavailable
+  Response: I'm sorry, but we don't carry chairs. Can I help you find a Home & Kitchen appliance instead?
+
+  ✓  Out-of-catalog noun: 'book' → unavailable
+  Response: I'm sorry, but we don't carry books. Would you like to browse our Electronics category instead?
+
+  ✓  Out-of-catalog noun: 'shoes' → unavailable
+  Response: I'm sorry, but we don't carry shoes. Can I help you find a Home & Kitchen appliance instead?
+
+  ✓  4K monitor → FHD monitors (closest options, NOT 'don't carry 4K')
+  Response: I couldn't find any products matching your requirements, even after relaxing several filters. Try a different category or higher budget.
+
+  ✓  Intent-to-subcategory: keep warm → room heater (not mixer)
+  Response: Here are my top recommendations for you:
+
+1. Room Heater Warmer Wall-Outlet 400 Watts Electric Handy Room Heater (Room Heaters Home for Bedroom, Reading Books, Work, bathrooms, Rooms, Offices, Home Offices,2022 by Room
+   Price: ₹799 | Rating: 4.3/5
+   "If u have to heat a small room you can definitely use this heater but people need to be near it to feel the heat." — Rajiv Ranjan Singh
+
+2. Amazon Brand - Solimo 2000/1000 Watts Room Heater with Adjustable Thermostat (ISI certified, White colour, Ideal for small to medium room/area) by Amazon
+   Price: ₹1199 | Rating: 4.0/5
+   "Good product under Rs. 1100..Easy to use..." — Amazon Customer
+
+3. Morphy Richards OFR Room Heater, 09 Fin 2000 Watts Oil Filled Room Heater , ISI Approved (OFR 9 Grey) by Morphy
+   Price: ₹6549 | Rating: 4.0/5
+   "During winter it keeps room temperature hot which reduced cold. We really enjoy the product" — S Y
+
+  ✓  Multi-turn: Sony headphones → under 3000 → Sony + price filter
+  Response: Here are my top recommendations for you:
+
+1. Sony WI-C100 Wireless Headphones with Customizable Equalizer for Deep Bass & 25 Hrs Battery, DSEE-Upscale, Splash Proof, 360RA, Fast Pair, in-Ear Bluetooth Headset with mic for Phone Calls (Black) by Sony
+   Price: ₹1599 | Rating: 3.6/5
+   "Let me start with something no one writes about.UI:Power On. Hold the center button for 2 seconds and the earphones with say in a Japanese/Indian woman's voice" — Nikhil M.
+
+  ✓  All-maybe / no results: gaming mouse under 2000
+  Response: I couldn't find any products matching your requirements, even after relaxing several filters. Try a different category or higher budget.
+
+═══ 3. Order Agent ═══
+  ✓  List orders → shows ORD-xxxx
+  Response: You have multiple orders. Which one would you like to check?
+
+• **ORD-2005** - Logitech M221 Wireless Mouse (processing)
+• **ORD-2004** - Croma 500W Mixer Grinder (delivered)
+• **ORD-2003** - Fire-Boltt Phoenix Smartwatch (shipped)
+• **ORD-2002** - Mi 108cm Full HD Android LED TV (shipped)
+• **ORD-2001** - boAt Rockerz 255 Pro+ (delivered)
+
+_(showing 5 most recent of 7 orders)_
+
+Please provide the order ID.
+
+  ✓  Specific order status: ORD-2004
+  Response: Good news! **Croma 500W Mixer Grinder** (Order ORD-2004) has been delivered. Tracking reference: TRK-1004.
+
+  ✓  Cancel ORD-2003 → support (not order agent)
+  Response: Order **ORD-2003** has already shipped — cancellation isn't possible. Once it arrives, I can help you initiate a return.
+
+═══ 4. Support Agent ═══
+  ✓  Cancel flow step 1: asks which order
+  Response: To raise a support ticket, I need to know which order this is about.
+
+Here are your recent orders:
+
+1. **ORD-2005** — Logitech M221 Wireless Mouse (Processing)
+2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)
+3. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)
+4. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)
+5. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)
+_(showing 5 most recent of 7 orders)_
+
+Please reply with the order number to open a support ticket.
+
+  ✓  Cancel flow step 2: tv one → ORD-2002 confirm
+  Response: Your order for the Mi 108cm Full HD Android LED TV (ORD-2002) is currently shipped and in transit, with an estimated delivery date of June 6, 2026. Unfortunately, cancellation is not possible at this stage, but I can assist you with a return once it arrives.
+
+  ✓  Wrong item → support ticket with ID
+  Response: You already have an open ticket **TKT-0B3CC1AE** for this order. Our support team will be in touch within the agreed timeframe. Is there anything else I can help you with?
+
+  ✓  Product name matching: boAt headphones → correct order
+  Response: Order **ORD-2001** has been delivered and can't be cancelled. You can return it within our 30-day policy window.
+
+  ✓  Return request with order ID → support ticket
+  Response: You already have an open ticket **TKT-0B3CC1AE** for this order. Our support team will be in touch within the agreed timeframe. Is there anything else I can help you with?
+
+═══ 5. Regressions ═══
+  ✓  wireless mouse ≤1000
+  Response: Here are my top recommendations for you:
+
+1. Logitech M221 Wireless Mouse, Silent Buttons, 2.4 GHz with USB Mini Receiver, 1000 DPI Optical Tracking, 18-Month Battery Life, Ambidextrous PC / Mac / Laptop - Charcoal Grey by Logitech
+   Price: ₹799 | Rating: 4.4/5
+   "I am using it from 1 month" — Kshitij
+
+2. Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, 12 Month Life Battery, Compatible with Windows, Mac, Chromebook/PC/Laptop by Logitech
+   Price: ₹699 | Rating: 4.5/5
+   "It's little small for big hands. But best available in the market." — Chandrashekar SK
+
+3. Logitech B170 Wireless Mouse, 2.4 GHz with USB Nano Receiver, Optical Tracking, 12-Months Battery Life, Ambidextrous, PC/Mac/Laptop - Black by Logitech
+   Price: ₹599 | Rating: 4.4/5
+   "Hi guys! Bought this yesterday" — Anand
+
+  ✓  brand switch → Fire-Boltt (not headphones)
+  Response: Here are my top recommendations for you:
+
+1. Fire-Boltt India's No 1 Smartwatch Brand Talk 2 Bluetooth Calling Smartwatch with Dual Button, Hands On Voice Assistance, 60 Sports Modes, in Built Mic & Speaker with IP68 Rating by Fire-Boltt
+   Price: ₹2199 | Rating: 4.2/5
+   "Received the product today. The packing was intact though I found watch not at its proper place. It fell down inside the box and found the inner holding box damaged also. Not expecting any kind of tampering but thought to share the product packaging. Overall nice product" — Deepankar G.
+
+2. Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3",120+ Sports Modes, 240*240 PX High Res with SpO2, Heart Rate Monitoring & IP67 Rating by Fire-Boltt
+   Price: ₹1998 | Rating: 4.3/5
+   "2 months review- its been working fine" — yogita ratre
+
+3. Fire-Boltt Ninja Calling 1.69" Bluetooth Calling Smart Watch, Dial Pad, Speaker, AI Voice Assistant with 450 NITS Peak Brightness, Wrist Gaming & 100+ Watch Faces with SpO2, HR, Multiple Sports Mode by Fire-Boltt
+   Price: ₹1999 | Rating: 4.2/5
+   "I've been using the watch for a while now and I got to say I love it. The battery lasts around 4-5 days not 10 days" — siddhi kamat
+
+  ✗ FAIL  synonym telly → TV
+  Response: I'm sorry, but we don't carry televisions. Would you like to see our selection of electronics instead?
+
+  ✓  misspelling blutooth → speakers
+  Response: Here are my top recommendations for you:
+
+1. JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL Signature Sound, Vibrant Color Options with IPX7 Waterproof & AUX (Blue) by JBL
+   Price: ₹1999 | Rating: 4.3/5
+   "The other reviews say that the volume is too low but it is not at all like that it is pretty good" — Murali am
+
+2. boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playback, IPX5 and Integrated Controls (Blue) by boAt
+   Price: ₹1799 | Rating: 4.2/5
+   "This is review is primarily focused on sound quality.The term Bass is used losely. One doesn't expect true Bass from such small drivers.SHORTER VERSION:Boat Stone 650: Very loud. Loud and somewhat uneven bass. Mids are a bit supressed. Somewhat muffled midrange. Decent treble. A loud bassy speaker.Nakamichi Speck: Barely louder than the 3W Stone 200. Mids clearer than 650. Bass much much lower than 650. If looking for VFM rule this one out" — VSMS
+
+3. boAt Stone 250 Portable Wireless Speaker with 5W RMS Immersive Audio, RGB LEDs, Up to 8HRS Playtime, IPX7 Water Resistance, Multi-Compatibility Modes(Black) by boAt
+   Price: ₹1199 | Rating: 4.2/5
+   "The LED light is vibrant with multiple form selection" — Devashish Gautam
+
+  ✓  unavailable → laptop redirect
+  Response: We don't carry laptops. We do have **computer accessories** — mouse, keyboard, monitors, and laptop bags.
+
+  ✓  price refinement after category (air fryer ≤6000)
+  Response: Here are my top recommendations for you:
+
+1. Instant Pot Air Fryer, Vortex 2QT, Touch Control Panel, 360° EvenCrisp™ Technology, Uses 95 % less Oil, 4-in-1 Appliance: Air Fry, Roast, Bake, Reheat (Vortex 1.97Litre, Black) by Instant
+   Price: ₹4995 | Rating: 4.8/5
+   "I have used multiple air fryers. But this one is best and value for money" — nikhil
+
+2. Pigeon Healthifry Digital Air Fryer, 360° High Speed Air Circulation Technology 1200 W with Non-Stick 4.2 L Basket - Green by Pigeon
+   Price: ₹3599 | Rating: 4.2/5
+   "Reviewing just after a day of using this product. We made French fries and chicken tikka and result is quiet impressive! The recipe book and cooking tips from the given QR code is really helpful. Hope it serves for a long time.Not to forget about the beautiful bottle green and golden look of it." — koustav
+
+  ✓  Cross-session reset: SID1 → mouse context
+  Response: Here are my top recommendations for you:
+
+1. Zebronics Zeb-Jaguar Wireless Mouse, 2.4GHz with USB Nano Receiver, High Precision Optical Tracking, 4 Buttons, Plug & Play, Ambidextrous, for PC/Mac/Laptop (Black+Grey) by Zebronics
+   Price: ₹399 | Rating: 4.1/5
+   "very good producteasy to handleuse of dpi is awesome" — Deepak
+
+2. Dell MS116 1000Dpi USB Wired Optical Mouse, Led Tracking, Scrolling Wheel, Plug and Play. by Dell
+   Price: ₹299 | Rating: 4.5/5
+   "I'm using this mouse from more than 6 months now and It's working great.but the only problem I faced is the big size of it.It looks like the old ball mouse which is quite big in size.Good for gaming by the way." — Mohammad Noushad
+
+3. Lenovo 300 Wired Plug & Play USB Mouse, High Resolution 1600 DPI Optical Sensor, 3-Button Design with clickable Scroll Wheel, Ambidextrous, Ergonomic Mouse for Comfortable All-Day Grip (GX30M39704) by Lenovo
+   Price: ₹289 | Rating: 4.4/5
+   "I am not a pro-gamer" — Harsha
+
+  ✓  Cross-session reset: SID2 → TV context
+  Response: Here are my top recommendations for you:
+
+1. Mi 108 cm (43 inches) Full HD Android LED TV 4C | L43M6-INC (Black) by Mi
+   Price: ₹19999 | Rating: 4.3/5
+   "NOTE:@ If you select brand-authorized TV installation" — Sameer Patil
+
+2. MI 80 cm (32 inches) 5A Series HD Ready Smart Android LED TV L32M7-5AIN (Black) by MI
+   Price: ₹13999 | Rating: 4.2/5
+   "Pros- xiomi 5a is best in budget-Nice picture quality-Very nice audio output- Full of featureCONS- sometimes tv lags-Sometimes stucksIn this prize range all tv having cons like this.::Overall nice tv" — Manoj maddheshiya
+
+3. VW 80 cm (32 inches) Frameless Series HD Ready LED TV VW32A (Black) by VW
+   Price: ₹6999 | Rating: 4.2/5
+   "I got this for 6k. At this price point" — Amazon Customer
+
+  ✓  Empty message → handled gracefully
+  Response: Hello! How can I assist you today?
+
+══════════════════════════════════════════════════
+  TOTAL: 33/34 passed ⚠
+══════════════════════════════════════════════════

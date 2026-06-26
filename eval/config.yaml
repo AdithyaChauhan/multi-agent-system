@@ -1,0 +1,25 @@
+# DeepEval CI/CD Evaluation Configuration
+# Thresholds below which the pipeline fails.
+
+metrics:
+  answer_relevancy:
+    threshold: 0.75
+    description: "Response addresses the user query — checks for expected phrases"
+  correctness:
+    threshold: 0.80
+    description: "Response is well-formed, non-empty, and free of error messages"
+
+# LangSmith dataset to push JSON report summaries into for cumulative history
+langsmith_dataset_name: "multi-agent-ecommerce-eval"
+
+# LangSmith dataset for end-to-end eval experiments (create_langsmith_experiment)
+langsmith_e2e_dataset_name: "multi-agent-ecommerce-e2e-eval"
+
+# Model used for live eval (RUN_LIVE_EVAL=true)
+model: "gpt-4o-mini"
+
+# App endpoint for live eval
+live_eval_api_url: "http://localhost:8000"
+
+# Report output directory (relative to repo root)
+report_dir: "eval/reports"

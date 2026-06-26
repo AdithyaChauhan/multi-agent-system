@@ -5,13 +5,22 @@ from app.agents.state import AgentState
 
 class TestOrderAgentResponseGeneration:
 
-    def test_response_generation_with_tracking(self):
-        """response_generation creates natural language response"""
+    def _mock_order_llm(self, mock_llm, content="Your order has been shipped.", no_tool=True):
+        """Set up llm.bind_tools(...).invoke() for response_generation."""
         mock_response = MagicMock()
-        mock_response.content = "Your order has been shipped via FedEx and will arrive tomorrow."
+        mock_response.content = content
+        mock_response.response_metadata = {
+            "token_usage": {"prompt_tokens": 50, "completion_tokens": 10, "total_tokens": 60}
+        }
+        mock_response.tool_calls = [] if no_tool else [{"id": "c1", "type": "function"}]
+        mock_llm.bind_tools.return_value.invoke.return_value = mock_response
+        mock_llm.invoke.return_value = mock_response
+        return mock_response
 
+    def test_response_generation_with_tracking(self):
+        """response_generation creates natural language response (no tool call path)."""
         with patch("app.agents.order_agent.llm") as mock_llm:
-            mock_llm.invoke.return_value = mock_response
+            self._mock_order_llm(mock_llm, content="Your order has been shipped via FedEx and will arrive tomorrow.")
             from app.agents.order_agent import response_generation
 
             state = AgentState(
@@ -20,7 +29,7 @@ class TestOrderAgentResponseGeneration:
                 session_id="test-session",
                 order_data={"order_id": "ORD-2001", "product_name": "AirPods", "status": "shipped"},
                 tracking_data={"carrier": "FedEx", "current_location": "Mumbai", "estimated_delivery": "2026-05-25"},
-                conversation_history=[]
+                conversation_history=[],
             )
             result = response_generation(state)
 
@@ -29,11 +38,8 @@ class TestOrderAgentResponseGeneration:
 
     def test_response_generation_without_tracking(self):
         """response_generation works without tracking data"""
-        mock_response = MagicMock()
-        mock_response.content = "Your order is being processed."
-
         with patch("app.agents.order_agent.llm") as mock_llm:
-            mock_llm.invoke.return_value = mock_response
+            self._mock_order_llm(mock_llm, content="Your order is being processed.")
             from app.agents.order_agent import response_generation
 
             state = AgentState(
@@ -42,7 +48,7 @@ class TestOrderAgentResponseGeneration:
                 session_id="test-session",
                 order_data={"order_id": "ORD-2001", "product_name": "AirPods", "status": "processing"},
                 tracking_data={},
-                conversation_history=[]
+                conversation_history=[],
             )
             result = response_generation(state)
 
@@ -60,7 +66,7 @@ class TestOrderRouting:
             user_id="test-user",
             session_id="test-session",
             order_id="ORD-2001",
-            conversation_history=[]
+            conversation_history=[],
         )
         result = route_after_check(state)
         assert result == "has_id"
@@ -75,7 +81,7 @@ class TestOrderRouting:
             session_id="test-session",
             order_id=None,
             user_orders=[],
-            conversation_history=[]
+            conversation_history=[],
         )
         result = route_after_check(state)
         assert result == "no_orders"
@@ -93,7 +99,7 @@ class TestOrderRouting:
                 {"order_id": "ORD-2001"},
                 {"order_id": "ORD-2002"},
             ],
-            conversation_history=[]
+            conversation_history=[],
         )
         result = route_after_check(state)
         assert result == "multiple_orders"
@@ -107,7 +113,7 @@ class TestOrderRouting:
             user_id="test-user",
             session_id="test-session",
             order_data={"order_id": "ORD-2001"},
-            conversation_history=[]
+            conversation_history=[],
         )
         result = route_after_fetch(state)
         assert result == "found"
@@ -121,7 +127,7 @@ class TestOrderRouting:
             user_id="test-user",
             session_id="test-session",
             order_data=None,
-            conversation_history=[]
+            conversation_history=[],
         )
         result = route_after_fetch(state)
         assert result == "not_found"
@@ -130,12 +136,16 @@ class TestOrderRouting:
 class TestSupportAgentDraftResolution:
 
     def test_draft_resolution_for_low_severity(self):
-        """draft_resolution creates response for low severity issues"""
+        """draft_resolution calls fetch_support_policy tool; falls back to final_response when no tool call."""
         mock_response = MagicMock()
         mock_response.content = "We apologize for the inconvenience. Your refund will be processed within 3-5 days."
+        mock_response.response_metadata = {
+            "token_usage": {"prompt_tokens": 50, "completion_tokens": 30, "total_tokens": 80}
+        }
+        mock_response.tool_calls = []  # no tool call → returns final_response directly
 
         with patch("app.agents.support_agent.llm") as mock_llm:
-            mock_llm.invoke.return_value = mock_response
+            mock_llm.bind_tools.return_value.invoke.return_value = mock_response
             from app.agents.support_agent import draft_resolution
 
             state = AgentState(
@@ -143,8 +153,8 @@ class TestSupportAgentDraftResolution:
                 user_id="test-user",
                 session_id="test-session",
                 support_issue={"category": "refund_request", "description": "Want refund"},
-                policy={"response_time": "48 hours"},
-                conversation_history=[]
+                severity="low",
+                conversation_history=[],
             )
             result = draft_resolution(state)
 
@@ -155,15 +165,15 @@ class TestSupportAgentDraftResolution:
 class TestSupportRouting:
 
     def test_route_by_severity_critical(self):
-        """Routes high severity to escalation handler"""
+        """Routes critical issues to high priority"""
         from app.agents.support_agent import route_by_severity
 
         state = AgentState(
             user_message="urgent!",
             user_id="test-user",
             session_id="test-session",
-            severity="high",
-            conversation_history=[]
+            severity="critical",
+            conversation_history=[],
         )
         result = route_by_severity(state)
         assert result == "high"
@@ -177,7 +187,7 @@ class TestSupportRouting:
             user_id="test-user",
             session_id="test-session",
             severity="medium",
-            conversation_history=[]
+            conversation_history=[],
         )
         result = route_by_severity(state)
         assert result == "high"
@@ -191,7 +201,7 @@ class TestSupportRouting:
             user_id="test-user",
             session_id="test-session",
             severity="low",
-            conversation_history=[]
+            conversation_history=[],
         )
         result = route_by_severity(state)
         assert result == "low"
@@ -214,7 +224,7 @@ class TestSupportSubgraphCreateTicket:
                 severity="medium",
                 priority="P2",
                 policy={"response_time": "24 hours"},
-                conversation_history=[]
+                conversation_history=[],
             )
             result = create_ticket_node(state)
 
@@ -236,7 +246,7 @@ class TestSupportSubgraphCreateTicket:
                 severity="critical",
                 priority="P0",
                 policy={"response_time": "1 hour"},
-                conversation_history=[]
+                conversation_history=[],
             )
             result = create_ticket_node(state)
 
@@ -256,7 +266,7 @@ class TestRouterRouting:
             session_id="test-session",
             confidence=0.3,
             intent="unclear",
-            conversation_history=[]
+            conversation_history=[],
         )
         result = route_after_classification(state)
         assert result == "clarify"
@@ -271,7 +281,7 @@ class TestRouterRouting:
             session_id="test-session",
             confidence=0.9,
             intent="order",
-            conversation_history=[]
+            conversation_history=[],
         )
         result = route_after_classification(state)
         assert result == "auth_gate"

@@ -1,0 +1,13 @@
+apiVersion: v2
+name: multi-agent-system
+description: Multi-agent e-commerce customer service chatbot (LangGraph + FastAPI + PostgreSQL)
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - langraph
+  - fastapi
+  - llm
+  - chatbot
+maintainers:
+  - name: Adithya Chauhan

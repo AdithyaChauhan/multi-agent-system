@@ -1,10 +1,49 @@
+import time
+import threading
 from typing import Optional, List
 from sqlalchemy import or_, cast, String
 from app.db.database import SessionLocal
 from app.models.product import Product
 from app.core.logger import get_logger, get_request_id
+from rapidfuzz import process, fuzz
 
 logger = get_logger("app.tools.product_tools")
+
+_BRAND_CACHE: dict = {"brands": [], "ts": 0.0}
+_BRAND_LOCK = threading.Lock()
+_BRAND_TTL = 300  # seconds
+
+
+def _get_known_brands() -> list[str]:
+    now = time.time()
+    with _BRAND_LOCK:
+        if now - _BRAND_CACHE["ts"] < _BRAND_TTL and _BRAND_CACHE["brands"]:
+            return _BRAND_CACHE["brands"]
+        db = SessionLocal()
+        try:
+            rows = db.query(Product.brand).filter(Product.brand.isnot(None)).distinct().all()
+            brands = [r[0] for r in rows if r[0] and len(r[0]) > 2]
+            _BRAND_CACHE["brands"] = brands
+            _BRAND_CACHE["ts"] = now
+            return brands
+        finally:
+            db.close()
+
+
+def _resolve_brand(brand: str) -> str:
+    """Snap a user-typed brand to the closest known brand (typo correction).
+    Exact case-insensitive match is tried first — fuzzy only runs when no exact
+    match exists (i.e. genuine typo or unseeded brand). Score cutoff 80 safely
+    catches 1-2 char edits while blocking correctly-spelled brands we don't carry."""
+    known = _get_known_brands()
+    if not known:
+        return brand
+    brand_lower = brand.lower()
+    for k in known:
+        if k.lower() == brand_lower:
+            return k
+    result = process.extractOne(brand, known, scorer=fuzz.WRatio, score_cutoff=80)
+    return result[0] if result else brand
 
 
 def search_products(
@@ -14,12 +53,13 @@ def search_products(
     brand: Optional[str] = None,
     max_price: Optional[int] = None,
     min_price: Optional[int] = None,
+    min_rating: Optional[float] = None,
     keywords: Optional[List[str]] = None,
     limit: int = 20,
 ) -> List[dict]:
     """
     Search products with flexible filtering.
-    
+
     Args:
         category: Product category (e.g., "Toys & Games", "Sports & Outdoors")
         subcategory: Product subcategory (e.g., "Learning & Education")
@@ -27,42 +67,46 @@ def search_products(
         brand: Brand name
         max_price: Maximum price in paise/cents
         min_price: Minimum price in paise/cents
+        min_rating: Minimum product rating (e.g. 4.0 for "best rated")
         keywords: List of keywords to search in name/description/attributes
         limit: Maximum results to return
     """
+    # Subcategories that exist in the DB but are never served — block them from all results,
+    # including relaxed searches. Prevents "iphone" / "redmi charger" from surfacing phones.
+    EXCLUDED_SUBCATEGORIES = {"smartphone", "laptop", "tablet"}
+
     db = SessionLocal()
     try:
-        query = db.query(Product)
-        
+        query = db.query(Product).filter(~Product.subcategory.in_(EXCLUDED_SUBCATEGORIES))
+
         # Filter by category
         if category:
             query = query.filter(Product.category.ilike(f"%{category}%"))
-        
-        # Filter by subcategory
+
+        # Filter by subcategory — exact match so "monitor" doesn't match "monitor stand"
         if subcategory:
-            query = query.filter(Product.subcategory.ilike(f"%{subcategory}%"))
-        # Match type column OR product name — many products have type=None even
-        # though the product type appears in the name (e.g. "HP Wired USB Mouse").
+            query = query.filter(Product.subcategory.ilike(subcategory))
+        # Filter by type (product-level classifier)
         if product_type:
-            query = query.filter(
-                or_(
-                    Product.type.ilike(f"%{product_type}%"),
-                    Product.name.ilike(f"%{product_type}%"),
-                )
-            )
+            query = query.filter(Product.type.ilike(f"%{product_type}%"))
         # Filter by brand
-        # Filter by brand — use first meaningful word to handle truncated brand names
+        # Filter by brand — fuzzy-correct typos, then use first meaningful word
         if brand:
-            brand_words = [w for w in brand.replace("&", "").split() if len(w) > 3]
-            search_brand = brand_words[0] if brand_words else brand
+            resolved = _resolve_brand(brand)
+            if resolved != brand:
+                logger.info(f"request_id={get_request_id()} | brand_fuzzy | {brand!r} → {resolved!r}")
+            brand_words = [w for w in resolved.replace("&", "").split() if len(w) > 3]
+            search_brand = brand_words[0] if brand_words else resolved
             query = query.filter(Product.brand.ilike(f"%{search_brand}%"))
-        
+
         # Filter by price range
         if max_price is not None:
             query = query.filter(Product.price <= max_price)
         if min_price is not None:
             query = query.filter(Product.price >= min_price)
-        
+        if min_rating is not None:
+            query = query.filter(Product.rating >= min_rating)
+
         # Keyword search in name, brand, and tags
         if keywords:
             for keyword in keywords:
@@ -72,28 +116,30 @@ def search_products(
                     cast(Product.tags, String).ilike(f"%{keyword}%"),
                 )
                 query = query.filter(keyword_filter)
-        
+
         # Execute query
         products = query.limit(limit).all()
-        
+
         # Convert to dict format
         results = []
         for p in products:
-            results.append({
-                "product_id": p.product_id,
-                "name": p.name,
-                "category": p.category,
-                "subcategory": p.subcategory,
-                "type": p.type,
-                "brand": p.brand,
-                "price": p.price,
-                "rating": float(p.rating) if p.rating else None,
-                "description": p.description,
-                "attributes": p.attributes,
-            })
-        
+            results.append(
+                {
+                    "product_id": p.product_id,
+                    "name": p.name,
+                    "category": p.category,
+                    "subcategory": p.subcategory,
+                    "type": p.type,
+                    "brand": p.brand,
+                    "price": p.price,
+                    "rating": float(p.rating) if p.rating else None,
+                    "description": p.description,
+                    "attributes": p.attributes,
+                }
+            )
+
         return results
-        
+
     finally:
         db.close()
 
@@ -106,50 +152,18 @@ def get_product_by_id(product_id: str) -> Optional[dict]:
     db = SessionLocal()
 
     try:
-        product = db.query(Product).filter(
-            Product.product_id == product_id
-        ).first()
+        product = db.query(Product).filter(Product.product_id == product_id).first()
 
         if not product:
-            logger.info(
-                f"request_id={get_request_id()} | "
-                f"Product not found | product_id={product_id}"
-            )
+            logger.info(f"request_id={get_request_id()} | " f"Product not found | product_id={product_id}")
             return None
 
-        logger.info(
-            f"request_id={get_request_id()} | "
-            f"Product fetched | product_id={product_id}"
-        )
+        logger.info(f"request_id={get_request_id()} | " f"Product fetched | product_id={product_id}")
         return _product_to_dict(product)
 
     finally:
         db.close()
 
-
-def get_all_categories() -> dict:
-    """
-    Returns available product types and their filterable attributes.
-    Used when the user is vague — agent knows what to ask for.
-    """
-    return {
-        "clothes": {
-            "filterable_attributes": ["gender", "section", "size"],
-            "gender_options":  ["male", "female", "unisex"],
-            "section_options": ["top", "bottom"],
-            "size_options":    ["S", "M", "L", "XL", "XXL"],
-        },
-        "laptop": {
-            "filterable_attributes": ["storage_gb", "ram_gb"],
-            "storage_options": [256, 512, 1024],
-            "ram_options":     [8, 16, 32],
-        },
-        "headphones": {
-            "filterable_attributes": ["form_factor", "wireless"],
-            "form_factor_options": ["over-ear", "earbuds", "in-ear"],
-            "wireless_options":    [True, False],
-        },
-    }
 
 
 def fetch_reviews(product_id: str) -> list[dict]:
@@ -162,24 +176,19 @@ def fetch_reviews(product_id: str) -> list[dict]:
     db = SessionLocal()
 
     try:
-        reviews = (
-            db.query(Review)
-            .filter(Review.product_id == product_id)
-            .all()
-        )
+        reviews = db.query(Review).filter(Review.product_id == product_id).all()
 
         logger.info(
-            f"request_id={get_request_id()} | "
-            f"Reviews fetched | product_id={product_id} | count={len(reviews)}"
+            f"request_id={get_request_id()} | " f"Reviews fetched | product_id={product_id} | count={len(reviews)}"
         )
 
         return [
             {
-                "review_id":   r.review_id,
-                "product_id":  r.product_id,
-                "rating":      r.rating,
+                "review_id": r.review_id,
+                "product_id": r.product_id,
+                "rating": r.rating,
                 "review_text": r.review_text,
-                "reviewer":    r.reviewer,
+                "reviewer": r.reviewer,
             }
             for r in reviews
         ]
@@ -198,22 +207,15 @@ def fetch_specs(product_id: str) -> list[dict]:
     db = SessionLocal()
 
     try:
-        specs = (
-            db.query(Spec)
-            .filter(Spec.product_id == product_id)
-            .all()
-        )
+        specs = db.query(Spec).filter(Spec.product_id == product_id).all()
 
-        logger.info(
-            f"request_id={get_request_id()} | "
-            f"Specs fetched | product_id={product_id} | count={len(specs)}"
-        )
+        logger.info(f"request_id={get_request_id()} | " f"Specs fetched | product_id={product_id} | count={len(specs)}")
 
         return [
             {
-                "spec_id":    s.spec_id,
+                "spec_id": s.spec_id,
                 "product_id": s.product_id,
-                "spec_key":   s.spec_key,
+                "spec_key": s.spec_key,
                 "spec_value": s.spec_value,
             }
             for s in specs
@@ -226,13 +228,13 @@ def fetch_specs(product_id: str) -> list[dict]:
 def _product_to_dict(product: Product) -> dict:
     """Internal helper — converts SQLAlchemy Product object to plain dict."""
     return {
-        "product_id":  product.product_id,
-        "name":        product.name,
-        "type":        product.type,
-        "brand":       product.brand,
-        "price":       product.price,
+        "product_id": product.product_id,
+        "name": product.name,
+        "type": product.type,
+        "brand": product.brand,
+        "price": product.price,
         "description": product.description,
-        "in_stock":    product.in_stock,
-        "rating":      product.rating,
-        "attributes":  product.attributes,
+        "in_stock": product.in_stock,
+        "rating": product.rating,
+        "attributes": product.attributes,
     }
