@@ -6,10 +6,17 @@ from app.core.logger import get_logger
 
 logger = get_logger("app.core.prompt_loader")
 
-client = Client()
+client = None
 
 # In-process cache: (name, version) → (text, commit_hash)
 _cache: dict[str, tuple[str, str]] = {}
+
+
+def _get_client() -> Client | None:
+    global client
+    if client is None:
+        client = Client()
+    return client
 
 
 def load_prompt(prompt_name: str, version: str = "latest") -> tuple[str, str]:
@@ -22,7 +29,11 @@ def load_prompt(prompt_name: str, version: str = "latest") -> tuple[str, str]:
         return _cache[cache_key]
 
     try:
-        prompt = client.pull_prompt(f"{prompt_name}:{version}")
+        prompt_client = _get_client()
+        if prompt_client is None:
+            return None, None
+
+        prompt = prompt_client.pull_prompt(f"{prompt_name}:{version}")
 
         system_text = ""
         for msg in prompt.messages:
@@ -43,6 +54,9 @@ def load_prompt(prompt_name: str, version: str = "latest") -> tuple[str, str]:
 
 def prewarm_prompts() -> None:
     """Call at app startup to fetch all prompts before the first request arrives."""
+    if os.getenv("PYTEST_CURRENT_TEST") or os.getenv("CI", "").lower() in {"1", "true", "yes"}:
+        return
+
     for name, version in PROMPT_VERSIONS.items():
         text, _ = load_prompt(name, version)
         status = "ok" if text else "failed (will use fallback)"

@@ -14,6 +14,24 @@ _BRAND_LOCK = threading.Lock()
 _BRAND_TTL = 300  # seconds
 
 
+def get_all_categories() -> dict:
+    """Return the curated category metadata used by legacy tests and UI helpers."""
+    return {
+        "headphones": {
+            "label": "Headphones",
+            "form_factor_options": ["neckband", "tws earbuds", "wired earphones", "over-ear headphones"],
+        },
+        "laptop": {
+            "label": "Laptops",
+            "form_factor_options": [],
+        },
+        "clothes": {
+            "label": "Clothes",
+            "form_factor_options": [],
+        },
+    }
+
+
 def _get_known_brands() -> list[str]:
     now = time.time()
     with _BRAND_LOCK:
@@ -163,7 +181,6 @@ def get_product_by_id(product_id: str) -> Optional[dict]:
 
     finally:
         db.close()
-
 
 
 def fetch_reviews(product_id: str) -> list[dict]:

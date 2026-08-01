@@ -13,8 +13,6 @@ from app.agents.order_agent import order_agent_graph
 from app.agents.product_agent import product_agent_graph
 from app.agents.support_agent import support_agent_graph
 
-from app.core.prompt_loader import load_prompt, PROMPT_VERSIONS
-
 from app.core.logger import get_logger, get_request_id
 from app.core.metrics import agent_requests_total, llm_requests_total, llm_tokens_total, llm_duration_seconds
 
@@ -166,10 +164,20 @@ def classify_intent_and_extract(state: AgentState) -> dict:
     # Handles ambiguous bare nouns (blanket, milk, book) that the LLM misclassifies.
     # Does NOT apply to navigation phrases or greetings — those stay as unclear.
     _NAVIGATION_PHRASES = {
-        "find a product", "find products", "find product",
-        "i need help", "i need support", "help me", "help",
-        "resolve support issues", "get support", "what can you do",
-        "what do you do", "get started", "browse", "browse products",
+        "find a product",
+        "find products",
+        "find product",
+        "i need help",
+        "i need support",
+        "help me",
+        "help",
+        "resolve support issues",
+        "get support",
+        "what can you do",
+        "what do you do",
+        "get started",
+        "browse",
+        "browse products",
     }
     if intent == "unclear":
         msg_normalized = user_message.strip().lower().rstrip("!.,?")
