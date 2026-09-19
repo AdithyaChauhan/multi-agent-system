@@ -34,7 +34,7 @@ Router (LLM intent classifier)
 ### Deploy a public demo on Render
 
 The repository includes a `render.yaml` Blueprint for a public FastAPI service,
-managed PostgreSQL, and the internal mock carrier service. In Render, choose
+managed PostgreSQL, and the mock carrier service. In Render, choose
 **New → Blueprint**, connect this repository, and enter `GROQ_API_KEY` and
 `LANGCHAIN_API_KEY` when prompted. Google OAuth variables are optional; without
 them, recruiters can still use the anonymous chat flow, while order cancellation

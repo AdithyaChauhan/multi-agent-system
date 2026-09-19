@@ -12,7 +12,7 @@ _carrier_url = os.getenv("MOCK_CARRIER_API_URL")
 if _carrier_url:
     CARRIER_API_BASE = _carrier_url.rstrip("/")
 else:
-    # Render supplies the private service host/port separately; local Docker
+    # Render supplies the carrier service host/port separately; local Docker
     # Compose uses the service-name fallback below.
     _carrier_hostport = os.getenv("MOCK_CARRIER_API_HOSTPORT", "mock-carrier-api:9000")
     CARRIER_API_BASE = f"http://{_carrier_hostport}"

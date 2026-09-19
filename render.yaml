@@ -14,7 +14,7 @@ services:
           property: connectionString
       - key: MOCK_CARRIER_API_HOSTPORT
         fromService:
-          type: pserv
+          type: web
           name: multi-agent-carrier
           property: hostport
       - key: GROQ_API_KEY
@@ -42,13 +42,14 @@ services:
       - key: GOOGLE_REDIRECT_URI
         sync: false
 
-  - type: pserv
+  - type: web
     name: multi-agent-carrier
     runtime: docker
     plan: free
     region: singapore
     dockerfilePath: ./mock_services/Dockerfile
     dockerContext: .
+    healthCheckPath: /tracking/TRK-9001
 
 databases:
   - name: multi-agent-db
