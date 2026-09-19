@@ -31,6 +31,20 @@ Router (LLM intent classifier)
 
 ## Quick Start
 
+### Deploy a public demo on Render
+
+The repository includes a `render.yaml` Blueprint for a public FastAPI service,
+managed PostgreSQL, and the internal mock carrier service. In Render, choose
+**New → Blueprint**, connect this repository, and enter `GROQ_API_KEY` and
+`LANGCHAIN_API_KEY` when prompted. Google OAuth variables are optional; without
+them, recruiters can still use the anonymous chat flow, while order cancellation
+remains authentication-protected.
+
+After the first deploy, copy the generated public URL into `GOOGLE_REDIRECT_URI`
+as `https://<your-service>.onrender.com/auth/callback` if OAuth is enabled, and
+add that same callback URL in Google Cloud Console. The service health check is
+`/health`, and the public demo is the service root URL.
+
 ### Prerequisites
 
 - Docker + Docker Compose

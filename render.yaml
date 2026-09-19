@@ -1,0 +1,58 @@
+services:
+  - type: web
+    name: multi-agent-chatbot
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: multi-agent-db
+          property: connectionString
+      - key: MOCK_CARRIER_API_HOSTPORT
+        fromService:
+          type: pserv
+          name: multi-agent-carrier
+          property: hostport
+      - key: GROQ_API_KEY
+        sync: false
+      - key: LANGCHAIN_API_KEY
+        sync: false
+      - key: LANGCHAIN_TRACING_V2
+        value: "true"
+      - key: LANGCHAIN_ENDPOINT
+        value: https://api.smith.langchain.com
+      - key: LANGCHAIN_PROJECT
+        value: multi-agent-ecommerce
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: JWT_EXPIRATION_HOURS
+        value: "24"
+      - key: SESSION_EXPIRY_MINUTES
+        value: "60"
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false
+
+  - type: pserv
+    name: multi-agent-carrier
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./mock_services/Dockerfile
+    dockerContext: .
+
+databases:
+  - name: multi-agent-db
+    plan: free
+    region: singapore
+    databaseName: multi_agent_db
+    user: multiagent
