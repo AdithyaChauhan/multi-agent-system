@@ -1,0 +1,460 @@
+{
+  "description": "Frozen baseline for the simplification work. Each conversation is replayed through the real FastAPI /chat endpoint and graph by eval/run_baseline.py. Expectations are plain assertions; see run_baseline.py for their exact meaning. Sources: eval/dataset.json (tc_*), test_suite_results.txt (suite: section label), scripts/run_20_tests.py (run20#N), test_live.py (live#N) and the git commit whose guard the case protects.",
+  "phrase_sets": {
+    "DONT_CARRY": ["don't carry", "do not carry", "don't have", "do not have", "don't stock", "not available", "doesn't carry", "not carry", "unavailable", "don't sell", "do not sell"],
+    "CANT_CANCEL": ["can't be cancelled", "cannot be cancelled", "can't be canceled", "cannot be canceled", "isn't possible", "not possible", "unable to cancel", "can't cancel", "cannot cancel", "already shipped", "has shipped", "has been delivered", "already been delivered"],
+    "IN_TRANSIT": ["shipped", "in transit", "on its way", "out for delivery", "on the way"],
+    "NOT_FOUND": ["couldn't find", "could not find", "can't find", "cannot find", "not found", "no order"]
+  },
+  "conversations": [
+    {
+      "id": "p01", "tags": ["product"], "user": "anon",
+      "sources": ["tc_001", "tc_012", "git 72aaf94 (cheaper refinement)"],
+      "turns": [
+        {"message": "I want to buy headphones under 2000",
+         "expect": {"route": "product", "subcategory": "headphones", "max_price": 2000, "results": true, "result_subcategory": ["headphones"]}},
+        {"message": "show me something cheaper",
+         "expect": {"route": "product", "subcategory": "headphones", "max_price": {"lt": 2000}, "results": true, "result_subcategory": ["headphones"]}}
+      ]
+    },
+    {
+      "id": "p02", "tags": ["product"], "user": "anon",
+      "sources": ["tc_002", "run20#5-6", "git a9c3683 / c7de56a (brand change keeps subcategory: 'Samsung' after TVs must stay TVs)"],
+      "turns": [
+        {"message": "show me some TVs",
+         "expect": {"route": "product", "subcategory": "tv", "results": true, "result_subcategory": ["tv"]}},
+        {"message": "what about Samsung",
+         "expect": {"route": "product", "subcategory": "tv", "brand": "samsung", "results": true, "result_brand": "samsung"}}
+      ]
+    },
+    {
+      "id": "p03", "tags": ["product"], "user": "anon",
+      "sources": ["tc_003", "suite: Regressions 'wireless mouse <=1000' / run20#1", "suite: Router 'Bare noun after product search -> out-of-catalog'", "git 1abeddf (unclear->product override, subcategory bleed guard)"],
+      "turns": [
+        {"message": "I need a wireless mouse",
+         "expect": {"route": "product", "subcategory": "mouse", "results": true, "result_subcategory": ["mouse"], "contains": ["mouse"]}},
+        {"message": "under 1000",
+         "expect": {"route": "product", "subcategory": "mouse", "max_price": 1000, "results": true, "result_subcategory": ["mouse"]}},
+        {"message": "table",
+         "expect": {"route": "product", "no_results": true, "contains_any": "$DONT_CARRY"}}
+      ]
+    },
+    {
+      "id": "p04", "tags": ["product"], "user": "anon",
+      "sources": ["tc_004", "suite: Product 'Fuzzy brand: philps -> Philips'", "git 95987fb (brand fuzzy match)"],
+      "turns": [
+        {"message": "I need an air purifier",
+         "expect": {"route": "product", "subcategory": "air purifier", "results": true, "result_subcategory": ["air purifier"]}},
+        {"message": "philps air purifier",
+         "expect": {"route": "product", "subcategory": "air purifier", "results": true, "result_brand": "philips"}}
+      ]
+    },
+    {
+      "id": "p05", "tags": ["product"], "user": "anon",
+      "sources": ["tc_005", "run20#13"],
+      "turns": [
+        {"message": "show me laptop bags",
+         "expect": {"route": "product", "subcategory": "laptop bag", "results": true, "result_subcategory": ["laptop bag"]}}
+      ]
+    },
+    {
+      "id": "p06", "tags": ["product"], "user": "anon",
+      "sources": ["tc_006", "git 8b93a8a (category-level browsing)"],
+      "turns": [
+        {"message": "show me all electronics",
+         "expect": {"route": "product", "category": "Electronics", "results": true}}
+      ]
+    },
+    {
+      "id": "p07", "tags": ["product"], "user": "anon",
+      "sources": ["suite: Router 'Typo -> product (Sony headphones)'", "suite: Product 'Fuzzy brand: lojitec -> Logitech'", "suite: Product 'Fuzzy brand: Samsng -> Samsung TV'", "git 95987fb / 2303234 (fuzzy brand resolver)"],
+      "turns": [
+        {"message": "sonny headphones",
+         "expect": {"route": "product", "subcategory": "headphones", "results": true, "result_brand": "sony"}},
+        {"message": "lojitec mouse",
+         "expect": {"route": "product", "subcategory": "mouse", "results": true, "result_brand": "logitech"}},
+        {"message": "samsng tv",
+         "expect": {"route": "product", "subcategory": "tv", "results": true, "result_brand": "samsung"}}
+      ]
+    },
+    {
+      "id": "p08", "tags": ["product"], "user": "anon",
+      "sources": ["suite: Router 'Lifestyle need -> room heater'", "suite: Product 'keep warm -> room heater (not mixer)'", "git ca2081f (category alone reaches the ranker for need-based queries)"],
+      "turns": [
+        {"message": "something to keep me warm this winter",
+         "expect": {"route": "product", "results": true, "result_subcategory": ["room heater"]}},
+        {"message": "something to make my chai",
+         "expect": {"route": "product", "category": "Home & Kitchen", "results": true, "result_subcategory": ["electric kettle", "induction"]}}
+      ]
+    },
+    {
+      "id": "p09", "tags": ["product"], "user": "anon",
+      "sources": ["suite: Product 'chair' / 'book' / 'shoes' -> unavailable", "git 1abeddf (principle-based unavailable_request)"],
+      "turns": [
+        {"message": "chair", "expect": {"route": "product", "no_results": true, "contains_any": "$DONT_CARRY"}},
+        {"message": "book", "expect": {"route": "product", "no_results": true, "contains_any": "$DONT_CARRY"}},
+        {"message": "shoes", "expect": {"route": "product", "no_results": true, "contains_any": "$DONT_CARRY"}}
+      ]
+    },
+    {
+      "id": "p10", "tags": ["product"], "user": "anon",
+      "sources": ["suite: Product '4K monitor -> FHD monitors'", "run20#12", "git 5fbf09f (subcategory guard)", "git 180e93e (no false 'don't carry 4K')"],
+      "turns": [
+        {"message": "4k monitor",
+         "expect": {"route": "product", "subcategory": "monitor", "results": true, "result_subcategory": ["monitor"], "not_contains": ["don't carry"]}}
+      ]
+    },
+    {
+      "id": "p11", "tags": ["product"], "user": "anon",
+      "sources": ["suite: Product 'Multi-turn: Sony headphones -> under 3000'", "git a9c3683 (persist brand/price across turns)"],
+      "turns": [
+        {"message": "sony headphones",
+         "expect": {"route": "product", "subcategory": "headphones", "brand": "sony", "results": true, "result_brand": "sony"}},
+        {"message": "under 3000",
+         "expect": {"route": "product", "subcategory": "headphones", "brand": "sony", "max_price": 3000, "results": true, "result_brand": "sony"}}
+      ]
+    },
+    {
+      "id": "p12", "tags": ["product"], "user": "anon",
+      "sources": ["suite: Product 'gaming mouse under 2000' (catalog has 6 gaming mice <= 2000)", "git e7e95d7 (type refinement '... ones')"],
+      "turns": [
+        {"message": "show me a mouse",
+         "expect": {"route": "product", "subcategory": "mouse", "results": true, "result_subcategory": ["mouse"]}},
+        {"message": "gaming ones under 2000",
+         "expect": {"route": "product", "subcategory": "mouse", "max_price": 2000, "results": true, "result_subcategory": ["mouse"], "contains": ["gaming"]}}
+      ]
+    },
+    {
+      "id": "p13", "tags": ["product"], "user": "anon",
+      "sources": ["suite: Regressions 'brand switch -> Fire-Boltt'", "run20#19-20", "git b258205 (safety gate must not fire on 'Fire-Boltt')"],
+      "turns": [
+        {"message": "smartwatches under 3000",
+         "expect": {"route": "product", "subcategory": "smartwatch", "max_price": 3000, "results": true, "result_subcategory": ["smartwatch"]}},
+        {"message": "what about Fire-Boltt",
+         "expect": {"route": "product", "subcategory": "smartwatch", "brand": "fire-boltt", "results": true, "result_brand": "fire-boltt"}}
+      ]
+    },
+    {
+      "id": "p14", "tags": ["product"], "user": "anon",
+      "sources": ["suite: Regressions 'synonym telly -> TV' (FAILED in the last saved run)", "suite: Regressions 'misspelling blutooth -> speakers'"],
+      "turns": [
+        {"message": "telly",
+         "expect": {"route": "product", "subcategory": "tv", "results": true, "result_subcategory": ["tv"]}},
+        {"message": "blutooth speaker",
+         "expect": {"route": "product", "subcategory": "speakers", "results": true, "result_subcategory": ["speakers"]}}
+      ]
+    },
+    {
+      "id": "p15", "tags": ["product"], "user": "anon",
+      "sources": ["suite: Regressions 'unavailable -> laptop redirect'", "git 83a5e90 (targeted unavailable responses)", "git 18f4155 / cfc57ec (redmi charger must not surface smartphones)"],
+      "turns": [
+        {"message": "laptop under 50000",
+         "expect": {"route": "product", "no_results": true, "contains": ["laptop"], "contains_any": "$DONT_CARRY"}},
+        {"message": "redmi charger",
+         "expect": {"route": "product", "subcategory": "charger", "results": true, "result_subcategory": ["charger"]}}
+      ]
+    },
+    {
+      "id": "p16", "tags": ["product"], "user": "anon",
+      "sources": ["suite: Regressions 'price refinement after category (air fryer <= 6000)'", "git d80c9bc (min_rating)"],
+      "turns": [
+        {"message": "best rated air fryer",
+         "expect": {"route": "product", "subcategory": "air fryer", "min_rating": 4.0, "results": true, "result_subcategory": ["air fryer"]}},
+        {"message": "under 6000",
+         "expect": {"route": "product", "subcategory": "air fryer", "max_price": 6000, "results": true, "result_subcategory": ["air fryer"]}}
+      ]
+    },
+    {
+      "id": "p17", "tags": ["product"], "user": "anon",
+      "sources": ["suite: Regressions 'Cross-session reset'", "git b98dd6f (preferences are per session)"],
+      "turns": [
+        {"message": "wireless mouse",
+         "expect": {"route": "product", "subcategory": "mouse", "results": true}},
+        {"message": "under 500", "new_session": true,
+         "expect": {"no_results": true}}
+      ]
+    },
+    {
+      "id": "p18", "tags": ["product"], "user": "anon",
+      "sources": ["run20#9-10", "git 1abeddf (brand-only refinement must not flag unavailable)"],
+      "turns": [
+        {"message": "mixer grinder under 2000",
+         "expect": {"route": "product", "subcategory": "mixer grinder", "max_price": 2000, "results": true, "result_subcategory": ["mixer grinder"]}},
+        {"message": "what about Bajaj",
+         "expect": {"route": "product", "subcategory": "mixer grinder", "brand": "bajaj", "results": true, "result_brand": "bajaj", "not_contains": ["don't carry"]}}
+      ]
+    },
+    {
+      "id": "p19", "tags": ["product"], "user": "anon",
+      "sources": ["run20#14", "git 0adef08 (keyword recovery)", "git 5fbf09f (spec keyword must not flag unavailable)"],
+      "turns": [
+        {"message": "usb hub with ethernet",
+         "expect": {"route": "product", "subcategory": "usb hub", "results": true, "contains": ["hub"], "not_contains": ["don't carry"]}}
+      ]
+    },
+    {
+      "id": "p20", "tags": ["product"], "user": "anon",
+      "sources": ["git b43ecd4 (vague catalog browsing is product intent)", "run20#18 (calculator)"],
+      "turns": [
+        {"message": "products list",
+         "expect": {"route": "product", "contains": ["electronics"]}},
+        {"message": "calculator",
+         "expect": {"route": "product", "results": true, "contains": ["casio", "calculator"]}}
+      ]
+    },
+    {
+      "id": "p21", "tags": ["product"], "user": "anon",
+      "sources": ["git 916d676 (keyword inheritance on pure price refinement)"],
+      "turns": [
+        {"message": "smartwatch with calling feature",
+         "expect": {"route": "product", "subcategory": "smartwatch", "results": true, "result_subcategory": ["smartwatch"]}},
+        {"message": "under 2000",
+         "expect": {"route": "product", "subcategory": "smartwatch", "max_price": 2000, "results": true, "result_subcategory": ["smartwatch"]}}
+      ]
+    },
+    {
+      "id": "p22", "tags": ["product", "router"], "user": "anon",
+      "sources": ["git fa02a59 (greeting mid-session is not a product search)", "live#5 / git 2303234 / 649dfb8 (Bose not in catalog, no fuzzy Bose->StyleHouse)", "live#7 / git c7de56a (bajaj smartwatches keeps smartwatch subcategory; three-way brand reply)"],
+      "turns": [
+        {"message": "show me headphones",
+         "expect": {"route": "product", "subcategory": "headphones", "results": true}},
+        {"message": "hi",
+         "expect": {"route": "clarify", "no_results": true}},
+        {"message": "bose speakers",
+         "expect": {"route": "product", "subcategory": "speakers", "brand": "bose", "contains": ["bose"], "contains_any": "$DONT_CARRY", "not_contains": ["stylehouse"]}},
+        {"message": "bajaj smartwatches",
+         "expect": {"route": "product", "subcategory": "smartwatch", "brand": "bajaj", "contains": ["bajaj"], "contains_any": ["but not", "don't carry", "do not carry", "doesn't make", "don't have", "not carry"]}}
+      ]
+    },
+    {
+      "id": "p23", "tags": ["product"], "user": "anon",
+      "sources": ["git 5c72a38 (restore context after no-results)", "git 130af1a (clear tight price after no-results)", "git 649dfb8 (brand we stock, filters too tight)"],
+      "turns": [
+        {"message": "sony headphones under 500",
+         "expect": {"route": "product", "subcategory": "headphones", "brand": "sony", "max_price": 500, "contains": ["sony"]}},
+        {"message": "under 3000",
+         "expect": {"route": "product", "subcategory": "headphones", "brand": "sony", "max_price": 3000, "results": true, "result_brand": "sony"}}
+      ]
+    },
+    {
+      "id": "p24", "tags": ["product"], "user": "anon",
+      "sources": ["git 505d167 (geyser -> water heater)", "git b258205 (keywords relaxed before subcategory)", "git fb2dfd2 (keywords must not leak into the next product)"],
+      "turns": [
+        {"message": "geyser under 5000",
+         "expect": {"route": "product", "subcategory": "water heater", "max_price": 5000, "results": true, "result_subcategory": ["water heater"]}},
+        {"message": "noise cancelling headphones",
+         "expect": {"route": "product", "subcategory": "headphones", "results": true, "result_subcategory": ["headphones"]}},
+        {"message": "smart tv",
+         "expect": {"route": "product", "subcategory": "tv", "results": true, "result_subcategory": ["tv"]}}
+      ]
+    },
+    {
+      "id": "p25", "tags": ["product", "safety"], "user": "anon",
+      "sources": ["main.py _SAFETY_KEYWORDS: 'fire' must not turn a catalog product (streaming device) into a safety alert"],
+      "turns": [
+        {"message": "amazon fire tv stick",
+         "expect": {"route": "product", "subcategory": "streaming device", "results": true, "result_subcategory": ["streaming device"], "not_contains": ["emergency"]}}
+      ]
+    },
+    {
+      "id": "r01", "tags": ["router"], "user": "anon",
+      "sources": ["live#1 (greeting)", "suite: Router 'Vague phrase -> unclear'", "suite: Regressions 'Empty message'", "git dcabe13 (greetings)"],
+      "turns": [
+        {"message": "hi", "expect": {"route": "clarify", "no_results": true, "contains_any": ["hello", "hi", "help", "welcome"]}},
+        {"message": "help me", "expect": {"route": "clarify", "no_results": true}},
+        {"message": "", "expect": {"no_results": true}}
+      ]
+    },
+    {
+      "id": "r02", "tags": ["router"], "user": "anon",
+      "sources": ["tc_011", "git 2525c18 / 72aaf94 (off-topic reply names the scope)"],
+      "turns": [
+        {"message": "what is the capital of France",
+         "expect": {"route": "clarify", "no_results": true, "not_contains": ["paris"]}}
+      ]
+    },
+    {
+      "id": "r03", "tags": ["router", "auth"], "user": "anon",
+      "sources": ["live#8", "live#9", "git 5735d22 (sign-in required for orders and support)"],
+      "turns": [
+        {"message": "track my order", "expect": {"route": "sign_in", "contains": ["sign in"]}},
+        {"message": "I want to return my order", "expect": {"route": "sign_in", "contains": ["sign in"]}}
+      ]
+    },
+    {
+      "id": "o01", "tags": ["order"], "user": "demo-user-1",
+      "sources": ["suite: Order 'List orders'", "git b340d7b ('2002 status' after the order list)"],
+      "turns": [
+        {"message": "show my orders", "expect": {"route": "order", "contains": ["ORD-2004", "ORD-2005"]}},
+        {"message": "2002 status", "expect": {"route": "order", "order_id": "ORD-2002", "contains": ["ORD-2002"], "contains_any": "$IN_TRANSIT"}}
+      ]
+    },
+    {
+      "id": "o02", "tags": ["order"], "user": "demo-user-1",
+      "sources": ["suite: Order 'Specific order status: ORD-2004'", "suite: Router 'Order status by ID'", "git a73f6b5 (delivered short-circuit)"],
+      "turns": [
+        {"message": "where is my order ORD-2004", "expect": {"route": "order", "order_id": "ORD-2004", "contains": ["delivered"]}},
+        {"message": "where is my order ORD-2003", "expect": {"route": "order", "order_id": "ORD-2003", "contains_any": "$IN_TRANSIT"}}
+      ]
+    },
+    {
+      "id": "o03", "tags": ["order"], "user": "demo-user-1",
+      "sources": ["tc_007"],
+      "turns": [
+        {"message": "what is the status of my order", "expect": {"route": "order", "contains": ["ORD-"]}}
+      ]
+    },
+    {
+      "id": "o04", "tags": ["order"], "user": "test-user-99",
+      "sources": ["tc_008 (ORD-9901 belongs to test-user-99 in the restored DB)"],
+      "turns": [
+        {"message": "where is my order ORD-9901", "expect": {"route": "order", "order_id": "ORD-9901", "contains_any": "$IN_TRANSIT"}}
+      ]
+    },
+    {
+      "id": "o05", "tags": ["order", "ownership"], "user": "demo-user-1",
+      "sources": ["git 852c41f (not-found lists the user's orders)", "ownership: an order must belong to the signed-in user"],
+      "turns": [
+        {"message": "where is ORD-7777", "expect": {"route": "order", "contains": ["ORD-7777"], "contains_any": "$NOT_FOUND"}},
+        {"message": "where is my order ORD-9901", "expect": {"route": "order", "contains_any": "$NOT_FOUND", "not_contains": ["iphone 15 pro max", "trk-9901"]}}
+      ]
+    },
+    {
+      "id": "s01", "tags": ["support"], "user": "demo-user-1",
+      "sources": ["suite: Router 'Cancel request -> support (asks which order)'", "suite: Support 'Cancel flow step 1/2: tv one -> ORD-2002'"],
+      "turns": [
+        {"message": "I want to cancel my order", "expect": {"route": "support", "contains": ["ORD-2005"], "action": null, "db": {"ORD-2005": "processing"}}},
+        {"message": "the tv one", "expect": {"route": "support", "order_id": "ORD-2002", "contains_any": "$CANT_CANCEL", "action": null, "db": {"ORD-2002": "shipped"}}}
+      ]
+    },
+    {
+      "id": "s02", "tags": ["support"], "user": "demo-user-1",
+      "sources": ["suite: Order 'Cancel ORD-2003 -> support'", "git a4b7972 (cancel delivered order)"],
+      "turns": [
+        {"message": "cancel ORD-2003", "expect": {"route": "support", "order_id": "ORD-2003", "contains_any": "$CANT_CANCEL", "action": null, "db": {"ORD-2003": "shipped"}}},
+        {"message": "cancel ORD-2004", "expect": {"route": "support", "order_id": "ORD-2004", "contains": ["delivered"], "action": null, "db": {"ORD-2004": "delivered"}}}
+      ]
+    },
+    {
+      "id": "s03", "tags": ["support"], "user": "demo-user-1",
+      "sources": ["suite: Support 'Wrong item -> support ticket with ID'"],
+      "turns": [
+        {"message": "I received the wrong item in order ORD-2001", "expect": {"route": "support", "order_id": "ORD-2001", "ticket_created": true, "contains": ["TKT-"]}}
+      ]
+    },
+    {
+      "id": "s04", "tags": ["support"], "user": "demo-user-1",
+      "sources": ["suite: Support 'Product name matching: boAt headphones -> correct order'"],
+      "turns": [
+        {"message": "cancel my boAt headphones order", "expect": {"route": "support", "order_id": "ORD-2001", "contains": ["delivered"], "action": null}}
+      ]
+    },
+    {
+      "id": "s05", "tags": ["support"], "user": "demo-user-1",
+      "sources": ["suite: Support 'Return request with order ID -> support ticket'"],
+      "turns": [
+        {"message": "I want to return my order ORD-2004", "expect": {"route": "support", "order_id": "ORD-2004", "contains_any": ["return", "TKT-"]}}
+      ]
+    },
+    {
+      "id": "s06", "tags": ["support"], "user": "demo-user-1",
+      "sources": ["tc_009"],
+      "turns": [
+        {"message": "my product is defective and I want a refund", "expect": {"route": "support", "contains": ["order"], "contains_any": ["support ticket", "which order"]}}
+      ]
+    },
+    {
+      "id": "s07", "tags": ["support"], "user": "demo-user-1",
+      "sources": ["tc_010", "suite: Router 'Return request -> support ticket/ask'"],
+      "turns": [
+        {"message": "I want to return my order", "expect": {"route": "support", "contains": ["order"]}}
+      ]
+    },
+    {
+      "id": "s08", "tags": ["support", "cancel"], "user": "demo-user-1",
+      "sources": ["git bc1ccff (cancel needs UI confirmation)", "git 362733d (confirmed cancel writes to the DB)"],
+      "turns": [
+        {"message": "cancel ORD-2005",
+         "expect": {"route": "support", "order_id": "ORD-2005", "action": "confirm_cancel", "db": {"ORD-2005": "processing"}},
+         "confirm_cancel": {"order_id": "ORD-2005", "expect_success": true, "db_after": "cancelled"}}
+      ]
+    },
+    {
+      "id": "s09", "tags": ["support", "cancel"], "user": "demo-user-1",
+      "sources": ["git 111c7f0 (product name beats an order ID from history)"],
+      "turns": [
+        {"message": "where is ORD-2002", "expect": {"route": "order", "order_id": "ORD-2002"}},
+        {"message": "cancel the logitech mouse", "expect": {"route": "support", "order_id": "ORD-2005", "action": "confirm_cancel", "db": {"ORD-2005": "processing"}}}
+      ]
+    },
+    {
+      "id": "s10", "tags": ["support"], "user": "demo-user-1",
+      "sources": ["git 80b0397 (bare order ID after the support ask; reroute guard)"],
+      "turns": [
+        {"message": "I received a damaged product", "expect": {"route": "support", "contains": ["ORD-"]}},
+        {"message": "ORD-2004", "expect": {"route": "support", "order_id": "ORD-2004", "ticket_created": true, "contains": ["TKT-"]}}
+      ]
+    },
+    {
+      "id": "s11", "tags": ["support"], "user": "demo-user-1",
+      "sources": ["git c8390c7 (policy question answered without order lookup)", "git 3a2a116 (data deletion is support)"],
+      "turns": [
+        {"message": "what is your return policy", "expect": {"route": "support", "contains": ["30 days"], "ticket_created": false}},
+        {"message": "please delete all my personal data", "expect": {"route": "support"}}
+      ]
+    },
+    {
+      "id": "s12", "tags": ["support", "escalation"], "user": "demo-user-1",
+      "sources": ["git c8390c7 (legal threat escalates to a ticket)"],
+      "turns": [
+        {"message": "my mixer grinder from ORD-2004 broke and I'm going to sue you", "expect": {"route": "support", "ticket_created": true, "contains": ["TKT-"]}}
+      ]
+    },
+    {
+      "id": "s13", "tags": ["support", "escalation"], "user": "demo-user-1",
+      "sources": ["git be61b3a (duplicate ticket guard)"],
+      "turns": [
+        {"message": "my order ORD-2004 arrived damaged", "expect": {"route": "support", "order_id": "ORD-2004", "ticket_created": true, "contains": ["TKT-"]}},
+        {"message": "the mixer from ORD-2004 is damaged, please help", "expect": {"route": "support", "ticket_created": false, "contains": ["already have an open ticket"]}}
+      ]
+    },
+    {
+      "id": "s14", "tags": ["support", "escalation"], "user": "demo-user-1",
+      "sources": ["git 0b7d4f2 (order ID from history must not override the product named now)"],
+      "turns": [
+        {"message": "where is ORD-2002", "expect": {"route": "order", "order_id": "ORD-2002"}},
+        {"message": "my mixer grinder arrived damaged", "expect": {"route": "support", "order_id": "ORD-2004", "ticket_created": true}}
+      ]
+    },
+    {
+      "id": "s15", "tags": ["support", "escalation", "safety"], "user": "demo-user-1",
+      "sources": ["git df77937 (safety reports go to a human)"],
+      "turns": [
+        {"message": "my room heater caught fire and burned my hand", "expect": {"route": "safety", "contains": ["emergency"], "ticket_created": true}}
+      ]
+    },
+    {
+      "id": "s16", "tags": ["support", "router"], "user": "demo-user-1",
+      "sources": ["git fa02a59 (navigation phrase must not open a ticket)"],
+      "turns": [
+        {"message": "resolve support issues", "expect": {"route": "clarify", "ticket_created": false, "no_results": true}}
+      ]
+    },
+    {
+      "id": "s18", "tags": ["support"], "user": "demo-user-1",
+      "sources": ["support_agent.py _LEGAL_THREAT_KEYWORDS: 'sue' is a substring of 'issue' (git c8390c7, a4b7972)"],
+      "turns": [
+        {"message": "I have an issue with my order", "expect": {"route": "support", "contains": ["ORD-"], "ticket_created": false}}
+      ]
+    },
+    {
+      "id": "s17", "tags": ["support", "cancel", "ownership"], "user": "test-user-99",
+      "sources": ["ownership: cancellation only for the signed-in user's own order"],
+      "turns": [
+        {"message": "cancel ORD-2005",
+         "expect": {"action": null, "db": {"ORD-2005": "processing"}, "not_contains": ["logitech"]},
+         "cancel_endpoint": {"order_id": "ORD-2005", "expect_success": false, "db_after": "processing"}}
+      ]
+    }
+  ]
+}
