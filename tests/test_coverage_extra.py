@@ -243,16 +243,15 @@ class TestSupportAgentNodes:
         mock_response = MagicMock()
         mock_response.content = '{"category": "defective_product", "order_id": "ORD-1", "description": "broken"}'
 
-        with patch("app.agents.support_agent.load_prompt", return_value=(None, "fallback")):
-            with patch("app.agents.support_agent.llm") as mock_llm:
-                mock_llm.invoke.return_value = mock_response
-                state = AgentState(
-                    user_message="my product is broken",
-                    user_id="u1",
-                    session_id="s1",
-                    conversation_history=[],
-                )
-                result = classify_issue(state)
+        with patch("app.agents.support_agent.llm") as mock_llm:
+            mock_llm.invoke.return_value = mock_response
+            state = AgentState(
+                user_message="my product is broken",
+                user_id="u1",
+                session_id="s1",
+                conversation_history=[],
+            )
+            result = classify_issue(state)
 
         assert "support_issue" in result
         assert result["support_issue"]["category"] == "defective_product"
@@ -264,19 +263,18 @@ class TestSupportAgentNodes:
         mock_response = MagicMock()
         mock_response.content = '{"category": "refund", "order_id": null, "description": "want refund"}'
 
-        with patch("app.agents.support_agent.load_prompt", return_value=("System prompt", "abc123")):
-            with patch("app.agents.support_agent.llm") as mock_llm:
-                mock_llm.invoke.return_value = mock_response
-                state = AgentState(
-                    user_message="I want a refund",
-                    user_id="u1",
-                    session_id="s1",
-                    conversation_history=[
-                        {"role": "user", "content": "my order arrived damaged"},
-                        {"role": "assistant", "content": "I'm sorry to hear that"},
-                    ],
-                )
-                result = classify_issue(state)
+        with patch("app.agents.support_agent.llm") as mock_llm:
+            mock_llm.invoke.return_value = mock_response
+            state = AgentState(
+                user_message="I want a refund",
+                user_id="u1",
+                session_id="s1",
+                conversation_history=[
+                    {"role": "user", "content": "my order arrived damaged"},
+                    {"role": "assistant", "content": "I'm sorry to hear that"},
+                ],
+            )
+            result = classify_issue(state)
 
         assert result["support_issue"]["category"] == "refund"
         # LLM was called with a prompt that included history context
@@ -290,16 +288,15 @@ class TestSupportAgentNodes:
         mock_response = MagicMock()
         mock_response.content = "not valid json at all"
 
-        with patch("app.agents.support_agent.load_prompt", return_value=("System", "abc")):
-            with patch("app.agents.support_agent.llm") as mock_llm:
-                mock_llm.invoke.return_value = mock_response
-                state = AgentState(
-                    user_message="broken product",
-                    user_id="u1",
-                    session_id="s1",
-                    conversation_history=[],
-                )
-                result = classify_issue(state)
+        with patch("app.agents.support_agent.llm") as mock_llm:
+            mock_llm.invoke.return_value = mock_response
+            state = AgentState(
+                user_message="broken product",
+                user_id="u1",
+                session_id="s1",
+                conversation_history=[],
+            )
+            result = classify_issue(state)
 
         assert result["support_issue"]["category"] == "other"
 
@@ -405,51 +402,29 @@ class TestSupportAgentNodes:
 
 
 class TestPromptLoader:
-    def _make_prompt_mock(self, template: str):
-        msg = MagicMock()
-        msg.prompt.template = template
-        pulled = MagicMock()
-        pulled.messages = [msg]
-        return pulled
+    def test_loads_prompt_from_disk(self):
+        from app.core.prompt_loader import load_prompt, PROMPTS_DIR
 
-    def test_load_prompt_success_path(self):
-        """Lines 27-37: successful client.pull_prompt populates cache and returns text."""
-        from app.core.prompt_loader import load_prompt, _cache
+        assert (PROMPTS_DIR / "router.md").exists()
+        assert load_prompt("router") == (PROMPTS_DIR / "router.md").read_text(encoding="utf-8").strip()
 
-        _cache.pop("__test-success-prompt__:v1", None)
-        with patch("app.core.prompt_loader.client") as mock_client:
-            mock_client.pull_prompt.return_value = self._make_prompt_mock("You are a test agent.")
-            text, version = load_prompt("__test-success-prompt__", "v1")
+    def test_fills_placeholders_but_keeps_json_braces(self, tmp_path, monkeypatch):
+        import app.core.prompt_loader as loader
 
-        assert text == "You are a test agent."
-        assert version == "v1"
+        (tmp_path / "t.md").write_text('Catalog:\n{catalog}\nExample: {"a": 1}\n', encoding="utf-8")
+        monkeypatch.setattr(loader, "PROMPTS_DIR", tmp_path)
+        loader._read.cache_clear()
+        try:
+            assert loader.load_prompt("t", catalog="tv | mouse") == 'Catalog:\ntv | mouse\nExample: {"a": 1}'
+        finally:
+            loader._read.cache_clear()
 
-    def test_load_prompt_cache_hit(self):
-        """Line 22: second call with same args returns cached result without hitting client."""
-        from app.core.prompt_loader import load_prompt, _cache
+    def test_missing_prompt_raises(self):
+        import pytest
+        from app.core.prompt_loader import load_prompt
 
-        _cache.pop("__test-cache-prompt__:v2", None)
-        with patch("app.core.prompt_loader.client") as mock_client:
-            mock_client.pull_prompt.return_value = self._make_prompt_mock("Cached text.")
-            load_prompt("__test-cache-prompt__", "v2")
-
-        with patch("app.core.prompt_loader.client") as mock_client2:
-            text, version = load_prompt("__test-cache-prompt__", "v2")
-            mock_client2.pull_prompt.assert_not_called()
-
-        assert text == "Cached text."
-
-    def test_load_prompt_failure_returns_none(self):
-        """Lines 39-41: exception from pull_prompt returns (None, None)."""
-        from app.core.prompt_loader import load_prompt, _cache
-
-        _cache.pop("__test-fail-prompt__:latest", None)
-        with patch("app.core.prompt_loader.client") as mock_client:
-            mock_client.pull_prompt.side_effect = Exception("auth error")
-            text, version = load_prompt("__test-fail-prompt__", "latest")
-
-        assert text is None
-        assert version is None
+        with pytest.raises(FileNotFoundError):
+            load_prompt("__no_such_prompt__")
 
 
 # ── product_agent extra branches ─────────────────────────────────────────────

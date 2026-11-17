@@ -43,7 +43,7 @@ class TestExtractPreferencesBranches:
 
         state = _state(user_message=user_message, preferences=previous_prefs or {})
         mock_llm = _mock_llm(json.dumps(llm_json))
-        with patch("app.agents.product_agent.load_prompt", return_value=(None, None)), patch(
+        with patch(
             "app.agents.product_agent.llm", mock_llm
         ):
             return extract_preferences(state)
@@ -186,7 +186,7 @@ class TestExtractPreferencesBranches:
         raw = '```json\n{"category":"Electronics","subcategory":"tv","type":null,"brand":null,"max_price":null,"min_price":null,"min_rating":null,"keywords":[],"unavailable_request":false}\n```'
         state = _state(user_message="show me a tv")
         mock_llm = _mock_llm(raw)
-        with patch("app.agents.product_agent.load_prompt", return_value=(None, None)), patch(
+        with patch(
             "app.agents.product_agent.llm", mock_llm
         ):
             result = extract_preferences(state)
@@ -197,7 +197,7 @@ class TestExtractPreferencesBranches:
 
         state = _state(user_message="show me something")
         mock_llm = _mock_llm("not valid json at all {{{{")
-        with patch("app.agents.product_agent.load_prompt", return_value=(None, None)), patch(
+        with patch(
             "app.agents.product_agent.llm", mock_llm
         ):
             result = extract_preferences(state)
@@ -416,7 +416,7 @@ class TestFormatRecommendations:
 
         state = _state(ranked_products=self._ranked_products(1), relaxed_filters=["brand"])
         result = format_recommendations(state)
-        assert "I relaxed" in result["final_response"] or "relaxed" in result["final_response"].lower()
+        assert "broadening" in result["final_response"].lower()
 
     def test_keyword_relaxed_but_generic_shows_products(self):
         # "keywords" in relaxed, but original keywords are all GENERIC_WORDS → show products

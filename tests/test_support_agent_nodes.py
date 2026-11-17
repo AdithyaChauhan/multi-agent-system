@@ -72,7 +72,7 @@ class TestClassifyIssueBranches:
 
         state = _state(user_message=user_message, order_id=state_order_id)
         mock_llm = _mock_llm(json.dumps(llm_json))
-        with patch("app.agents.support_agent.load_prompt", return_value=(None, None)), patch(
+        with patch(
             "app.agents.support_agent.llm", mock_llm
         ):
             return classify_issue(state)
@@ -223,7 +223,7 @@ class TestFinalizeDraft:
             messages=[],
         )
         mock_llm = _mock_llm("We're sorry to hear about the issue with your order. A replacement will be arranged.")
-        with patch("app.agents.support_agent.load_prompt", return_value=(None, None)), patch(
+        with patch(
             "app.agents.support_agent.llm", mock_llm
         ):
             result = finalize_draft(state)

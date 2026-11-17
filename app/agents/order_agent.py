@@ -16,7 +16,7 @@ from app.tools.order_tools import fetch_order_from_db, fetch_user_orders
 from app.tools.shipment_tools import fetch_tracking_info
 from app.core.logger import get_logger, get_request_id
 from app.core.metrics import llm_requests_total, llm_tokens_total, llm_duration_seconds
-from app.core.prompt_loader import load_prompt, PROMPT_VERSIONS
+from app.core.prompt_loader import load_prompt
 
 load_dotenv()
 
@@ -25,17 +25,7 @@ logger = get_logger("app.agents.order_agent")
 llm = ChatGroq(model=GROQ_MODEL, temperature=0.3, api_key=os.getenv("GROQ_API_KEY"))
 
 
-RESPONSE_SYSTEM_PROMPT = """You are a customer service agent for an e-commerce store.
-Generate a concise (1-3 sentence) response about the customer's order using ONLY the data below.
-
-Status rules:
-- "delivered": confirm the order has been delivered; mention tracking ID if available.
-- "shipped" / "out_for_delivery": state the current status and estimated delivery if present.
-- "processing": say the order is being prepared / will ship soon.
-- "cancelled": inform the order is already cancelled; nothing further needed.
-- If live tracking data is "N/A" or missing, rely on the DB status field only.
-- NEVER suggest the customer check the website or their account — give the answer directly.
-- NEVER invent carrier names, locations, or dates that are not in the data."""
+RESPONSE_SYSTEM_PROMPT = load_prompt("order_response")
 
 
 # ==================== HELPER FUNCTIONS ====================
@@ -246,11 +236,7 @@ Order details:
 
 User asked: {state.get('user_message')}"""
 
-    _order_prompt_version = PROMPT_VERSIONS.get("order-response-prompt", "latest")
-    _order_system_prompt, _order_commit_hash = load_prompt("order-response-prompt", _order_prompt_version)
-    if not _order_system_prompt:
-        _order_system_prompt = RESPONSE_SYSTEM_PROMPT
-        _order_commit_hash = "fallback"
+    _order_system_prompt = RESPONSE_SYSTEM_PROMPT
 
     call_messages = [
         SystemMessage(content=_order_system_prompt),
@@ -260,7 +246,7 @@ User asked: {state.get('user_message')}"""
     _t0 = time.perf_counter()
     response = llm.bind_tools(_order_tools).invoke(
         call_messages,
-        config={"metadata": {"prompt_name": "order-response-prompt", "prompt_version": _order_commit_hash}},
+        config={"metadata": {"prompt_name": "order_response"}},
     )
     _latency_s = time.perf_counter() - _t0
     _latency_ms = int(_latency_s * 1000)
@@ -332,14 +318,10 @@ Order details:
 
 User asked: {state.get('user_message')}"""
 
-    _fv = PROMPT_VERSIONS.get("order-response-prompt", "latest")
-    _fs, _fh = load_prompt("order-response-prompt", _fv)
-    if not _fs:
-        _fs = RESPONSE_SYSTEM_PROMPT
-        _fh = "fallback"
+    _fs = RESPONSE_SYSTEM_PROMPT
     response = llm.invoke(
         [SystemMessage(content=_fs), HumanMessage(content=context)],
-        config={"metadata": {"prompt_name": "order-response-prompt", "prompt_version": _fh}},
+        config={"metadata": {"prompt_name": "order_response"}},
     )
     logger.info(f"request_id={get_request_id()} | Response generated (post-tool)")
     return {"final_response": response.content.strip()}

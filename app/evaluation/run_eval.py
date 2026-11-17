@@ -35,24 +35,10 @@ llm = ChatGroq(model=GROQ_MODEL, temperature=0, api_key=os.getenv("GROQ_API_KEY"
 DATASET_NAME = "multi-agent-ecommerce-eval"
 CONFIDENCE_THRESHOLD = 0.7  # matches route_after_classification in router.py
 
-# Fallback prompt — used only if LangSmith hub pull fails
-from app.agents.router import ROUTER_SYSTEM_PROMPT as _FALLBACK_PROMPT
+# The router prompt that runs in the app (app/prompts/router.md).
+from app.core.prompt_loader import load_prompt  # noqa: E402
 
-
-def _load_router_prompt() -> str:
-    """Pull the live router prompt from LangSmith hub, fall back to hardcoded."""
-    try:
-        from app.core.prompt_loader import load_prompt
-
-        text, _ = load_prompt("router-classification-prompt", "latest")
-        if text:
-            return text
-    except Exception:
-        pass
-    return _FALLBACK_PROMPT
-
-
-ROUTER_PROMPT = _load_router_prompt()
+ROUTER_PROMPT = load_prompt("router")
 
 
 def predict(inputs: dict) -> dict:

@@ -273,25 +273,26 @@ class TestProductAgentCompleteFlow:
         assert route_after_search(merged) == "broaden"
 
     def test_flow_broaden_relaxes_filters(self):
-        """broaden_search relaxes subcategory when attempt index reaches it in RELAXATION_ORDER"""
+        """broaden_search relaxes brand when attempt index reaches it in RELAXATION_ORDER"""
         from app.agents.product_agent import broaden_search, RELAXATION_ORDER
 
-        # Start exactly at the subcategory step so the test is independent of earlier steps
-        subcategory_idx = RELAXATION_ORDER.index("subcategory")
+        # Start exactly at the brand step so the test is independent of earlier steps
+        brand_idx = RELAXATION_ORDER.index("brand")
+        prefs = {"category": "Electronics", "subcategory": "headphones", "brand": "Bose", "keywords": ["sony"]}
         state = AgentState(
             user_message="headphones",
             user_id="u1",
             session_id="s1",
-            preferences={"category": "Electronics", "subcategory": "headphones", "keywords": ["sony"]},
-            original_preferences={"category": "Electronics", "subcategory": "headphones", "keywords": ["sony"]},
-            broaden_attempt=subcategory_idx,
+            preferences=dict(prefs),
+            original_preferences=dict(prefs),
+            broaden_attempt=brand_idx,
             conversation_history=[],
         )
         result = broaden_search(state)
 
         assert "preferences" in result
-        assert result["broaden_attempt"] > subcategory_idx
-        assert result["preferences"]["subcategory"] is None
+        assert result["broaden_attempt"] > brand_idx
+        assert result["preferences"]["brand"] is None
         # keywords still present so specificity remains and search is retried
         assert result["preferences"].get("keywords")
 
@@ -416,9 +417,7 @@ class TestSupportAgentCompleteFlow:
         mock_resp = MagicMock()
         mock_resp.content = '{"category": "defective_product", "order_id": "ORD-1", "description": "Broken"}'
 
-        with patch("app.agents.support_agent.llm") as mock_llm, patch(
-            "app.agents.support_agent.load_prompt", return_value=("prompt", "latest")
-        ):
+        with patch("app.agents.support_agent.llm") as mock_llm:
             mock_llm.invoke.return_value = mock_resp
             from app.agents.support_agent import classify_issue
 
@@ -434,9 +433,7 @@ class TestSupportAgentCompleteFlow:
         mock_resp = MagicMock()
         mock_resp.content = '{"category": "refund_request", "order_id": null, "description": "Want refund"}'
 
-        with patch("app.agents.support_agent.llm") as mock_llm, patch(
-            "app.agents.support_agent.load_prompt", return_value=("prompt", "latest")
-        ):
+        with patch("app.agents.support_agent.llm") as mock_llm:
             mock_llm.invoke.return_value = mock_resp
             from app.agents.support_agent import classify_issue
 

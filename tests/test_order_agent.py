@@ -139,7 +139,7 @@ class TestFinalizeOrderResponse:
         mock_resp = MagicMock()
         mock_resp.content = "Your order has been delivered."
 
-        with patch("app.agents.order_agent.load_prompt", return_value=(None, None)), patch(
+        with patch(
             "app.agents.order_agent.llm"
         ) as mock_llm:
             mock_llm.invoke.return_value = mock_resp
@@ -171,7 +171,7 @@ class TestFinalizeOrderResponse:
             tool_call_id="call_1",
         )
 
-        with patch("app.agents.order_agent.load_prompt", return_value=(None, None)), patch(
+        with patch(
             "app.agents.order_agent.llm"
         ) as mock_llm:
             mock_llm.invoke.return_value = mock_resp
@@ -190,12 +190,12 @@ class TestFinalizeOrderResponse:
 
         assert "final_response" in result
 
-    def test_uses_prompt_from_hub_when_available(self):
-        """finalize_order_response uses hub prompt when load_prompt succeeds."""
+    def test_uses_llm_reply_after_tool_call(self):
+        """finalize_order_response returns the LLM reply generated after the tracking tool ran."""
         mock_resp = MagicMock()
         mock_resp.content = "Delivered yesterday."
 
-        with patch("app.agents.order_agent.load_prompt", return_value=("Hub system prompt", "abc123")), patch(
+        with patch(
             "app.agents.order_agent.llm"
         ) as mock_llm:
             mock_llm.invoke.return_value = mock_resp

@@ -12,9 +12,7 @@ class TestClassifyIssue:
             '{"category": "defective_product", "order_id": null, "description": "Product is broken"}'
         )
 
-        with patch("app.agents.support_agent.llm") as mock_llm, patch(
-            "app.agents.support_agent.load_prompt", return_value=("system prompt", "latest")
-        ):
+        with patch("app.agents.support_agent.llm") as mock_llm:
             mock_llm.invoke.return_value = mock_response
             from app.agents.support_agent import classify_issue
 
@@ -33,9 +31,7 @@ class TestClassifyIssue:
         mock_response = MagicMock()
         mock_response.content = '{"category": "refund_request", "order_id": "ORD-2001", "description": "Want refund"}'
 
-        with patch("app.agents.support_agent.llm") as mock_llm, patch(
-            "app.agents.support_agent.load_prompt", return_value=("system prompt", "latest")
-        ):
+        with patch("app.agents.support_agent.llm") as mock_llm:
             mock_llm.invoke.return_value = mock_response
             from app.agents.support_agent import classify_issue
 
@@ -54,9 +50,7 @@ class TestClassifyIssue:
         mock_response = MagicMock()
         mock_response.content = "invalid json"
 
-        with patch("app.agents.support_agent.llm") as mock_llm, patch(
-            "app.agents.support_agent.load_prompt", return_value=("system prompt", "latest")
-        ):
+        with patch("app.agents.support_agent.llm") as mock_llm:
             mock_llm.invoke.return_value = mock_response
             from app.agents.support_agent import classify_issue
 

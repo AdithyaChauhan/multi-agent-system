@@ -17,7 +17,7 @@ from app.tools.support_tools import lookup_support_policy, get_open_ticket_for_o
 from app.tools.order_tools import fetch_order_from_db, fetch_user_orders, cancel_order_in_db
 from app.core.logger import get_logger, get_request_id
 from app.core.metrics import llm_requests_total, llm_tokens_total, llm_duration_seconds
-from app.core.prompt_loader import load_prompt, PROMPT_VERSIONS
+from app.core.prompt_loader import load_prompt
 
 load_dotenv()
 
@@ -26,75 +26,10 @@ logger = get_logger("app.agents.support_agent")
 llm = ChatGroq(model=GROQ_MODEL, temperature=0, api_key=os.getenv("GROQ_API_KEY"))
 
 
-CLASSIFICATION_SYSTEM_PROMPT = """You are a support issue classification system.
-
-Analyze the user's message and extract:
-1. Issue category
-2. Order ID if mentioned
-3. Brief description
-
-ISSUE CATEGORIES:
-- "defective_product": Product doesn't work, broken, faulty
-- "wrong_item": Received wrong product
-- "damaged_delivery": Package arrived damaged
-- "missing_parts": Product incomplete, missing accessories
-- "refund_request": Want money back
-- "cancellation_request": User wants to cancel an order
-- "other": Anything else
-
-Extract order ID ONLY if explicitly stated in the CURRENT message (ORD-1234, order #1234, "order 2001", etc.). Do NOT infer order ID from conversation history.
-
-Return JSON:
-{
-  "category": "defective_product" | "wrong_item" | "damaged_delivery" | "missing_parts" | "refund_request" | "other",
-  "order_id": "ORD-1234" or null,
-  "description": "brief summary of the issue"
-}
-
-EXAMPLES:
-
-Input: "My product arrived broken"
-Output: {"category": "damaged_delivery", "order_id": null, "description": "Product arrived broken"}
-
-Input: "I want a refund for order ORD-2002"
-Output: {"category": "refund_request", "order_id": "ORD-2002", "description": "Refund request"}
-
-Input: "Battery leaked from toy, child got chemical burn"
-Output: {"category": "defective_product", "order_id": null, "description": "Defective toy caused chemical burn to child"}
-
-Respond ONLY with valid JSON."""
+CLASSIFICATION_SYSTEM_PROMPT = load_prompt("support_classification")
 
 
-RESOLUTION_SYSTEM_PROMPT = """You are a customer support agent drafting resolutions for low-severity issues.
-
-Given:
-- Order details (including status)
-- Issue description
-- Category
-- Company policy
-
-Draft a helpful, empathetic response that:
-1. Acknowledges the issue
-2. Provides solution based on policy AND order status
-3. Offers next steps
-4. Maintains professional, friendly tone
-
-Cancellation rules (check order status and conversation history):
-- "processing" + user has NOT yet confirmed: tell them cancellation is possible and ask them to confirm ("Shall I go ahead and cancel it?").
-- "processing" + user IS confirming (said "yes", "confirm", "go ahead", "please cancel", "do it"): CALL the cancel_order tool with order_id and user_id, then confirm in your reply.
-- "shipped" / "out_for_delivery" / "in_transit": not possible — offer return once it arrives.
-- "delivered": not possible — offer return within 30-day policy window.
-- "cancelled": inform the order is already cancelled.
-
-IMPORTANT: Call cancel_order only when the user explicitly confirms. Do NOT cancel without confirmation.
-
-Keep response under 150 words. Be specific and actionable.
-IMPORTANT:
-- Respond conversationally like a chat message, NOT as a formal email
-- Do NOT use placeholders like [Customer's Name], [Your Name], [Company Name]
-- Do NOT write Subject lines or sign-offs
-- Address the user directly as "you"
-- Be direct and helpful"""
+RESOLUTION_SYSTEM_PROMPT = load_prompt("support_resolution")
 
 
 _POLICY_QUESTION_PHRASES = [
@@ -135,7 +70,6 @@ def classify_issue(state: AgentState) -> dict:
     conversation_history = state.get("conversation_history", [])
 
     system_prompt = CLASSIFICATION_SYSTEM_PROMPT
-    commit_hash = "hardcoded"
 
     history_context = ""
     if conversation_history:
@@ -158,7 +92,7 @@ def classify_issue(state: AgentState) -> dict:
 
     _t0 = time.perf_counter()
     response = llm.invoke(
-        messages, config={"metadata": {"prompt_name": "support-classification-prompt", "prompt_version": commit_hash}}
+        messages, config={"metadata": {"prompt_name": "support_classification"}}
     )
     _latency_s = time.perf_counter() - _t0
     _latency_ms = int(_latency_s * 1000)
@@ -425,11 +359,7 @@ def draft_resolution(state: AgentState) -> dict:
     category = issue.get("category", "other")
     user_id = state.get("user_id", "")
     conversation_history = state.get("conversation_history", [])
-    resolution_prompt_version = PROMPT_VERSIONS.get("support-resolution-prompt", "latest")
-    resolution_system_prompt, res_hash = load_prompt("support-resolution-prompt", resolution_prompt_version)
-    if not resolution_system_prompt:
-        resolution_system_prompt = RESOLUTION_SYSTEM_PROMPT
-        res_hash = "fallback"
+    resolution_system_prompt = RESOLUTION_SYSTEM_PROMPT
 
     history_context = ""
     if conversation_history:
@@ -457,7 +387,7 @@ def draft_resolution(state: AgentState) -> dict:
     _t0 = time.perf_counter()
     response = llm.bind_tools(_support_tools).invoke(
         messages,
-        config={"metadata": {"prompt_name": "support-resolution-prompt", "prompt_version": res_hash}},
+        config={"metadata": {"prompt_name": "support_resolution"}},
     )
     _latency_s = time.perf_counter() - _t0
     _latency_ms = int(_latency_s * 1000)
