@@ -4,6 +4,7 @@ import re
 import time
 from typing import Literal
 from langchain_groq import ChatGroq
+from app.core.config import GROQ_MODEL
 from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_core.tools import tool
 from langgraph.graph import StateGraph, END
@@ -22,7 +23,7 @@ load_dotenv()
 
 logger = get_logger("app.agents.support_agent")
 
-llm = ChatGroq(model="qwen/qwen3.8-27b", temperature=0, api_key=os.getenv("GROQ_API_KEY"))
+llm = ChatGroq(model=GROQ_MODEL, temperature=0, api_key=os.getenv("GROQ_API_KEY"))
 
 
 CLASSIFICATION_SYSTEM_PROMPT = """You are a support issue classification system.

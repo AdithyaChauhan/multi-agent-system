@@ -3,6 +3,7 @@ import re
 import time
 from typing import Literal
 from langchain_groq import ChatGroq
+from app.core.config import GROQ_MODEL
 from langchain_core.messages import SystemMessage, HumanMessage, ToolMessage
 from langchain_core.tools import tool
 from langgraph.graph import StateGraph, END
@@ -21,7 +22,7 @@ load_dotenv()
 
 logger = get_logger("app.agents.order_agent")
 
-llm = ChatGroq(model="qwen/qwen3.8-27b", temperature=0.3, api_key=os.getenv("GROQ_API_KEY"))
+llm = ChatGroq(model=GROQ_MODEL, temperature=0.3, api_key=os.getenv("GROQ_API_KEY"))
 
 
 RESPONSE_SYSTEM_PROMPT = """You are a customer service agent for an e-commerce store.

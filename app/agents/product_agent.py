@@ -6,6 +6,7 @@ import time
 import threading
 from typing import Literal
 from langchain_groq import ChatGroq
+from app.core.config import GROQ_MODEL
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph import StateGraph, END
 from dotenv import load_dotenv
@@ -21,7 +22,7 @@ load_dotenv()
 
 logger = get_logger("app.agents.product_agent")
 
-llm = ChatGroq(model="qwen/qwen3.8-27b", temperature=0, api_key=os.getenv("GROQ_API_KEY"))
+llm = ChatGroq(model=GROQ_MODEL, temperature=0, api_key=os.getenv("GROQ_API_KEY"))
 
 
 SERVED_CATEGORIES = {"Electronics", "Computers & Accessories", "Home & Kitchen", "Office Products"}
