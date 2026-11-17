@@ -77,6 +77,8 @@ def configure_environment(args) -> None:
 
         load_dotenv(args.env_file, override=False)
     os.environ["DATABASE_URL"] = args.database_url
+    if args.model:
+        os.environ["GROQ_MODEL"] = args.model  # read by app.core.config at import
     os.environ.setdefault("MOCK_CARRIER_API_URL", "http://localhost:9000")
     if not args.trace:
         os.environ["LANGCHAIN_TRACING_V2"] = "false"
@@ -86,7 +88,7 @@ def configure_environment(args) -> None:
     # Keep app logs out of the (OneDrive-synced) repo and off stdout.
     import app.core.logger as app_logger
 
-    app_logger.LOG_FILE = str(Path(tempfile.gettempdir()) / "multi_agent_baseline_app.log")
+    app_logger.LOG_FILE = str(Path(tempfile.gettempdir()) / f"multi_agent_baseline_app_{os.getpid()}.log")
 
 
 def quiet_app_loggers() -> None:
@@ -160,6 +162,8 @@ def install_meter() -> None:
     original = ChatGroq._generate
 
     def metered(self, messages, stop=None, run_manager=None, **kwargs):
+        if str(self.model_name).startswith("openai/gpt-oss"):
+            kwargs.setdefault("reasoning_effort", "low")  # same setting for before and after runs
         try:
             result = original(self, messages, stop=stop, run_manager=run_manager, **kwargs)
         except groq.RateLimitError:
@@ -599,6 +603,8 @@ def main() -> int:
     parser.add_argument("--max-calls", type=int, default=0, help="abort a run after this many LLM calls (0 = no cap)")
     parser.add_argument("--trace", action="store_true", help="keep LangSmith tracing enabled")
     parser.add_argument("--env-file", default="", help="load environment variables from this .env file")
+    parser.add_argument("--model", default="", help="Groq model for this measurement (default: the app's GROQ_MODEL)")
+    parser.add_argument("--exclude", default="", help="comma-separated conversation ids to skip")
     args = parser.parse_args()
 
     configure_environment(args)
@@ -615,6 +621,12 @@ def main() -> int:
     if args.tags:
         tags = {t.strip() for t in args.tags.split(",") if t.strip()}
         convs = [c for c in convs if tags & set(c.get("tags", []))]
+    if args.exclude:
+        skip = {c.strip() for c in args.exclude.split(",") if c.strip()}
+        convs = [c for c in convs if c["id"] not in skip]
+    from app.core.config import GROQ_MODEL
+
+    print(f"model={GROQ_MODEL} conversations={len(convs)}", flush=True)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     run_summaries = []
@@ -630,6 +642,9 @@ def main() -> int:
                     time.sleep(65)
                     outcome = run_conversation(client, conv, router_rec, reroute_rec, phrase_sets, args)
                     outcome["retried_after_rate_limit"] = True
+                    if outcome["infra_error"]:
+                        print("  still rate-limited after a retry (daily quota?) — stopping this run", flush=True)
+                        break
                 results.append(outcome)
                 mark = "PASS" if outcome["passed"] else "FAIL"
                 calls = sum(t["llm_calls"] for t in outcome["turns"])
@@ -645,6 +660,7 @@ def main() -> int:
             payload = {
                 "label": args.label,
                 "run": run_idx,
+                "model": GROQ_MODEL,
                 "git_sha": git_sha(),
                 "started_at": started,
                 "finished_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -667,6 +683,7 @@ def main() -> int:
         n = len(run_summaries)
         agg = {
             "label": args.label,
+            "model": GROQ_MODEL,
             "runs": n,
             "git_sha": git_sha(),
             "conversation_ids": [c["id"] for c in convs],
