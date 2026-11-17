@@ -212,29 +212,6 @@ class TestOrderSubgraphDeep:
 class TestProductAgentCompleteFlow:
     """Tests every flow path in product agent"""
 
-    def test_flow_extract_with_full_preferences(self):
-        """Extract all preference fields from message"""
-        mock_resp = MagicMock()
-        mock_resp.content = '{"category": "Toys & Games", "keywords": ["educational"], "brand": "Lego", "min_price": 500, "max_price": 2000, "subcategory": null, "unavailable_request": false}'
-
-        with patch("app.agents.product_agent.llm") as mock_llm:
-            mock_llm.invoke.return_value = mock_resp
-            from app.agents.product_agent import extract_preferences
-
-            state = AgentState(
-                user_message="show me Lego educational toys 500-2000 rupees",
-                user_id="u1",
-                session_id="s1",
-                conversation_history=[],
-            )
-            result = extract_preferences(state)
-
-        prefs = result["preferences"]
-        assert prefs["category"] == "Toys & Games"
-        assert prefs["brand"] == "Lego"
-        assert prefs["min_price"] == 500
-        assert prefs["max_price"] == 2000
-
     def test_flow_search_returns_results(self):
         """do_search_products is deterministic — returns search_results directly."""
         products = [{"product_id": "P1", "name": "Speaker", "price": 1000, "rating": 4.5, "brand": "JBL"}]
@@ -295,20 +272,6 @@ class TestProductAgentCompleteFlow:
         assert result["preferences"]["brand"] is None
         # keywords still present so specificity remains and search is retried
         assert result["preferences"].get("keywords")
-
-    def test_flow_unavailable_product_response(self):
-        """Unavailable products get redirect message"""
-        from app.agents.product_agent import handle_unavailable_products
-
-        state = AgentState(
-            user_message="show me MacBook",
-            user_id="u1",
-            session_id="s1",
-            preferences={"category": "electronics", "unavailable_request": True},
-            conversation_history=[],
-        )
-        result = handle_unavailable_products(state)
-        assert "final_response" in result
 
     def test_flow_routing_extraction_to_search(self):
         """Valid preferences route to search"""

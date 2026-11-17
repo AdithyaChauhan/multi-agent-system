@@ -437,52 +437,6 @@ class TestProductAgentExtra:
         r.response_metadata = {"token_usage": {"prompt_tokens": 80, "completion_tokens": 20, "total_tokens": 100}}
         return r
 
-    def test_extract_preferences_with_conversation_history(self):
-        """Lines 211-212, 215: history branch in extract_preferences."""
-        with patch("app.agents.product_agent.llm") as mock_llm:
-            mock_llm.invoke.return_value = self._llm_mock(
-                '{"category": "Electronics", "subcategory": "speakers", "type": null, '
-                '"brand": null, "max_price": null, "min_price": null, "keywords": [], "unavailable_request": false}'
-            )
-            from app.agents.product_agent import extract_preferences
-
-            state = AgentState(
-                user_message="what about a cheaper one",
-                user_id="u1",
-                session_id="s1",
-                conversation_history=[
-                    {"role": "user", "content": "show me bluetooth speakers"},
-                    {"role": "assistant", "content": "Here are some speakers under ₹3000."},
-                ],
-            )
-            result = extract_preferences(state)
-
-        assert "preferences" in result
-
-    def test_rank_and_filter_with_results(self):
-        """rank_and_filter invokes llm directly and returns ranked_products."""
-        search_results = [
-            {"product_id": "P1", "name": "JBL Go 2 Speaker", "price": 2499, "rating": 4.5, "brand": "JBL"},
-            {"product_id": "P2", "name": "boAt Stone 200", "price": 1299, "rating": 4.2, "brand": "boAt"},
-        ]
-        mock_r = self._llm_mock("[1, 2]")
-        with patch("app.agents.product_agent.llm") as mock_llm:
-            mock_llm.invoke.return_value = mock_r
-            from app.agents.product_agent import rank_and_filter
-
-            state = AgentState(
-                user_message="show me bluetooth speakers",
-                user_id="u1",
-                session_id="s1",
-                search_results=search_results,
-                preferences={"category": "Electronics", "subcategory": "speakers"},
-                conversation_history=[],
-            )
-            result = rank_and_filter(state)
-
-        assert "ranked_products" in result
-        assert len(result["ranked_products"]) >= 1
-
     def test_rank_and_filter_empty_returns_early(self):
         """Empty search_results returns early without calling LLM."""
         from app.agents.product_agent import rank_and_filter

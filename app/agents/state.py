@@ -21,6 +21,7 @@ class AgentState(TypedDict, total=False):
 
     # Agent 2 — Product
     preferences: Optional[dict]
+    not_carried: Optional[dict]
     original_preferences: Optional[dict]
     search_results: Optional[List[dict]]
     ranked_products: Optional[List[dict]]
