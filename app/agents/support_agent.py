@@ -3,7 +3,7 @@ import os
 import re
 import time
 from typing import Literal
-from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_core.tools import tool
 from langgraph.graph import StateGraph, END
@@ -22,7 +22,7 @@ load_dotenv()
 
 logger = get_logger("app.agents.support_agent")
 
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=os.getenv("OPENAI_API_KEY"))
+llm = ChatGroq(model="qwen/qwen3.8-27b", temperature=0, api_key=os.getenv("GROQ_API_KEY"))
 
 
 CLASSIFICATION_SYSTEM_PROMPT = """You are a support issue classification system.

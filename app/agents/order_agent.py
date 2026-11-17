@@ -2,7 +2,7 @@ import os
 import re
 import time
 from typing import Literal
-from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage, ToolMessage
 from langchain_core.tools import tool
 from langgraph.graph import StateGraph, END
@@ -21,7 +21,7 @@ load_dotenv()
 
 logger = get_logger("app.agents.order_agent")
 
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3, api_key=os.getenv("OPENAI_API_KEY"))
+llm = ChatGroq(model="qwen/qwen3.8-27b", temperature=0.3, api_key=os.getenv("GROQ_API_KEY"))
 
 
 RESPONSE_SYSTEM_PROMPT = """You are a customer service agent for an e-commerce store.

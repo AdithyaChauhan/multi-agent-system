@@ -2,7 +2,7 @@ import json
 import os
 import time
 from typing import Literal
-from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph import StateGraph, END
 from dotenv import load_dotenv
@@ -20,7 +20,7 @@ load_dotenv()
 
 logger = get_logger("app.agents.router")
 
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=os.getenv("OPENAI_API_KEY"))
+llm = ChatGroq(model="qwen/qwen3.8-27b", temperature=0, api_key=os.getenv("GROQ_API_KEY"))
 
 
 ROUTER_SYSTEM_PROMPT = """Classify user intent for a customer service app. Use conversation history to resolve references and follow-ups.

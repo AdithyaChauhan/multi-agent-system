@@ -101,9 +101,16 @@ def search_products(
         if category:
             query = query.filter(Product.category.ilike(f"%{category}%"))
 
-        # Filter by subcategory — exact match so "monitor" doesn't match "monitor stand"
+        # Catalog imports use both `subcategory` and `type` for canonical product
+        # labels. Match either field so a request like "headphones" remains
+        # focused on headphones instead of triggering a broad fallback search.
         if subcategory:
-            query = query.filter(Product.subcategory.ilike(subcategory))
+            query = query.filter(
+                or_(
+                    Product.subcategory.ilike(subcategory),
+                    Product.type.ilike(subcategory),
+                )
+            )
         # Filter by type (product-level classifier)
         if product_type:
             query = query.filter(Product.type.ilike(f"%{product_type}%"))

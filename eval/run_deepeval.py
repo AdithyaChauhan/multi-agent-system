@@ -32,11 +32,6 @@ load_dotenv()
 
 # Disable deepeval telemetry before importing deepeval
 os.environ.setdefault("DEEPEVAL_TELEMETRY_OPT_OUT", "YES")
-# EVAL_OPENAI_API_KEY is a dedicated key for GEval (separate from the app's OPENAI_API_KEY).
-# Falls back to OPENAI_API_KEY, then a dummy so deepeval doesn't hard-fail on import.
-_EVAL_KEY = os.getenv("EVAL_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY") or "ci-fixture-mode-no-llm"
-os.environ["OPENAI_API_KEY"] = _EVAL_KEY
-
 from deepeval import evaluate as deepeval_evaluate  # noqa: E402
 from deepeval.metrics import BaseMetric  # noqa: E402
 from deepeval.test_case import LLMTestCase  # noqa: E402
@@ -68,6 +63,13 @@ def _make_metrics(rel_threshold: float, cor_threshold: float) -> tuple:
     The app's actual_output comes from fixture_response (CI) or the live API
     (RUN_LIVE_EVAL=true), but the evaluator is always LLM-based when possible.
     """
+    # CI uses deterministic evaluators only, so no second LLM provider is
+    # required to evaluate fixture or live chatbot responses.
+    return (
+        AnswerRelevancyMetric(threshold=rel_threshold),
+        CorrectnessMetric(threshold=cor_threshold),
+    )
+
     try:
         from deepeval.metrics import GEval
         from deepeval.test_case import SingleTurnParams

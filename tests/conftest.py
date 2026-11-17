@@ -43,7 +43,7 @@ def mock_llm_response():
 
 
 @pytest.fixture
-def mock_openai():
-    """Patch ChatOpenAI to avoid real LLM calls"""
-    with patch("langchain_openai.ChatOpenAI") as mock:
+def mock_groq():
+    """Patch ChatGroq to avoid real LLM calls"""
+    with patch("langchain_groq.ChatGroq") as mock:
         yield mock

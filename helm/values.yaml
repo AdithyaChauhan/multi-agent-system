@@ -49,7 +49,7 @@ app:
 
 # ── Secrets ───────────────────────────────────────────────────────────────────
 # All values default to empty.  Supply real values by:
-#   - passing --set-string secrets.openaiApiKey=sk-... at deploy time, OR
+#   - passing --set-string secrets.groqApiKey=gsk-... at deploy time, OR
 #   - creating a pre-existing Kubernetes Secret and setting existingSecret below.
 # Real credentials must NEVER be committed to any values file.
 secrets:
@@ -57,7 +57,7 @@ secrets:
   # creating the Secret from these values (recommended for production).
   existingSecret: ""
 
-  openaiApiKey: ""
+  groqApiKey: ""
   langchainApiKey: ""
   jwtSecretKey: ""
   googleClientId: ""

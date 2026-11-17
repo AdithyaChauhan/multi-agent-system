@@ -45,7 +45,7 @@ jobs:
     needs: lint
 
     env:
-      OPENAI_API_KEY: ci-mock-key
+      GROQ_API_KEY: ci-mock-key
       LANGCHAIN_API_KEY: ci-mock-key
       LANGCHAIN_TRACING_V2: "false"
       JWT_SECRET_KEY: ci-test-secret
@@ -91,7 +91,7 @@ jobs:
     needs: test
 
     env:
-      EVAL_OPENAI_API_KEY: ${{ secrets.EVAL_OPENAI_API_KEY }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
       LANGCHAIN_API_KEY: ${{ secrets.LANGCHAIN_API_KEY }}
       DEEPEVAL_TELEMETRY_OPT_OUT: "YES"
       RUN_LIVE_EVAL: "true"
@@ -219,7 +219,7 @@ jobs:
           helm template multi-agent-system ./helm \
             --values helm/values.yaml \
             --set app.image.tag=sha-dryrun \
-            --set secrets.openaiApiKey=ci-mock \
+            --set secrets.groqApiKey=ci-mock \
             --set secrets.langchainApiKey=ci-mock \
             --set secrets.jwtSecretKey=ci-mock \
             --set secrets.googleClientId=ci-mock \
@@ -292,7 +292,7 @@ jobs:
             --set app.image.tag=$IMAGE_TAG \
             --set app.image.repository=$IMAGE_REPO \
             --set app.image.pullSecrets[0]=ghcr-secret \
-            --set-string secrets.openaiApiKey=${{ secrets.OPENAI_API_KEY }} \
+            --set-string secrets.groqApiKey=${{ secrets.GROQ_API_KEY }} \
             --set-string secrets.langchainApiKey=${{ secrets.LANGCHAIN_API_KEY }} \
             --set-string secrets.jwtSecretKey=${{ secrets.JWT_SECRET_KEY }} \
             --set-string secrets.googleClientId=${{ secrets.GOOGLE_CLIENT_ID }} \

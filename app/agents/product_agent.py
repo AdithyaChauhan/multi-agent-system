@@ -5,7 +5,7 @@ import copy
 import time
 import threading
 from typing import Literal
-from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph import StateGraph, END
 from dotenv import load_dotenv
@@ -21,7 +21,7 @@ load_dotenv()
 
 logger = get_logger("app.agents.product_agent")
 
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=os.getenv("OPENAI_API_KEY"))
+llm = ChatGroq(model="qwen/qwen3.8-27b", temperature=0, api_key=os.getenv("GROQ_API_KEY"))
 
 
 SERVED_CATEGORIES = {"Electronics", "Computers & Accessories", "Home & Kitchen", "Office Products"}
@@ -183,7 +183,6 @@ RELAXATION_ORDER = [
     "price_increase",
     "brand",
     "keywords",
-    "subcategory",
 ]
 
 
@@ -658,8 +657,7 @@ def format_recommendations(state: AgentState) -> dict:
 
     lines = []
     if relaxed and not state.get("keyword_recovery_attempted"):
-        lines.append(f"Note — I couldn't find an exact match, so I relaxed: {', '.join(relaxed)}.\n")
-        lines.append("Here are the closest options:\n")
+        lines.append("I found close matches after broadening a few optional filters:\n")
     elif all_maybe:
         lines.append(
             "I couldn't find products that exactly match your request, but here are some related options — let me know if any of these work for you or if you'd like me to look for something else:\n"
@@ -668,15 +666,10 @@ def format_recommendations(state: AgentState) -> dict:
         lines.append("Here are my top recommendations for you:\n")
 
     for i, p in enumerate(top3, 1):
-        reviews = p.get("reviews") or []
-        top_review = ""
-        if reviews:
-            best = max(reviews, key=lambda r: r["rating"])
-            top_review = f'"{best["review_text"]}" — {best["reviewer"]}'
-        lines.append(f"{i}. {p['name']} by {p['brand']}")
-        lines.append(f"   Price: ₹{p['price']} | Rating: {p['rating']}/5")
-        if top_review:
-            lines.append(f"   {top_review}")
+        brand = p.get("brand") or "Unknown brand"
+        rating = f"{p['rating']:.1f}/5" if p.get("rating") is not None else "Not rated"
+        lines.append(f"{i}. **{p['name']}** — {brand}")
+        lines.append(f"   ₹{p['price']:,} · {rating}")
         lines.append("")
 
     return {"final_response": "\n".join(lines)}

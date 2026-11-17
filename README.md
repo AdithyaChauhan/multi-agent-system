@@ -20,7 +20,7 @@ Router (LLM intent classifier)
 |---|---|
 | Backend | FastAPI + Uvicorn |
 | Agents | LangGraph (StateGraph) |
-| LLM | OpenAI GPT-4o-mini |
+| LLM | Groq (Qwen 3.8 27B) |
 | Database | PostgreSQL (SQLAlchemy 2.0) |
 | Auth | Google OAuth 2.0 + JWT |
 | Observability | LangSmith (tracing + prompts + eval) |
@@ -48,7 +48,7 @@ add that same callback URL in Google Cloud Console. The service health check is
 ### Prerequisites
 
 - Docker + Docker Compose
-- OpenAI API key
+- Groq API key
 - LangSmith account (free tier at [smith.langchain.com](https://smith.langchain.com))
 - Google OAuth credentials (for the login UI)
 
@@ -58,7 +58,7 @@ add that same callback URL in Google Cloud Console. The service health check is
 git clone https://github.com/AdithyaChauhan/multi-agent-system.git
 cd multi-agent-system
 cp .env.example .env
-# Fill in OPENAI_API_KEY, LANGCHAIN_API_KEY, GOOGLE_CLIENT_ID/SECRET
+# Fill in GROQ_API_KEY, LANGCHAIN_API_KEY, GOOGLE_CLIENT_ID/SECRET
 ```
 
 ### 2. Start all containers
@@ -269,7 +269,7 @@ See [.env.example](.env.example) for the full list. Key variables:
 | Variable | Description |
 |---|---|
 | `DATABASE_URL` | PostgreSQL connection string |
-| `OPENAI_API_KEY` | OpenAI API key for GPT-4o-mini |
+| `GROQ_API_KEY` | Groq API key for the chatbot model |
 | `LANGCHAIN_API_KEY` | LangSmith API key |
 | `LANGCHAIN_PROJECT` | LangSmith project name (`multi-agent-ecommerce`) |
 | `GOOGLE_CLIENT_ID` | Google OAuth client ID |

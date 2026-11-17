@@ -25,11 +25,11 @@ load_dotenv('/home/admin1/project/multi-agent-system/.env')
 
 from langsmith import Client
 from langsmith.evaluation import evaluate, EvaluationResult
-from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
 
 client = Client(api_key=os.getenv("LANGCHAIN_API_KEY"))
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=os.getenv("OPENAI_API_KEY"))
+llm = ChatGroq(model="qwen/qwen3.8-27b", temperature=0, api_key=os.getenv("GROQ_API_KEY"))
 
 DATASET_NAME = "multi-agent-ecommerce-eval"
 CONFIDENCE_THRESHOLD = 0.7  # matches route_after_classification in router.py
@@ -60,7 +60,7 @@ def predict(inputs: dict) -> dict:
 
     Mirrors classify_intent_and_extract() in router.py:
     - Formats up to 2 history messages as context
-    - Calls GPT-4o-mini with the live LangSmith hub prompt
+    - Calls Groq with the live LangSmith hub prompt
     - Returns intent, confidence, order_id
     """
     user_message = inputs.get("user_message", "")
