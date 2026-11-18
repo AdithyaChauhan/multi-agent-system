@@ -1,0 +1,4810 @@
+{
+ "description": "Labelled product-search queries for eval/run_retrieval.py (Phase 0). Each query's expected products come from SQL rules over raw name and price (never category columns), materialised to product ids by eval/label_queries.py --write. 'exact' = everything asked for; 'ok' = right kind of product but misses a constraint. Queries with expect_none must show no products (out of scope).",
+ "macros": {
+  "WIRELESS": "(name ~* 'wireless|bluetooth|2\\.4 ?ghz')",
+  "MOUSE": "(name ~* '\\mmouse\\M' AND name !~* 'mouse ?pad|mouse ?mat|keyboard|combo')",
+  "KEYBOARD": "(name ~* '\\mkeyboard\\M' AND name !~* 'cover|skin|protector|clean|\\mstands?\\M|tray|\\mpads?\\M|mouse ?pad|combo|\\mmouse\\M')",
+  "KB_COMBO": "(name ~* '\\mkeyboard\\M' AND name ~* 'combo|\\mmouse\\M' AND name !~* 'mouse ?pad|\\mpads?\\M|cover|skin')",
+  "TV": "(name ~* '\\m(tv|television)\\M' AND name ~* '\\d+\\s*(cm|inch)' AND name !~* 'remote|stand|mount|cover|cable|stick|bracket|antenna|wall|\\mbox\\M|dongle|adapter|trolley|shelf|table')",
+  "SMART": "(name ~* 'smart|android|webos|tizen|google tv|fire tv|vidaa|linux')",
+  "INCH32": "(name ~* '32 ?inch')",
+  "INCH43": "(name ~* '43 ?inch')",
+  "INCH55": "(name ~* '55 ?inch')",
+  "FOURK": "(name ~* '4k|ultra hd|\\muhd\\M')",
+  "HEADPHONES": "(name ~* 'headphone|headset' AND name !~* 'stand|hanger|holder|case|cable|adapter|splitter|cover|pad|cushion|earbud|airdopes|neckband')",
+  "EARBUDS": "(name ~* 'earbud|airdopes|true wireless|\\mtws\\M|earphone|neckband|neck band|in-ear|in ear' AND name !~* 'case|cover|cable|adapter|charger|tips|holder|cleaning|speaker')",
+  "TWS": "(name ~* 'earbud|airdopes|true wireless|\\mtws\\M' AND name !~* 'case|cover|cable|tips|neckband|neck band|speaker')",
+  "NECKBAND": "(name ~* 'neckband|neck band')",
+  "ANC": "(name ~* '\\manc\\M|active noise|noise cancell')",
+  "ROOM_HEATER": "(name ~* 'heater|radiator|\\mofr\\M' AND name !~* 'water|geyser|immersion|\\mrod\\M|tank|instant|bath|pool|aquarium|hand warmer')",
+  "OIL_HEATER": "({ROOM_HEATER} AND name ~* '\\moil|\\mofr\\M|radiator|\\mfins?\\M')",
+  "GEYSER": "(name ~* 'geyser|water heater' AND name !~* 'immersion|\\mrod\\M|stand|switch|pipe|valve|element')",
+  "IMMERSION": "(name ~* 'immersion')",
+  "INSTANT": "(name ~* 'instant')",
+  "L3": "(name ~* '\\m3\\s?(l|ltr|litres?|liters?)\\M')",
+  "L15": "(name ~* '1\\.5\\s?(l|ltr|litres?|liters?)\\M')",
+  "MIXER": "((name ~* 'mixer' AND name ~* 'grinder') OR name ~* 'mixer juicer|juicer mixer')",
+  "KETTLE": "(name ~* 'kettle' AND name !~* 'gas|stove ?top|whistl|descal')",
+  "SMARTWATCH": "(name ~* 'smart ?watch|fitness (band|tracker)|activity tracker' AND name !~* 'strap|band for|charger|cable|protector|guard|case|cover|tempered')",
+  "CALLING": "(name ~* 'calling|bt call|bluetooth call')",
+  "SPEAKER": "(name ~* 'speaker|soundbar|sound bar|home theat' AND name !~* '\\mstands?\\M|mount|cable|\\mwires?\\M|grill|cover|coupler|bracket|adapter|case|\\mbag\\M|watch|earbud|headphone|neckband|calling|printer')",
+  "BT_SPEAKER": "({SPEAKER} AND name ~* 'bluetooth|wireless|portable')",
+  "CABLE": "(name ~* 'cable|\\mcord\\M' AND name !~* 'organi[sz]er|clip|holder|protector|\\mtie|management|winder|tester')",
+  "TYPEC": "(name ~* 'type[- ]?c\\M|usb[- ]?c\\M')",
+  "C_TO_C": "(name ~* '(type[- ]?c|usb[- ]?c)\\M to (type[- ]?c|usb[- ]?c)\\M|\\mc to c\\M')",
+  "BRAIDED": "(name ~* 'braided')",
+  "HDMI_CABLE": "(name ~* 'hdmi' AND name ~* 'cable' AND name !~* 'coupler|adapter|converter|splitter|switch|extender')",
+  "HDMI_ANY": "(name ~* 'hdmi' AND name ~* 'cable|adapter|converter|coupler|splitter|switch|extender')",
+  "PEN_DRIVE": "(name ~* 'pen ?drive|flash drive|usb drive|thumb drive' AND name !~* 'case|cover|holder|\\mhub\\M|cable|extension|adapter|reader|connector')",
+  "GB128": "(name ~* '128\\s?gb')",
+  "STORAGE": "({PEN_DRIVE} OR (name ~* 'external (hdd|hard|ssd)|portable (ssd|hard)|micro ?sd|memory card|\\msdxc\\M|\\msdhc\\M' AND name !~* 'cable|case|cover|enclosure|pouch|\\mbag\\M|adapter|reader|phone|watch'))",
+  "POWER_BANK": "(name ~* 'power ?bank' AND name !~* 'case|cover|pouch|cable|stand|holder|mount|buds|earbud|speaker|lamp|light')",
+  "IRON": "(name ~* '\\miron\\M' AND name !~* 'hair|straighten|curl|stand|board|cover|cast iron|soldering|\\mrest\\M|\\mpan\\M|tawa|kadai')",
+  "VACUUM": "(name ~* 'vacuum' AND name ~* 'cleaner|robot|mop|wet and dry|wet & dry|handheld|cordless' AND name !~* 'dust ?bags?|\\mbags? for|spare|replacement|hose|nozzle|flask|bottle|container|storage|sealer|food')",
+  "CEILING_FAN": "(name ~* 'ceiling fan' AND name !~* 'regulator|capacitor|\\mhook|down ?rod')",
+  "BLDC": "(name ~* 'bldc')",
+  "BLENDER": "(name ~* 'blender' AND name !~* 'spare|jar only')",
+  "LAPTOP_STAND": "(name ~* 'laptop[- ]?(stand|table|riser|holder|tray|desk)|laptop tabletop|lapdesk|(stand|riser|table) for (laptop|macbook)' AND name !~* 'webcam|headphone|keyboard|\\mmouse|cleaning|cover|\\mbag\\M|sleeve')",
+  "COOLING_PAD": "(name ~* 'cooling pad|cooler pad|laptop cooler|cooling stand')",
+  "LINT": "(name ~* '\\mlint|fabric shaver|fuzz|bobble|pet hair remov')",
+  "WATER_PURIFIER": "(name ~* 'water purifier' AND name !~* 'cartridge|candle|spare|replacement|service kit|\\mkit\\M|germkill|\\mtap\\M|pre-filter')",
+  "WATER_FILTER": "(name ~* 'water filter|filter pitcher|cartridge|candle' AND name ~* 'water|aqua|kent|swach|purif')",
+  "TOASTER": "(name ~* 'toaster')",
+  "POPUP_TOASTER": "(name ~* 'pop[- ]?up' AND name ~* 'toaster')",
+  "INDUCTION": "(name ~* 'induction' AND name ~* 'cooktop|cook top|stove|chulha|chula|\\mhob\\M' AND name !~* '\\mbase\\M|vessel|\\mpan\\M|tawa|kadai|bottom|compatible|cookware|pressure cooker')",
+  "SCALE": "(name ~* '\\mscale' AND name ~* 'kitchen|food|weighing' AND name !~* 'body|bathroom|person|\\mbmi\\M|luggage|jewel')",
+  "ROUTER": "(name ~* '\\mrouter\\M|archer (a|c)\\d' AND name ~* 'wi-?fi|wireless|dual band|mbps|archer' AND name !~* '\\mups\\M|power ?backup|power supply|adapter|stand|table|cable|patch')",
+  "PRINTER": "(name ~* '\\mprinter\\M' AND name !~* 'cable|\\d+\\s?ml\\M|refill|ink bottle|adapter|dongle|extension|usb 2\\.0')",
+  "SANDWICH": "(name ~* 'sandwich' AND name ~* 'maker|griller|grill|toaster')",
+  "EGG_BOILER": "(name ~* '\\megg' AND name ~* 'boil|cooker|steam')",
+  "BATTERY": "(name ~* 'batter(y|ies)' AND name ~* '\\maaa?\\M|\\m9v\\M|coin|cr\\d{4}|rechargeable' AND name !~* 'laptop|phone|mobile|tester|\\mcar\\M|inverter|\\mups\\M|camera')"
+ },
+ "queries": [
+  {
+   "id": "q001",
+   "tags": [
+    "plain"
+   ],
+   "query": "electric kettle",
+   "label": {
+    "exact": "{KETTLE}"
+   },
+   "expect": {
+    "exact": [
+     "B00NW4UWN6",
+     "B00TI8E7BI",
+     "B01I1LDZGA",
+     "B01MQZ7J8K",
+     "B078V8R9BS",
+     "B07B5XJ572",
+     "B07F366Z51",
+     "B07GLS2563",
+     "B07GLSKXS1",
+     "B07QDSN9V6",
+     "B07SYYVP69",
+     "B07T4D9FNY",
+     "B07VNFP3C2",
+     "B07VZYMQNZ",
+     "B07WGPBXY9",
+     "B07WJXCTG9",
+     "B07WMS7TWB",
+     "B07WNK1FFN",
+     "B07YR26BJ3",
+     "B082KVTRW8",
+     "B083GKDRKR",
+     "B08C7TYHPB",
+     "B08HLC7Z3G",
+     "B091V8HK8Z",
+     "B094G9L9LT",
+     "B096YCN3SD",
+     "B097RN7BBK",
+     "B09VGS66FV",
+     "B09Y5FZK9N",
+     "B0B2CZTCL2",
+     "B0B2DZ5S6R",
+     "B0B3TBY2YX",
+     "B0B5KZ3C53"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q002",
+   "tags": [
+    "plain"
+   ],
+   "query": "mixer grinder",
+   "label": {
+    "exact": "{MIXER}"
+   },
+   "expect": {
+    "exact": [
+     "B00HVXS7WC",
+     "B00K57MR22",
+     "B00W56GLOQ",
+     "B0188KPKB2",
+     "B01GZSQJPA",
+     "B071113J7M",
+     "B071R3LHFM",
+     "B0756K5DYZ",
+     "B075JJ5NQC",
+     "B075S9FVRY",
+     "B078JT7LTD",
+     "B07D8VBYB4",
+     "B07DGD4Z4C",
+     "B07FL3WRX5",
+     "B07MKMFKPG",
+     "B07TTSS5MP",
+     "B07TXCY3YK",
+     "B07Y9PY6Y1",
+     "B085LPT5F4",
+     "B086199CWG",
+     "B08CFJBZRK",
+     "B08CNLYKW5",
+     "B08G8H8DPL",
+     "B08H673XKN",
+     "B08KDBLMQP",
+     "B08MXJYB2V",
+     "B08TT63N58",
+     "B097XJQZ8H",
+     "B09GYBZPHF",
+     "B09J2SCVQT",
+     "B09MFR93KS",
+     "B09X5C9VLK",
+     "B09Y358DZQ",
+     "B09ZDVL7L8",
+     "B0BDZWMGZ1",
+     "B0BL3R4RGS",
+     "B0BNDGL26T",
+     "B0BNQMF152"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q003",
+   "tags": [
+    "plain"
+   ],
+   "query": "room heater",
+   "label": {
+    "exact": "{ROOM_HEATER}"
+   },
+   "expect": {
+    "exact": [
+     "B009P2LIL4",
+     "B009P2LITG",
+     "B009P2LK08",
+     "B009P2LK80",
+     "B00GHL8VP2",
+     "B00H47GVGY",
+     "B00KRCBA6E",
+     "B00LUGTJGO",
+     "B00O24PUO6",
+     "B01M265AAK",
+     "B01M5F614J",
+     "B01N1XVVLC",
+     "B06XFTHCNY",
+     "B078KRFWQB",
+     "B07J9KXQCC",
+     "B07K19NYZ8",
+     "B07R99NBVB",
+     "B07VX71FZP",
+     "B08DCVRW98",
+     "B08MVSGXMY",
+     "B08MVXPTDG",
+     "B08MZNT7GP",
+     "B08QHLXWV3",
+     "B099FDW2ZF",
+     "B099PR2GQJ",
+     "B09CGLY5CX",
+     "B09H34V36W",
+     "B09KRHXTLN",
+     "B09LV1CMGH",
+     "B09M3F4HGB",
+     "B09MQ9PDHR",
+     "B09NFSHCWN",
+     "B09P1MFKG1",
+     "B09R1YFL6S",
+     "B09ZTZ9N3Q",
+     "B09ZVJXN5L",
+     "B0B7NWGXS6",
+     "B0B9F9PT8R",
+     "B0BDG6QDYD",
+     "B0BMTZ4T1D",
+     "B0BMZ6SY89",
+     "B0BPBG712X",
+     "B0BPJBTB3F"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q004",
+   "tags": [
+    "plain"
+   ],
+   "query": "vacuum cleaner",
+   "label": {
+    "exact": "{VACUUM}"
+   },
+   "expect": {
+    "exact": [
+     "B00JBNZPFM",
+     "B072J83V9W",
+     "B07H3N8RJH",
+     "B07SLNG3LW",
+     "B07SRM58TP",
+     "B07Z51CGGH",
+     "B083M7WPZD",
+     "B08HDCWDXD",
+     "B092R48XXB",
+     "B09FZ89DK6",
+     "B09SZ5TWHW",
+     "B09XTQFFCG",
+     "B0B19VJXQZ",
+     "B0B1MDZV9C"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q005",
+   "tags": [
+    "plain"
+   ],
+   "query": "smartwatch",
+   "label": {
+    "exact": "{SMARTWATCH}"
+   },
+   "expect": {
+    "exact": [
+     "B07YY1BY5B",
+     "B08HV25BBQ",
+     "B0949SBKMP",
+     "B094JB13XL",
+     "B096VF5YYF",
+     "B0972BQ2RS",
+     "B097R25DP7",
+     "B09BNXQ6BR",
+     "B09MQSCJQ1",
+     "B09NC2TY11",
+     "B09NVPJ3P4",
+     "B09NVPSCQT",
+     "B09P18XVW6",
+     "B09PLFJ7ZW",
+     "B09PNKXSKF",
+     "B09RKFBCV7",
+     "B09TBCVJS3",
+     "B09V12K8NT",
+     "B09V175NP7",
+     "B09V17S2BG",
+     "B09YV3K34W",
+     "B09YV42QHZ",
+     "B09YV463SW",
+     "B09YV4MW2T",
+     "B09YV4RG4D",
+     "B09ZQK9X8G",
+     "B0B3MWYCHQ",
+     "B0B3N7LR6K",
+     "B0B3NDPCS9",
+     "B0B3RRWSF6",
+     "B0B3RS9DNF",
+     "B0B3RSDSZ3",
+     "B0B53NXFFR",
+     "B0B53QFZPY",
+     "B0B53QLB9H",
+     "B0B5B6PQCT",
+     "B0B5CGTBKV",
+     "B0B5D39BCD",
+     "B0B5DDJNH4",
+     "B0B5GF6DQD",
+     "B0B5LVS732",
+     "B0B6BLTGTT",
+     "B0B82YGCF6",
+     "B0BBVKRP7B",
+     "B0BF4YBLPX",
+     "B0BF54972T",
+     "B0BF54LXW6",
+     "B0BF563HB4",
+     "B0BF57RN3K",
+     "B0BGSV43WY",
+     "B0BMVWKZ8G",
+     "B0BNXFDTZ2",
+     "B0BP18W8TM"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q006",
+   "tags": [
+    "plain"
+   ],
+   "query": "headphones",
+   "label": {
+    "exact": "{HEADPHONES}",
+    "ok": "{EARBUDS}"
+   },
+   "expect": {
+    "exact": [
+     "B009LJ2BXA",
+     "B00Y4ORQ46",
+     "B01DEWVZ2C",
+     "B01DF26V7A",
+     "B071Z8M4KX",
+     "B078W65FJ7",
+     "B079S811J3",
+     "B07JQKQ91F",
+     "B07L8KNP5F",
+     "B07T9FV9YP",
+     "B083T5G5PM",
+     "B0873L7J6X",
+     "B08D75R3Z1",
+     "B097JVLW3L",
+     "B09YLFHFDW"
+    ],
+    "ok": [
+     "B01F25X6RQ",
+     "B01F262EUU",
+     "B01MF8MB65",
+     "B07CD2BN46",
+     "B07DFYJRQV",
+     "B07GPXXNNG",
+     "B07GQD4K6L",
+     "B07KY3FNQP",
+     "B07LG59NPV",
+     "B07QZ3CZ48",
+     "B07S9S86BF",
+     "B07T5DKR5D",
+     "B07TCN5VR9",
+     "B07XJWTYM2",
+     "B085W8CFLH",
+     "B086WMSCN3",
+     "B08CFCK6CW",
+     "B08D11DZ2W",
+     "B08D77XZX5",
+     "B08FB2LNSZ",
+     "B08FN6WGDQ",
+     "B08G28Z33M",
+     "B08H9Z3XQW",
+     "B08JQN8DGZ",
+     "B08MTLLSL8",
+     "B08TV2P1N8",
+     "B091JF2TFD",
+     "B092X94QNQ",
+     "B098R25TGC",
+     "B09GFWJDY1",
+     "B09N3ZNHTY",
+     "B09ND94ZRG",
+     "B09NR6G588",
+     "B09PL79D2X",
+     "B09Y5MP7C4",
+     "B0B1F6GQPS",
+     "B0B217Z5VK",
+     "B0B31BYXQQ",
+     "B0B31FR4Y2",
+     "B0B3N7LR6K",
+     "B0B3NDPCS9",
+     "B0B5GJRTHB"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q007",
+   "tags": [
+    "plain"
+   ],
+   "query": "water purifier",
+   "label": {
+    "exact": "{WATER_PURIFIER}",
+    "ok": "{WATER_FILTER}"
+   },
+   "expect": {
+    "exact": [
+     "B009DA69W6",
+     "B07FJNNZCJ",
+     "B07YC8JHMB",
+     "B08BJN4MP3",
+     "B096NTB9XT",
+     "B09YLWT89W",
+     "B0B7FJNSZR",
+     "B0BCYQY9X5",
+     "B0BJ966M5K"
+    ],
+    "ok": [
+     "B00LP9RFSU",
+     "B0762HXMTF",
+     "B078XFKBZL",
+     "B07FXLC2G2",
+     "B08K36NZSV",
+     "B08L7J3T31",
+     "B09JFR8H3Q",
+     "B0BBLHTRM9",
+     "B0BHYLCL19",
+     "B0BJ6P3LSK",
+     "B0BNDRK886"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q008",
+   "tags": [
+    "plain"
+   ],
+   "query": "ceiling fan",
+   "label": {
+    "exact": "{CEILING_FAN}"
+   },
+   "expect": {
+    "exact": [
+     "B01L7C4IU2",
+     "B01LYU3BZF",
+     "B01M0505SJ",
+     "B07SPVMSC6",
+     "B07ZJND9B9",
+     "B08WWKM5HQ",
+     "B08Y5QJXSR",
+     "B08ZHYNTM1",
+     "B095PWLLY6",
+     "B09MT94QLL",
+     "B09SPTNG58"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q009",
+   "tags": [
+    "plain"
+   ],
+   "query": "pen drive",
+   "label": {
+    "exact": "{PEN_DRIVE}"
+   },
+   "expect": {
+    "exact": [
+     "B005FYNT3G",
+     "B01EZ0X3L8",
+     "B01L8ZNWN2",
+     "B01LYLJ99X",
+     "B01N6LU1VF",
+     "B07JJFSG2B",
+     "B07SLMR1K6",
+     "B0819ZZK5K",
+     "B084PJSSQ1",
+     "B08JD36C6H"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q010",
+   "tags": [
+    "plain"
+   ],
+   "query": "power bank",
+   "label": {
+    "exact": "{POWER_BANK}"
+   },
+   "expect": {
+    "exact": [
+     "B07X963JNS",
+     "B08HF4W2CT",
+     "B08HV83HL3",
+     "B08HVJCW95",
+     "B08HVL8QN3",
+     "B08MC57J31",
+     "B098QXR9X2",
+     "B0993BB11X",
+     "B09MZCQYHZ"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q011",
+   "tags": [
+    "plain"
+   ],
+   "query": "toaster",
+   "label": {
+    "exact": "{POPUP_TOASTER}",
+    "ok": "{TOASTER}"
+   },
+   "expect": {
+    "exact": [
+     "B0073QGKAS",
+     "B06XPYRWV5",
+     "B071VNHMX2"
+    ],
+    "ok": [
+     "B00935MGHS",
+     "B07N2MGB3G",
+     "B07P1BR7L8",
+     "B07RX42D3D",
+     "B07YQ5SN4H"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q012",
+   "tags": [
+    "plain"
+   ],
+   "query": "induction cooktop",
+   "label": {
+    "exact": "{INDUCTION}"
+   },
+   "expect": {
+    "exact": [
+     "B00EDJJ7FS",
+     "B00NM6MO26",
+     "B00YMJ0OI8",
+     "B01GFTEV5Y",
+     "B0756KCV5K",
+     "B07YCBSCYB",
+     "B0832W3B7Q",
+     "B09NBZ36F7",
+     "B0BL11S5QK"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q013",
+   "tags": [
+    "plain"
+   ],
+   "query": "keyboard",
+   "label": {
+    "exact": "{KEYBOARD}",
+    "ok": "{KB_COMBO}"
+   },
+   "expect": {
+    "exact": [
+     "B00MUTWLW4",
+     "B00ZYLMQH0",
+     "B0148NPH9I",
+     "B077T3BG5L",
+     "B08498D67S",
+     "B08498H13H",
+     "B08CF4SCNP",
+     "B09BVCVTBC"
+    ],
+    "ok": [
+     "B00CEQEGPI",
+     "B00OFM6PEO",
+     "B012MQS060",
+     "B01N4EV2TL",
+     "B07BRKK9JQ",
+     "B07KR5P3YD",
+     "B07V82W5CN",
+     "B087FXHB6J",
+     "B098K3H92Z",
+     "B09GBBJV72",
+     "B09T3H12GV",
+     "B0BHYJ8CVF"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q014",
+   "tags": [
+    "plain"
+   ],
+   "query": "speakers",
+   "label": {
+    "exact": "{SPEAKER}"
+   },
+   "expect": {
+    "exact": [
+     "B07B88KQZ8",
+     "B07L3NDN24",
+     "B07NC12T2R",
+     "B07W6VWZ8C",
+     "B07W7Z6DVL",
+     "B07YNTJ8ZM",
+     "B0814ZY6FP",
+     "B08CRRQK6Z",
+     "B08DCVRW98",
+     "B08JMC1988",
+     "B08K9PX15C",
+     "B08S74GTBT",
+     "B08SBH499M",
+     "B08SMJT55F",
+     "B09LRZYBH1",
+     "B0B12K5BPM"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q015",
+   "tags": [
+    "plain"
+   ],
+   "query": "egg boiler",
+   "label": {
+    "exact": "{EGG_BOILER}"
+   },
+   "expect": {
+    "exact": [
+     "B07GMFY9QM",
+     "B07H3WDC4X",
+     "B08S7V8YTN",
+     "B08TTRVWKY",
+     "B091KNVNS9",
+     "B099Z83VRC",
+     "B09FPP3R1D",
+     "B09J4YQYX3",
+     "B0B25DJ352",
+     "B0B5KZ3C53",
+     "B0B8ZM9RVV",
+     "B0BM9H2NY9"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q016",
+   "tags": [
+    "plain"
+   ],
+   "query": "lint remover",
+   "label": {
+    "exact": "{LINT}"
+   },
+   "expect": {
+    "exact": [
+     "B00TDD0YM4",
+     "B01NCVJMKX",
+     "B07HK53XM4",
+     "B07MP21WJD",
+     "B07NCKMXVZ",
+     "B07NKNBTT3",
+     "B081RLM75M",
+     "B08SKZ2RMG",
+     "B09474JWN6",
+     "B09DSQXCM8",
+     "B09JN37WBX",
+     "B09KNMLH4Y",
+     "B09MTLG4TP",
+     "B09NL7LBWT",
+     "B09NNZ1GF7",
+     "B09SFRNKSR",
+     "B09XB1R2F3",
+     "B0B3JSWG81",
+     "B0B59K1C8F",
+     "B0BK1K598K",
+     "B0BN2576GQ",
+     "B0BN6M3TCM"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q017",
+   "tags": [
+    "plain"
+   ],
+   "query": "kitchen weighing scale",
+   "label": {
+    "exact": "{SCALE}"
+   },
+   "expect": {
+    "exact": [
+     "B013B2WGT6",
+     "B07BKSSDR2",
+     "B07VQGVL68",
+     "B083P71WKK",
+     "B08SJVD8QD",
+     "B0949FPSFY",
+     "B09H3BXWTK",
+     "B09W9V2PXG",
+     "B0B4SJKRDF",
+     "B0B61DSF17",
+     "B0B694PXQJ"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q018",
+   "tags": [
+    "plain"
+   ],
+   "query": "wifi router",
+   "label": {
+    "exact": "{ROUTER}"
+   },
+   "expect": {
+    "exact": [
+     "B0085IATT6",
+     "B01HGCLUH6",
+     "B07GVR9TG7",
+     "B07W9KYT62",
+     "B09MKG4ZCM"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q019",
+   "tags": [
+    "plain"
+   ],
+   "query": "printer",
+   "label": {
+    "exact": "{PRINTER}"
+   },
+   "expect": {
+    "exact": [
+     "B01EJ5MM5M",
+     "B01JOFKL0A",
+     "B08D9MNH4B",
+     "B08D9NDZ1Y",
+     "B09F5Z694W"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q020",
+   "tags": [
+    "plain"
+   ],
+   "query": "sandwich maker",
+   "label": {
+    "exact": "{SANDWICH}"
+   },
+   "expect": {
+    "exact": [
+     "B00935MGHS",
+     "B01486F4G6",
+     "B07GWTWFS2",
+     "B07JZSG42Y",
+     "B07RX42D3D",
+     "B07S851WX5",
+     "B07YQ5SN4H",
+     "B08LVVTGZK",
+     "B09XRBJ94N",
+     "B0B2DD8BQ8",
+     "B0B5RP43VN"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q021",
+   "tags": [
+    "brand"
+   ],
+   "query": "logitech mouse",
+   "label": {
+    "exact": "{MOUSE} AND name ~* '\\mlogitech\\M'",
+    "ok": "{MOUSE}"
+   },
+   "expect": {
+    "exact": [
+     "B003L62T7W",
+     "B004IO5BMQ",
+     "B00NFD0ETQ",
+     "B01J0XWYKQ",
+     "B01M72LILF",
+     "B01MQ2A86A",
+     "B07X2L5Z8C",
+     "B08LT9BMPP"
+    ],
+    "ok": [
+     "B009VCGPSY",
+     "B01HJI0FS2",
+     "B01KK0HU3Y",
+     "B073BRXPZX",
+     "B079Y6JZC8",
+     "B07J2NGB69",
+     "B07JPX9CR7",
+     "B07L9FW9GF",
+     "B0819HZPXL",
+     "B083RCTXLL",
+     "B083RD1J99",
+     "B08497Z1MQ",
+     "B08CHZ3ZQ7",
+     "B08D64C9FN",
+     "B08LW31NQ6",
+     "B08Y7MXFMK",
+     "B08YDFX7Y1",
+     "B098JYT4SY",
+     "B099SD8PRP",
+     "B09F6D21BY",
+     "B09GB5B4BK",
+     "B09Z6WH2N1",
+     "B09ZHCJDP1",
+     "B0B296NTFV",
+     "B0B8ZWNR5T"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q022",
+   "tags": [
+    "brand"
+   ],
+   "query": "samsung tv",
+   "label": {
+    "exact": "{TV} AND name ~* '\\msamsung\\M'",
+    "ok": "{TV}"
+   },
+   "expect": {
+    "exact": [
+     "B08PV1X771",
+     "B092BJMT8Q",
+     "B092BL5DCX",
+     "B09F6S8BT6",
+     "B0B15CPR37",
+     "B0B15GSPQW"
+    ],
+    "ok": [
+     "B06XGWRKYT",
+     "B07MDRGHWQ",
+     "B07MKFNHKG",
+     "B084872DQY",
+     "B087JWLZ2K",
+     "B08B42LWKN",
+     "B08CS3BT4L",
+     "B08DPLCM6T",
+     "B08FD2VSD9",
+     "B08PZ6HZLT",
+     "B08XXF5V6G",
+     "B08Y55LPBF",
+     "B095JPKPH3",
+     "B095JQVC7N",
+     "B099K9ZX65",
+     "B09DSXK8JX",
+     "B09F6VHQXB",
+     "B09F9YQQ7B",
+     "B09HQSV46W",
+     "B09JPC82QC",
+     "B09MJ77786",
+     "B09NNGHG22",
+     "B09NNJ9WYM",
+     "B09PLD9TCD",
+     "B09Q5P2MT3",
+     "B09Q5SWVBJ",
+     "B09RFC46VP",
+     "B09RWQ7YR6",
+     "B09T3KB6JZ",
+     "B09VCHLSJF",
+     "B09WN3SRC7",
+     "B09X1M3DHX",
+     "B09YL9SN9B",
+     "B09ZPJT8B2",
+     "B09ZPM4C2C",
+     "B0B1YVCJ2Y",
+     "B0B1YY6JJL",
+     "B0B1YZ9CB8",
+     "B0B1YZX72F",
+     "B0B21XL94T",
+     "B0B2C5MJN6",
+     "B0B3MMYHYW",
+     "B0B3XXSB1K",
+     "B0B3XY5YT4",
+     "B0B466C3G4",
+     "B0B467CCB9",
+     "B0B6F7LX4C",
+     "B0B6F8HHR6",
+     "B0B6F98KJJ",
+     "B0B7B9V9QP",
+     "B0B8CXTTG3",
+     "B0B9959XF3",
+     "B0B997FBZT",
+     "B0B9XLX8VR",
+     "B0B9XN9S3W",
+     "B0BB3CBFBM",
+     "B0BC8BQ432",
+     "B0BC9BW512"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q023",
+   "tags": [
+    "brand"
+   ],
+   "query": "boat earbuds",
+   "label": {
+    "exact": "{TWS} AND name ~* '^boat\\M'",
+    "ok": "{TWS}"
+   },
+   "expect": {
+    "exact": [
+     "B086WMSCN3",
+     "B08JQN8DGZ",
+     "B09N3ZNHTY",
+     "B09PL79D2X"
+    ],
+    "ok": [
+     "B07DFYJRQV",
+     "B08CFCK6CW",
+     "B08D11DZ2W",
+     "B08FB2LNSZ",
+     "B08FN6WGDQ",
+     "B098R25TGC",
+     "B09ND94ZRG",
+     "B09Y5MP7C4",
+     "B0B217Z5VK",
+     "B0B31BYXQQ",
+     "B0B31FR4Y2",
+     "B0B3N7LR6K",
+     "B0B3NDPCS9",
+     "B0B5GJRTHB"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q024",
+   "tags": [
+    "brand"
+   ],
+   "query": "bajaj room heater",
+   "label": {
+    "exact": "{ROOM_HEATER} AND name ~* '\\mbajaj\\M'",
+    "ok": "{ROOM_HEATER}"
+   },
+   "expect": {
+    "exact": [
+     "B009P2LIL4",
+     "B009P2LITG",
+     "B009P2LK08",
+     "B009P2LK80",
+     "B00LUGTJGO",
+     "B01N1XVVLC"
+    ],
+    "ok": [
+     "B00GHL8VP2",
+     "B00H47GVGY",
+     "B00KRCBA6E",
+     "B00O24PUO6",
+     "B01M265AAK",
+     "B01M5F614J",
+     "B06XFTHCNY",
+     "B078KRFWQB",
+     "B07J9KXQCC",
+     "B07K19NYZ8",
+     "B07R99NBVB",
+     "B07VX71FZP",
+     "B08DCVRW98",
+     "B08MVSGXMY",
+     "B08MVXPTDG",
+     "B08MZNT7GP",
+     "B08QHLXWV3",
+     "B099FDW2ZF",
+     "B099PR2GQJ",
+     "B09CGLY5CX",
+     "B09H34V36W",
+     "B09KRHXTLN",
+     "B09LV1CMGH",
+     "B09M3F4HGB",
+     "B09MQ9PDHR",
+     "B09NFSHCWN",
+     "B09P1MFKG1",
+     "B09R1YFL6S",
+     "B09ZTZ9N3Q",
+     "B09ZVJXN5L",
+     "B0B7NWGXS6",
+     "B0B9F9PT8R",
+     "B0BDG6QDYD",
+     "B0BMTZ4T1D",
+     "B0BMZ6SY89",
+     "B0BPBG712X",
+     "B0BPJBTB3F"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q025",
+   "tags": [
+    "brand"
+   ],
+   "query": "philips iron",
+   "label": {
+    "exact": "{IRON} AND name ~* '\\mphilips\\M'",
+    "ok": "{IRON}"
+   },
+   "expect": {
+    "exact": [
+     "B008LN8KDM",
+     "B008QTK47Q",
+     "B009UORDX4",
+     "B01EY310UM",
+     "B08H6B3G96",
+     "B08H6CZSHT"
+    ],
+    "ok": [
+     "B008YW3CYM",
+     "B008YW8M0G",
+     "B009P2L7CO",
+     "B00B7GKXMG",
+     "B00F159RIK",
+     "B00SMJPA9C",
+     "B01C8P29N0",
+     "B01C8P29T4",
+     "B01MY839VW",
+     "B01N6IJG0F",
+     "B076VQS87V",
+     "B078WB1VWJ",
+     "B07989VV5K",
+     "B07D2NMTTV",
+     "B07LDN9Q2P",
+     "B07LDPLSZC",
+     "B07S9M8YTY",
+     "B07YSJ7FF1",
+     "B08235JZFB",
+     "B0883KDSXC",
+     "B0883LQJ6B",
+     "B08CNLYKW5",
+     "B08DPLCM6T",
+     "B09PDZNSBG",
+     "B09WF4Q7B3",
+     "B09ZK6THRR",
+     "B0B84KSH3X",
+     "B0B84QN4CN"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q026",
+   "tags": [
+    "brand"
+   ],
+   "query": "fire-boltt smartwatch",
+   "label": {
+    "exact": "{SMARTWATCH} AND name ~* 'fire-?boltt'",
+    "ok": "{SMARTWATCH}"
+   },
+   "expect": {
+    "exact": [
+     "B0972BQ2RS",
+     "B09RKFBCV7",
+     "B09YV3K34W",
+     "B09YV42QHZ",
+     "B09YV463SW",
+     "B09YV4MW2T",
+     "B09YV4RG4D",
+     "B0B3MWYCHQ",
+     "B0B3N7LR6K",
+     "B0B3NDPCS9",
+     "B0B3RRWSF6",
+     "B0B3RS9DNF",
+     "B0B3RSDSZ3",
+     "B0BF4YBLPX",
+     "B0BF54972T",
+     "B0BF54LXW6",
+     "B0BF563HB4",
+     "B0BF57RN3K",
+     "B0BNXFDTZ2",
+     "B0BP18W8TM"
+    ],
+    "ok": [
+     "B07YY1BY5B",
+     "B08HV25BBQ",
+     "B0949SBKMP",
+     "B094JB13XL",
+     "B096VF5YYF",
+     "B097R25DP7",
+     "B09BNXQ6BR",
+     "B09MQSCJQ1",
+     "B09NC2TY11",
+     "B09NVPJ3P4",
+     "B09NVPSCQT",
+     "B09P18XVW6",
+     "B09PLFJ7ZW",
+     "B09PNKXSKF",
+     "B09TBCVJS3",
+     "B09V12K8NT",
+     "B09V175NP7",
+     "B09V17S2BG",
+     "B09ZQK9X8G",
+     "B0B53NXFFR",
+     "B0B53QFZPY",
+     "B0B53QLB9H",
+     "B0B5B6PQCT",
+     "B0B5CGTBKV",
+     "B0B5D39BCD",
+     "B0B5DDJNH4",
+     "B0B5GF6DQD",
+     "B0B5LVS732",
+     "B0B6BLTGTT",
+     "B0B82YGCF6",
+     "B0BBVKRP7B",
+     "B0BGSV43WY",
+     "B0BMVWKZ8G"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q027",
+   "tags": [
+    "brand"
+   ],
+   "query": "noise smart watch",
+   "label": {
+    "exact": "{SMARTWATCH} AND name ~* '^noise\\M'",
+    "ok": "{SMARTWATCH}"
+   },
+   "expect": {
+    "exact": [
+     "B07YY1BY5B",
+     "B08HV25BBQ",
+     "B094JB13XL",
+     "B097R25DP7",
+     "B09BNXQ6BR",
+     "B09NC2TY11",
+     "B09NVPJ3P4",
+     "B09NVPSCQT",
+     "B09P18XVW6",
+     "B09PLFJ7ZW",
+     "B09PNKXSKF",
+     "B09ZQK9X8G",
+     "B0B5GF6DQD",
+     "B0B5LVS732",
+     "B0B6BLTGTT",
+     "B0BGSV43WY"
+    ],
+    "ok": [
+     "B0949SBKMP",
+     "B096VF5YYF",
+     "B0972BQ2RS",
+     "B09MQSCJQ1",
+     "B09RKFBCV7",
+     "B09TBCVJS3",
+     "B09V12K8NT",
+     "B09V175NP7",
+     "B09V17S2BG",
+     "B09YV3K34W",
+     "B09YV42QHZ",
+     "B09YV463SW",
+     "B09YV4MW2T",
+     "B09YV4RG4D",
+     "B0B3MWYCHQ",
+     "B0B3N7LR6K",
+     "B0B3NDPCS9",
+     "B0B3RRWSF6",
+     "B0B3RS9DNF",
+     "B0B3RSDSZ3",
+     "B0B53NXFFR",
+     "B0B53QFZPY",
+     "B0B53QLB9H",
+     "B0B5B6PQCT",
+     "B0B5CGTBKV",
+     "B0B5D39BCD",
+     "B0B5DDJNH4",
+     "B0B82YGCF6",
+     "B0BBVKRP7B",
+     "B0BF4YBLPX",
+     "B0BF54972T",
+     "B0BF54LXW6",
+     "B0BF563HB4",
+     "B0BF57RN3K",
+     "B0BMVWKZ8G",
+     "B0BNXFDTZ2",
+     "B0BP18W8TM"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q028",
+   "tags": [
+    "brand"
+   ],
+   "query": "sandisk pen drive",
+   "label": {
+    "exact": "{PEN_DRIVE} AND name ~* 'sandisk'",
+    "ok": "{PEN_DRIVE}"
+   },
+   "expect": {
+    "exact": [
+     "B005FYNT3G",
+     "B01EZ0X3L8",
+     "B01N6LU1VF",
+     "B07JJFSG2B",
+     "B07SLMR1K6",
+     "B0819ZZK5K",
+     "B084PJSSQ1"
+    ],
+    "ok": [
+     "B01L8ZNWN2",
+     "B01LYLJ99X",
+     "B08JD36C6H"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q029",
+   "tags": [
+    "brand"
+   ],
+   "query": "havells ceiling fan",
+   "label": {
+    "exact": "{CEILING_FAN} AND name ~* 'havells'",
+    "ok": "{CEILING_FAN}"
+   },
+   "expect": {
+    "exact": [
+     "B01L7C4IU2",
+     "B01LYU3BZF",
+     "B08ZHYNTM1",
+     "B09MT94QLL"
+    ],
+    "ok": [
+     "B01M0505SJ",
+     "B07SPVMSC6",
+     "B07ZJND9B9",
+     "B08WWKM5HQ",
+     "B08Y5QJXSR",
+     "B095PWLLY6",
+     "B09SPTNG58"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q030",
+   "tags": [
+    "brand"
+   ],
+   "query": "duracell batteries",
+   "label": {
+    "exact": "{BATTERY} AND name ~* 'duracell'",
+    "ok": "{BATTERY}"
+   },
+   "expect": {
+    "exact": [
+     "B003B00484",
+     "B00E3DVQFS",
+     "B014SZO90Y",
+     "B015ZXUDD0",
+     "B01DJJVFPC",
+     "B08QDPB1SL",
+     "B08Y57TPDM",
+     "B08Y5QJTVK"
+    ],
+    "ok": [
+     "B00BN5SNF0",
+     "B00LVMTA2A",
+     "B00N3XLDW0",
+     "B00ZRBWPA0",
+     "B075DB1F13",
+     "B07NRTCDS5",
+     "B07Q7561HD",
+     "B08YK7BBD2",
+     "B09NTHQRW3",
+     "B0B12K5BPM",
+     "B0B3G5XZN5"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q031",
+   "tags": [
+    "price"
+   ],
+   "query": "mixer grinder under 3000",
+   "label": {
+    "exact": "{MIXER} AND price <= 3000",
+    "ok": "{MIXER} AND price <= 3750"
+   },
+   "expect": {
+    "exact": [
+     "B00HVXS7WC",
+     "B00W56GLOQ",
+     "B071R3LHFM",
+     "B07TTSS5MP",
+     "B07TXCY3YK",
+     "B085LPT5F4",
+     "B08CNLYKW5",
+     "B08KDBLMQP",
+     "B08MXJYB2V",
+     "B08TT63N58",
+     "B097XJQZ8H",
+     "B09GYBZPHF",
+     "B09J2SCVQT",
+     "B09X5C9VLK",
+     "B09Y358DZQ",
+     "B09ZDVL7L8",
+     "B0BDZWMGZ1",
+     "B0BL3R4RGS",
+     "B0BNDGL26T",
+     "B0BNQMF152"
+    ],
+    "ok": [
+     "B0188KPKB2",
+     "B01GZSQJPA",
+     "B0756K5DYZ",
+     "B075JJ5NQC",
+     "B07DGD4Z4C",
+     "B07FL3WRX5",
+     "B086199CWG",
+     "B08CFJBZRK",
+     "B08G8H8DPL",
+     "B08H673XKN",
+     "B09MFR93KS"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q032",
+   "tags": [
+    "price"
+   ],
+   "query": "headphones under 1000",
+   "label": {
+    "exact": "{HEADPHONES} AND price <= 1000",
+    "ok": "({EARBUDS} AND price <= 1000) OR ({HEADPHONES} AND price <= 1250)"
+   },
+   "expect": {
+    "exact": [
+     "B009LJ2BXA",
+     "B00Y4ORQ46",
+     "B01DEWVZ2C",
+     "B01DF26V7A",
+     "B071Z8M4KX",
+     "B078W65FJ7",
+     "B07JQKQ91F",
+     "B07L8KNP5F",
+     "B07T9FV9YP",
+     "B08D75R3Z1"
+    ],
+    "ok": [
+     "B01F25X6RQ",
+     "B01F262EUU",
+     "B01MF8MB65",
+     "B07CD2BN46",
+     "B07DFYJRQV",
+     "B07GPXXNNG",
+     "B07GQD4K6L",
+     "B07KY3FNQP",
+     "B07LG59NPV",
+     "B07QZ3CZ48",
+     "B07S9S86BF",
+     "B07T5DKR5D",
+     "B07TCN5VR9",
+     "B085W8CFLH",
+     "B08D77XZX5",
+     "B08G28Z33M",
+     "B08H9Z3XQW",
+     "B08MTLLSL8",
+     "B091JF2TFD",
+     "B09GFWJDY1",
+     "B0B1F6GQPS",
+     "B0B5GJRTHB"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q033",
+   "tags": [
+    "price"
+   ],
+   "query": "smart tv under 15000",
+   "label": {
+    "exact": "{TV} AND {SMART} AND price <= 15000",
+    "ok": "{TV} AND price <= 18750"
+   },
+   "expect": {
+    "exact": [
+     "B084872DQY",
+     "B08B42LWKN",
+     "B08CS3BT4L",
+     "B08DPLCM6T",
+     "B08PZ6HZLT",
+     "B09DSXK8JX",
+     "B09F6S8BT6",
+     "B09F9YQQ7B",
+     "B09NNJ9WYM",
+     "B09X1M3DHX",
+     "B09ZPJT8B2",
+     "B09ZPM4C2C",
+     "B0B1YVCJ2Y",
+     "B0B466C3G4",
+     "B0B6F7LX4C",
+     "B0B9959XF3"
+    ],
+    "ok": [
+     "B06XGWRKYT",
+     "B07MDRGHWQ",
+     "B07MKFNHKG",
+     "B08PV1X771",
+     "B09F6VHQXB",
+     "B09Q5SWVBJ",
+     "B09YL9SN9B",
+     "B0B467CCB9",
+     "B0B8CXTTG3",
+     "B0B9XN9S3W"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q034",
+   "tags": [
+    "price"
+   ],
+   "query": "room heater below 2000",
+   "label": {
+    "exact": "{ROOM_HEATER} AND price <= 2000",
+    "ok": "{ROOM_HEATER} AND price <= 2500"
+   },
+   "expect": {
+    "exact": [
+     "B009P2LK08",
+     "B009P2LK80",
+     "B00H47GVGY",
+     "B00LUGTJGO",
+     "B00O24PUO6",
+     "B06XFTHCNY",
+     "B07J9KXQCC",
+     "B07R99NBVB",
+     "B07VX71FZP",
+     "B08DCVRW98",
+     "B08MVSGXMY",
+     "B099FDW2ZF",
+     "B099PR2GQJ",
+     "B09CGLY5CX",
+     "B09H34V36W",
+     "B09KRHXTLN",
+     "B09LV1CMGH",
+     "B09MQ9PDHR",
+     "B09NFSHCWN",
+     "B09P1MFKG1",
+     "B09R1YFL6S",
+     "B09ZTZ9N3Q",
+     "B09ZVJXN5L",
+     "B0B9F9PT8R",
+     "B0BDG6QDYD",
+     "B0BMTZ4T1D",
+     "B0BMZ6SY89",
+     "B0BPBG712X",
+     "B0BPJBTB3F"
+    ],
+    "ok": [
+     "B009P2LIL4",
+     "B009P2LITG",
+     "B00KRCBA6E",
+     "B078KRFWQB",
+     "B07K19NYZ8",
+     "B0B7NWGXS6"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q035",
+   "tags": [
+    "price",
+    "attribute"
+   ],
+   "query": "wireless mouse under 500",
+   "label": {
+    "exact": "{MOUSE} AND {WIRELESS} AND price <= 500",
+    "ok": "({MOUSE} AND {WIRELESS} AND price <= 625) OR ({MOUSE} AND price <= 500)"
+   },
+   "expect": {
+    "exact": [
+     "B08YDFX7Y1",
+     "B098JYT4SY",
+     "B09ZHCJDP1",
+     "B0B296NTFV"
+    ],
+    "ok": [
+     "B003L62T7W",
+     "B009VCGPSY",
+     "B01HJI0FS2",
+     "B01J0XWYKQ",
+     "B073BRXPZX",
+     "B079Y6JZC8",
+     "B07JPX9CR7",
+     "B07L9FW9GF",
+     "B0819HZPXL",
+     "B083RD1J99",
+     "B099SD8PRP",
+     "B09GB5B4BK",
+     "B09Z6WH2N1",
+     "B0B8ZWNR5T"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q036",
+   "tags": [
+    "price"
+   ],
+   "query": "electric kettle under 1000",
+   "label": {
+    "exact": "{KETTLE} AND price <= 1000",
+    "ok": "{KETTLE} AND price <= 1250"
+   },
+   "expect": {
+    "exact": [
+     "B01MQZ7J8K",
+     "B078V8R9BS",
+     "B07F366Z51",
+     "B07QDSN9V6",
+     "B07SYYVP69",
+     "B07T4D9FNY",
+     "B07VNFP3C2",
+     "B07WGPBXY9",
+     "B07WJXCTG9",
+     "B07WMS7TWB",
+     "B08C7TYHPB",
+     "B094G9L9LT",
+     "B096YCN3SD",
+     "B097RN7BBK",
+     "B09Y5FZK9N",
+     "B0B2DZ5S6R"
+    ],
+    "ok": [
+     "B00NW4UWN6",
+     "B07GLS2563",
+     "B07GLSKXS1",
+     "B07VZYMQNZ",
+     "B07YR26BJ3",
+     "B082KVTRW8",
+     "B08HLC7Z3G"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q037",
+   "tags": [
+    "price"
+   ],
+   "query": "power bank under 1500",
+   "label": {
+    "exact": "{POWER_BANK} AND price <= 1500",
+    "ok": "{POWER_BANK} AND price <= 1875"
+   },
+   "expect": {
+    "exact": [
+     "B07X963JNS",
+     "B08HVJCW95",
+     "B08HVL8QN3",
+     "B08MC57J31",
+     "B0993BB11X",
+     "B09MZCQYHZ"
+    ],
+    "ok": [
+     "B08HF4W2CT"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q038",
+   "tags": [
+    "price"
+   ],
+   "query": "smartwatch under 2000",
+   "label": {
+    "exact": "{SMARTWATCH} AND price <= 2000",
+    "ok": "{SMARTWATCH} AND price <= 2500"
+   },
+   "expect": {
+    "exact": [
+     "B07YY1BY5B",
+     "B08HV25BBQ",
+     "B0949SBKMP",
+     "B097R25DP7",
+     "B09NVPJ3P4",
+     "B09NVPSCQT",
+     "B09PLFJ7ZW",
+     "B09PNKXSKF",
+     "B09RKFBCV7",
+     "B09V12K8NT",
+     "B09V175NP7",
+     "B09V17S2BG",
+     "B09YV42QHZ",
+     "B09YV463SW",
+     "B09YV4RG4D",
+     "B0B3RRWSF6",
+     "B0B3RS9DNF",
+     "B0B3RSDSZ3",
+     "B0B53NXFFR",
+     "B0B53QFZPY",
+     "B0B53QLB9H",
+     "B0B5B6PQCT",
+     "B0B5CGTBKV",
+     "B0B5D39BCD",
+     "B0B5DDJNH4",
+     "B0B5LVS732",
+     "B0B82YGCF6",
+     "B0BBVKRP7B",
+     "B0BF4YBLPX",
+     "B0BF54972T",
+     "B0BF54LXW6",
+     "B0BF563HB4",
+     "B0BF57RN3K",
+     "B0BMVWKZ8G"
+    ],
+    "ok": [
+     "B094JB13XL",
+     "B0972BQ2RS",
+     "B09MQSCJQ1",
+     "B09NC2TY11",
+     "B09P18XVW6",
+     "B09YV3K34W",
+     "B09YV4MW2T",
+     "B0B5GF6DQD"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q039",
+   "tags": [
+    "price"
+   ],
+   "query": "vacuum cleaner under 5000",
+   "label": {
+    "exact": "{VACUUM} AND price <= 5000",
+    "ok": "{VACUUM} AND price <= 6250"
+   },
+   "expect": {
+    "exact": [
+     "B07H3N8RJH",
+     "B07SLNG3LW",
+     "B07SRM58TP",
+     "B083M7WPZD",
+     "B08HDCWDXD",
+     "B09SZ5TWHW",
+     "B09XTQFFCG",
+     "B0B1MDZV9C"
+    ],
+    "ok": [
+     "B00JBNZPFM",
+     "B07Z51CGGH",
+     "B09FZ89DK6"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q040",
+   "tags": [
+    "price"
+   ],
+   "query": "geyser under 5000",
+   "label": {
+    "exact": "{GEYSER} AND price <= 5000",
+    "ok": "({GEYSER} AND price <= 6250) OR ({IMMERSION} AND price <= 5000)"
+   },
+   "expect": {
+    "exact": [
+     "B077BTLQ67",
+     "B078JBK4GX",
+     "B078JDNZJ8",
+     "B078JF6X9B",
+     "B07H5PBN54",
+     "B07QDSN9V6",
+     "B07W4HTS8Q",
+     "B07WKB69RS",
+     "B07Y1RCCW5",
+     "B081B1JL35",
+     "B0836JGZ74",
+     "B08QW937WV",
+     "B08T8KWNQ9",
+     "B08YRMBK9R",
+     "B097MKZHNV",
+     "B097R2V1W8",
+     "B097R4D42G",
+     "B09WMTJPG7",
+     "B0B3X2BY3M",
+     "B0B9RN5X8B",
+     "B0BP89YBC1",
+     "B0BR4F878Q"
+    ],
+    "ok": [
+     "B00ABMASXG",
+     "B00HZIOGXW",
+     "B00P0R95EA",
+     "B0123P3PWE",
+     "B014HDJ7ZE",
+     "B07K2HVKLL",
+     "B07LG96SDB",
+     "B088ZTJT2R",
+     "B08CGW4GYR",
+     "B08GSQXLJ2",
+     "B08MV82R99",
+     "B097R45BH8",
+     "B09J2QCKKM",
+     "B09N3BFP4M"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q041",
+   "tags": [
+    "attribute"
+   ],
+   "query": "wireless mouse",
+   "label": {
+    "exact": "{MOUSE} AND {WIRELESS}",
+    "ok": "{MOUSE}"
+   },
+   "expect": {
+    "exact": [
+     "B004IO5BMQ",
+     "B01J0XWYKQ",
+     "B01KK0HU3Y",
+     "B01M72LILF",
+     "B01MQ2A86A",
+     "B07J2NGB69",
+     "B07JPX9CR7",
+     "B07X2L5Z8C",
+     "B083RCTXLL",
+     "B08LW31NQ6",
+     "B08Y7MXFMK",
+     "B08YDFX7Y1",
+     "B098JYT4SY",
+     "B099SD8PRP",
+     "B09GB5B4BK",
+     "B09ZHCJDP1",
+     "B0B296NTFV"
+    ],
+    "ok": [
+     "B003L62T7W",
+     "B009VCGPSY",
+     "B00NFD0ETQ",
+     "B01HJI0FS2",
+     "B073BRXPZX",
+     "B079Y6JZC8",
+     "B07L9FW9GF",
+     "B0819HZPXL",
+     "B083RD1J99",
+     "B08497Z1MQ",
+     "B08CHZ3ZQ7",
+     "B08D64C9FN",
+     "B08LT9BMPP",
+     "B09F6D21BY",
+     "B09Z6WH2N1",
+     "B0B8ZWNR5T"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q042",
+   "tags": [
+    "attribute"
+   ],
+   "query": "55 inch 4k tv",
+   "label": {
+    "exact": "{TV} AND {INCH55} AND {FOURK}",
+    "ok": "{TV} AND ({INCH55} OR {FOURK})"
+   },
+   "expect": {
+    "exact": [
+     "B08XXF5V6G",
+     "B092BL5DCX",
+     "B095JQVC7N",
+     "B09NNGHG22",
+     "B09RWQ7YR6",
+     "B0B15GSPQW",
+     "B0B1YZ9CB8",
+     "B0B3XXSB1K",
+     "B0B997FBZT",
+     "B0B9XLX8VR",
+     "B0BB3CBFBM"
+    ],
+    "ok": [
+     "B087JWLZ2K",
+     "B08FD2VSD9",
+     "B08Y55LPBF",
+     "B092BJMT8Q",
+     "B095JPKPH3",
+     "B099K9ZX65",
+     "B09MJ77786",
+     "B09PLD9TCD",
+     "B09RFC46VP",
+     "B09VCHLSJF",
+     "B09WN3SRC7",
+     "B0B15CPR37",
+     "B0B1YY6JJL",
+     "B0B1YZX72F",
+     "B0B2C5MJN6",
+     "B0B3MMYHYW",
+     "B0B3XY5YT4",
+     "B0BC8BQ432"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q043",
+   "tags": [
+    "attribute"
+   ],
+   "query": "32 inch smart tv",
+   "label": {
+    "exact": "{TV} AND {INCH32} AND {SMART}",
+    "ok": "{TV} AND {INCH32}"
+   },
+   "expect": {
+    "exact": [
+     "B084872DQY",
+     "B08B42LWKN",
+     "B08CS3BT4L",
+     "B08DPLCM6T",
+     "B08PV1X771",
+     "B08PZ6HZLT",
+     "B09DSXK8JX",
+     "B09F6S8BT6",
+     "B09F9YQQ7B",
+     "B09NNJ9WYM",
+     "B09Q5SWVBJ",
+     "B09X1M3DHX",
+     "B09YL9SN9B",
+     "B09ZPJT8B2",
+     "B09ZPM4C2C",
+     "B0B1YVCJ2Y",
+     "B0B466C3G4",
+     "B0B6F7LX4C",
+     "B0B8CXTTG3",
+     "B0B9959XF3"
+    ],
+    "ok": [
+     "B06XGWRKYT",
+     "B07MKFNHKG",
+     "B09F6VHQXB",
+     "B0B467CCB9",
+     "B0B9XN9S3W"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q044",
+   "tags": [
+    "attribute"
+   ],
+   "query": "type c to type c cable",
+   "label": {
+    "exact": "{CABLE} AND {C_TO_C}",
+    "ok": "{CABLE} AND {TYPEC}"
+   },
+   "expect": {
+    "exact": [
+     "B008FWZGSG",
+     "B07CWDX49D",
+     "B07CWNJLPC",
+     "B082LSVT4B",
+     "B084MZYBTV",
+     "B084N18QZY",
+     "B08NW8GHCJ",
+     "B08PSQRW2T",
+     "B08PSVBB2X",
+     "B08V9C4B1J",
+     "B08WKFSN84",
+     "B09C6HWG18",
+     "B09CMQRQM6",
+     "B09Q8WQ5QJ",
+     "B09QGZFBPM",
+     "B09RZS1NQT",
+     "B0B4HJNPV4",
+     "B0B86CDHL1",
+     "B0B94JPY2N",
+     "B0BMXMLSMM"
+    ],
+    "ok": [
+     "B01GGKYKQM",
+     "B01GGKZ0V6",
+     "B01GGKZ4NU",
+     "B01LONQBDG",
+     "B071SDRGWL",
+     "B077Z65HSD",
+     "B07F1P8KNV",
+     "B07GVGTSLN",
+     "B07HZ2QCGR",
+     "B07PFJ5VQD",
+     "B07RD611Z8",
+     "B07XJYYH7L",
+     "B07XLCFSSN",
+     "B07YTNKVJQ",
+     "B081FG1QYX",
+     "B081FJWN52",
+     "B083342NKJ",
+     "B084DTMYWK",
+     "B084MZXJNK",
+     "B084N133Y7",
+     "B085DTN6R2",
+     "B086JTMRYL",
+     "B08CF3D7QR",
+     "B08CHKQ8D4",
+     "B08CT62BM1",
+     "B08CTNJ985",
+     "B08DDRGWTJ",
+     "B08H5L8V1L",
+     "B08HDH26JX",
+     "B08HDJ86NZ",
+     "B08JW1GVS7",
+     "B08LKS3LSP",
+     "B08N1WL9XW",
+     "B08NCKT9FG",
+     "B08QSC1XY8",
+     "B08QSDKFGQ",
+     "B08R69WBN7",
+     "B08RP2L2NL",
+     "B08VRMK55F",
+     "B08WKG2MWT",
+     "B08WRBG3XW",
+     "B08XMG618K",
+     "B08Y1TFSP6",
+     "B08Y5KXR6Z",
+     "B0941392C8",
+     "B094DQWV9B",
+     "B0974G5Q2Y",
+     "B0974H97TJ",
+     "B097C564GC",
+     "B098NS6PVG",
+     "B09BW2GP18",
+     "B09C6H53KH",
+     "B09CMM3VGK",
+     "B09CMP1SC8",
+     "B09HV71RL1",
+     "B09KH58JZR",
+     "B09NKZXMWJ",
+     "B09NL4DCXK",
+     "B09NL4DJ2Z",
+     "B09PTT8DZF",
+     "B09Q8HMKZX",
+     "B09QGZM8QB",
+     "B09RWZRCP1",
+     "B09RX1FK54",
+     "B09SB6SJB4",
+     "B09VH568H7",
+     "B09W5XR9RT",
+     "B09X79PP8F",
+     "B09YLX91QR",
+     "B09YLXYP7Y",
+     "B0B3N8VG24",
+     "B0B4DT8MKT",
+     "B0B4HKH19N",
+     "B0B4T8RSJ1",
+     "B0B5F3YZY4",
+     "B0B5ZF3NRK",
+     "B0B65MJ45G",
+     "B0B65P827P",
+     "B0B8SRZ5SV",
+     "B0B8SSC5D9",
+     "B0B8SSZ76F",
+     "B0BFWGBX61",
+     "B0BQRJ3C47"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q045",
+   "tags": [
+    "attribute"
+   ],
+   "query": "hdmi cable",
+   "label": {
+    "exact": "{HDMI_CABLE}",
+    "ok": "{HDMI_ANY}"
+   },
+   "expect": {
+    "exact": [
+     "B00GG59HU2",
+     "B014I8SSD0",
+     "B014I8SX4Y",
+     "B015OW3M1W",
+     "B016MDK4F4",
+     "B01D5H8ZI8",
+     "B01D5H90L4",
+     "B01J8S6X2I",
+     "B01M4GGIVU",
+     "B01M5967SY",
+     "B0718ZN31Q",
+     "B075ZTJ9XR",
+     "B07KSMBL2H",
+     "B07RX14W1Q",
+     "B07RY2X9MP",
+     "B07VSG5SXZ",
+     "B08PPHFXG3",
+     "B08TGG316Z",
+     "B09HCH3JZG",
+     "B0BBMGLQDW"
+    ],
+    "ok": [
+     "B06XR9PR5X",
+     "B07VJ9ZTXS",
+     "B085194JFL",
+     "B09163Q5CD"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q046",
+   "tags": [
+    "attribute"
+   ],
+   "query": "braided type-c cable",
+   "label": {
+    "exact": "{CABLE} AND {TYPEC} AND {BRAIDED}",
+    "ok": "{CABLE} AND {TYPEC}"
+   },
+   "expect": {
+    "exact": [
+     "B07CWDX49D",
+     "B07CWNJLPC",
+     "B07F1P8KNV",
+     "B07PFJ5VQD",
+     "B07XJYYH7L",
+     "B07XLCFSSN",
+     "B081FG1QYX",
+     "B081FJWN52",
+     "B082LSVT4B",
+     "B083342NKJ",
+     "B084MZXJNK",
+     "B085DTN6R2",
+     "B086JTMRYL",
+     "B08CHKQ8D4",
+     "B08LKS3LSP",
+     "B08NW8GHCJ",
+     "B08PSQRW2T",
+     "B08PSVBB2X",
+     "B08QSC1XY8",
+     "B08QSDKFGQ",
+     "B08VRMK55F",
+     "B08WKFSN84",
+     "B08Y1TFSP6",
+     "B098NS6PVG",
+     "B09C6H53KH",
+     "B09C6HWG18",
+     "B09CMM3VGK",
+     "B09CMQRQM6",
+     "B09HV71RL1",
+     "B09PTT8DZF",
+     "B09Q8WQ5QJ",
+     "B09SB6SJB4",
+     "B09W5XR9RT",
+     "B0B5F3YZY4",
+     "B0B65MJ45G",
+     "B0B65P827P",
+     "B0B86CDHL1",
+     "B0B8SRZ5SV",
+     "B0B8SSC5D9",
+     "B0B94JPY2N",
+     "B0BFWGBX61"
+    ],
+    "ok": [
+     "B008FWZGSG",
+     "B01GGKYKQM",
+     "B01GGKZ0V6",
+     "B01GGKZ4NU",
+     "B01LONQBDG",
+     "B071SDRGWL",
+     "B077Z65HSD",
+     "B07GVGTSLN",
+     "B07HZ2QCGR",
+     "B07RD611Z8",
+     "B07YTNKVJQ",
+     "B084DTMYWK",
+     "B084MZYBTV",
+     "B084N133Y7",
+     "B084N18QZY",
+     "B08CF3D7QR",
+     "B08CT62BM1",
+     "B08CTNJ985",
+     "B08DDRGWTJ",
+     "B08H5L8V1L",
+     "B08HDH26JX",
+     "B08HDJ86NZ",
+     "B08JW1GVS7",
+     "B08N1WL9XW",
+     "B08NCKT9FG",
+     "B08R69WBN7",
+     "B08RP2L2NL",
+     "B08V9C4B1J",
+     "B08WKG2MWT",
+     "B08WRBG3XW",
+     "B08XMG618K",
+     "B08Y5KXR6Z",
+     "B0941392C8",
+     "B094DQWV9B",
+     "B0974G5Q2Y",
+     "B0974H97TJ",
+     "B097C564GC",
+     "B09BW2GP18",
+     "B09CMP1SC8",
+     "B09KH58JZR",
+     "B09NKZXMWJ",
+     "B09NL4DCXK",
+     "B09NL4DJ2Z",
+     "B09Q8HMKZX",
+     "B09QGZFBPM",
+     "B09QGZM8QB",
+     "B09RWZRCP1",
+     "B09RX1FK54",
+     "B09RZS1NQT",
+     "B09VH568H7",
+     "B09X79PP8F",
+     "B09YLX91QR",
+     "B09YLXYP7Y",
+     "B0B3N8VG24",
+     "B0B4DT8MKT",
+     "B0B4HJNPV4",
+     "B0B4HKH19N",
+     "B0B4T8RSJ1",
+     "B0B5ZF3NRK",
+     "B0B8SSZ76F",
+     "B0BMXMLSMM",
+     "B0BQRJ3C47"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q047",
+   "tags": [
+    "attribute"
+   ],
+   "query": "bluetooth speaker",
+   "label": {
+    "exact": "{BT_SPEAKER}",
+    "ok": "{SPEAKER}"
+   },
+   "expect": {
+    "exact": [
+     "B07B88KQZ8",
+     "B07NC12T2R",
+     "B07W6VWZ8C",
+     "B07W7Z6DVL",
+     "B07YNTJ8ZM",
+     "B0814ZY6FP",
+     "B08CRRQK6Z",
+     "B08JMC1988",
+     "B08S74GTBT",
+     "B08SMJT55F",
+     "B09LRZYBH1",
+     "B0B12K5BPM"
+    ],
+    "ok": [
+     "B07L3NDN24",
+     "B08DCVRW98",
+     "B08K9PX15C",
+     "B08SBH499M"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q048",
+   "tags": [
+    "attribute"
+   ],
+   "query": "earbuds with noise cancellation",
+   "label": {
+    "exact": "{TWS} AND {ANC}",
+    "ok": "{TWS}"
+   },
+   "expect": {
+    "exact": [
+     "B0B31FR4Y2"
+    ],
+    "ok": [
+     "B07DFYJRQV",
+     "B086WMSCN3",
+     "B08CFCK6CW",
+     "B08D11DZ2W",
+     "B08FB2LNSZ",
+     "B08FN6WGDQ",
+     "B08JQN8DGZ",
+     "B098R25TGC",
+     "B09N3ZNHTY",
+     "B09ND94ZRG",
+     "B09PL79D2X",
+     "B09Y5MP7C4",
+     "B0B217Z5VK",
+     "B0B31BYXQQ",
+     "B0B3N7LR6K",
+     "B0B3NDPCS9",
+     "B0B5GJRTHB"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q049",
+   "tags": [
+    "attribute"
+   ],
+   "query": "neckband earphones",
+   "label": {
+    "exact": "{NECKBAND} AND {EARBUDS}",
+    "ok": "{EARBUDS}"
+   },
+   "expect": {
+    "exact": [
+     "B085W8CFLH",
+     "B08D77XZX5",
+     "B08TV2P1N8",
+     "B092X94QNQ",
+     "B09GFWJDY1",
+     "B0B1F6GQPS"
+    ],
+    "ok": [
+     "B01DEWVZ2C",
+     "B01DF26V7A",
+     "B01F25X6RQ",
+     "B01F262EUU",
+     "B01MF8MB65",
+     "B071Z8M4KX",
+     "B07CD2BN46",
+     "B07DFYJRQV",
+     "B07GPXXNNG",
+     "B07GQD4K6L",
+     "B07JQKQ91F",
+     "B07KY3FNQP",
+     "B07LG59NPV",
+     "B07QZ3CZ48",
+     "B07S9S86BF",
+     "B07T5DKR5D",
+     "B07TCN5VR9",
+     "B07XJWTYM2",
+     "B083T5G5PM",
+     "B086WMSCN3",
+     "B08CFCK6CW",
+     "B08D11DZ2W",
+     "B08D75R3Z1",
+     "B08FB2LNSZ",
+     "B08FN6WGDQ",
+     "B08G28Z33M",
+     "B08H9Z3XQW",
+     "B08JQN8DGZ",
+     "B08MTLLSL8",
+     "B091JF2TFD",
+     "B098R25TGC",
+     "B09N3ZNHTY",
+     "B09ND94ZRG",
+     "B09NR6G588",
+     "B09PL79D2X",
+     "B09Y5MP7C4",
+     "B09YLFHFDW",
+     "B0B217Z5VK",
+     "B0B31BYXQQ",
+     "B0B31FR4Y2",
+     "B0B3N7LR6K",
+     "B0B3NDPCS9",
+     "B0B5GJRTHB"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q050",
+   "tags": [
+    "attribute"
+   ],
+   "query": "oil filled radiator heater",
+   "label": {
+    "exact": "{OIL_HEATER}",
+    "ok": "{ROOM_HEATER}"
+   },
+   "expect": {
+    "exact": [
+     "B01M5F614J",
+     "B01N1XVVLC",
+     "B08MZNT7GP",
+     "B08QHLXWV3",
+     "B09M3F4HGB"
+    ],
+    "ok": [
+     "B009P2LIL4",
+     "B009P2LITG",
+     "B009P2LK08",
+     "B009P2LK80",
+     "B00GHL8VP2",
+     "B00H47GVGY",
+     "B00KRCBA6E",
+     "B00LUGTJGO",
+     "B00O24PUO6",
+     "B01M265AAK",
+     "B06XFTHCNY",
+     "B078KRFWQB",
+     "B07J9KXQCC",
+     "B07K19NYZ8",
+     "B07R99NBVB",
+     "B07VX71FZP",
+     "B08DCVRW98",
+     "B08MVSGXMY",
+     "B08MVXPTDG",
+     "B099FDW2ZF",
+     "B099PR2GQJ",
+     "B09CGLY5CX",
+     "B09H34V36W",
+     "B09KRHXTLN",
+     "B09LV1CMGH",
+     "B09MQ9PDHR",
+     "B09NFSHCWN",
+     "B09P1MFKG1",
+     "B09R1YFL6S",
+     "B09ZTZ9N3Q",
+     "B09ZVJXN5L",
+     "B0B7NWGXS6",
+     "B0B9F9PT8R",
+     "B0BDG6QDYD",
+     "B0BMTZ4T1D",
+     "B0BMZ6SY89",
+     "B0BPBG712X",
+     "B0BPJBTB3F"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q051",
+   "tags": [
+    "attribute"
+   ],
+   "query": "3 litre instant geyser",
+   "label": {
+    "exact": "{GEYSER} AND {INSTANT} AND {L3}",
+    "ok": "{GEYSER} AND ({INSTANT} OR {L3})"
+   },
+   "expect": {
+    "exact": [
+     "B077BTLQ67",
+     "B07W4HTS8Q",
+     "B07WKB69RS",
+     "B097MKZHNV",
+     "B097R2V1W8",
+     "B0B9RN5X8B"
+    ],
+    "ok": [
+     "B078JBK4GX",
+     "B078JDNZJ8",
+     "B078JF6X9B",
+     "B07H5PBN54",
+     "B07Y1RCCW5",
+     "B081B1JL35",
+     "B0836JGZ74",
+     "B08QW937WV",
+     "B08T8KWNQ9",
+     "B08YRMBK9R",
+     "B09WMTJPG7",
+     "B0B3X2BY3M",
+     "B0BP89YBC1",
+     "B0BR4F878Q"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q052",
+   "tags": [
+    "attribute"
+   ],
+   "query": "1.5 litre electric kettle",
+   "label": {
+    "exact": "{KETTLE} AND {L15}",
+    "ok": "{KETTLE}"
+   },
+   "expect": {
+    "exact": [
+     "B01MQZ7J8K",
+     "B07QDSN9V6",
+     "B07T4D9FNY",
+     "B07VNFP3C2",
+     "B07VZYMQNZ",
+     "B07WMS7TWB",
+     "B08C7TYHPB",
+     "B096YCN3SD",
+     "B09Y5FZK9N",
+     "B0B2DZ5S6R",
+     "B0B3TBY2YX"
+    ],
+    "ok": [
+     "B00NW4UWN6",
+     "B00TI8E7BI",
+     "B01I1LDZGA",
+     "B078V8R9BS",
+     "B07B5XJ572",
+     "B07F366Z51",
+     "B07GLS2563",
+     "B07GLSKXS1",
+     "B07SYYVP69",
+     "B07WGPBXY9",
+     "B07WJXCTG9",
+     "B07WNK1FFN",
+     "B07YR26BJ3",
+     "B082KVTRW8",
+     "B083GKDRKR",
+     "B08HLC7Z3G",
+     "B091V8HK8Z",
+     "B094G9L9LT",
+     "B097RN7BBK",
+     "B09VGS66FV",
+     "B0B2CZTCL2",
+     "B0B5KZ3C53"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q053",
+   "tags": [
+    "attribute"
+   ],
+   "query": "bldc ceiling fan",
+   "label": {
+    "exact": "{CEILING_FAN} AND {BLDC}",
+    "ok": "{CEILING_FAN}"
+   },
+   "expect": {
+    "exact": [
+     "B08Y5QJXSR"
+    ],
+    "ok": [
+     "B01L7C4IU2",
+     "B01LYU3BZF",
+     "B01M0505SJ",
+     "B07SPVMSC6",
+     "B07ZJND9B9",
+     "B08WWKM5HQ",
+     "B08ZHYNTM1",
+     "B095PWLLY6",
+     "B09MT94QLL",
+     "B09SPTNG58"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q054",
+   "tags": [
+    "attribute"
+   ],
+   "query": "wireless keyboard",
+   "label": {
+    "exact": "{KEYBOARD} AND {WIRELESS}",
+    "ok": "({KB_COMBO} AND {WIRELESS}) OR {KEYBOARD}"
+   },
+   "expect": {
+    "exact": [
+     "B00MUTWLW4",
+     "B0148NPH9I"
+    ],
+    "ok": [
+     "B00CEQEGPI",
+     "B00ZYLMQH0",
+     "B012MQS060",
+     "B01N4EV2TL",
+     "B077T3BG5L",
+     "B07V82W5CN",
+     "B08498D67S",
+     "B08498H13H",
+     "B087FXHB6J",
+     "B08CF4SCNP",
+     "B098K3H92Z",
+     "B09BVCVTBC",
+     "B09GBBJV72",
+     "B09T3H12GV",
+     "B0BHYJ8CVF"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q055",
+   "tags": [
+    "attribute"
+   ],
+   "query": "128gb pen drive",
+   "label": {
+    "exact": "{PEN_DRIVE} AND {GB128}",
+    "ok": "{PEN_DRIVE}"
+   },
+   "expect": {
+    "exact": [
+     "B07JJFSG2B",
+     "B0819ZZK5K",
+     "B084PJSSQ1"
+    ],
+    "ok": [
+     "B005FYNT3G",
+     "B01EZ0X3L8",
+     "B01L8ZNWN2",
+     "B01LYLJ99X",
+     "B01N6LU1VF",
+     "B07SLMR1K6",
+     "B08JD36C6H"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q056",
+   "tags": [
+    "vague"
+   ],
+   "query": "something to keep my room warm in winter",
+   "label": {
+    "exact": "{ROOM_HEATER}"
+   },
+   "expect": {
+    "exact": [
+     "B009P2LIL4",
+     "B009P2LITG",
+     "B009P2LK08",
+     "B009P2LK80",
+     "B00GHL8VP2",
+     "B00H47GVGY",
+     "B00KRCBA6E",
+     "B00LUGTJGO",
+     "B00O24PUO6",
+     "B01M265AAK",
+     "B01M5F614J",
+     "B01N1XVVLC",
+     "B06XFTHCNY",
+     "B078KRFWQB",
+     "B07J9KXQCC",
+     "B07K19NYZ8",
+     "B07R99NBVB",
+     "B07VX71FZP",
+     "B08DCVRW98",
+     "B08MVSGXMY",
+     "B08MVXPTDG",
+     "B08MZNT7GP",
+     "B08QHLXWV3",
+     "B099FDW2ZF",
+     "B099PR2GQJ",
+     "B09CGLY5CX",
+     "B09H34V36W",
+     "B09KRHXTLN",
+     "B09LV1CMGH",
+     "B09M3F4HGB",
+     "B09MQ9PDHR",
+     "B09NFSHCWN",
+     "B09P1MFKG1",
+     "B09R1YFL6S",
+     "B09ZTZ9N3Q",
+     "B09ZVJXN5L",
+     "B0B7NWGXS6",
+     "B0B9F9PT8R",
+     "B0BDG6QDYD",
+     "B0BMTZ4T1D",
+     "B0BMZ6SY89",
+     "B0BPBG712X",
+     "B0BPJBTB3F"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q057",
+   "tags": [
+    "vague"
+   ],
+   "query": "I need hot water for bathing",
+   "label": {
+    "exact": "{GEYSER} OR {IMMERSION}"
+   },
+   "expect": {
+    "exact": [
+     "B00ABMASXG",
+     "B00HZIOGXW",
+     "B00P0R95EA",
+     "B0123P3PWE",
+     "B014HDJ7ZE",
+     "B01892MIPA",
+     "B077BTLQ67",
+     "B078JBK4GX",
+     "B078JDNZJ8",
+     "B078JF6X9B",
+     "B07H5PBN54",
+     "B07JGCGNDG",
+     "B07K2HVKLL",
+     "B07LG96SDB",
+     "B07QDSN9V6",
+     "B07W4HTS8Q",
+     "B07WKB69RS",
+     "B07Y1RCCW5",
+     "B081B1JL35",
+     "B0836JGZ74",
+     "B088ZTJT2R",
+     "B08CGW4GYR",
+     "B08GSQXLJ2",
+     "B08MV82R99",
+     "B08QW937WV",
+     "B08T8KWNQ9",
+     "B08WRKSF9D",
+     "B08YRMBK9R",
+     "B097MKZHNV",
+     "B097R2V1W8",
+     "B097R3XH9R",
+     "B097R45BH8",
+     "B097R4D42G",
+     "B09J2QCKKM",
+     "B09N3BFP4M",
+     "B09WMTJPG7",
+     "B0B3X2BY3M",
+     "B0B9RN5X8B",
+     "B0BP89YBC1",
+     "B0BR4F878Q"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q058",
+   "tags": [
+    "vague"
+   ],
+   "query": "something to make smoothies",
+   "label": {
+    "exact": "{BLENDER}",
+    "ok": "{MIXER}"
+   },
+   "expect": {
+    "exact": [
+     "B0085W2MUQ",
+     "B00A7PLVU6",
+     "B00W56GLOQ",
+     "B00YQLG7GK",
+     "B071R3LHFM",
+     "B0747VDH9L",
+     "B075K76YW1",
+     "B07FL3WRX5",
+     "B07NRTCDS5",
+     "B07QHHCB27",
+     "B07Y5FDPKV",
+     "B08CGW4GYR",
+     "B08RDWBYCQ",
+     "B08S6RKT4L",
+     "B08TT63N58",
+     "B098T9CJVQ",
+     "B09F6KL23R",
+     "B09NTHQRW3",
+     "B0B3G5XZN5",
+     "B0B8CB7MHW",
+     "B0B9RZ4G4W",
+     "B0BFBNXS94",
+     "B0BHNHMR3H",
+     "B0BL3R4RGS",
+     "B0BLC2BYPX",
+     "B0BNDGL26T",
+     "B0BNQMF152",
+     "B0BPCJM7TB",
+     "B0BQ3K23Y1"
+    ],
+    "ok": [
+     "B00HVXS7WC",
+     "B00K57MR22",
+     "B0188KPKB2",
+     "B01GZSQJPA",
+     "B071113J7M",
+     "B0756K5DYZ",
+     "B075JJ5NQC",
+     "B075S9FVRY",
+     "B078JT7LTD",
+     "B07D8VBYB4",
+     "B07DGD4Z4C",
+     "B07MKMFKPG",
+     "B07TTSS5MP",
+     "B07TXCY3YK",
+     "B07Y9PY6Y1",
+     "B085LPT5F4",
+     "B086199CWG",
+     "B08CFJBZRK",
+     "B08CNLYKW5",
+     "B08G8H8DPL",
+     "B08H673XKN",
+     "B08KDBLMQP",
+     "B08MXJYB2V",
+     "B097XJQZ8H",
+     "B09GYBZPHF",
+     "B09J2SCVQT",
+     "B09MFR93KS",
+     "B09X5C9VLK",
+     "B09Y358DZQ",
+     "B09ZDVL7L8",
+     "B0BDZWMGZ1"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q059",
+   "tags": [
+    "vague"
+   ],
+   "query": "something to listen to music while running",
+   "label": {
+    "exact": "{TWS} OR {NECKBAND}",
+    "ok": "{HEADPHONES}"
+   },
+   "expect": {
+    "exact": [
+     "B07DFYJRQV",
+     "B085W8CFLH",
+     "B086WMSCN3",
+     "B08CFCK6CW",
+     "B08D11DZ2W",
+     "B08D77XZX5",
+     "B08FB2LNSZ",
+     "B08FN6WGDQ",
+     "B08JQN8DGZ",
+     "B08TV2P1N8",
+     "B092X94QNQ",
+     "B098R25TGC",
+     "B09GFWJDY1",
+     "B09N3ZNHTY",
+     "B09ND94ZRG",
+     "B09PL79D2X",
+     "B09Y5MP7C4",
+     "B09YLX91QR",
+     "B09YLXYP7Y",
+     "B09YLYB9PB",
+     "B0B1F6GQPS",
+     "B0B217Z5VK",
+     "B0B31BYXQQ",
+     "B0B31FR4Y2",
+     "B0B3N7LR6K",
+     "B0B3NDPCS9",
+     "B0B5GJRTHB"
+    ],
+    "ok": [
+     "B009LJ2BXA",
+     "B00Y4ORQ46",
+     "B01DEWVZ2C",
+     "B01DF26V7A",
+     "B071Z8M4KX",
+     "B078W65FJ7",
+     "B079S811J3",
+     "B07JQKQ91F",
+     "B07L8KNP5F",
+     "B07T9FV9YP",
+     "B083T5G5PM",
+     "B0873L7J6X",
+     "B08D75R3Z1",
+     "B097JVLW3L",
+     "B09YLFHFDW"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q060",
+   "tags": [
+    "vague"
+   ],
+   "query": "my laptop sits too low and my neck hurts",
+   "label": {
+    "exact": "{LAPTOP_STAND}",
+    "ok": "{COOLING_PAD}"
+   },
+   "expect": {
+    "exact": [
+     "B07MSLTW8Z",
+     "B07TR5HSR9",
+     "B07XCM6T4N",
+     "B082FTPRSK",
+     "B086394NY5",
+     "B08HQL67D6",
+     "B08MZQBFLN",
+     "B08PFSZ7FH",
+     "B08WKCTFF3",
+     "B08YD264ZS",
+     "B09B9SPC7F",
+     "B09XX51X2G",
+     "B09Z28BQZT",
+     "B09Z7YGV3R",
+     "B0B72BSW7K",
+     "B0BCVJ3PVP",
+     "B0BHVPTM2C"
+    ],
+    "ok": [
+     "B07YWS9SP9",
+     "B08XXVXP3J"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q061",
+   "tags": [
+    "vague"
+   ],
+   "query": "remove fuzz balls from my sweaters",
+   "label": {
+    "exact": "{LINT}"
+   },
+   "expect": {
+    "exact": [
+     "B00TDD0YM4",
+     "B01NCVJMKX",
+     "B07HK53XM4",
+     "B07MP21WJD",
+     "B07NCKMXVZ",
+     "B07NKNBTT3",
+     "B081RLM75M",
+     "B08SKZ2RMG",
+     "B09474JWN6",
+     "B09DSQXCM8",
+     "B09JN37WBX",
+     "B09KNMLH4Y",
+     "B09MTLG4TP",
+     "B09NL7LBWT",
+     "B09NNZ1GF7",
+     "B09SFRNKSR",
+     "B09XB1R2F3",
+     "B0B3JSWG81",
+     "B0B59K1C8F",
+     "B0BK1K598K",
+     "B0BN2576GQ",
+     "B0BN6M3TCM"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q062",
+   "tags": [
+    "vague"
+   ],
+   "query": "something to track my steps and heart rate",
+   "label": {
+    "exact": "{SMARTWATCH}"
+   },
+   "expect": {
+    "exact": [
+     "B07YY1BY5B",
+     "B08HV25BBQ",
+     "B0949SBKMP",
+     "B094JB13XL",
+     "B096VF5YYF",
+     "B0972BQ2RS",
+     "B097R25DP7",
+     "B09BNXQ6BR",
+     "B09MQSCJQ1",
+     "B09NC2TY11",
+     "B09NVPJ3P4",
+     "B09NVPSCQT",
+     "B09P18XVW6",
+     "B09PLFJ7ZW",
+     "B09PNKXSKF",
+     "B09RKFBCV7",
+     "B09TBCVJS3",
+     "B09V12K8NT",
+     "B09V175NP7",
+     "B09V17S2BG",
+     "B09YV3K34W",
+     "B09YV42QHZ",
+     "B09YV463SW",
+     "B09YV4MW2T",
+     "B09YV4RG4D",
+     "B09ZQK9X8G",
+     "B0B3MWYCHQ",
+     "B0B3N7LR6K",
+     "B0B3NDPCS9",
+     "B0B3RRWSF6",
+     "B0B3RS9DNF",
+     "B0B3RSDSZ3",
+     "B0B53NXFFR",
+     "B0B53QFZPY",
+     "B0B53QLB9H",
+     "B0B5B6PQCT",
+     "B0B5CGTBKV",
+     "B0B5D39BCD",
+     "B0B5DDJNH4",
+     "B0B5GF6DQD",
+     "B0B5LVS732",
+     "B0B6BLTGTT",
+     "B0B82YGCF6",
+     "B0BBVKRP7B",
+     "B0BF4YBLPX",
+     "B0BF54972T",
+     "B0BF54LXW6",
+     "B0BF563HB4",
+     "B0BF57RN3K",
+     "B0BGSV43WY",
+     "B0BMVWKZ8G",
+     "B0BNXFDTZ2",
+     "B0BP18W8TM"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q063",
+   "tags": [
+    "vague"
+   ],
+   "query": "boil water quickly for tea",
+   "label": {
+    "exact": "{KETTLE}"
+   },
+   "expect": {
+    "exact": [
+     "B00NW4UWN6",
+     "B00TI8E7BI",
+     "B01I1LDZGA",
+     "B01MQZ7J8K",
+     "B078V8R9BS",
+     "B07B5XJ572",
+     "B07F366Z51",
+     "B07GLS2563",
+     "B07GLSKXS1",
+     "B07QDSN9V6",
+     "B07SYYVP69",
+     "B07T4D9FNY",
+     "B07VNFP3C2",
+     "B07VZYMQNZ",
+     "B07WGPBXY9",
+     "B07WJXCTG9",
+     "B07WMS7TWB",
+     "B07WNK1FFN",
+     "B07YR26BJ3",
+     "B082KVTRW8",
+     "B083GKDRKR",
+     "B08C7TYHPB",
+     "B08HLC7Z3G",
+     "B091V8HK8Z",
+     "B094G9L9LT",
+     "B096YCN3SD",
+     "B097RN7BBK",
+     "B09VGS66FV",
+     "B09Y5FZK9N",
+     "B0B2CZTCL2",
+     "B0B2DZ5S6R",
+     "B0B3TBY2YX",
+     "B0B5KZ3C53"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q064",
+   "tags": [
+    "vague"
+   ],
+   "query": "keep my phone charged while travelling",
+   "label": {
+    "exact": "{POWER_BANK}"
+   },
+   "expect": {
+    "exact": [
+     "B07X963JNS",
+     "B08HF4W2CT",
+     "B08HV83HL3",
+     "B08HVJCW95",
+     "B08HVL8QN3",
+     "B08MC57J31",
+     "B098QXR9X2",
+     "B0993BB11X",
+     "B09MZCQYHZ"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q065",
+   "tags": [
+    "vague"
+   ],
+   "query": "somewhere to store my files and photos",
+   "label": {
+    "exact": "{STORAGE}"
+   },
+   "expect": {
+    "exact": [
+     "B005FYNT3G",
+     "B01EZ0X3L8",
+     "B01L8ZNWN2",
+     "B01LYLJ99X",
+     "B01N6LU1VF",
+     "B06XDKWLJH",
+     "B07DJLFMPS",
+     "B07JJFSG2B",
+     "B07SLMR1K6",
+     "B07VTFN6HM",
+     "B0819ZZK5K",
+     "B084PJSSQ1",
+     "B08GYG6T12",
+     "B08JD36C6H",
+     "B08L5FM4JC",
+     "B08L5HMJVW",
+     "B09LRZYBH1"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q066",
+   "tags": [
+    "typo",
+    "brand"
+   ],
+   "query": "lojitech mouse",
+   "label": {
+    "exact": "{MOUSE} AND name ~* '\\mlogitech\\M'",
+    "ok": "{MOUSE}"
+   },
+   "expect": {
+    "exact": [
+     "B003L62T7W",
+     "B004IO5BMQ",
+     "B00NFD0ETQ",
+     "B01J0XWYKQ",
+     "B01M72LILF",
+     "B01MQ2A86A",
+     "B07X2L5Z8C",
+     "B08LT9BMPP"
+    ],
+    "ok": [
+     "B009VCGPSY",
+     "B01HJI0FS2",
+     "B01KK0HU3Y",
+     "B073BRXPZX",
+     "B079Y6JZC8",
+     "B07J2NGB69",
+     "B07JPX9CR7",
+     "B07L9FW9GF",
+     "B0819HZPXL",
+     "B083RCTXLL",
+     "B083RD1J99",
+     "B08497Z1MQ",
+     "B08CHZ3ZQ7",
+     "B08D64C9FN",
+     "B08LW31NQ6",
+     "B08Y7MXFMK",
+     "B08YDFX7Y1",
+     "B098JYT4SY",
+     "B099SD8PRP",
+     "B09F6D21BY",
+     "B09GB5B4BK",
+     "B09Z6WH2N1",
+     "B09ZHCJDP1",
+     "B0B296NTFV",
+     "B0B8ZWNR5T"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q067",
+   "tags": [
+    "typo",
+    "brand"
+   ],
+   "query": "samsng tv",
+   "label": {
+    "exact": "{TV} AND name ~* '\\msamsung\\M'",
+    "ok": "{TV}"
+   },
+   "expect": {
+    "exact": [
+     "B08PV1X771",
+     "B092BJMT8Q",
+     "B092BL5DCX",
+     "B09F6S8BT6",
+     "B0B15CPR37",
+     "B0B15GSPQW"
+    ],
+    "ok": [
+     "B06XGWRKYT",
+     "B07MDRGHWQ",
+     "B07MKFNHKG",
+     "B084872DQY",
+     "B087JWLZ2K",
+     "B08B42LWKN",
+     "B08CS3BT4L",
+     "B08DPLCM6T",
+     "B08FD2VSD9",
+     "B08PZ6HZLT",
+     "B08XXF5V6G",
+     "B08Y55LPBF",
+     "B095JPKPH3",
+     "B095JQVC7N",
+     "B099K9ZX65",
+     "B09DSXK8JX",
+     "B09F6VHQXB",
+     "B09F9YQQ7B",
+     "B09HQSV46W",
+     "B09JPC82QC",
+     "B09MJ77786",
+     "B09NNGHG22",
+     "B09NNJ9WYM",
+     "B09PLD9TCD",
+     "B09Q5P2MT3",
+     "B09Q5SWVBJ",
+     "B09RFC46VP",
+     "B09RWQ7YR6",
+     "B09T3KB6JZ",
+     "B09VCHLSJF",
+     "B09WN3SRC7",
+     "B09X1M3DHX",
+     "B09YL9SN9B",
+     "B09ZPJT8B2",
+     "B09ZPM4C2C",
+     "B0B1YVCJ2Y",
+     "B0B1YY6JJL",
+     "B0B1YZ9CB8",
+     "B0B1YZX72F",
+     "B0B21XL94T",
+     "B0B2C5MJN6",
+     "B0B3MMYHYW",
+     "B0B3XXSB1K",
+     "B0B3XY5YT4",
+     "B0B466C3G4",
+     "B0B467CCB9",
+     "B0B6F7LX4C",
+     "B0B6F8HHR6",
+     "B0B6F98KJJ",
+     "B0B7B9V9QP",
+     "B0B8CXTTG3",
+     "B0B9959XF3",
+     "B0B997FBZT",
+     "B0B9XLX8VR",
+     "B0B9XN9S3W",
+     "B0BB3CBFBM",
+     "B0BC8BQ432",
+     "B0BC9BW512"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q068",
+   "tags": [
+    "typo"
+   ],
+   "query": "headfones",
+   "label": {
+    "exact": "{HEADPHONES}",
+    "ok": "{EARBUDS}"
+   },
+   "expect": {
+    "exact": [
+     "B009LJ2BXA",
+     "B00Y4ORQ46",
+     "B01DEWVZ2C",
+     "B01DF26V7A",
+     "B071Z8M4KX",
+     "B078W65FJ7",
+     "B079S811J3",
+     "B07JQKQ91F",
+     "B07L8KNP5F",
+     "B07T9FV9YP",
+     "B083T5G5PM",
+     "B0873L7J6X",
+     "B08D75R3Z1",
+     "B097JVLW3L",
+     "B09YLFHFDW"
+    ],
+    "ok": [
+     "B01F25X6RQ",
+     "B01F262EUU",
+     "B01MF8MB65",
+     "B07CD2BN46",
+     "B07DFYJRQV",
+     "B07GPXXNNG",
+     "B07GQD4K6L",
+     "B07KY3FNQP",
+     "B07LG59NPV",
+     "B07QZ3CZ48",
+     "B07S9S86BF",
+     "B07T5DKR5D",
+     "B07TCN5VR9",
+     "B07XJWTYM2",
+     "B085W8CFLH",
+     "B086WMSCN3",
+     "B08CFCK6CW",
+     "B08D11DZ2W",
+     "B08D77XZX5",
+     "B08FB2LNSZ",
+     "B08FN6WGDQ",
+     "B08G28Z33M",
+     "B08H9Z3XQW",
+     "B08JQN8DGZ",
+     "B08MTLLSL8",
+     "B08TV2P1N8",
+     "B091JF2TFD",
+     "B092X94QNQ",
+     "B098R25TGC",
+     "B09GFWJDY1",
+     "B09N3ZNHTY",
+     "B09ND94ZRG",
+     "B09NR6G588",
+     "B09PL79D2X",
+     "B09Y5MP7C4",
+     "B0B1F6GQPS",
+     "B0B217Z5VK",
+     "B0B31BYXQQ",
+     "B0B31FR4Y2",
+     "B0B3N7LR6K",
+     "B0B3NDPCS9",
+     "B0B5GJRTHB"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q069",
+   "tags": [
+    "typo"
+   ],
+   "query": "miksar grinder",
+   "label": {
+    "exact": "{MIXER}"
+   },
+   "expect": {
+    "exact": [
+     "B00HVXS7WC",
+     "B00K57MR22",
+     "B00W56GLOQ",
+     "B0188KPKB2",
+     "B01GZSQJPA",
+     "B071113J7M",
+     "B071R3LHFM",
+     "B0756K5DYZ",
+     "B075JJ5NQC",
+     "B075S9FVRY",
+     "B078JT7LTD",
+     "B07D8VBYB4",
+     "B07DGD4Z4C",
+     "B07FL3WRX5",
+     "B07MKMFKPG",
+     "B07TTSS5MP",
+     "B07TXCY3YK",
+     "B07Y9PY6Y1",
+     "B085LPT5F4",
+     "B086199CWG",
+     "B08CFJBZRK",
+     "B08CNLYKW5",
+     "B08G8H8DPL",
+     "B08H673XKN",
+     "B08KDBLMQP",
+     "B08MXJYB2V",
+     "B08TT63N58",
+     "B097XJQZ8H",
+     "B09GYBZPHF",
+     "B09J2SCVQT",
+     "B09MFR93KS",
+     "B09X5C9VLK",
+     "B09Y358DZQ",
+     "B09ZDVL7L8",
+     "B0BDZWMGZ1",
+     "B0BL3R4RGS",
+     "B0BNDGL26T",
+     "B0BNQMF152"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q070",
+   "tags": [
+    "typo"
+   ],
+   "query": "smart wach",
+   "label": {
+    "exact": "{SMARTWATCH}"
+   },
+   "expect": {
+    "exact": [
+     "B07YY1BY5B",
+     "B08HV25BBQ",
+     "B0949SBKMP",
+     "B094JB13XL",
+     "B096VF5YYF",
+     "B0972BQ2RS",
+     "B097R25DP7",
+     "B09BNXQ6BR",
+     "B09MQSCJQ1",
+     "B09NC2TY11",
+     "B09NVPJ3P4",
+     "B09NVPSCQT",
+     "B09P18XVW6",
+     "B09PLFJ7ZW",
+     "B09PNKXSKF",
+     "B09RKFBCV7",
+     "B09TBCVJS3",
+     "B09V12K8NT",
+     "B09V175NP7",
+     "B09V17S2BG",
+     "B09YV3K34W",
+     "B09YV42QHZ",
+     "B09YV463SW",
+     "B09YV4MW2T",
+     "B09YV4RG4D",
+     "B09ZQK9X8G",
+     "B0B3MWYCHQ",
+     "B0B3N7LR6K",
+     "B0B3NDPCS9",
+     "B0B3RRWSF6",
+     "B0B3RS9DNF",
+     "B0B3RSDSZ3",
+     "B0B53NXFFR",
+     "B0B53QFZPY",
+     "B0B53QLB9H",
+     "B0B5B6PQCT",
+     "B0B5CGTBKV",
+     "B0B5D39BCD",
+     "B0B5DDJNH4",
+     "B0B5GF6DQD",
+     "B0B5LVS732",
+     "B0B6BLTGTT",
+     "B0B82YGCF6",
+     "B0BBVKRP7B",
+     "B0BF4YBLPX",
+     "B0BF54972T",
+     "B0BF54LXW6",
+     "B0BF563HB4",
+     "B0BF57RN3K",
+     "B0BGSV43WY",
+     "B0BMVWKZ8G",
+     "B0BNXFDTZ2",
+     "B0BP18W8TM"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q071",
+   "tags": [
+    "hinglish",
+    "price"
+   ],
+   "query": "sasta mixer grinder",
+   "label": {
+    "exact": "{MIXER} AND price <= 1500",
+    "ok": "{MIXER}"
+   },
+   "expect": {
+    "exact": [
+     "B08KDBLMQP",
+     "B08TT63N58",
+     "B09GYBZPHF",
+     "B09X5C9VLK",
+     "B0BDZWMGZ1",
+     "B0BL3R4RGS",
+     "B0BNDGL26T",
+     "B0BNQMF152"
+    ],
+    "ok": [
+     "B00HVXS7WC",
+     "B00K57MR22",
+     "B00W56GLOQ",
+     "B0188KPKB2",
+     "B01GZSQJPA",
+     "B071113J7M",
+     "B071R3LHFM",
+     "B0756K5DYZ",
+     "B075JJ5NQC",
+     "B075S9FVRY",
+     "B078JT7LTD",
+     "B07D8VBYB4",
+     "B07DGD4Z4C",
+     "B07FL3WRX5",
+     "B07MKMFKPG",
+     "B07TTSS5MP",
+     "B07TXCY3YK",
+     "B07Y9PY6Y1",
+     "B085LPT5F4",
+     "B086199CWG",
+     "B08CFJBZRK",
+     "B08CNLYKW5",
+     "B08G8H8DPL",
+     "B08H673XKN",
+     "B08MXJYB2V",
+     "B097XJQZ8H",
+     "B09J2SCVQT",
+     "B09MFR93KS",
+     "B09Y358DZQ",
+     "B09ZDVL7L8"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q072",
+   "tags": [
+    "hinglish"
+   ],
+   "query": "garam pani ke liye geyser",
+   "label": {
+    "exact": "{GEYSER}",
+    "ok": "{IMMERSION}"
+   },
+   "expect": {
+    "exact": [
+     "B014HDJ7ZE",
+     "B01892MIPA",
+     "B077BTLQ67",
+     "B078JBK4GX",
+     "B078JDNZJ8",
+     "B078JF6X9B",
+     "B07H5PBN54",
+     "B07JGCGNDG",
+     "B07QDSN9V6",
+     "B07W4HTS8Q",
+     "B07WKB69RS",
+     "B07Y1RCCW5",
+     "B081B1JL35",
+     "B0836JGZ74",
+     "B08GSQXLJ2",
+     "B08QW937WV",
+     "B08T8KWNQ9",
+     "B08WRKSF9D",
+     "B08YRMBK9R",
+     "B097MKZHNV",
+     "B097R2V1W8",
+     "B097R3XH9R",
+     "B097R45BH8",
+     "B097R4D42G",
+     "B09N3BFP4M",
+     "B09WMTJPG7",
+     "B0B3X2BY3M",
+     "B0B9RN5X8B",
+     "B0BP89YBC1",
+     "B0BR4F878Q"
+    ],
+    "ok": [
+     "B00ABMASXG",
+     "B00HZIOGXW",
+     "B00P0R95EA",
+     "B0123P3PWE",
+     "B07K2HVKLL",
+     "B07LG96SDB",
+     "B088ZTJT2R",
+     "B08CGW4GYR",
+     "B08MV82R99",
+     "B09J2QCKKM"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q073",
+   "tags": [
+    "hinglish"
+   ],
+   "query": "kapde press karne ke liye iron",
+   "label": {
+    "exact": "{IRON}"
+   },
+   "expect": {
+    "exact": [
+     "B008LN8KDM",
+     "B008QTK47Q",
+     "B008YW3CYM",
+     "B008YW8M0G",
+     "B009P2L7CO",
+     "B009UORDX4",
+     "B00B7GKXMG",
+     "B00F159RIK",
+     "B00SMJPA9C",
+     "B01C8P29N0",
+     "B01C8P29T4",
+     "B01EY310UM",
+     "B01MY839VW",
+     "B01N6IJG0F",
+     "B076VQS87V",
+     "B078WB1VWJ",
+     "B07989VV5K",
+     "B07D2NMTTV",
+     "B07LDN9Q2P",
+     "B07LDPLSZC",
+     "B07S9M8YTY",
+     "B07YSJ7FF1",
+     "B08235JZFB",
+     "B0883KDSXC",
+     "B0883LQJ6B",
+     "B08CNLYKW5",
+     "B08DPLCM6T",
+     "B08H6B3G96",
+     "B08H6CZSHT",
+     "B09PDZNSBG",
+     "B09WF4Q7B3",
+     "B09ZK6THRR",
+     "B0B84KSH3X",
+     "B0B84QN4CN"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q074",
+   "tags": [
+    "hinglish"
+   ],
+   "query": "chai banane ke liye kettle",
+   "label": {
+    "exact": "{KETTLE}"
+   },
+   "expect": {
+    "exact": [
+     "B00NW4UWN6",
+     "B00TI8E7BI",
+     "B01I1LDZGA",
+     "B01MQZ7J8K",
+     "B078V8R9BS",
+     "B07B5XJ572",
+     "B07F366Z51",
+     "B07GLS2563",
+     "B07GLSKXS1",
+     "B07QDSN9V6",
+     "B07SYYVP69",
+     "B07T4D9FNY",
+     "B07VNFP3C2",
+     "B07VZYMQNZ",
+     "B07WGPBXY9",
+     "B07WJXCTG9",
+     "B07WMS7TWB",
+     "B07WNK1FFN",
+     "B07YR26BJ3",
+     "B082KVTRW8",
+     "B083GKDRKR",
+     "B08C7TYHPB",
+     "B08HLC7Z3G",
+     "B091V8HK8Z",
+     "B094G9L9LT",
+     "B096YCN3SD",
+     "B097RN7BBK",
+     "B09VGS66FV",
+     "B09Y5FZK9N",
+     "B0B2CZTCL2",
+     "B0B2DZ5S6R",
+     "B0B3TBY2YX",
+     "B0B5KZ3C53"
+    ],
+    "ok": []
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q075",
+   "tags": [
+    "hinglish",
+    "attribute"
+   ],
+   "query": "accha wala bluetooth speaker",
+   "label": {
+    "exact": "{BT_SPEAKER} AND rating >= 4.0",
+    "ok": "{SPEAKER}"
+   },
+   "expect": {
+    "exact": [
+     "B07B88KQZ8",
+     "B07NC12T2R",
+     "B07W6VWZ8C",
+     "B07W7Z6DVL",
+     "B08CRRQK6Z",
+     "B08JMC1988",
+     "B08SMJT55F"
+    ],
+    "ok": [
+     "B07L3NDN24",
+     "B07YNTJ8ZM",
+     "B0814ZY6FP",
+     "B08DCVRW98",
+     "B08K9PX15C",
+     "B08S74GTBT",
+     "B08SBH499M",
+     "B09LRZYBH1",
+     "B0B12K5BPM"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q076",
+   "tags": [
+    "brand_missing"
+   ],
+   "query": "bose speakers",
+   "label": {
+    "exact": "{SPEAKER} AND name ~* '\\mbose\\M'",
+    "ok": "{SPEAKER}"
+   },
+   "expect": {
+    "exact": [],
+    "ok": [
+     "B07B88KQZ8",
+     "B07L3NDN24",
+     "B07NC12T2R",
+     "B07W6VWZ8C",
+     "B07W7Z6DVL",
+     "B07YNTJ8ZM",
+     "B0814ZY6FP",
+     "B08CRRQK6Z",
+     "B08DCVRW98",
+     "B08JMC1988",
+     "B08K9PX15C",
+     "B08S74GTBT",
+     "B08SBH499M",
+     "B08SMJT55F",
+     "B09LRZYBH1",
+     "B0B12K5BPM"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q077",
+   "tags": [
+    "brand_missing"
+   ],
+   "query": "apple airpods",
+   "label": {
+    "exact": "{TWS} AND name ~* '\\mapple\\M|airpods'",
+    "ok": "{TWS}"
+   },
+   "expect": {
+    "exact": [],
+    "ok": [
+     "B07DFYJRQV",
+     "B086WMSCN3",
+     "B08CFCK6CW",
+     "B08D11DZ2W",
+     "B08FB2LNSZ",
+     "B08FN6WGDQ",
+     "B08JQN8DGZ",
+     "B098R25TGC",
+     "B09N3ZNHTY",
+     "B09ND94ZRG",
+     "B09PL79D2X",
+     "B09Y5MP7C4",
+     "B0B217Z5VK",
+     "B0B31BYXQQ",
+     "B0B31FR4Y2",
+     "B0B3N7LR6K",
+     "B0B3NDPCS9",
+     "B0B5GJRTHB"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q078",
+   "tags": [
+    "brand_missing"
+   ],
+   "query": "dyson vacuum cleaner",
+   "label": {
+    "exact": "{VACUUM} AND name ~* 'dyson'",
+    "ok": "{VACUUM}"
+   },
+   "expect": {
+    "exact": [],
+    "ok": [
+     "B00JBNZPFM",
+     "B072J83V9W",
+     "B07H3N8RJH",
+     "B07SLNG3LW",
+     "B07SRM58TP",
+     "B07Z51CGGH",
+     "B083M7WPZD",
+     "B08HDCWDXD",
+     "B092R48XXB",
+     "B09FZ89DK6",
+     "B09SZ5TWHW",
+     "B09XTQFFCG",
+     "B0B19VJXQZ",
+     "B0B1MDZV9C"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q079",
+   "tags": [
+    "brand_missing"
+   ],
+   "query": "garmin smartwatch",
+   "label": {
+    "exact": "{SMARTWATCH} AND name ~* 'garmin'",
+    "ok": "{SMARTWATCH}"
+   },
+   "expect": {
+    "exact": [],
+    "ok": [
+     "B07YY1BY5B",
+     "B08HV25BBQ",
+     "B0949SBKMP",
+     "B094JB13XL",
+     "B096VF5YYF",
+     "B0972BQ2RS",
+     "B097R25DP7",
+     "B09BNXQ6BR",
+     "B09MQSCJQ1",
+     "B09NC2TY11",
+     "B09NVPJ3P4",
+     "B09NVPSCQT",
+     "B09P18XVW6",
+     "B09PLFJ7ZW",
+     "B09PNKXSKF",
+     "B09RKFBCV7",
+     "B09TBCVJS3",
+     "B09V12K8NT",
+     "B09V175NP7",
+     "B09V17S2BG",
+     "B09YV3K34W",
+     "B09YV42QHZ",
+     "B09YV463SW",
+     "B09YV4MW2T",
+     "B09YV4RG4D",
+     "B09ZQK9X8G",
+     "B0B3MWYCHQ",
+     "B0B3N7LR6K",
+     "B0B3NDPCS9",
+     "B0B3RRWSF6",
+     "B0B3RS9DNF",
+     "B0B3RSDSZ3",
+     "B0B53NXFFR",
+     "B0B53QFZPY",
+     "B0B53QLB9H",
+     "B0B5B6PQCT",
+     "B0B5CGTBKV",
+     "B0B5D39BCD",
+     "B0B5DDJNH4",
+     "B0B5GF6DQD",
+     "B0B5LVS732",
+     "B0B6BLTGTT",
+     "B0B82YGCF6",
+     "B0BBVKRP7B",
+     "B0BF4YBLPX",
+     "B0BF54972T",
+     "B0BF54LXW6",
+     "B0BF563HB4",
+     "B0BF57RN3K",
+     "B0BGSV43WY",
+     "B0BMVWKZ8G",
+     "B0BNXFDTZ2",
+     "B0BP18W8TM"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q080",
+   "tags": [
+    "brand_missing"
+   ],
+   "query": "breville electric kettle",
+   "label": {
+    "exact": "{KETTLE} AND name ~* 'breville'",
+    "ok": "{KETTLE}"
+   },
+   "expect": {
+    "exact": [],
+    "ok": [
+     "B00NW4UWN6",
+     "B00TI8E7BI",
+     "B01I1LDZGA",
+     "B01MQZ7J8K",
+     "B078V8R9BS",
+     "B07B5XJ572",
+     "B07F366Z51",
+     "B07GLS2563",
+     "B07GLSKXS1",
+     "B07QDSN9V6",
+     "B07SYYVP69",
+     "B07T4D9FNY",
+     "B07VNFP3C2",
+     "B07VZYMQNZ",
+     "B07WGPBXY9",
+     "B07WJXCTG9",
+     "B07WMS7TWB",
+     "B07WNK1FFN",
+     "B07YR26BJ3",
+     "B082KVTRW8",
+     "B083GKDRKR",
+     "B08C7TYHPB",
+     "B08HLC7Z3G",
+     "B091V8HK8Z",
+     "B094G9L9LT",
+     "B096YCN3SD",
+     "B097RN7BBK",
+     "B09VGS66FV",
+     "B09Y5FZK9N",
+     "B0B2CZTCL2",
+     "B0B2DZ5S6R",
+     "B0B3TBY2YX",
+     "B0B5KZ3C53"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q081",
+   "tags": [
+    "out_of_scope"
+   ],
+   "query": "iphone 15",
+   "expect_none": true
+  },
+  {
+   "id": "q082",
+   "tags": [
+    "out_of_scope"
+   ],
+   "query": "gaming laptop",
+   "expect_none": true
+  },
+  {
+   "id": "q083",
+   "tags": [
+    "out_of_scope"
+   ],
+   "query": "samsung galaxy tablet",
+   "expect_none": true
+  },
+  {
+   "id": "q084",
+   "tags": [
+    "out_of_scope"
+   ],
+   "query": "washing machine",
+   "expect_none": true
+  },
+  {
+   "id": "q085",
+   "tags": [
+    "out_of_scope"
+   ],
+   "query": "running shoes",
+   "expect_none": true
+  },
+  {
+   "id": "q086",
+   "tags": [
+    "followup",
+    "brand"
+   ],
+   "history": [
+    "wireless mouse under 1000"
+   ],
+   "query": "what about Logitech",
+   "label": {
+    "exact": "{MOUSE} AND {WIRELESS} AND name ~* '\\mlogitech\\M' AND price <= 1000",
+    "ok": "({MOUSE} AND name ~* '\\mlogitech\\M') OR ({MOUSE} AND {WIRELESS} AND price <= 1000)"
+   },
+   "expect": {
+    "exact": [
+     "B004IO5BMQ",
+     "B01J0XWYKQ",
+     "B01M72LILF"
+    ],
+    "ok": [
+     "B003L62T7W",
+     "B00NFD0ETQ",
+     "B01KK0HU3Y",
+     "B01MQ2A86A",
+     "B07J2NGB69",
+     "B07JPX9CR7",
+     "B07X2L5Z8C",
+     "B083RCTXLL",
+     "B08LT9BMPP",
+     "B08YDFX7Y1",
+     "B098JYT4SY",
+     "B099SD8PRP",
+     "B09GB5B4BK",
+     "B09ZHCJDP1",
+     "B0B296NTFV"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q087",
+   "tags": [
+    "followup",
+    "brand"
+   ],
+   "history": [
+    "show me some TVs"
+   ],
+   "query": "Samsung",
+   "label": {
+    "exact": "{TV} AND name ~* '\\msamsung\\M'",
+    "ok": "{TV}"
+   },
+   "expect": {
+    "exact": [
+     "B08PV1X771",
+     "B092BJMT8Q",
+     "B092BL5DCX",
+     "B09F6S8BT6",
+     "B0B15CPR37",
+     "B0B15GSPQW"
+    ],
+    "ok": [
+     "B06XGWRKYT",
+     "B07MDRGHWQ",
+     "B07MKFNHKG",
+     "B084872DQY",
+     "B087JWLZ2K",
+     "B08B42LWKN",
+     "B08CS3BT4L",
+     "B08DPLCM6T",
+     "B08FD2VSD9",
+     "B08PZ6HZLT",
+     "B08XXF5V6G",
+     "B08Y55LPBF",
+     "B095JPKPH3",
+     "B095JQVC7N",
+     "B099K9ZX65",
+     "B09DSXK8JX",
+     "B09F6VHQXB",
+     "B09F9YQQ7B",
+     "B09HQSV46W",
+     "B09JPC82QC",
+     "B09MJ77786",
+     "B09NNGHG22",
+     "B09NNJ9WYM",
+     "B09PLD9TCD",
+     "B09Q5P2MT3",
+     "B09Q5SWVBJ",
+     "B09RFC46VP",
+     "B09RWQ7YR6",
+     "B09T3KB6JZ",
+     "B09VCHLSJF",
+     "B09WN3SRC7",
+     "B09X1M3DHX",
+     "B09YL9SN9B",
+     "B09ZPJT8B2",
+     "B09ZPM4C2C",
+     "B0B1YVCJ2Y",
+     "B0B1YY6JJL",
+     "B0B1YZ9CB8",
+     "B0B1YZX72F",
+     "B0B21XL94T",
+     "B0B2C5MJN6",
+     "B0B3MMYHYW",
+     "B0B3XXSB1K",
+     "B0B3XY5YT4",
+     "B0B466C3G4",
+     "B0B467CCB9",
+     "B0B6F7LX4C",
+     "B0B6F8HHR6",
+     "B0B6F98KJJ",
+     "B0B7B9V9QP",
+     "B0B8CXTTG3",
+     "B0B9959XF3",
+     "B0B997FBZT",
+     "B0B9XLX8VR",
+     "B0B9XN9S3W",
+     "B0BB3CBFBM",
+     "B0BC8BQ432",
+     "B0BC9BW512"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q088",
+   "tags": [
+    "followup",
+    "price"
+   ],
+   "history": [
+    "headphones"
+   ],
+   "query": "under 1000",
+   "label": {
+    "exact": "{HEADPHONES} AND price <= 1000",
+    "ok": "({EARBUDS} AND price <= 1000) OR ({HEADPHONES} AND price <= 1250)"
+   },
+   "expect": {
+    "exact": [
+     "B009LJ2BXA",
+     "B00Y4ORQ46",
+     "B01DEWVZ2C",
+     "B01DF26V7A",
+     "B071Z8M4KX",
+     "B078W65FJ7",
+     "B07JQKQ91F",
+     "B07L8KNP5F",
+     "B07T9FV9YP",
+     "B08D75R3Z1"
+    ],
+    "ok": [
+     "B01F25X6RQ",
+     "B01F262EUU",
+     "B01MF8MB65",
+     "B07CD2BN46",
+     "B07DFYJRQV",
+     "B07GPXXNNG",
+     "B07GQD4K6L",
+     "B07KY3FNQP",
+     "B07LG59NPV",
+     "B07QZ3CZ48",
+     "B07S9S86BF",
+     "B07T5DKR5D",
+     "B07TCN5VR9",
+     "B085W8CFLH",
+     "B08D77XZX5",
+     "B08G28Z33M",
+     "B08H9Z3XQW",
+     "B08MTLLSL8",
+     "B091JF2TFD",
+     "B09GFWJDY1",
+     "B0B1F6GQPS",
+     "B0B5GJRTHB"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q089",
+   "tags": [
+    "followup",
+    "brand"
+   ],
+   "history": [
+    "mixer grinder"
+   ],
+   "query": "only Bajaj",
+   "label": {
+    "exact": "{MIXER} AND name ~* '\\mbajaj\\M'",
+    "ok": "{MIXER}"
+   },
+   "expect": {
+    "exact": [
+     "B00HVXS7WC",
+     "B08G8H8DPL",
+     "B09MFR93KS"
+    ],
+    "ok": [
+     "B00K57MR22",
+     "B00W56GLOQ",
+     "B0188KPKB2",
+     "B01GZSQJPA",
+     "B071113J7M",
+     "B071R3LHFM",
+     "B0756K5DYZ",
+     "B075JJ5NQC",
+     "B075S9FVRY",
+     "B078JT7LTD",
+     "B07D8VBYB4",
+     "B07DGD4Z4C",
+     "B07FL3WRX5",
+     "B07MKMFKPG",
+     "B07TTSS5MP",
+     "B07TXCY3YK",
+     "B07Y9PY6Y1",
+     "B085LPT5F4",
+     "B086199CWG",
+     "B08CFJBZRK",
+     "B08CNLYKW5",
+     "B08H673XKN",
+     "B08KDBLMQP",
+     "B08MXJYB2V",
+     "B08TT63N58",
+     "B097XJQZ8H",
+     "B09GYBZPHF",
+     "B09J2SCVQT",
+     "B09X5C9VLK",
+     "B09Y358DZQ",
+     "B09ZDVL7L8",
+     "B0BDZWMGZ1",
+     "B0BL3R4RGS",
+     "B0BNDGL26T",
+     "B0BNQMF152"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q090",
+   "tags": [
+    "followup",
+    "attribute"
+   ],
+   "history": [
+    "room heater"
+   ],
+   "query": "an oil filled one",
+   "label": {
+    "exact": "{OIL_HEATER}",
+    "ok": "{ROOM_HEATER}"
+   },
+   "expect": {
+    "exact": [
+     "B01M5F614J",
+     "B01N1XVVLC",
+     "B08MZNT7GP",
+     "B08QHLXWV3",
+     "B09M3F4HGB"
+    ],
+    "ok": [
+     "B009P2LIL4",
+     "B009P2LITG",
+     "B009P2LK08",
+     "B009P2LK80",
+     "B00GHL8VP2",
+     "B00H47GVGY",
+     "B00KRCBA6E",
+     "B00LUGTJGO",
+     "B00O24PUO6",
+     "B01M265AAK",
+     "B06XFTHCNY",
+     "B078KRFWQB",
+     "B07J9KXQCC",
+     "B07K19NYZ8",
+     "B07R99NBVB",
+     "B07VX71FZP",
+     "B08DCVRW98",
+     "B08MVSGXMY",
+     "B08MVXPTDG",
+     "B099FDW2ZF",
+     "B099PR2GQJ",
+     "B09CGLY5CX",
+     "B09H34V36W",
+     "B09KRHXTLN",
+     "B09LV1CMGH",
+     "B09MQ9PDHR",
+     "B09NFSHCWN",
+     "B09P1MFKG1",
+     "B09R1YFL6S",
+     "B09ZTZ9N3Q",
+     "B09ZVJXN5L",
+     "B0B7NWGXS6",
+     "B0B9F9PT8R",
+     "B0BDG6QDYD",
+     "B0BMTZ4T1D",
+     "B0BMZ6SY89",
+     "B0BPBG712X",
+     "B0BPJBTB3F"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q091",
+   "tags": [
+    "followup",
+    "attribute"
+   ],
+   "history": [
+    "smartwatch"
+   ],
+   "query": "with calling",
+   "label": {
+    "exact": "{SMARTWATCH} AND {CALLING}",
+    "ok": "{SMARTWATCH}"
+   },
+   "expect": {
+    "exact": [
+     "B0972BQ2RS",
+     "B09NC2TY11",
+     "B09P18XVW6",
+     "B09PLFJ7ZW",
+     "B09RKFBCV7",
+     "B09YV3K34W",
+     "B09YV4MW2T",
+     "B09ZQK9X8G",
+     "B0B3MWYCHQ",
+     "B0B3N7LR6K",
+     "B0B3NDPCS9",
+     "B0B3RRWSF6",
+     "B0B3RS9DNF",
+     "B0B3RSDSZ3",
+     "B0B53NXFFR",
+     "B0B53QFZPY",
+     "B0B53QLB9H",
+     "B0B5B6PQCT",
+     "B0B5CGTBKV",
+     "B0B5D39BCD",
+     "B0B5DDJNH4",
+     "B0B5GF6DQD",
+     "B0B5LVS732",
+     "B0B6BLTGTT",
+     "B0B82YGCF6",
+     "B0BF4YBLPX",
+     "B0BF54972T",
+     "B0BF54LXW6",
+     "B0BF563HB4",
+     "B0BF57RN3K",
+     "B0BGSV43WY",
+     "B0BMVWKZ8G",
+     "B0BNXFDTZ2",
+     "B0BP18W8TM"
+    ],
+    "ok": [
+     "B07YY1BY5B",
+     "B08HV25BBQ",
+     "B0949SBKMP",
+     "B094JB13XL",
+     "B096VF5YYF",
+     "B097R25DP7",
+     "B09BNXQ6BR",
+     "B09MQSCJQ1",
+     "B09NVPJ3P4",
+     "B09NVPSCQT",
+     "B09PNKXSKF",
+     "B09TBCVJS3",
+     "B09V12K8NT",
+     "B09V175NP7",
+     "B09V17S2BG",
+     "B09YV42QHZ",
+     "B09YV463SW",
+     "B09YV4RG4D",
+     "B0BBVKRP7B"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q092",
+   "tags": [
+    "followup",
+    "attribute"
+   ],
+   "history": [
+    "32 inch tv"
+   ],
+   "query": "make it 43 inch",
+   "label": {
+    "exact": "{TV} AND {INCH43}",
+    "ok": "{TV}"
+   },
+   "expect": {
+    "exact": [
+     "B087JWLZ2K",
+     "B08FD2VSD9",
+     "B092BJMT8Q",
+     "B099K9ZX65",
+     "B09JPC82QC",
+     "B09MJ77786",
+     "B09Q5P2MT3",
+     "B09RFC46VP",
+     "B09VCHLSJF",
+     "B0B15CPR37",
+     "B0B1YY6JJL",
+     "B0B21XL94T",
+     "B0B3XY5YT4",
+     "B0B6F8HHR6",
+     "B0B7B9V9QP"
+    ],
+    "ok": [
+     "B06XGWRKYT",
+     "B07MDRGHWQ",
+     "B07MKFNHKG",
+     "B084872DQY",
+     "B08B42LWKN",
+     "B08CS3BT4L",
+     "B08DPLCM6T",
+     "B08PV1X771",
+     "B08PZ6HZLT",
+     "B08XXF5V6G",
+     "B08Y55LPBF",
+     "B092BL5DCX",
+     "B095JPKPH3",
+     "B095JQVC7N",
+     "B09DSXK8JX",
+     "B09F6S8BT6",
+     "B09F6VHQXB",
+     "B09F9YQQ7B",
+     "B09HQSV46W",
+     "B09NNGHG22",
+     "B09NNJ9WYM",
+     "B09PLD9TCD",
+     "B09Q5SWVBJ",
+     "B09RWQ7YR6",
+     "B09T3KB6JZ",
+     "B09WN3SRC7",
+     "B09X1M3DHX",
+     "B09YL9SN9B",
+     "B09ZPJT8B2",
+     "B09ZPM4C2C",
+     "B0B15GSPQW",
+     "B0B1YVCJ2Y",
+     "B0B1YZ9CB8",
+     "B0B1YZX72F",
+     "B0B2C5MJN6",
+     "B0B3MMYHYW",
+     "B0B3XXSB1K",
+     "B0B466C3G4",
+     "B0B467CCB9",
+     "B0B6F7LX4C",
+     "B0B6F98KJJ",
+     "B0B8CXTTG3",
+     "B0B9959XF3",
+     "B0B997FBZT",
+     "B0B9XLX8VR",
+     "B0B9XN9S3W",
+     "B0BB3CBFBM",
+     "B0BC8BQ432",
+     "B0BC9BW512"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q093",
+   "tags": [
+    "followup",
+    "price"
+   ],
+   "history": [
+    "bluetooth speaker"
+   ],
+   "query": "under 2000",
+   "label": {
+    "exact": "{BT_SPEAKER} AND price <= 2000",
+    "ok": "({SPEAKER} AND price <= 2000) OR ({BT_SPEAKER} AND price <= 2500)"
+   },
+   "expect": {
+    "exact": [
+     "B07B88KQZ8",
+     "B07NC12T2R",
+     "B07W6VWZ8C",
+     "B07W7Z6DVL",
+     "B07YNTJ8ZM",
+     "B0814ZY6FP",
+     "B08JMC1988",
+     "B08S74GTBT",
+     "B08SMJT55F",
+     "B0B12K5BPM"
+    ],
+    "ok": [
+     "B07L3NDN24",
+     "B08DCVRW98",
+     "B08K9PX15C",
+     "B08SBH499M",
+     "B09LRZYBH1"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q094",
+   "tags": [
+    "followup",
+    "attribute"
+   ],
+   "history": [
+    "electric kettle"
+   ],
+   "query": "1.5 litre",
+   "label": {
+    "exact": "{KETTLE} AND {L15}",
+    "ok": "{KETTLE}"
+   },
+   "expect": {
+    "exact": [
+     "B01MQZ7J8K",
+     "B07QDSN9V6",
+     "B07T4D9FNY",
+     "B07VNFP3C2",
+     "B07VZYMQNZ",
+     "B07WMS7TWB",
+     "B08C7TYHPB",
+     "B096YCN3SD",
+     "B09Y5FZK9N",
+     "B0B2DZ5S6R",
+     "B0B3TBY2YX"
+    ],
+    "ok": [
+     "B00NW4UWN6",
+     "B00TI8E7BI",
+     "B01I1LDZGA",
+     "B078V8R9BS",
+     "B07B5XJ572",
+     "B07F366Z51",
+     "B07GLS2563",
+     "B07GLSKXS1",
+     "B07SYYVP69",
+     "B07WGPBXY9",
+     "B07WJXCTG9",
+     "B07WNK1FFN",
+     "B07YR26BJ3",
+     "B082KVTRW8",
+     "B083GKDRKR",
+     "B08HLC7Z3G",
+     "B091V8HK8Z",
+     "B094G9L9LT",
+     "B097RN7BBK",
+     "B09VGS66FV",
+     "B0B2CZTCL2",
+     "B0B5KZ3C53"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q095",
+   "tags": [
+    "followup"
+   ],
+   "history": [
+    "wireless mouse"
+   ],
+   "query": "and a keyboard",
+   "label": {
+    "exact": "({KEYBOARD} OR {KB_COMBO}) AND {WIRELESS}",
+    "ok": "{KEYBOARD} OR {KB_COMBO}"
+   },
+   "expect": {
+    "exact": [
+     "B00CEQEGPI",
+     "B00MUTWLW4",
+     "B012MQS060",
+     "B0148NPH9I",
+     "B01N4EV2TL",
+     "B07V82W5CN",
+     "B087FXHB6J",
+     "B098K3H92Z",
+     "B09GBBJV72",
+     "B09T3H12GV",
+     "B0BHYJ8CVF"
+    ],
+    "ok": [
+     "B00OFM6PEO",
+     "B00ZYLMQH0",
+     "B077T3BG5L",
+     "B07BRKK9JQ",
+     "B07KR5P3YD",
+     "B08498D67S",
+     "B08498H13H",
+     "B08CF4SCNP",
+     "B09BVCVTBC"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q096",
+   "tags": [
+    "followup",
+    "price",
+    "brand"
+   ],
+   "history": [
+    "boat headphones under 500"
+   ],
+   "query": "ok, under 2000 then",
+   "label": {
+    "exact": "({HEADPHONES} OR {EARBUDS}) AND name ~* '^boat\\M' AND price <= 2000",
+    "ok": "({HEADPHONES} OR {EARBUDS}) AND price <= 2000"
+   },
+   "expect": {
+    "exact": [
+     "B01MF8MB65",
+     "B071Z8M4KX",
+     "B078W65FJ7",
+     "B07GPXXNNG",
+     "B07GQD4K6L",
+     "B07KY3FNQP",
+     "B07QZ3CZ48",
+     "B07S9S86BF",
+     "B086WMSCN3",
+     "B08H9Z3XQW",
+     "B08JQN8DGZ",
+     "B08MTLLSL8",
+     "B08TV2P1N8",
+     "B092X94QNQ",
+     "B09N3ZNHTY",
+     "B09PL79D2X"
+    ],
+    "ok": [
+     "B009LJ2BXA",
+     "B00Y4ORQ46",
+     "B01DEWVZ2C",
+     "B01DF26V7A",
+     "B01F25X6RQ",
+     "B01F262EUU",
+     "B079S811J3",
+     "B07CD2BN46",
+     "B07DFYJRQV",
+     "B07JQKQ91F",
+     "B07L8KNP5F",
+     "B07LG59NPV",
+     "B07T5DKR5D",
+     "B07T9FV9YP",
+     "B07TCN5VR9",
+     "B07XJWTYM2",
+     "B083T5G5PM",
+     "B085W8CFLH",
+     "B0873L7J6X",
+     "B08CFCK6CW",
+     "B08D11DZ2W",
+     "B08D75R3Z1",
+     "B08D77XZX5",
+     "B08FB2LNSZ",
+     "B08G28Z33M",
+     "B091JF2TFD",
+     "B098R25TGC",
+     "B09GFWJDY1",
+     "B09ND94ZRG",
+     "B09NR6G588",
+     "B09Y5MP7C4",
+     "B09YLFHFDW",
+     "B0B1F6GQPS",
+     "B0B217Z5VK",
+     "B0B31BYXQQ",
+     "B0B31FR4Y2",
+     "B0B5GJRTHB"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q097",
+   "tags": [
+    "followup",
+    "attribute"
+   ],
+   "history": [
+    "geyser"
+   ],
+   "query": "instant one, 3 litre",
+   "label": {
+    "exact": "{GEYSER} AND {INSTANT} AND {L3}",
+    "ok": "{GEYSER} AND ({INSTANT} OR {L3})"
+   },
+   "expect": {
+    "exact": [
+     "B077BTLQ67",
+     "B07W4HTS8Q",
+     "B07WKB69RS",
+     "B097MKZHNV",
+     "B097R2V1W8",
+     "B0B9RN5X8B"
+    ],
+    "ok": [
+     "B078JBK4GX",
+     "B078JDNZJ8",
+     "B078JF6X9B",
+     "B07H5PBN54",
+     "B07Y1RCCW5",
+     "B081B1JL35",
+     "B0836JGZ74",
+     "B08QW937WV",
+     "B08T8KWNQ9",
+     "B08YRMBK9R",
+     "B09WMTJPG7",
+     "B0B3X2BY3M",
+     "B0BP89YBC1",
+     "B0BR4F878Q"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q098",
+   "tags": [
+    "followup",
+    "attribute"
+   ],
+   "history": [
+    "pen drive"
+   ],
+   "query": "128 gb",
+   "label": {
+    "exact": "{PEN_DRIVE} AND {GB128}",
+    "ok": "{PEN_DRIVE}"
+   },
+   "expect": {
+    "exact": [
+     "B07JJFSG2B",
+     "B0819ZZK5K",
+     "B084PJSSQ1"
+    ],
+    "ok": [
+     "B005FYNT3G",
+     "B01EZ0X3L8",
+     "B01L8ZNWN2",
+     "B01LYLJ99X",
+     "B01N6LU1VF",
+     "B07SLMR1K6",
+     "B08JD36C6H"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q099",
+   "tags": [
+    "followup",
+    "attribute"
+   ],
+   "history": [
+    "type c cable"
+   ],
+   "query": "braided ones",
+   "label": {
+    "exact": "{CABLE} AND {TYPEC} AND {BRAIDED}",
+    "ok": "{CABLE} AND {TYPEC}"
+   },
+   "expect": {
+    "exact": [
+     "B07CWDX49D",
+     "B07CWNJLPC",
+     "B07F1P8KNV",
+     "B07PFJ5VQD",
+     "B07XJYYH7L",
+     "B07XLCFSSN",
+     "B081FG1QYX",
+     "B081FJWN52",
+     "B082LSVT4B",
+     "B083342NKJ",
+     "B084MZXJNK",
+     "B085DTN6R2",
+     "B086JTMRYL",
+     "B08CHKQ8D4",
+     "B08LKS3LSP",
+     "B08NW8GHCJ",
+     "B08PSQRW2T",
+     "B08PSVBB2X",
+     "B08QSC1XY8",
+     "B08QSDKFGQ",
+     "B08VRMK55F",
+     "B08WKFSN84",
+     "B08Y1TFSP6",
+     "B098NS6PVG",
+     "B09C6H53KH",
+     "B09C6HWG18",
+     "B09CMM3VGK",
+     "B09CMQRQM6",
+     "B09HV71RL1",
+     "B09PTT8DZF",
+     "B09Q8WQ5QJ",
+     "B09SB6SJB4",
+     "B09W5XR9RT",
+     "B0B5F3YZY4",
+     "B0B65MJ45G",
+     "B0B65P827P",
+     "B0B86CDHL1",
+     "B0B8SRZ5SV",
+     "B0B8SSC5D9",
+     "B0B94JPY2N",
+     "B0BFWGBX61"
+    ],
+    "ok": [
+     "B008FWZGSG",
+     "B01GGKYKQM",
+     "B01GGKZ0V6",
+     "B01GGKZ4NU",
+     "B01LONQBDG",
+     "B071SDRGWL",
+     "B077Z65HSD",
+     "B07GVGTSLN",
+     "B07HZ2QCGR",
+     "B07RD611Z8",
+     "B07YTNKVJQ",
+     "B084DTMYWK",
+     "B084MZYBTV",
+     "B084N133Y7",
+     "B084N18QZY",
+     "B08CF3D7QR",
+     "B08CT62BM1",
+     "B08CTNJ985",
+     "B08DDRGWTJ",
+     "B08H5L8V1L",
+     "B08HDH26JX",
+     "B08HDJ86NZ",
+     "B08JW1GVS7",
+     "B08N1WL9XW",
+     "B08NCKT9FG",
+     "B08R69WBN7",
+     "B08RP2L2NL",
+     "B08V9C4B1J",
+     "B08WKG2MWT",
+     "B08WRBG3XW",
+     "B08XMG618K",
+     "B08Y5KXR6Z",
+     "B0941392C8",
+     "B094DQWV9B",
+     "B0974G5Q2Y",
+     "B0974H97TJ",
+     "B097C564GC",
+     "B09BW2GP18",
+     "B09CMP1SC8",
+     "B09KH58JZR",
+     "B09NKZXMWJ",
+     "B09NL4DCXK",
+     "B09NL4DJ2Z",
+     "B09Q8HMKZX",
+     "B09QGZFBPM",
+     "B09QGZM8QB",
+     "B09RWZRCP1",
+     "B09RX1FK54",
+     "B09RZS1NQT",
+     "B09VH568H7",
+     "B09X79PP8F",
+     "B09YLX91QR",
+     "B09YLXYP7Y",
+     "B0B3N8VG24",
+     "B0B4DT8MKT",
+     "B0B4HJNPV4",
+     "B0B4HKH19N",
+     "B0B4T8RSJ1",
+     "B0B5ZF3NRK",
+     "B0B8SSZ76F",
+     "B0BMXMLSMM",
+     "B0BQRJ3C47"
+    ]
+   },
+   "reviewed": false
+  },
+  {
+   "id": "q100",
+   "tags": [
+    "followup",
+    "price"
+   ],
+   "history": [
+    "vacuum cleaner"
+   ],
+   "query": "something cheaper, under 3000",
+   "label": {
+    "exact": "{VACUUM} AND price <= 3000",
+    "ok": "{VACUUM} AND price <= 3750"
+   },
+   "expect": {
+    "exact": [
+     "B07SRM58TP",
+     "B09SZ5TWHW",
+     "B09XTQFFCG",
+     "B0B1MDZV9C"
+    ],
+    "ok": [
+     "B083M7WPZD",
+     "B08HDCWDXD"
+    ]
+   },
+   "reviewed": false
+  }
+ ]
+}

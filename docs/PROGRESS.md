@@ -12,6 +12,19 @@ Newest first. `/handoff` adds an entry at the end of every session. Keep entries
 - **Commits:**
 -->
 
+## 2026-11-18 · Phase 0 · Measuring stick built; first numbers
+- **Done:**
+  - LLM record/replay in `app/core/llm.py`;
+  - 100 labelled queries (`eval/product_queries.json`) and the labelling tool `eval/label_queries.py`;
+  - `eval/run_retrieval.py` with `--resume`, `--rescore` and `--token-budget`, plus `eval/retrieval_metrics.py`;
+  - `scripts/make_renamed_catalog_db.py`;
+  - 20 new tests. 195 pass in total, coverage 90%, lint clean.
+- **Measured:** v1 recall@5 0.885 and precision@3 0.897 on q001–q052 (gpt-oss-20b, 1 run). Attribute queries: 0.62. Renamed catalog: recall@5 0.97 → 0.00 (35-query sample, gpt-oss-120b). Details are in the phase 0 plan's Results.
+- **Decisions:** none new. The renamed-catalog result is the evidence for 0005 and 0006.
+- **Open questions:** the user should review the labels (`reviewed: false`). A CI replay step needs Postgres in CI.
+- **Next:** finish q053–q100 with `--resume` after the gpt-oss-20b daily cap resets, replay once, then close Phase 0.
+- **Commits:** see `git log` on `phase-0-evals`.
+
 ## 2026-11-18 · Planning · Roadmap, decisions and session workflow
 - **Done:** finished the `simplify-agents` branch (15 commits, see `SIMPLIFY_REPORT.md`). Reviewed the architecture, audited the product table, and wrote `ROADMAP.md`, phase plans 0–5, ADRs 0001–0008 and the `/resume` and `/handoff` skills. Saved the 3D explainer to `docs/visual/`.
 - **Measured:** 43/51 baseline conversations after simplification (gpt-oss-20b/120b, 1 run, `multi_agent_baseline`). Product table: 1,350 rows; `attributes` empty on all of them; `type` null on 977 (72%); 91 subcategories, 29 of them with 3 or fewer items; names average 127 characters.

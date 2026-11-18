@@ -3,15 +3,16 @@
 **Goal:** take the assistant from about 5.8/10 to 9/10: measured quality, holds up when things fail, and escalations reach a real person. The work is split into phases, and each phase is worth keeping even if work stops after it.
 
 ## Now
-- **Current phase:** Phase 0, Measuring stick (not started)
-- **Branch:** `simplify-agents`. Start each phase on its own branch, e.g. `phase-0-evals`.
-- **Next action:** in a new chat, run `/resume`, refine `docs/plans/phase-0-measuring-stick.md` in plan mode, then build the labelled query set.
+- **Current phase:** Phase 0, Measuring stick (in progress)
+- **Branch:** `phase-0-evals` (off `simplify-agents`).
+- **Next action:** finish the v1 run (`eval/run_retrieval.py --label v1-gptoss20b --model openai/gpt-oss-20b --resume`, about 95K tokens, after gpt-oss-20b's daily cap resets), replay it once to confirm, then close Phase 0. The user should review the labels in `eval/product_queries.json`.
+- **Headline so far:** recall@5 0.885 on q001–q052 (attribute queries 0.62). Renaming categories drops recall@5 from 0.97 to 0.00.
 - **Blocked on:** nothing.
 
 ## Phases
 | # | Phase | Status | Plan | Exit criteria (short) |
 |---|---|---|---|---|
-| 0 | Measuring stick | Not started | [plan](docs/plans/phase-0-measuring-stick.md) | 100 labelled product queries; today's recall@5 measured; LLM replay mode |
+| 0 | Measuring stick | In progress | [plan](docs/plans/phase-0-measuring-stick.md) | 100 labelled product queries; today's recall@5 measured; LLM replay mode |
 | 1 | Clean product data | Not started | [plan](docs/plans/phase-1-clean-product-data.md) | Every product typed, key attributes filled, catalog constants removed |
 | 2 | Search v2 | Not started | [plan](docs/plans/phase-2-search-v2.md) | Query rewrite + hybrid search beats v1 on Phase 0 metrics |
 | 3 | State and filter chips | Not started | [plan](docs/plans/phase-3-state-and-filter-chips.md) | Search state in Postgres; active filters visible and removable in chat |
