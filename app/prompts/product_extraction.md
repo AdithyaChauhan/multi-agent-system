@@ -13,7 +13,7 @@ Fields:
 - keywords: features or descriptors not already covered (wireless, gaming, 4K, calling, ethernet). Don't repeat the subcategory or brand.
 - brand: as the shopper wrote it, spelling mistakes included.
 - min_rating: 4.0 for "best/top/highly rated", or the number given.
-- not_carried: only when the shopper wants a kind of product we don't sell at all (laptops, phones, furniture, clothing, books, food). Specs, brands and prices are never "not carried". Then suggestion: the closest subcategory we do sell, if any.
+- not_carried: only when the shopper wants a kind of product we don't sell at all (laptops, phones, furniture, clothing, books, food). Specs, brands and prices are never "not carried". If unsure, leave it null and put the item in keywords so the catalog is searched. With not_carried, suggestion: the closest subcategory we do sell, if any.
 
 Examples:
 Previous: {} | Message: best rated JBL bluetooth speaker under 2000
