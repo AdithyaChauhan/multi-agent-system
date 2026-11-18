@@ -2,7 +2,7 @@
  "description": "Labelled product-search queries for eval/run_retrieval.py (Phase 0). Each query's expected products come from SQL rules over raw name and price (never category columns), materialised to product ids by eval/label_queries.py --write. 'exact' = everything asked for; 'ok' = right kind of product but misses a constraint. Queries with expect_none must show no products (out of scope).",
  "macros": {
   "WIRELESS": "(name ~* 'wireless|bluetooth|2\\.4 ?ghz')",
-  "MOUSE": "(name ~* '\\mmouse\\M' AND name !~* 'mouse ?pad|mouse ?mat|keyboard|combo')",
+  "MOUSE": "(name ~* '\\mmouse\\M' AND name !~* 'mouse ?pad|mouse ?mat|keyboard|combo|remote|protector|cable')",
   "KEYBOARD": "(name ~* '\\mkeyboard\\M' AND name !~* 'cover|skin|protector|clean|\\mstands?\\M|tray|\\mpads?\\M|mouse ?pad|combo|\\mmouse\\M')",
   "KB_COMBO": "(name ~* '\\mkeyboard\\M' AND name ~* 'combo|\\mmouse\\M' AND name !~* 'mouse ?pad|\\mpads?\\M|cover|skin')",
   "TV": "(name ~* '\\m(tv|television)\\M' AND name ~* '\\d+\\s*(cm|inch)' AND name !~* 'remote|stand|mount|cover|cable|stick|bracket|antenna|wall|\\mbox\\M|dongle|adapter|trolley|shelf|table')",
@@ -836,12 +836,9 @@
      "B08YDFX7Y1",
      "B098JYT4SY",
      "B099SD8PRP",
-     "B09F6D21BY",
      "B09GB5B4BK",
-     "B09Z6WH2N1",
      "B09ZHCJDP1",
-     "B0B296NTFV",
-     "B0B8ZWNR5T"
+     "B0B296NTFV"
     ]
    },
    "reviewed": false
@@ -1539,9 +1536,7 @@
      "B0819HZPXL",
      "B083RD1J99",
      "B099SD8PRP",
-     "B09GB5B4BK",
-     "B09Z6WH2N1",
-     "B0B8ZWNR5T"
+     "B09GB5B4BK"
     ]
    },
    "reviewed": false
@@ -1798,10 +1793,7 @@
      "B08497Z1MQ",
      "B08CHZ3ZQ7",
      "B08D64C9FN",
-     "B08LT9BMPP",
-     "B09F6D21BY",
-     "B09Z6WH2N1",
-     "B0B8ZWNR5T"
+     "B08LT9BMPP"
     ]
    },
    "reviewed": false
@@ -3105,12 +3097,9 @@
      "B08YDFX7Y1",
      "B098JYT4SY",
      "B099SD8PRP",
-     "B09F6D21BY",
      "B09GB5B4BK",
-     "B09Z6WH2N1",
      "B09ZHCJDP1",
-     "B0B296NTFV",
-     "B0B8ZWNR5T"
+     "B0B296NTFV"
     ]
    },
    "reviewed": false
