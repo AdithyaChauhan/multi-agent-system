@@ -1,6 +1,6 @@
 # Simplification report
 
-Branch `simplify-agents`: 14 commits on top of your work snapshot `c8a0fa6`. Nothing was pushed,
+Branch `simplify-agents`: 15 commits on top of your work snapshot `c8a0fa6`. Nothing was pushed,
 deployed or changed in LangSmith. Details behind every claim here are in `DIAGNOSIS.md` and
 `eval/baseline_runs/`.
 
