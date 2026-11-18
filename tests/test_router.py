@@ -1,157 +1,115 @@
+"""Router: one structured LLM decision, deterministic routing and guardrails."""
+
+from unittest.mock import patch
+
 import pytest
-import json
-from unittest.mock import MagicMock, patch
-from app.agents.state import AgentState
+
+import app.agents.router as router
+from app.agents.router import RouteDecision
+
+ORDERS = [
+    {"order_id": "ORD-2002", "product_name": "Mi 108cm Full HD Android LED TV", "status": "shipped"},
+    {"order_id": "ORD-2005", "product_name": "Logitech M221 Wireless Mouse", "status": "processing"},
+]
 
 
-class TestRouterClassification:
-
-    def test_classify_order_intent(self):
-        """Router correctly classifies order-related messages"""
-        mock_response = MagicMock()
-        mock_response.content = '{"intent": "order", "confidence": 0.95, "order_id": null}'
-
-        with patch("app.agents.router.llm") as mock_llm:
-            mock_llm.invoke.return_value = mock_response
-            from app.agents.router import classify_intent_and_extract
-
-            state = AgentState(
-                user_message="Where is my order?",
-                user_id="test-user",
-                session_id="test-session",
-                conversation_history=[],
-            )
-            result = classify_intent_and_extract(state)
-
-        assert result["intent"] == "order"
-        assert result["confidence"] == 0.95
-
-    def test_classify_product_intent(self):
-        """Router correctly classifies product-related messages"""
-        mock_response = MagicMock()
-        mock_response.content = '{"intent": "product", "confidence": 0.9, "order_id": null}'
-
-        with patch("app.agents.router.llm") as mock_llm:
-            mock_llm.invoke.return_value = mock_response
-            from app.agents.router import classify_intent_and_extract
-
-            state = AgentState(
-                user_message="Show me toys", user_id="test-user", session_id="test-session", conversation_history=[]
-            )
-            result = classify_intent_and_extract(state)
-
-        assert result["intent"] == "product"
-
-    def test_classify_support_intent(self):
-        """Router correctly classifies support-related messages"""
-        mock_response = MagicMock()
-        mock_response.content = '{"intent": "support", "confidence": 0.95, "order_id": null}'
-
-        with patch("app.agents.router.llm") as mock_llm:
-            mock_llm.invoke.return_value = mock_response
-            from app.agents.router import classify_intent_and_extract
-
-            state = AgentState(
-                user_message="My product is broken",
-                user_id="test-user",
-                session_id="test-session",
-                conversation_history=[],
-            )
-            result = classify_intent_and_extract(state)
-
-        assert result["intent"] == "support"
-
-    def test_classify_with_order_id_extraction(self):
-        """Router extracts order ID from message"""
-        mock_response = MagicMock()
-        mock_response.content = '{"intent": "order", "confidence": 1.0, "order_id": "ORD-2001"}'
-
-        with patch("app.agents.router.llm") as mock_llm:
-            mock_llm.invoke.return_value = mock_response
-            from app.agents.router import classify_intent_and_extract
-
-            state = AgentState(
-                user_message="Track order ORD-2001",
-                user_id="test-user",
-                session_id="test-session",
-                conversation_history=[],
-            )
-            result = classify_intent_and_extract(state)
-
-        assert result["order_id"] == "ORD-2001"
-
-    def test_classify_invalid_json_returns_unclear(self):
-        """Router handles invalid JSON gracefully"""
-        mock_response = MagicMock()
-        mock_response.content = "invalid json"
-
-        with patch("app.agents.router.llm") as mock_llm:
-            mock_llm.invoke.return_value = mock_response
-            from app.agents.router import classify_intent_and_extract
-
-            state = AgentState(
-                user_message="Something", user_id="test-user", session_id="test-session", conversation_history=[]
-            )
-            result = classify_intent_and_extract(state)
-
-        assert result["intent"] == "unclear"
-        assert result["confidence"] == 0.0
+def _classify(decision, **state):
+    state.setdefault("user_message", "hello")
+    state.setdefault("user_id", "anon-1")
+    with patch.object(router, "call_llm", return_value=decision) as call, patch.object(
+        router, "fetch_user_orders", return_value=ORDERS
+    ):
+        return router.classify(state), call
 
 
-class TestRouterAuthGate:
+class TestNormalizeOrderId:
+    @pytest.mark.parametrize(
+        "raw,expected",
+        [("2002", "ORD-2002"), ("ord 2002", "ORD-2002"), ("ORD-9901", "ORD-9901"), ("the tv one", None), (None, None)],
+    )
+    def test_formats(self, raw, expected):
+        assert router.normalize_order_id(raw) == expected
 
-    def test_auth_gate_returns_empty_dict(self):
-        """Auth gate is a pass-through that returns empty dict"""
-        from app.agents.router import auth_gate
 
-        state = AgentState(
-            user_message="Where is my order?",
-            user_id="anon-123",
-            session_id="test-session",
-            intent="order",
-            conversation_history=[],
-        )
-        result = auth_gate(state)
-        assert result == {}
-
-    def test_auth_gate_allows_authenticated_user(self):
-        """Auth gate passes through for authenticated users"""
-        from app.agents.router import auth_gate
-
-        state = AgentState(
-            user_message="Where is my order?",
+class TestClassify:
+    def test_signed_in_user_orders_and_history_are_given_to_the_model(self):
+        history = [{"role": "assistant", "content": "Which order? ORD-2002 ..."}]
+        _, call = _classify(
+            RouteDecision(intent="order", order_id="2002"),
             user_id="demo-user-1",
-            session_id="test-session",
-            intent="order",
-            conversation_history=[],
+            user_message="2002 status",
+            conversation_history=history,
         )
-        result = auth_gate(state)
-        assert result == {}
+        human = call.call_args.args[2][1].content
+        assert "ORD-2005 Logitech M221 Wireless Mouse (processing)" in human
+        assert "Which order? ORD-2002" in human
+        assert human.endswith("Message: 2002 status")
 
-    def test_route_after_auth_gate_blocks_anonymous(self):
-        """Routing blocks anonymous users from order intent"""
-        from app.agents.router import route_after_auth_gate
+    def test_anonymous_user_orders_are_not_looked_up(self):
+        _, call = _classify(RouteDecision(intent="product"))
+        assert "not signed in" in call.call_args.args[2][1].content
 
-        state = AgentState(
-            user_message="Where is my order?",
-            user_id="anon-123",
-            session_id="test-session",
-            intent="order",
-            conversation_history=[],
+    def test_decision_fields_are_copied_to_state(self):
+        result, _ = _classify(
+            RouteDecision(intent="support", order_id="ord-2004", issue="damaged_delivery", risk="legal"),
+            user_message="the mixer broke, I'll sue",
         )
-        result = route_after_auth_gate(state)
-        assert result == "sign_in"
+        assert result["intent"] == "support"
+        assert result["order_id"] == "ORD-2004"
+        assert result["support_issue"] == {"category": "damaged_delivery", "description": "the mixer broke, I'll sue"}
+        assert result["risk"] == "legal"
+        assert result["final_response"] is None
 
-    def test_route_after_auth_gate_allows_product_intent(self):
-        """Anonymous users can browse products"""
-        from app.agents.router import route_after_auth_gate
+    def test_unclear_carries_the_model_reply(self):
+        result, _ = _classify(RouteDecision(intent="unclear", reply="Hi! What do you need?"))
+        assert result["final_response"] == "Hi! What do you need?"
 
-        state = AgentState(
-            user_message="Show me toys",
-            user_id="anon-123",
-            session_id="test-session",
-            intent="product",
-            conversation_history=[],
-        )
-        result = route_after_auth_gate(state)
-        assert result != "sign_in"
+    def test_unparseable_reply_is_unclear(self):
+        result, _ = _classify(None)
+        assert result["intent"] == "unclear"
+
+
+class TestRoute:
+    def test_safety_wins_over_intent_and_sign_in(self):
+        assert router.route({"risk": "safety", "intent": "support", "user_id": "anon-1"}) == "safety"
+
+    def test_unclear_goes_to_clarify(self):
+        assert router.route({"intent": "unclear", "user_id": "u1"}) == "clarify"
+
+    @pytest.mark.parametrize("intent", ["order", "support"])
+    def test_orders_and_support_need_sign_in(self, intent):
+        assert router.route({"intent": intent, "user_id": "anon-123"}) == "sign_in"
+        assert router.route({"intent": intent, "user_id": "demo-user-1"}) == intent
+
+    def test_products_need_no_sign_in(self):
+        assert router.route({"intent": "product", "user_id": "anon-123"}) == "product"
+
+
+class TestTerminalNodes:
+    def test_clarify_uses_reply_or_fallback(self):
+        assert router.clarify({"final_response": "Hello!"})["final_response"] == "Hello!"
+        assert router.clarify({})["final_response"] == router.CLARIFY_FALLBACK
+
+    def test_sign_in_mentions_sign_in(self):
+        assert "Sign In" in router.respond_sign_in({"intent": "order"})["final_response"]
+        assert "support ticket" in router.respond_sign_in({"intent": "support"})["final_response"]
+
+    def test_safety_opens_a_critical_ticket(self):
+        with patch.object(router, "create_support_ticket") as create:
+            result = router.safety_escalation({"user_id": "u1", "user_message": "the heater caught fire"})
+        assert result["final_response"] == router.SAFETY_RESPONSE
+        kwargs = create.call_args.kwargs
+        assert kwargs["severity"] == "critical" and kwargs["safety_alert"] is True
+
+
+class TestGraph:
+    def test_greeting_end_to_end(self):
+        with patch.object(router, "call_llm", return_value=RouteDecision(intent="unclear", reply="Hi there!")):
+            out = router.router_graph.invoke({"user_message": "hi", "user_id": "anon-1", "conversation_history": []})
+        assert out["final_response"] == "Hi there!"
+        assert out["route"] == "clarify"
+
+    def test_anonymous_order_request_asks_to_sign_in(self):
+        with patch.object(router, "call_llm", return_value=RouteDecision(intent="order")):
+            out = router.router_graph.invoke({"user_message": "track my order", "user_id": "anon-1"})
+        assert out["route"] == "sign_in"

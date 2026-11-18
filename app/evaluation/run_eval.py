@@ -2,83 +2,49 @@
 LangSmith Evaluation — Multi-Agent E-commerce Router
 
 Evaluates router intent classification against the dataset created by create_dataset.py.
+The target is the app's own router node (app.agents.router.classify), so the evaluation
+always measures the prompt and schema that run in production.
 
 Run:
-    python3 app/evaluation/run_eval.py
+    python app/evaluation/run_eval.py
 
 Evaluators
 ----------
 - intent_correctness   : 1.0 if predicted intent == expected intent, else 0.0
-- confidence_check     : 1.0 if confidence >= 0.7 (router threshold), else 0.0
 - order_id_correctness : 1.0/0.0 only scored when the example expects a non-null order_id
 """
 
 import os
 import sys
-import json
+from pathlib import Path
 
-sys.path.insert(0, '/home/admin1/project/multi-agent-system')
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from dotenv import load_dotenv
+from dotenv import load_dotenv  # noqa: E402
 
-load_dotenv('/home/admin1/project/multi-agent-system/.env')
+load_dotenv()
 
-from langsmith import Client
-from langsmith.evaluation import evaluate, EvaluationResult
-from langchain_groq import ChatGroq
-from app.core.config import GROQ_MODEL
-from langchain_core.messages import SystemMessage, HumanMessage
+from langsmith import Client  # noqa: E402
+from langsmith.evaluation import evaluate, EvaluationResult  # noqa: E402
+
+from app.agents.router import classify  # noqa: E402
+from app.core.config import GROQ_MODEL  # noqa: E402
 
 client = Client(api_key=os.getenv("LANGCHAIN_API_KEY"))
-llm = ChatGroq(model=GROQ_MODEL, temperature=0, api_key=os.getenv("GROQ_API_KEY"))
 
 DATASET_NAME = "multi-agent-ecommerce-eval"
-CONFIDENCE_THRESHOLD = 0.7  # matches route_after_classification in router.py
-
-# The router prompt that runs in the app (app/prompts/router.md).
-from app.core.prompt_loader import load_prompt  # noqa: E402
-
-ROUTER_PROMPT = load_prompt("router")
 
 
 def predict(inputs: dict) -> dict:
-    """
-    Run the router on a single dataset example.
-
-    Mirrors classify_intent_and_extract() in router.py:
-    - Formats up to 2 history messages as context
-    - Calls Groq with the live LangSmith hub prompt
-    - Returns intent, confidence, order_id
-    """
-    user_message = inputs.get("user_message", "")
-    conversation_history = inputs.get("conversation_history", [])
-
-    history_context = ""
-    if conversation_history:
-        recent = conversation_history[-2:]
-        history_context = "\n".join(f"{msg['role'].title()}: {msg['content']}" for msg in recent)
-
-    prompt_text = user_message
-    if history_context:
-        prompt_text = f"Recent conversation:\n{history_context}\n\nCurrent message: {user_message}"
-
-    messages = [
-        SystemMessage(content=ROUTER_PROMPT),
-        HumanMessage(content=prompt_text),
-    ]
-
-    response = llm.invoke(messages)
-    raw = response.content.strip()
-
-    try:
-        parsed = json.loads(raw)
-        return {
-            "intent": parsed.get("intent", "unclear"),
-            "confidence": float(parsed.get("confidence", 0.0)),
-            "order_id": parsed.get("order_id"),
+    """Run the app's router node on one dataset example (anonymous user, no order list)."""
+    decision = classify(
+        {
+            "user_message": inputs.get("user_message", ""),
+            "conversation_history": inputs.get("conversation_history", []),
+            "user_id": "anon-eval",
         }
-    except (json.JSONDecodeError, ValueError):
-        return {"intent": "unclear", "confidence": 0.0, "order_id": None}
+    )
+    return {"intent": decision["intent"], "order_id": decision["order_id"]}
 
 
 # ── Evaluators ──────────────────────────────────────────────────────────────
@@ -92,16 +58,6 @@ def intent_correctness(run, example) -> dict:
         "key": "intent_correctness",
         "score": score,
         "comment": f"predicted={predicted}  expected={expected}",
-    }
-
-
-def confidence_check(run, _example) -> dict:
-    confidence = run.outputs.get("confidence", 0.0)
-    score = 1.0 if confidence >= CONFIDENCE_THRESHOLD else 0.0
-    return {
-        "key": "confidence_check",
-        "score": score,
-        "comment": f"confidence={confidence:.2f}  threshold={CONFIDENCE_THRESHOLD}",
     }
 
 
@@ -124,15 +80,14 @@ def order_id_correctness(run, example) -> EvaluationResult:
 
 if __name__ == "__main__":
     print(f"Running evaluation on dataset: {DATASET_NAME}")
-    print(f"Router prompt source: {'LangSmith hub' if ROUTER_PROMPT != _FALLBACK_PROMPT else 'fallback (hardcoded)'}\n")
 
     results = evaluate(
         predict,
         data=DATASET_NAME,
-        evaluators=[intent_correctness, confidence_check, order_id_correctness],
+        evaluators=[intent_correctness, order_id_correctness],
         experiment_prefix="router-intent-eval",
         client=client,
-        metadata={"model": "gpt-4o-mini", "confidence_threshold": CONFIDENCE_THRESHOLD},
+        metadata={"model": GROQ_MODEL},
     )
 
     print("\nEvaluation complete.")

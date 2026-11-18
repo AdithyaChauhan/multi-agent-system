@@ -1,5 +1,4 @@
 import os
-import re
 import threading
 import uuid
 from datetime import datetime, timezone, timedelta
@@ -21,56 +20,9 @@ from app.models.session import Session
 from app.models.message import Message
 
 from app.agents.router import router_graph
-from app.agents.order_agent import order_agent_graph
-from app.tools.support_tools import create_support_ticket
 from app.tools.order_tools import cancel_order_in_db
 
 _session_preferences: dict = {}
-
-_SAFETY_KEYWORDS = {
-    "fire",
-    "smoke",
-    "burning",
-    "burn",
-    "burnt",
-    "electric shock",
-    "electrocuted",
-    "injury",
-    "injured",
-    "injuring",
-    "hurt",
-    "hurting",
-    "wound",
-    "wounded",
-    "bleeding",
-    "poison",
-    "poisoned",
-    "toxic",
-    "choking",
-    "choke",
-    "unconscious",
-    "hospital",
-    "ambulance",
-    "emergency services",
-    "call 911",
-    "danger",
-}
-
-_SAFETY_RESPONSE = (
-    "We take safety seriously. If you're in immediate danger, please call emergency services. "
-    "We've flagged your message and a human team member will follow up with you."
-)
-
-
-def _is_safety_emergency(message: str) -> bool:
-    lowered = message.lower()
-    for kw in _SAFETY_KEYWORDS:
-        # Match whole-word only; exclude hyphenated brand names (e.g. "Fire-Boltt")
-        pattern = r"(?<![a-zA-Z])" + re.escape(kw) + r"(?![a-zA-Z\-])"
-        if re.search(pattern, lowered):
-            return True
-    return False
-
 
 from app.schemas.chat import ChatRequest, SessionMessagesResponse, ChatResponse
 from app.core.logger import get_logger, set_request_id, get_request_id
@@ -364,25 +316,6 @@ def chat(
 
         logger.info(f"request_id={get_request_id()} | User message stored | session_id={session.session_id}")
 
-        # Safety gate — exits before any agent or LLM call
-        if _is_safety_emergency(chat_request.message):
-            logger.warning(
-                f"request_id={get_request_id()} | SAFETY_GATE triggered | user_id={user_id} | message={chat_request.message[:100]}"
-            )
-            create_support_ticket(
-                user_id=user_id,
-                severity="critical",
-                category="other",
-                description=f"[SAFETY_ALERT] {chat_request.message[:500]}",
-                safety_alert=True,
-            )
-            assistant_message = Message(session_id=session.session_id, role="assistant", content=_SAFETY_RESPONSE)
-            db.add(assistant_message)
-            db.commit()
-            response.headers["X-Session-ID"] = session.session_id
-            response.headers["X-User-ID"] = user_id
-            return ChatResponse(session_id=session.session_id, user_id=user_id, response=_SAFETY_RESPONSE)
-
         # Invoke the router graph with LangSmith tracking
         logger.info(f"request_id={get_request_id()} | Invoking router")
 
@@ -418,24 +351,7 @@ def chat(
         if graph_result.get("preferences"):
             _session_preferences[session.session_id] = graph_result["preferences"]
 
-        # Support agent detected a bare order lookup — re-invoke order agent directly
-        if graph_result.get("reroute_to_order"):
-            support_order = graph_result.get("support_order") or {}
-            logger.info(
-                f"request_id={get_request_id()} | Rerouting to order agent | order_id={support_order.get('order_id')}"
-            )
-            order_result = order_agent_graph.invoke(
-                {
-                    "user_message": chat_request.message,
-                    "user_id": user_id,
-                    "session_id": session.session_id,
-                    "conversation_history": conversation_history,
-                    "order_id": support_order.get("order_id"),
-                }
-            )
-            final_response = order_result.get("final_response", "Something went wrong.")
-        else:
-            final_response = graph_result.get("final_response", "Something went wrong.")
+        final_response = graph_result.get("final_response") or "Something went wrong."
         logger.info(f"request_id={get_request_id()} | Graph completed | final_response_preview={final_response[:80]}")
 
         # Submit per-turn feedback scores to LangSmith (fire-and-forget, non-blocking)
@@ -458,9 +374,7 @@ def chat(
         response.headers["X-Session-ID"] = session.session_id
         response.headers["X-User-ID"] = user_id
 
-        action = graph_result.get("action_required") or (
-            order_result.get("action_required") if graph_result.get("reroute_to_order") else None
-        )
+        action = graph_result.get("action_required")
         return ChatResponse(
             session_id=session.session_id,
             user_id=user_id,
