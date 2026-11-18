@@ -1,0 +1,1448 @@
+{
+ "label": "before_gptoss20b",
+ "run": 1,
+ "model": "openai/gpt-oss-20b",
+ "git_sha": "b2e46e5",
+ "started_at": "2026-11-17T18:09:39+00:00",
+ "finished_at": "2026-11-17T18:23:35+00:00",
+ "summary": {
+  "conversations": 32,
+  "conversations_passed": 25,
+  "turns": 50,
+  "turns_passed": 42,
+  "llm_calls": 101,
+  "llm_calls_per_turn": 2.02,
+  "tokens": 109208,
+  "tokens_per_turn": 2184,
+  "seconds_per_turn_mean": 1.95,
+  "seconds_per_turn_median": 1.82,
+  "rate_limited_calls": 0,
+  "sdk_retries": 0,
+  "infra_error_conversations": [],
+  "failed_conversations": [
+   "p02",
+   "p03",
+   "p04",
+   "s01",
+   "s10",
+   "s16",
+   "s18"
+  ],
+  "by_route": {
+   "product": {
+    "turns": 11,
+    "llm_calls": 31,
+    "seconds": 28.3,
+    "tokens": 38885,
+    "llm_calls_per_turn": 2.82,
+    "seconds_per_turn": 2.57,
+    "tokens_per_turn": 3535
+   },
+   "clarify": {
+    "turns": 4,
+    "llm_calls": 8,
+    "seconds": 7.7,
+    "tokens": 6391,
+    "llm_calls_per_turn": 2.0,
+    "seconds_per_turn": 1.94,
+    "tokens_per_turn": 1598
+   },
+   "sign_in": {
+    "turns": 2,
+    "llm_calls": 2,
+    "seconds": 1.2,
+    "tokens": 2838,
+    "llm_calls_per_turn": 1.0,
+    "seconds_per_turn": 0.6,
+    "tokens_per_turn": 1419
+   },
+   "order": {
+    "turns": 10,
+    "llm_calls": 15,
+    "seconds": 23.5,
+    "tokens": 17372,
+    "llm_calls_per_turn": 1.5,
+    "seconds_per_turn": 2.35,
+    "tokens_per_turn": 1737
+   },
+   "support": {
+    "turns": 22,
+    "llm_calls": 45,
+    "seconds": 36.9,
+    "tokens": 43722,
+    "llm_calls_per_turn": 2.05,
+    "seconds_per_turn": 1.68,
+    "tokens_per_turn": 1987
+   },
+   "safety": {
+    "turns": 1,
+    "llm_calls": 0,
+    "seconds": 0.1,
+    "tokens": 0,
+    "llm_calls_per_turn": 0.0,
+    "seconds_per_turn": 0.12,
+    "tokens_per_turn": 0
+   }
+  }
+ },
+ "conversations": [
+  {
+   "id": "p01",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "I want to buy headphones under 2000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3650,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.547,
+     "paced_wait_seconds": 0.0,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "headphones",
+      "type": null,
+      "brand": null,
+      "max_price": 2000,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "realme Buds Wireless in Ear Bluetooth Earphones with mic, 11",
+       "brand": "realme",
+       "subcategory": "headphones"
+      },
+      {
+       "name": "Wings Phantom Pro Earphones Gaming Earbuds with LED Battery ",
+       "brand": "Wings",
+       "subcategory": "headphones"
+      },
+      {
+       "name": "Samsung Ehs64 Ehs64Avfwecinu Hands-Free Wired In Ear Earphon",
+       "brand": "Samsung",
+       "subcategory": "headphones"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **realme Buds Wireless in Ear Bluetooth Earphones with mic, 11.2mm Bass Boost Driver, Magnetic Fast Pair, Fast Charging and 12 Hrs Playtime (Yellow)** — realme\n   ₹1,679 · 4.1/5\n\n2. **Wings Phantom Pro Earphones Gaming Earbuds with LED Battery Indicator, 50ms Low Latency, Bluetooth 5.3, 40 Hours Playtime, MEMs Mic, IPX4 Resist, 12mm Driver, 500mah case, Headphones, (Black TWS)** — Wings\n   ₹1,199 · 3.8/5\n\n3. **Samsung Ehs64 Ehs64Avfwecinu Hands-Free Wired In Ear Earphones With Mic With Remote Note (White)** — Samsung\n   ₹499 · 4.2/5\n"
+    },
+    {
+     "message": "show me something cheaper",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3743,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.809,
+     "paced_wait_seconds": 13.5,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "headphones",
+      "type": null,
+      "brand": null,
+      "max_price": 1400,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Wings Phantom Pro Earphones Gaming Earbuds with LED Battery ",
+       "brand": "Wings",
+       "subcategory": "headphones"
+      },
+      {
+       "name": "Samsung Ehs64 Ehs64Avfwecinu Hands-Free Wired In Ear Earphon",
+       "brand": "Samsung",
+       "subcategory": "headphones"
+      },
+      {
+       "name": "boAt Bassheads 225 in Ear Wired Earphones with Mic(Blue)",
+       "brand": "boAt",
+       "subcategory": "headphones"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Wings Phantom Pro Earphones Gaming Earbuds with LED Battery Indicator, 50ms Low Latency, Bluetooth 5.3, 40 Hours Playtime, MEMs Mic, IPX4 Resist, 12mm Driver, 500mah case, Headphones, (Black TWS)** — Wings\n   ₹1,199 · 3.8/5\n\n2. **Samsung Ehs64 Ehs64Avfwecinu Hands-Free Wired In Ear Earphones With Mic With Remote Note (White)** — Samsung\n   ₹499 · 4.2/5\n\n3. **boAt Bassheads 225 in Ear Wired Earphones with Mic(Blue)** — boAt\n   ₹699 · 4.1/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p02",
+   "tags": [
+    "product"
+   ],
+   "passed": false,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "show me some TVs",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": false,
+     "failures": [
+      "subcategory None not in ['tv']",
+      "no product listing in reply",
+      "ranked_products empty"
+     ],
+     "llm_calls": 2,
+     "tokens": 3044,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.472,
+     "paced_wait_seconds": 27.7,
+     "extracted": {
+      "category": null,
+      "subcategory": null,
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [],
+     "response": "What are you looking for? Here's what we carry:\n\n• Electronics (463 products) — tv, headphones, smartwatch\n• Home & Kitchen (440 products) — room heater, water heater, mixer grinder\n• Computers & Accessories (402 products) — cable, mouse, adapter\n• Office Products (38 products) — stationery, art supplies, office electronics"
+    },
+    {
+     "message": "what about Samsung",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": false,
+     "failures": [
+      "subcategory None not in ['tv']",
+      "brand None != 'samsung'"
+     ],
+     "llm_calls": 3,
+     "tokens": 3781,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 3.386,
+     "paced_wait_seconds": 22.6,
+     "extracted": {
+      "category": null,
+      "subcategory": null,
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": [
+       "Samsung"
+      ]
+     },
+     "shown": [
+      {
+       "name": "Samsung 25W USB Travel Adapter for Cellular Phones - White",
+       "brand": "Samsung",
+       "subcategory": "adapter"
+      },
+      {
+       "name": "Samsung Original Type C to C Cable - 3.28 Feet (1 Meter), Wh",
+       "brand": "Samsung",
+       "subcategory": "cable"
+      },
+      {
+       "name": "Samsung EVO Plus 128GB microSDXC UHS-I U3 130MB/s Full HD & ",
+       "brand": "Samsung",
+       "subcategory": "Accessories"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Samsung 25W USB Travel Adapter for Cellular Phones - White** — Samsung\n   ₹1,219 · 4.4/5\n\n2. **Samsung Original Type C to C Cable - 3.28 Feet (1 Meter), White** — Samsung\n   ₹599 · 4.3/5\n\n3. **Samsung EVO Plus 128GB microSDXC UHS-I U3 130MB/s Full HD & 4K UHD Memory Card with Adapter (MB-MC128KA), Blue** — Samsung\n   ₹1,149 · 4.3/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p03",
+   "tags": [
+    "product"
+   ],
+   "passed": false,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "I need a wireless mouse",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3698,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 3.15,
+     "paced_wait_seconds": 26.5,
+     "extracted": {
+      "category": "Computers & Accessories",
+      "subcategory": "mouse",
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": [
+       "wireless"
+      ]
+     },
+     "shown": [
+      {
+       "name": "Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Na",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      },
+      {
+       "name": "Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, 12 ",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      },
+      {
+       "name": "Logitech B170 Wireless Mouse, 2.4 GHz with USB Nano Receiver",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Nano Receiver, 1000 DPI Optical Tracking, 3 Buttons, 24 Month Life Battery, PC/Mac/Laptop - Black** — Logitech\n   ₹1,295 · 4.6/5\n\n2. **Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, 12 Month Life Battery, Compatible with Windows, Mac, Chromebook/PC/Laptop** — Logitech\n   ₹699 · 4.5/5\n\n3. **Logitech B170 Wireless Mouse, 2.4 GHz with USB Nano Receiver, Optical Tracking, 12-Months Battery Life, Ambidextrous, PC/Mac/Laptop - Black** — Logitech\n   ₹599 · 4.4/5\n"
+    },
+    {
+     "message": "under 1000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": false,
+     "failures": [
+      "subcategory None not in ['mouse']",
+      "max_price None !~ 1000",
+      "no product listing in reply",
+      "ranked_products empty"
+     ],
+     "llm_calls": 2,
+     "tokens": 3158,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.179,
+     "paced_wait_seconds": 26.0,
+     "extracted": {
+      "category": null,
+      "subcategory": null,
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [],
+     "response": "What are you looking for? Here's what we carry:\n\n• Electronics (463 products) — tv, headphones, smartwatch\n• Home & Kitchen (440 products) — room heater, water heater, mixer grinder\n• Computers & Accessories (402 products) — cable, mouse, adapter\n• Office Products (38 products) — stationery, art supplies, office electronics"
+    },
+    {
+     "message": "table",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3540,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.569,
+     "paced_wait_seconds": 22.7,
+     "extracted": {
+      "category": null,
+      "subcategory": null,
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [],
+     "response": "We don’t carry tables. Would you like to browse our full catalog?"
+    }
+   ]
+  },
+  {
+   "id": "p04",
+   "tags": [
+    "product"
+   ],
+   "passed": false,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "I need an air purifier",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": false,
+     "failures": [
+      "subcategory None not in ['air purifier']",
+      "no product listing in reply",
+      "ranked_products empty"
+     ],
+     "llm_calls": 3,
+     "tokens": 3627,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.98,
+     "paced_wait_seconds": 25.4,
+     "extracted": {
+      "category": "Home & Kitchen",
+      "subcategory": null,
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [],
+     "response": "I couldn't find any products matching your requirements, even after relaxing several filters. Try a different category or higher budget."
+    },
+    {
+     "message": "philps air purifier",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3437,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.244,
+     "paced_wait_seconds": 25.6,
+     "extracted": {
+      "category": "Home & Kitchen",
+      "subcategory": "air purifier",
+      "type": null,
+      "brand": "Philips",
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Philips Air Purifier Ac2887/20,Vitashield Intelligent Purifi",
+       "brand": "Philips",
+       "subcategory": "air purifier"
+      },
+      {
+       "name": "Philips AC1215/20 Air purifier, removes 99.97% airborne poll",
+       "brand": "Philips",
+       "subcategory": "air purifier"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Philips Air Purifier Ac2887/20,Vitashield Intelligent Purification,Long Hepa Filter Life Upto 17000 Hours,Removes 99.9% Airborne Viruses & Bacteria,99.97% Airborne Pollutants,Ideal For Master Bedroom** — Philips\n   ₹14,499 · 4.3/5\n\n2. **Philips AC1215/20 Air purifier, removes 99.97% airborne pollutants, 4-stage filtration with True HEPA filter (white)** — Philips\n   ₹8,799 · 4.1/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p05",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "show me laptop bags",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3536,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.81,
+     "paced_wait_seconds": 24.9,
+     "extracted": {
+      "category": "Computers & Accessories",
+      "subcategory": "laptop bag",
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "AirCase Protective Laptop Bag Sleeve fits Upto 13.3\" Laptop/",
+       "brand": "AirCase",
+       "subcategory": "laptop bag"
+      },
+      {
+       "name": "AirCase Protective Laptop Bag Sleeve fits Upto 15.6\" Laptop/",
+       "brand": "AirCase",
+       "subcategory": "laptop bag"
+      },
+      {
+       "name": "AirCase Protective Laptop Bag Sleeve fits Upto 14.1\" Laptop/",
+       "brand": "AirCase",
+       "subcategory": "laptop bag"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **AirCase Protective Laptop Bag Sleeve fits Upto 13.3\" Laptop/ MacBook, Wrinkle Free, Padded, Waterproof Light Neoprene case Cover Pouch, for Men & Women, Black- 6 Months Warranty** — AirCase\n   ₹449 · 4.4/5\n\n2. **AirCase Protective Laptop Bag Sleeve fits Upto 15.6\" Laptop/ MacBook, Wrinkle Free, Padded, Waterproof Light Neoprene case Cover Pouch, for Men & Women, Black- 6 Months Warranty** — AirCase\n   ₹449 · 4.3/5\n\n3. **AirCase Protective Laptop Bag Sleeve fits Upto 14.1\" Laptop/ MacBook, Wrinkle Free, Padded, Waterproof Light Neoprene case Cover Pouch, for Men & Women, Black- 6 Months Warranty** — AirCase\n   ₹449 · 4.3/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p06",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "show me all electronics",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3671,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 3.113,
+     "paced_wait_seconds": 25.1,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": null,
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "SanDisk Ultra SDHC UHS-I Card 32GB 120MB/s R for DSLR Camera",
+       "brand": "SanDisk",
+       "subcategory": "Accessories"
+      },
+      {
+       "name": "SanDisk Ultra® microSDXC™ UHS-I Card, 64GB, 140MB/s R, 10 Y ",
+       "brand": "SanDisk",
+       "subcategory": "Accessories"
+      },
+      {
+       "name": "DIGITEK® (DLS-9FT) Lightweight & Portable Aluminum Alloy Lig",
+       "brand": "DIGITEK®",
+       "subcategory": "Cameras & Photography"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **SanDisk Ultra SDHC UHS-I Card 32GB 120MB/s R for DSLR Cameras, for Full HD Recording, 10Y Warranty** — SanDisk\n   ₹449 · 4.4/5\n\n2. **SanDisk Ultra® microSDXC™ UHS-I Card, 64GB, 140MB/s R, 10 Y Warranty, for Smartphones** — SanDisk\n   ₹569 · 4.4/5\n\n3. **DIGITEK® (DLS-9FT) Lightweight & Portable Aluminum Alloy Light Stand for Ring Light, Reflector, Flash Units, Diffuser, Portrait, Softbox, Studio Lighting & More Ideal for Outdoor & Indoor Shoots** — DIGITEK®\n   ₹699 · 4.3/5\n"
+    }
+   ]
+  },
+  {
+   "id": "r01",
+   "tags": [
+    "router"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "hi",
+     "route": "clarify",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 1571,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 3.381,
+     "paced_wait_seconds": 25.8,
+     "extracted": {},
+     "shown": [],
+     "response": "Hello! How can I help you today?"
+    },
+    {
+     "message": "help me",
+     "route": "clarify",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 1616,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.84,
+     "paced_wait_seconds": 8.9,
+     "extracted": {},
+     "shown": [],
+     "response": "Hello! How can I help you with shopping today?"
+    },
+    {
+     "message": "",
+     "route": "clarify",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 1589,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.516,
+     "paced_wait_seconds": 10.9,
+     "extracted": {},
+     "shown": [],
+     "response": "Hello! How can I help you today?"
+    }
+   ]
+  },
+  {
+   "id": "r02",
+   "tags": [
+    "router"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "what is the capital of France",
+     "route": "clarify",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 1615,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.003,
+     "paced_wait_seconds": 11.0,
+     "extracted": {},
+     "shown": [],
+     "response": "I handle shopping tasks only: finding products, tracking orders, and resolving support issues."
+    }
+   ]
+  },
+  {
+   "id": "r03",
+   "tags": [
+    "router",
+    "auth"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "track my order",
+     "route": "sign_in",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1389,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 0.632,
+     "paced_wait_seconds": 11.7,
+     "extracted": {},
+     "shown": [],
+     "response": "I'd love to help you with your order!\n\nPlease sign in first using the **Sign In** button at the top of the page.\n\nIt only takes a moment with Google, and your conversation will be saved so you can continue right where you left off."
+    },
+    {
+     "message": "I want to return my order",
+     "route": "sign_in",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1449,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 0.57,
+     "paced_wait_seconds": 10.3,
+     "extracted": {},
+     "shown": [],
+     "response": "I'd love to help resolve this for you! To raise a support ticket we need to verify your account and find your order.\n\nPlease sign in first using the **Sign In** button at the top of the page.\n\nIt only takes a moment with Google, and your conversation will be saved so you can continue right where you left off."
+    }
+   ]
+  },
+  {
+   "id": "o01",
+   "tags": [
+    "order"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "show my orders",
+     "route": "order",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1393,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.855,
+     "paced_wait_seconds": 10.8,
+     "extracted": {},
+     "shown": [],
+     "response": "You have multiple orders. Which one would you like to check?\n\n• **ORD-2002** - Mi 108cm Full HD Android LED TV (shipped)\n• **ORD-2004** - Croma 500W Mixer Grinder (delivered)\n• **ORD-2005** - Logitech M221 Wireless Mouse (processing)\n• **ORD-2001** - boAt Rockerz 255 Pro+ (delivered)\n• **ORD-2003** - Fire-Boltt Phoenix Smartwatch (shipped)\n\n_(showing 5 most recent of 7 orders)_\n\nPlease provide the order ID."
+    },
+    {
+     "message": "2002 status",
+     "route": "order",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 2182,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.943,
+     "paced_wait_seconds": 9.1,
+     "extracted": {},
+     "shown": [],
+     "response": "Your order **ORD-2002** is currently **shipped** via FakeExpress. No estimated delivery date is available at this time."
+    }
+   ]
+  },
+  {
+   "id": "o02",
+   "tags": [
+    "order"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "where is my order ORD-2004",
+     "route": "order",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1424,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.156,
+     "paced_wait_seconds": 14.2,
+     "extracted": {},
+     "shown": [],
+     "response": "Good news! **Croma 500W Mixer Grinder** (Order ORD-2004) has been delivered. Tracking reference: TRK-2004."
+    },
+    {
+     "message": "where is my order ORD-2003",
+     "route": "order",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 2061,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 3.314,
+     "paced_wait_seconds": 9.1,
+     "extracted": {},
+     "shown": [],
+     "response": "Your **Fire‑Boltt Phoenix Smartwatch** (Order ORD‑2003) has been shipped via DTDC. No estimated delivery date is available at this time."
+    }
+   ]
+  },
+  {
+   "id": "o03",
+   "tags": [
+    "order"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "what is the status of my order",
+     "route": "order",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1429,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.505,
+     "paced_wait_seconds": 12.9,
+     "extracted": {},
+     "shown": [],
+     "response": "You have multiple orders. Which one would you like to check?\n\n• **ORD-2002** - Mi 108cm Full HD Android LED TV (shipped)\n• **ORD-2004** - Croma 500W Mixer Grinder (delivered)\n• **ORD-2005** - Logitech M221 Wireless Mouse (processing)\n• **ORD-2001** - boAt Rockerz 255 Pro+ (delivered)\n• **ORD-2003** - Fire-Boltt Phoenix Smartwatch (shipped)\n\n_(showing 5 most recent of 7 orders)_\n\nPlease provide the order ID."
+    }
+   ]
+  },
+  {
+   "id": "o04",
+   "tags": [
+    "order"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "where is my order ORD-9901",
+     "route": "order",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 1968,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 3.271,
+     "paced_wait_seconds": 8.3,
+     "extracted": {},
+     "shown": [],
+     "response": "Your order ORD-9901 has been shipped. No estimated delivery date is available at this time."
+    }
+   ]
+  },
+  {
+   "id": "o05",
+   "tags": [
+    "order",
+    "ownership"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "where is ORD-7777",
+     "route": "order",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1420,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 0.781,
+     "paced_wait_seconds": 12.1,
+     "extracted": {},
+     "shown": [],
+     "response": "I couldn't find order **ORD-7777** on your account. Here are your recent orders:\n\n1. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)\n2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)\n3. **ORD-2005** — Logitech M221 Wireless Mouse (Processing)\n4. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)\n5. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)\n_(showing 5 most recent of 7 orders)_\n\nPlease reply with the order number you need help with."
+    },
+    {
+     "message": "where is my order ORD-9901",
+     "route": "order",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1530,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 0.516,
+     "paced_wait_seconds": 10.4,
+     "extracted": {},
+     "shown": [],
+     "response": "I couldn't find order **ORD-9901** on your account. Here are your recent orders:\n\n1. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)\n2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)\n3. **ORD-2005** — Logitech M221 Wireless Mouse (Processing)\n4. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)\n5. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)\n_(showing 5 most recent of 7 orders)_\n\nPlease reply with the order number you need help with."
+    }
+   ]
+  },
+  {
+   "id": "s01",
+   "tags": [
+    "support"
+   ],
+   "passed": false,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "I want to cancel my order",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 1880,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 0.987,
+     "paced_wait_seconds": 11.5,
+     "extracted": {},
+     "shown": [],
+     "response": "To raise a support ticket, I need to know which order this is about.\n\nHere are your recent orders:\n\n1. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)\n2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)\n3. **ORD-2005** — Logitech M221 Wireless Mouse (Processing)\n4. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)\n5. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)\n_(showing 5 most recent of 7 orders)_\n\nPlease reply with the order number to open a support ticket."
+    },
+    {
+     "message": "the tv one",
+     "route": "support",
+     "rerouted_to_order": true,
+     "passed": false,
+     "failures": [
+      "none of [\"can't be cancelled\", 'cannot be cancelled', \"can't be canceled\", 'cannot be canceled', \"isn't possible\", 'not possible', 'unable to cancel', \"can't cancel\", 'cannot cancel', 'already shipped', 'has shipped', 'has been delivered', 'already been delivered']"
+     ],
+     "llm_calls": 3,
+     "tokens": 2875,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 4.917,
+     "paced_wait_seconds": 13.8,
+     "extracted": {},
+     "shown": [],
+     "response": "Your Mi 108cm Full HD Android LED TV (Order ORD‑2002) has been shipped via FakeExpress. The current estimated delivery date is not available at this time."
+    }
+   ]
+  },
+  {
+   "id": "s02",
+   "tags": [
+    "support"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "cancel ORD-2003",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 1918,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.784,
+     "paced_wait_seconds": 17.5,
+     "extracted": {},
+     "shown": [],
+     "response": "Order **ORD-2003** has already shipped — cancellation isn't possible. Once it arrives, I can help you initiate a return."
+    },
+    {
+     "message": "cancel ORD-2004",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 1985,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.012,
+     "paced_wait_seconds": 13.2,
+     "extracted": {},
+     "shown": [],
+     "response": "Order **ORD-2004** has been delivered and can't be cancelled. You can return it within our 30-day policy window."
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "tags": [
+    "support"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "I received the wrong item in order ORD-2001",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 1919,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.556,
+     "paced_wait_seconds": 14.6,
+     "extracted": {},
+     "shown": [],
+     "response": "I've created a support ticket: **TKT-43E84B2F**\n\n**Issue:** Received wrong item\n**Category:** Wrong Item\n**Priority:** P2\n**Response Time:** 24 hours\n\nOur support team will review this and contact you. You'll receive email updates at your registered address."
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "tags": [
+    "support"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "cancel my boAt headphones order",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 1890,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 3.084,
+     "paced_wait_seconds": 13.4,
+     "extracted": {},
+     "shown": [],
+     "response": "Order **ORD-2001** has been delivered and can't be cancelled. You can return it within our 30-day policy window."
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "tags": [
+    "support"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "I want to return my order ORD-2004",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 1926,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.446,
+     "paced_wait_seconds": 11.7,
+     "extracted": {},
+     "shown": [],
+     "response": "I've created a support ticket: **TKT-D5EE3247**\n\n**Issue:** Return order ORD-2004\n**Category:** Refund Request\n**Priority:** P2\n**Response Time:** 2-3 days\n\nOur support team will review this and contact you. You'll receive email updates at your registered address."
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "tags": [
+    "support"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "my product is defective and I want a refund",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 1938,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.04,
+     "paced_wait_seconds": 13.7,
+     "extracted": {},
+     "shown": [],
+     "response": "To raise a support ticket, I need to know which order this is about.\n\nHere are your recent orders:\n\n1. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)\n2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)\n3. **ORD-2005** — Logitech M221 Wireless Mouse (Processing)\n4. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)\n5. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)\n_(showing 5 most recent of 7 orders)_\n\nPlease reply with the order number to open a support ticket."
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "tags": [
+    "support"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "I want to return my order",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 1897,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.125,
+     "paced_wait_seconds": 14.2,
+     "extracted": {},
+     "shown": [],
+     "response": "To raise a support ticket, I need to know which order this is about.\n\nHere are your recent orders:\n\n1. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)\n2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)\n3. **ORD-2005** — Logitech M221 Wireless Mouse (Processing)\n4. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)\n5. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)\n_(showing 5 most recent of 7 orders)_\n\nPlease reply with the order number to open a support ticket."
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "tags": [
+    "support",
+    "cancel"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "cancel ORD-2005",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 1898,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.93,
+     "paced_wait_seconds": 13.7,
+     "extracted": {},
+     "shown": [],
+     "response": "Your order **ORD-2005** (Logitech M221 Wireless Mouse) is in processing and can still be cancelled."
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "tags": [
+    "support",
+    "cancel"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "where is ORD-2002",
+     "route": "order",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 1986,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 3.069,
+     "paced_wait_seconds": 13.0,
+     "extracted": {},
+     "shown": [],
+     "response": "Your order ORD-2002 has been shipped via FakeExpress. The tracking ID is TRK-2002. No further delivery estimate is available at this time."
+    },
+    {
+     "message": "cancel the logitech mouse",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 1978,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 0.953,
+     "paced_wait_seconds": 12.6,
+     "extracted": {},
+     "shown": [],
+     "response": "Your order **ORD-2005** (Logitech M221 Wireless Mouse) is in processing and can still be cancelled."
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "tags": [
+    "support"
+   ],
+   "passed": false,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "I received a damaged product",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 1900,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.968,
+     "paced_wait_seconds": 14.6,
+     "extracted": {},
+     "shown": [],
+     "response": "To raise a support ticket, I need to know which order this is about.\n\nHere are your recent orders:\n\n1. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)\n2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)\n3. **ORD-2005** — Logitech M221 Wireless Mouse (Processing)\n4. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)\n5. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)\n_(showing 5 most recent of 7 orders)_\n\nPlease reply with the order number to open a support ticket."
+    },
+    {
+     "message": "ORD-2004",
+     "route": "support",
+     "rerouted_to_order": true,
+     "passed": false,
+     "failures": [
+      "missing 'TKT-'",
+      "no ticket created"
+     ],
+     "llm_calls": 2,
+     "tokens": 2185,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 3.066,
+     "paced_wait_seconds": 13.0,
+     "extracted": {},
+     "shown": [],
+     "response": "Good news! **Croma 500W Mixer Grinder** (Order ORD-2004) has been delivered. Tracking reference: TRK-2004."
+    }
+   ]
+  },
+  {
+   "id": "s11",
+   "tags": [
+    "support"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "what is your return policy",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 1880,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 0.957,
+     "paced_wait_seconds": 14.1,
+     "extracted": {},
+     "shown": [],
+     "response": "Here's a quick summary of our policies:\n\n**Returns:** Most items can be returned within 30 days of delivery in original condition.\n**Refunds:** Processed within 3-5 business days after we receive the return.\n**Defective items:** Replacement or full refund — no questions asked.\n**Damaged delivery:** Report within 48 hours for priority resolution.\n\nIf you have a specific order you'd like help with, just share the order number and I'll get started."
+    },
+    {
+     "message": "please delete all my personal data",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 2062,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 0.89,
+     "paced_wait_seconds": 13.9,
+     "extracted": {},
+     "shown": [],
+     "response": "To raise a support ticket, I need to know which order this is about.\n\nHere are your recent orders:\n\n1. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)\n2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)\n3. **ORD-2005** — Logitech M221 Wireless Mouse (Processing)\n4. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)\n5. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)\n_(showing 5 most recent of 7 orders)_\n\nPlease reply with the order number to open a support ticket."
+    }
+   ]
+  },
+  {
+   "id": "s12",
+   "tags": [
+    "support",
+    "escalation"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "my mixer grinder from ORD-2004 broke and I'm going to sue you",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 1922,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.411,
+     "paced_wait_seconds": 15.3,
+     "extracted": {},
+     "shown": [],
+     "response": "I've created a support ticket: **TKT-E607293C**\n\n**Issue:** Mixer grinder broke\n**Category:** Defective Product\n**Priority:** P2\n**Response Time:** 12-24 hours\n\nOur support team will review this and contact you. You'll receive email updates at your registered address."
+    }
+   ]
+  },
+  {
+   "id": "s13",
+   "tags": [
+    "support",
+    "escalation"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "my order ORD-2004 arrived damaged",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 1902,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.657,
+     "paced_wait_seconds": 13.7,
+     "extracted": {},
+     "shown": [],
+     "response": "I've created a support ticket: **TKT-2E74A04B**\n\n**Issue:** Product arrived damaged\n**Category:** Damaged Delivery\n**Priority:** P2\n**Response Time:** 24 hours\n\nOur support team will review this and contact you. You'll receive email updates at your registered address."
+    },
+    {
+     "message": "the mixer from ORD-2004 is damaged, please help",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 2089,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.155,
+     "paced_wait_seconds": 13.3,
+     "extracted": {},
+     "shown": [],
+     "response": "You already have an open ticket **TKT-2E74A04B** for this order. Our support team will be in touch within the agreed timeframe. Is there anything else I can help you with?"
+    }
+   ]
+  },
+  {
+   "id": "s14",
+   "tags": [
+    "support",
+    "escalation"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "where is ORD-2002",
+     "route": "order",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 1979,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 3.044,
+     "paced_wait_seconds": 15.3,
+     "extracted": {},
+     "shown": [],
+     "response": "Your order ORD-2002 has been shipped via FakeExpress. Unfortunately, we don’t have an estimated delivery date or live tracking details available at this time."
+    },
+    {
+     "message": "my mixer grinder arrived damaged",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 1995,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.256,
+     "paced_wait_seconds": 12.6,
+     "extracted": {},
+     "shown": [],
+     "response": "I've created a support ticket: **TKT-617EDCC3**\n\n**Issue:** Mixer grinder arrived damaged\n**Category:** Damaged Delivery\n**Priority:** P2\n**Response Time:** 24 hours\n\nOur support team will review this and contact you. You'll receive email updates at your registered address."
+    }
+   ]
+  },
+  {
+   "id": "s15",
+   "tags": [
+    "support",
+    "escalation",
+    "safety"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "my room heater caught fire and burned my hand",
+     "route": "safety",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 0,
+     "tokens": 0,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 0.123,
+     "paced_wait_seconds": 14.4,
+     "extracted": {},
+     "shown": [],
+     "response": "We take safety seriously. If you're in immediate danger, please call emergency services. We've flagged your message and a human team member will follow up with you."
+    }
+   ]
+  },
+  {
+   "id": "s16",
+   "tags": [
+    "support",
+    "router"
+   ],
+   "passed": false,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "resolve support issues",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": false,
+     "failures": [
+      "route 'support' not in ['clarify']",
+      "1 unexpected ticket(s)"
+     ],
+     "llm_calls": 2,
+     "tokens": 1888,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.689,
+     "paced_wait_seconds": 0.0,
+     "extracted": {},
+     "shown": [],
+     "response": "I've created a support ticket: **TKT-0B2B0A8D**\n\n**Issue:** User requests general support issue resolution\n**Category:** Other\n**Priority:** P2\n**Response Time:** 24 hours\n\nOur support team will review this and contact you. You'll receive email updates at your registered address."
+    }
+   ]
+  },
+  {
+   "id": "s18",
+   "tags": [
+    "support"
+   ],
+   "passed": false,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "I have an issue with my order",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": false,
+     "failures": [
+      "missing 'ORD-'",
+      "1 unexpected ticket(s)"
+     ],
+     "llm_calls": 2,
+     "tokens": 1897,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.126,
+     "paced_wait_seconds": 13.0,
+     "extracted": {},
+     "shown": [],
+     "response": "I've created a support ticket: **TKT-63A51ABC**\n\n**Issue:** User reports a general issue with their order\n**Category:** Other\n**Priority:** P2\n**Response Time:** 24 hours\n\nOur support team will review this and contact you. You'll receive email updates at your registered address."
+    }
+   ]
+  },
+  {
+   "id": "s17",
+   "tags": [
+    "support",
+    "cancel",
+    "ownership"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "cancel ORD-2005",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 1898,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.877,
+     "paced_wait_seconds": 13.8,
+     "extracted": {},
+     "shown": [],
+     "response": "I couldn't find order **ORD-2005** on your account. 1. **ORD-T902** — boAt Rockerz 450 Bluetooth Headphones (Delivered)\n2. **ORD-T903** — Philips Air Purifier AC1215 (Delivered)\n3. **ORD-T904** — Samsung 43 inch 4K Smart TV (Out_For_Delivery)\n4. **ORD-T905** — Bajaj Rex 500W Mixer Grinder (Processing)\n5. **ORD-T901** — iPhone 15 Pro Max (Shipped)\n_(showing 5 most recent of 10 orders)_\n\nPlease reply with the order number to open a support ticket."
+    }
+   ]
+  }
+ ]
+}
