@@ -1,0 +1,91 @@
+{
+ "label": "v1-combined",
+ "parts": [
+  "v1-gptoss20b",
+  "v1-gptoss120b-rest",
+  "v1-qwen-rest"
+ ],
+ "summary": {
+  "queries": 87,
+  "scored": 87,
+  "errors": 0,
+  "recall@5": 0.854,
+  "precision@3": 0.866,
+  "mrr": 0.825,
+  "empty_rate": 0.11,
+  "correct_refusal_rate": 0.8,
+  "llm_calls_per_query": 1.931,
+  "tokens_per_query": 1993.713,
+  "p50_seconds": 1.14,
+  "p95_seconds": 1.77
+ },
+ "by_tag": {
+  "attribute": {
+   "scored": 17,
+   "recall@5": 0.647,
+   "precision@3": 0.706,
+   "mrr": 0.618,
+   "empty_rate": 0.294
+  },
+  "brand": {
+   "scored": 14,
+   "recall@5": 0.929,
+   "precision@3": 0.929,
+   "mrr": 0.881,
+   "empty_rate": 0.071
+  },
+  "brand_missing": {
+   "scored": 5,
+   "recall@5": 0.8,
+   "precision@3": 0.8,
+   "mrr": 0.8,
+   "empty_rate": 0.0
+  },
+  "followup": {
+   "scored": 2,
+   "recall@5": 0.5,
+   "precision@3": 0.5,
+   "mrr": 0.167,
+   "empty_rate": 0.5
+  },
+  "hinglish": {
+   "scored": 5,
+   "recall@5": 0.6,
+   "precision@3": 0.8,
+   "mrr": 0.6,
+   "empty_rate": 0.2
+  },
+  "out_of_scope": {
+   "scored": 5,
+   "correct_refusal_rate": 0.8
+  },
+  "plain": {
+   "scored": 20,
+   "recall@5": 1.0,
+   "precision@3": 0.983,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "price": {
+   "scored": 11,
+   "recall@5": 0.727,
+   "precision@3": 0.818,
+   "mrr": 0.682,
+   "empty_rate": 0.182
+  },
+  "typo": {
+   "scored": 5,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "vague": {
+   "scored": 10,
+   "recall@5": 0.8,
+   "precision@3": 0.733,
+   "mrr": 0.733,
+   "empty_rate": 0.2
+  }
+ }
+}

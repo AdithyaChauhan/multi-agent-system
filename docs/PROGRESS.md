@@ -12,6 +12,17 @@ Newest first. `/handoff` adds an entry at the end of every session. Keep entries
 - **Commits:**
 -->
 
+## 2026-11-18 · Phase 0 · 87/100 measured; re-planned around prompts and architecture
+- **Done:**
+  - v1 baseline on 87 of 100 queries (gpt-oss-20b, then gpt-oss-120b, then qwen, each until its daily cap);
+  - combined summary in `eval/retrieval_runs/v1-combined-summary.json`;
+  - re-plan: new Phase 2 is LangGraph-native architecture, hybrid search becomes conditional Phase 3; ADRs 0009 and 0010.
+- **Measured:** recall@5 0.854, precision@3 0.866, empty rate 11%. Attribute 0.65, Hinglish 0.60, plain and typo 1.00. Wrong "we don't carry" replies for fitness tracker, laptop stand and geyser.
+- **Decisions:** [0009](decisions/0009-langgraph-primitives.md), [0010](decisions/0010-prompt-budget.md).
+- **Open questions:** label review by the user; whether qwen's generic "What are you looking for?" replies are tool-call failures.
+- **Next:** in a **new chat**, `/resume`: run q088–q100, replay once, close Phase 0, then plan Phase 1.
+- **Commits:** `c9dd1ea` (re-plan), plus this handoff.
+
 ## 2026-11-18 · Phase 0 · Measuring stick built; first numbers
 - **Done:**
   - LLM record/replay in `app/core/llm.py`;

@@ -5,8 +5,8 @@
 ## Now
 - **Current phase:** Phase 0, Measuring stick (in progress)
 - **Branch:** `phase-0-evals` (off `simplify-agents`).
-- **Next action:** finish the v1 baseline. q001–q055 ran on gpt-oss-20b and 19 more on gpt-oss-120b before both hit their daily caps; the rest is running on qwen. Then replay once and close Phase 0. The user should review the labels in `eval/product_queries.json`.
-- **Headline so far:** recall@5 0.89 on q001–q055 (attribute queries 0.62). Renaming categories drops recall@5 from 0.97 to 0.00.
+- **Next action:** run q088–q100 after the daily caps reset (the command is in the Phase 0 plan), replay once, then close Phase 0 and start Phase 1 **in a new chat**. The user should review the labels in `eval/product_queries.json`.
+- **Headline so far:** recall@5 0.85 and precision@3 0.87 on 87 queries (3 models). Attribute queries 0.65, Hinglish 0.60. The app says "we don't carry" for products it does stock. Renaming categories drops recall@5 from 0.97 to 0.00.
 - **Blocked on:** nothing.
 
 ## Phases

@@ -2281,30 +2281,159 @@
    "llm_calls": 2,
    "tokens": 2014,
    "seconds": 1.27
+  },
+  {
+   "id": "q053",
+   "query": "bldc ceiling fan",
+   "history": [],
+   "tags": [
+    "attribute"
+   ],
+   "shown": [
+    "B08Y5QJXSR"
+   ],
+   "shown_names": [
+    "atomberg Renesa 1200mm BLDC Motor with Remote 3 Blade Energy Saving Ceiling Fan "
+   ],
+   "preferences": {
+    "category": "Home & Kitchen",
+    "subcategory": "ceiling fan",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **atomberg Renesa 1200mm BLDC Motor with Remote 3 Blade Energy Saving Ceiling Fan (Matt Black)** — atomberg\n   ₹3,569 · 4.3/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 1
+   },
+   "llm_calls": 2,
+   "tokens": 1921,
+   "seconds": 1.17
+  },
+  {
+   "id": "q054",
+   "query": "wireless keyboard",
+   "history": [],
+   "tags": [
+    "attribute"
+   ],
+   "shown": [
+    "B0148NPH9I",
+    "B00MUTWLW4",
+    "B01N4EV2TL",
+    "B00CEQEGPI",
+    "B09T3H12GV"
+   ],
+   "shown_names": [
+    "Logitech K380 Wireless Multi-Device Keyboard for Windows, Apple iOS, Apple TV An",
+    "Logitech K480 Wireless Multi-Device Keyboard for Windows, macOS, iPadOS, Android",
+    "Logitech MK240 Nano Wireless USB Keyboard and Mouse Set, 12 Function Keys 2.4GHz",
+    "Logitech MK270r USB Wireless Keyboard and Mouse Set for Windows, 2.4 GHz Wireles",
+    "Dell USB Wireless Keyboard and Mouse Set- KM3322W, Anti-Fade & Spill-Resistant K"
+   ],
+   "preferences": {
+    "category": "Computers & Accessories",
+    "subcategory": "keyboard",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": [
+     "wireless"
+    ]
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Logitech K380 Wireless Multi-Device Keyboard for Windows, Apple iOS, Apple TV Android or Chrome, Bluetooth, Compact Space-Saving Design, PC/Mac/Laptop/Smartphone/Tablet (Dark Grey)** — Logitech\n   ₹2,640 · 4.5",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 2,
+   "tokens": 1906,
+   "seconds": 1.09
+  },
+  {
+   "id": "q055",
+   "query": "128gb pen drive",
+   "history": [],
+   "tags": [
+    "attribute"
+   ],
+   "shown": [
+    "B07JJFSG2B",
+    "B005FYNT3G",
+    "B01EZ0X3L8",
+    "B01N6LU1VF",
+    "B07SLMR1K6"
+   ],
+   "shown_names": [
+    "SanDisk Ultra 128 GB USB 3.0 Pen Drive (Black)",
+    "SanDisk Cruzer Blade 32GB USB Flash Drive",
+    "SanDisk Ultra 64 GB USB Pen Drives (SDDDC2-064G-I35, Black, Silver)",
+    "SanDisk Ultra Dual 64 GB USB 3.0 OTG Pen Drive (Black)",
+    "SanDisk Ultra Flair 64GB USB 3.0 Pen Drive, Multicolor"
+   ],
+   "preferences": {
+    "category": "Computers & Accessories",
+    "subcategory": "pen drive",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **SanDisk Ultra 128 GB USB 3.0 Pen Drive (Black)** — SanDisk\n   ₹889 · 4.3/5\n\n2. **SanDisk Cruzer Blade 32GB USB Flash Drive** — SanDisk\n   ₹289 · 4.3/5\n\n3. **SanDisk Ultra 64 GB USB Pen Drives (SDDDC2-064G-I35, Black, Silver)** — SanDisk\n   ₹729 · 4.3/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 2,
+   "tokens": 1927,
+   "seconds": 1.35
   }
  ],
- "finished": "2026-11-18T11:08:37+00:00",
+ "finished": "2026-11-18T11:42:28+00:00",
  "summary": {
-  "queries": 52,
-  "scored": 52,
+  "queries": 55,
+  "scored": 55,
   "errors": 0,
-  "recall@5": 0.885,
-  "precision@3": 0.897,
-  "mrr": 0.865,
-  "empty_rate": 0.096,
+  "recall@5": 0.891,
+  "precision@3": 0.903,
+  "mrr": 0.873,
+  "empty_rate": 0.091,
   "correct_refusal_rate": null,
-  "llm_calls_per_query": 1.962,
-  "tokens_per_query": 1884.615,
+  "llm_calls_per_query": 1.964,
+  "tokens_per_query": 1886.436,
   "p50_seconds": 1.11,
   "p95_seconds": 2.15
  },
  "by_tag": {
   "attribute": {
-   "scored": 13,
-   "recall@5": 0.615,
-   "precision@3": 0.692,
-   "mrr": 0.577,
-   "empty_rate": 0.308
+   "scored": 16,
+   "recall@5": 0.688,
+   "precision@3": 0.75,
+   "mrr": 0.656,
+   "empty_rate": 0.25
   },
   "brand": {
    "scored": 10,
@@ -2328,5 +2457,5 @@
    "empty_rate": 0.2
   }
  },
- "rescored": "2026-11-18T11:10:53+00:00"
+ "rescored": "2026-11-18T11:53:20+00:00"
 }

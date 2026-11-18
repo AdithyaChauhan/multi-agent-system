@@ -127,6 +127,21 @@
    "type": "tws earbuds"
   }
  },
+ "16fdcf48f2ce1c82331f5bfb195b9ee3": {
+  "agent": "product",
+  "message": "User request: \"bldc ceiling fan\"\n\nProducts:\n1. Havells Ambrose 1200mm Ceiling Fan (Gold Mist Wood) | ₹2199 | 4.3★ | Havells\n2. atomberg Renesa 1200mm BLDC Motor with Remote 3 Blade Energy | ₹3569 | 4.",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 649,
+  "value": {
+   "exact": [
+    2
+   ],
+   "same_kind": [
+    2
+   ]
+  }
+ },
  "18f8f6b018843554ed0840eba2674cae": {
   "agent": "product",
   "message": "User request: \"fire-boltt smartwatch\"\n\nProducts:\n1. Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Spo | ₹2999 | 4.4★ | Fire-Boltt\n2. Fire-Boltt Gladiator 1.96\" Biggest Display Smart Watch w",
@@ -202,6 +217,25 @@
     5,
     6
    ]
+  }
+ },
+ "1dd86d106b3e547964ca6e4228845c55": {
+  "agent": "product",
+  "message": "Previous: {} | Message: bldc ceiling fan",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1272,
+  "value": {
+   "brand": null,
+   "category": "Home & Kitchen",
+   "keywords": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "ceiling fan",
+   "suggestion": null,
+   "type": null
   }
  },
  "1e008541062db517da9c9fb2762ff50f": {
@@ -873,6 +907,27 @@
    "type": null
   }
  },
+ "6cb3422f89fd032ed574e87c1db46b53": {
+  "agent": "product",
+  "message": "Previous: {} | Message: wireless keyboard",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1280,
+  "value": {
+   "brand": null,
+   "category": "Computers & Accessories",
+   "keywords": [
+    "wireless"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "keyboard",
+   "suggestion": null,
+   "type": null
+  }
+ },
  "6f8f086dbb2fc5cdd332d48012721f7b": {
   "agent": "product",
   "message": "User request: \"egg boiler\"\n\nProducts:\n1. Multifunctional 2 in 1 Electric Egg Boiling Steamer Egg Fryi | ₹699 | 4.7★ | Multifunctional\n2. Borosil Electric Egg Boiler, 8 Egg Capacity, For Hard, Soft, | ",
@@ -1308,6 +1363,28 @@
    "type": null
   }
  },
+ "a2786b8174647cf5eaf7dc697290689b": {
+  "agent": "product",
+  "message": "User request: \"wireless keyboard\"\n\nProducts:\n1. Logitech K380 Wireless Multi-Device Keyboard for Windows, Ap | ₹2640 | 4.5★ | Logitech\n2. Logitech K480 Wireless Multi-Device Keyboard for Windows, ma |",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 626,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
  "a2865b353ad3d61009761781e37fef25": {
   "agent": "product",
   "message": "Previous: {} | Message: headphones under 1000",
@@ -1673,6 +1750,25 @@
    "type": null
   }
  },
+ "cec62b8d194f72c6b29faa74f56de380": {
+  "agent": "product",
+  "message": "Previous: {} | Message: 128gb pen drive",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1290,
+  "value": {
+   "brand": null,
+   "category": "Computers & Accessories",
+   "keywords": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "pen drive",
+   "suggestion": null,
+   "type": null
+  }
+ },
  "cee476c463de1a84d185f2179a446388": {
   "agent": "product",
   "message": "Previous: {} | Message: bluetooth speaker",
@@ -1793,6 +1889,29 @@
     7,
     8,
     9
+   ]
+  }
+ },
+ "dc296a113feade6901472cdb60f5d2f9": {
+  "agent": "product",
+  "message": "User request: \"128gb pen drive\"\n\nProducts:\n1. SanDisk Cruzer Blade 32GB USB Flash Drive | ₹289 | 4.3★ | SanDisk\n2. SanDisk Ultra 64 GB USB Pen Drives (SDDDC2-064G-I35, Black,  | ₹729 | 4.3★ | SanDisk\n",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 637,
+  "value": {
+   "exact": [
+    5
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
    ]
   }
  },

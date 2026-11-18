@@ -46,7 +46,7 @@ Phases 1 and 2 change the data and the search. Without a fixed yardstick it's im
   - computes the metrics above;
   - writes `eval/retrieval_runs/<label>.json` and prints a table;
   - takes the same options as `run_baseline.py`: `--label`, `--model`, `--database-url`, `--only`, `--tags`.
-- [ ] Today's numbers (partly done: q001–q052 recorded on gpt-oss-20b before the daily cap; finish with `--resume`, about 95K tokens):
+- [ ] Today's numbers: 87 of 100 done across 3 models (see Results). To finish: `eval/run_retrieval.py --label v1-gptoss20b --model openai/gpt-oss-20b --resume --only q088,q089,q090,q091,q092,q093,q094,q095,q096,q097,q098,q099,q100` (about 60K tokens). Original wording:
   - one live run on `openai/gpt-oss-20b`, recorded;
   - one replay run, which must give identical numbers;
   - optionally, one live qwen run when quota allows.
@@ -72,7 +72,43 @@ Phases 1 and 2 change the data and the search. Without a fixed yardstick it's im
 ## Results
 All runs were on 2026-11-18, 1 run each, code at `phase-0-evals`. Files are in `eval/retrieval_runs/`, scored against the labels after the rule fixes (`--rescore`).
 
-**v1 (today's search), gpt-oss-20b, `multi_agent_baseline`, q001–q052 only** (the daily cap stopped the run) · `v1-gptoss20b.json`
+**v1 baseline so far: 87 of 100 queries, 1 run, `multi_agent_baseline`** · `v1-combined-summary.json`
+Every model hit Groq's daily cap, so the queries are split by model: q001–q055 on gpt-oss-20b, q056–q074 on gpt-oss-120b, q075–q087 on qwen3.8-27b. q088–q100 (follow-ups) are still to run. Later comparisons must pair each query with the same model; the cassettes are per model.
+
+| Metric | Value |
+|---|---|
+| recall@5 | 0.854 |
+| precision@3 | 0.866 |
+| MRR | 0.825 |
+| empty rate | 11% |
+| correct refusals | 4 of 5 |
+| tokens per query | ~1,990 |
+| latency p50 / p95 | 1.1 s / 1.8 s |
+
+| Tag (n) | recall@5 | precision@3 | empty rate |
+|---|---|---|---|
+| plain (20) | 1.00 | 0.98 | 0% |
+| typo (5) | 1.00 | 1.00 | 0% |
+| brand (14) | 0.93 | 0.93 | 7% |
+| brand we don't carry (5) | 0.80 | 0.80 | 0% |
+| vague (10) | 0.80 | 0.73 | 20% |
+| price (11) | 0.73 | 0.82 | 18% |
+| attribute (17) | 0.65 | 0.71 | 29% |
+| Hinglish (5) | 0.60 | 0.80 | 20% |
+| follow-up (2 so far) | 0.50 | 0.50 | 50% |
+
+**"We don't carry" said about products we do carry** (the most damaging failure):
+- "something to track my steps and heart rate" → "we don't carry fitness tracker" (there are 53 smartwatches);
+- "my laptop sits too low and my neck hurts" → "we don't carry laptops, see our laptop bag range" (there are 17 laptop stands);
+- "geyser" queries → "we don't carry water heater" (there are 44).
+
+**qwen-specific failures:**
+- "accha wala bluetooth speaker" and the follow-up "Samsung" (after "show me some TVs") got the generic "What are you looking for?" reply.
+- "running shoes" got that same generic reply instead of "we don't carry".
+- "apple airpods" showed a wired gaming headset.
+- Most likely cause: qwen's malformed tool calls failing twice (DIAGNOSIS.md). This needs a check.
+
+**Earlier partial view: v1 (today's search), gpt-oss-20b, `multi_agent_baseline`, q001–q052 only** (the daily cap stopped the run) · `v1-gptoss20b.json`
 
 | Metric | Value |
 |---|---|
