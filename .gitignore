@@ -46,3 +46,7 @@ eval/reports/*.html
 # Claude Code personal files
 .claude/settings.local.json
 CLAUDE.local.md
+
+# Extra env files with keys (keep the example)
+.env.*
+!.env.example
