@@ -386,7 +386,9 @@ def check_turn(expect: dict, *, text, status_code, state, route, api_json, user_
             failures.append(f"shown subcategories {got} mostly not in {expect['result_subcategory']}")
     if "result_brand" in expect and shown:
         want = _alnum(expect["result_brand"])
-        bad = [p.get("brand") for p in shown if want not in _alnum(p.get("brand")) and _alnum(p.get("brand")) not in want]
+        bad = [
+            p.get("brand") for p in shown if want not in _alnum(p.get("brand")) and _alnum(p.get("brand")) not in want
+        ]
         if bad:
             failures.append(f"shown brands {bad} != {expect['result_brand']!r}")
 

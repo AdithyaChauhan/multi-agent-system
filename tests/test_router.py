@@ -113,3 +113,9 @@ class TestGraph:
         with patch.object(router, "call_llm", return_value=RouteDecision(intent="order")):
             out = router.router_graph.invoke({"user_message": "track my order", "user_id": "anon-1"})
         assert out["route"] == "sign_in"
+
+
+def test_current_message_is_not_repeated_in_history():
+    history = [{"role": "user", "content": "4k monitor"}]
+    _, call = _classify(RouteDecision(intent="product"), user_message="4k monitor", conversation_history=history)
+    assert "Recent conversation" not in call.call_args.args[2][1].content

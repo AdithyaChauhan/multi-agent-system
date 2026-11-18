@@ -66,12 +66,15 @@ def _orders_line(user_id: str) -> str:
 
 def classify(state: AgentState) -> dict:
     """LLM node: one structured call decides intent, order, support issue and risk."""
-    history = state.get("conversation_history") or []
+    history = list(state.get("conversation_history") or [])
+    message = state.get("user_message", "")
+    if history and history[-1].get("role") == "user" and history[-1].get("content") == message:
+        history = history[:-1]  # main.py stores the new message before loading history
     recent = "\n".join(f"{m['role'].title()}: {m['content'][:400]}" for m in history[-4:])
     content = f"{_orders_line(state.get('user_id', ''))}\n"
     if recent:
         content += f"Recent conversation:\n{recent}\n"
-    content += f"Message: {state.get('user_message', '')}"
+    content += f"Message: {message}"
 
     decision = call_llm(
         "router",

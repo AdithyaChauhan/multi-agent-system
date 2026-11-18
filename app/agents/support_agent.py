@@ -78,7 +78,9 @@ def ask_for_order(state: AgentState) -> dict:
     if order_id:
         intro = f"I couldn't find order **{order_id}** on your account. Here are your recent orders:\n\n"
     else:
-        intro = "To raise a support ticket, I need to know which order this is about.\n\nHere are your recent orders:\n\n"
+        intro = (
+            "To raise a support ticket, I need to know which order this is about.\n\nHere are your recent orders:\n\n"
+        )
     return {
         "final_response": f"{intro}{order_lines(orders, numbered=True)}\n\n"
         "Please reply with the order number to open a support ticket."
@@ -124,7 +126,11 @@ def create_ticket(state: AgentState) -> dict:
     if state.get("risk") == "legal":
         description = f"[LEGAL] {description}"
     ticket = create_support_ticket(
-        user_id=user_id, severity="medium", category=category, description=f"[P2] {description[:500]}", order_id=order_id
+        user_id=user_id,
+        severity="medium",
+        category=category,
+        description=f"[P2] {description[:500]}",
+        order_id=order_id,
     )
     policy = lookup_support_policy(category, "medium")
     logger.info(f"request_id={get_request_id()} | ticket created | {ticket['ticket_id']} | category={category}")

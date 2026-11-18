@@ -13,7 +13,14 @@ ORDERS = [
 
 
 def _order(status, **extra):
-    return {"order_id": "ORD-1", "product_name": "Mixer", "status": status, "carrier": None, "tracking_id": None, **extra}
+    return {
+        "order_id": "ORD-1",
+        "product_name": "Mixer",
+        "status": status,
+        "carrier": None,
+        "tracking_id": None,
+        **extra,
+    }
 
 
 class TestFindOrder:
@@ -97,4 +104,6 @@ def test_graph_end_to_end():
         oa, "fetch_order_from_db", return_value=dict(ORDERS[0], carrier="BlueDart", tracking_id="TRK-2004")
     ), patch.object(oa, "fetch_tracking_info", return_value=None):
         out = oa.order_agent_graph.invoke({"user_id": "demo-user-1", "order_id": "ORD-2004"})
-    assert out["final_response"].startswith("Good news! **Croma 500W Mixer Grinder** (order ORD-2004) has been delivered.")
+    assert out["final_response"].startswith(
+        "Good news! **Croma 500W Mixer Grinder** (order ORD-2004) has been delivered."
+    )

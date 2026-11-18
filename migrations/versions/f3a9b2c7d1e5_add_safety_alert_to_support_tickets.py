@@ -16,9 +16,10 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.add_column('support_tickets',
-        sa.Column('safety_alert', sa.Boolean(), nullable=True)
-    )
+    # The app adds this column at startup on older databases, so it may already exist.
+    columns = {c["name"] for c in sa.inspect(op.get_bind()).get_columns("support_tickets")}
+    if "safety_alert" not in columns:
+        op.add_column('support_tickets', sa.Column('safety_alert', sa.Boolean(), nullable=True))
 
 
 def downgrade() -> None:

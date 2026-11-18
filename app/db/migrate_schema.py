@@ -60,7 +60,7 @@ def migrate_schema():
 
 
 def ensure_support_ticket_priority_column() -> None:
-    """Add missing support_tickets columns when an older SQLite DB is still in use."""
+    """Add support_tickets columns missing from older databases (SQLite or Postgres restores)."""
     inspector = inspect(engine)
     if "support_tickets" not in inspector.get_table_names():
         return
@@ -68,7 +68,7 @@ def ensure_support_ticket_priority_column() -> None:
     column_names = {column["name"] for column in inspector.get_columns("support_tickets")}
     additions = {
         "priority": "VARCHAR",
-        "safety_alert": "BOOLEAN DEFAULT 0",
+        "safety_alert": "BOOLEAN DEFAULT FALSE",  # FALSE, not 0: Postgres rejects an integer default
     }
 
     missing_columns = {name: ddl for name, ddl in additions.items() if name not in column_names}

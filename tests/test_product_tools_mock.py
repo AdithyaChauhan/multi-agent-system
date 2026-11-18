@@ -170,3 +170,16 @@ class TestSearchProducts:
 
         assert len(results) == 1
 
+
+class TestResolveBrand:
+    KNOWN = ["Sony", "Logitech", "Philips", "TE™", "boAt", "Fire-Boltt"]
+
+    @pytest.mark.parametrize(
+        "typed,expected",
+        [("sonny", "Sony"), ("Lojitec", "Logitech"), ("philps", "Philips"), ("BOAT", "boAt"), ("bose", "bose")],
+    )
+    def test_typos_resolve_case_insensitively_without_partial_matches(self, typed, expected):
+        from app.tools.product_tools import _resolve_brand
+
+        with patch("app.tools.product_tools._get_known_brands", return_value=self.KNOWN):
+            assert _resolve_brand(typed) == expected

@@ -106,7 +106,9 @@ class TestReplies:
     def test_brand_we_carry_outside_the_filters(self):
         ranked = [{**_product(1, brand="boAt"), "llm_tier": 1}]
         with patch.object(pa, "search_products", return_value=[_product(9, brand="Sony")]):
-            text = pa.format_recommendations({"preferences": {"subcategory": "headphones", "brand": "Sony"}, "ranked_products": ranked})
+            text = pa.format_recommendations(
+                {"preferences": {"subcategory": "headphones", "brand": "Sony"}, "ranked_products": ranked}
+            )
         assert text["final_response"].startswith("I couldn't find Sony headphones within your filters")
 
     def test_only_maybe_results(self):
@@ -116,7 +118,9 @@ class TestReplies:
     @pytest.mark.parametrize("stocked,prefix", [([], "We don't carry Bose."), ([_product(1)], "I couldn't find")])
     def test_no_results(self, stocked, prefix):
         with patch.object(pa, "search_products", return_value=stocked):
-            text = pa.respond_no_results({"preferences": {"subcategory": "speakers", "brand": "Bose"}})["final_response"]
+            text = pa.respond_no_results({"preferences": {"subcategory": "speakers", "brand": "Bose"}})[
+                "final_response"
+            ]
         assert text.startswith(prefix)
 
     def test_ask_for_preferences_shows_catalog(self):

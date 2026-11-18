@@ -91,6 +91,7 @@ class TestSupportTools:
         result = lookup_support_policy("defective_product", "critical")
         assert "response_time" in result
 
+
 class TestSupportTools:
 
     def test_create_support_ticket_returns_ticket(self):
@@ -122,6 +123,7 @@ class TestSupportTools:
 
         result = lookup_support_policy("defective_product", "critical")
         assert "response_time" in result
+
 
 class TestShipmentTools:
 

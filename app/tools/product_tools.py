@@ -5,7 +5,7 @@ from sqlalchemy import or_, cast, String
 from app.db.database import SessionLocal
 from app.models.product import Product
 from app.core.logger import get_logger, get_request_id
-from rapidfuzz import process, fuzz
+from rapidfuzz import fuzz, process, utils
 
 logger = get_logger("app.tools.product_tools")
 
@@ -42,7 +42,9 @@ def _resolve_brand(brand: str) -> str:
     for k in known:
         if k.lower() == brand_lower:
             return k
-    result = process.extractOne(brand, known, scorer=fuzz.WRatio, score_cutoff=80)
+    # Edit-distance ratio on lowercased names: "sonny"→Sony, "lojitec"→Logitech, but no partial
+    # matches on short brands (WRatio matched "lojitec" to "TE™").
+    result = process.extractOne(brand, known, scorer=fuzz.ratio, processor=utils.default_process, score_cutoff=80)
     return result[0] if result else brand
 
 
@@ -149,4 +151,3 @@ def search_products(
 
     finally:
         db.close()
-

@@ -58,18 +58,17 @@ def _make_metrics(rel_threshold: float, cor_threshold: float) -> tuple:
     """
     Return (relevancy_metric, correctness_metric).
 
-    Always attempts GEval (LLM judge via gpt-4o-mini) — falls back to rule-based
-    only if GEval cannot be initialised (e.g. deepeval version mismatch).
-    The app's actual_output comes from fixture_response (CI) or the live API
-    (RUN_LIVE_EVAL=true), but the evaluator is always LLM-based when possible.
+    Fixture mode (CI) uses the rule-based metrics below. Live mode uses GEval with gpt-4o-mini as
+    the judge, which needs EVAL_OPENAI_API_KEY (a real OpenAI key). Without that key, live mode
+    falls back to the rule-based metrics and says so in judge_name(); it never borrows
+    OPENAI_API_KEY, which some .env files point at Groq.
     """
-    # CI uses deterministic evaluators only, so no second LLM provider is
-    # required to evaluate fixture or live chatbot responses.
-    return (
-        AnswerRelevancyMetric(threshold=rel_threshold),
-        CorrectnessMetric(threshold=cor_threshold),
-    )
-
+    if judge_name() != "geval":
+        return (
+            AnswerRelevancyMetric(threshold=rel_threshold),
+            CorrectnessMetric(threshold=cor_threshold),
+        )
+    os.environ["OPENAI_API_KEY"] = os.environ["EVAL_OPENAI_API_KEY"]
     try:
         from deepeval.metrics import GEval
         from deepeval.test_case import SingleTurnParams
@@ -108,6 +107,12 @@ def _make_metrics(rel_threshold: float, cor_threshold: float) -> tuple:
             AnswerRelevancyMetric(threshold=rel_threshold),
             CorrectnessMetric(threshold=cor_threshold),
         )
+
+
+def judge_name() -> str:
+    if not RUN_LIVE_EVAL:
+        return "rule-based"
+    return "geval" if os.getenv("EVAL_OPENAI_API_KEY") else "rule-based (no EVAL_OPENAI_API_KEY)"
 
 
 # ── Custom rule-based metrics (no LLM — deterministic for CI) ────────────────
@@ -436,7 +441,7 @@ def create_langsmith_experiment(
                 "eval_mode": "live" if RUN_LIVE_EVAL else "fixture",
                 "answer_relevancy_threshold": rel_t,
                 "correctness_threshold": cor_t,
-                "judge": "deepeval-geval-gpt-4o-mini",
+                "judge": judge_name(),
             },
             max_concurrency=1,
         )
@@ -634,8 +639,8 @@ def main() -> None:
     print(f"{sep}\n")
 
     # Load config and dataset
-    config = yaml.safe_load((EVAL_DIR / "config.yaml").read_text())
-    dataset = json.loads((EVAL_DIR / "dataset.json").read_text())
+    config = yaml.safe_load((EVAL_DIR / "config.yaml").read_text(encoding="utf-8"))
+    dataset = json.loads((EVAL_DIR / "dataset.json").read_text(encoding="utf-8"))
     git_info = get_git_info()
 
     thresholds = config["metrics"]
@@ -644,7 +649,10 @@ def main() -> None:
 
     print(f"Dataset   : {len(dataset)} test cases")
     print(f"Metrics   : answer_relevancy ≥ {rel_threshold}  |  correctness ≥ {cor_threshold}")
-    print("Evaluator : GEval (LLM judge — gpt-4o-mini)  [rule-based fallback if API unavailable]")
+    judge = judge_name()
+    print(f"Evaluator : {'GEval (LLM judge — gpt-4o-mini)' if judge == 'geval' else judge}")
+    if judge.startswith("rule-based (no"):
+        print("  [WARN] LIVE MODE WITHOUT AN LLM JUDGE: set EVAL_OPENAI_API_KEY to score with gpt-4o-mini.")
     print(f"App mode  : {'Live (real LLM responses)' if RUN_LIVE_EVAL else 'Fixture (stored responses)'}\n")
 
     # Build LLMTestCase objects
@@ -747,6 +755,7 @@ def main() -> None:
     # Build JSON report
     report = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
+        "judge": judge_name(),
         "commit_sha": git_info["commit_sha"],
         "branch": git_info["branch"],
         "total_samples": n,
@@ -763,8 +772,8 @@ def main() -> None:
     json_path = reports_dir / "eval_report.json"
     html_path = reports_dir / "eval_report.html"
 
-    json_path.write_text(json.dumps(report, indent=2, ensure_ascii=False))
-    html_path.write_text(generate_html_report(report, config))
+    json_path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+    html_path.write_text(generate_html_report(report, config), encoding="utf-8")
 
     # Print summary
     print(f"\n{'─'*50}")

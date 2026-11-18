@@ -139,7 +139,12 @@ def search_schema():
             if not options:  # catalog unavailable: accept the model's value as written
                 return value.strip() or None
             word = value.strip().lower()
-            forms = {word, word + "s", word[:-1] if word.endswith("s") else word, word[:-2] if word.endswith("es") else word}
+            forms = {
+                word,
+                word + "s",
+                word[:-1] if word.endswith("s") else word,
+                word[:-2] if word.endswith("es") else word,
+            }
             return next((a for a in options if a.lower() in forms), None)  # "TVs" → "tv"
 
         @field_validator("keywords", mode="before")
@@ -192,9 +197,7 @@ def extract_preferences(state: AgentState) -> dict:
     preferences["keywords"] = out.get("keywords") or []
     preferences["category"] = _category_of(preferences["subcategory"], preferences["category"])
     not_carried = out.get("not_carried")
-    logger.info(
-        f"request_id={get_request_id()} | EXTRACTED: {json.dumps(preferences)} | not_carried={not_carried!r}"
-    )
+    logger.info(f"request_id={get_request_id()} | EXTRACTED: {json.dumps(preferences)} | not_carried={not_carried!r}")
     return {
         "preferences": preferences,
         "original_preferences": copy.deepcopy(preferences),
@@ -341,11 +344,18 @@ def _brand_note(prefs: dict, shown: list) -> str:
         return ""
     label = _label(prefs)
     if search_products(brand=brand, subcategory=prefs.get("subcategory"), limit=1):
-        return f"I couldn't find {brand} {label} within your filters, so here are the closest options from other brands:\n"
+        return (
+            f"I couldn't find {brand} {label} within your filters, so here are the closest options from other brands:\n"
+        )
     return f"We don't carry {brand} {label}, so here are the closest options from other brands:\n"
 
 
-RELAXED_WORDS = {"type": "the type", "price": "the price limit (+25%)", "brand": "the brand", "keywords": "some features"}
+RELAXED_WORDS = {
+    "type": "the type",
+    "price": "the price limit (+25%)",
+    "brand": "the brand",
+    "keywords": "some features",
+}
 
 
 def format_recommendations(state: AgentState) -> dict:

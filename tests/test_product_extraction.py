@@ -65,7 +65,9 @@ class TestExtractPreferences:
         assert result["not_carried"] is None
 
     def test_category_comes_from_the_catalog_not_the_model(self, fake_catalog):
-        result, _ = _extract(fake_catalog, "calculator", {"category": "Electronics", "subcategory": "office electronics"})
+        result, _ = _extract(
+            fake_catalog, "calculator", {"category": "Electronics", "subcategory": "office electronics"}
+        )
         assert result["preferences"]["category"] == "Office Products"
 
     def test_shared_subcategory_keeps_a_matching_category(self, fake_catalog):
@@ -85,7 +87,9 @@ class TestExtractPreferences:
 
 class TestRouting:
     def test_not_carried_goes_to_unavailable(self, fake_catalog):
-        assert fake_catalog.route_after_extraction({"not_carried": {"item": "chairs"}, "preferences": {}}) == "unavailable"
+        assert (
+            fake_catalog.route_after_extraction({"not_carried": {"item": "chairs"}, "preferences": {}}) == "unavailable"
+        )
 
     def test_no_signal_asks(self, fake_catalog):
         assert fake_catalog.route_after_extraction({"preferences": {"max_price": 500}}) == "ask"
@@ -97,7 +101,10 @@ class TestRouting:
 class TestRespondUnavailable:
     def test_offers_the_suggestion(self, fake_catalog):
         reply = fake_catalog.respond_unavailable({"not_carried": {"item": "laptops", "suggestion": "laptop bag"}})
-        assert reply["final_response"] == "Sorry, we don't carry laptops. Would you like to see our laptop bag range instead?"
+        assert (
+            reply["final_response"]
+            == "Sorry, we don't carry laptops. Would you like to see our laptop bag range instead?"
+        )
 
     def test_without_suggestion_shows_the_catalog(self, fake_catalog):
         with patch.object(fake_catalog, "CATALOG_BLURB", "• Electronics (3 products) — tv"):
