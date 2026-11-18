@@ -1,0 +1,645 @@
+<title>Multi-Agent Request Flow</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+/* Layout: one fixed full-screen night scene; story chapters scroll over it, one idea per screen; a thin HUD sits in the corners. Single dark world by design. */
+:root {
+  --bg: #05070D; --fg: #ECF1F7; --muted: #8391A3; --faint: #4F5B6D; --hair: rgba(236,241,247,.12);
+  --http: #FFB45E; --llm: #A08FFF; --db: #43E3C2; --embed: #EB8EFF; --guard: #FF6E86; --code: #A9B5C4;
+  --serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --sans: "Geist", "Segoe UI", system-ui, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+  color-scheme: dark;
+}
+* { box-sizing: border-box }
+html { background: var(--bg) }
+body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased }
+button, select { font: inherit; color: inherit }
+:focus-visible { outline: 1px solid var(--fg); outline-offset: 3px }
+
+/* scene */
+.aurora { position: fixed; inset: -20%; z-index: 0; pointer-events: none; filter: blur(70px); opacity: .55;
+  background:
+    radial-gradient(40% 30% at 70% 30%, rgba(67,227,194,.22), transparent 70%),
+    radial-gradient(35% 28% at 30% 70%, rgba(160,143,255,.20), transparent 70%),
+    radial-gradient(30% 25% at 85% 80%, rgba(235,142,255,.12), transparent 70%);
+  animation: drift 26s ease-in-out infinite alternate }
+@keyframes drift { to { transform: translate3d(-4%, 3%, 0) scale(1.08) } }
+#cv { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; display: block }
+.scrim { position: fixed; inset: 0; z-index: 2; pointer-events: none;
+  background: linear-gradient(90deg, rgba(5,7,13,.86) 0%, rgba(5,7,13,.55) 30%, rgba(5,7,13,0) 52%) }
+.labels { position: fixed; inset: 0; z-index: 3; pointer-events: none; overflow: hidden }
+.lbl { position: absolute; left: 0; top: 0; white-space: nowrap; font: 500 11px/1.3 var(--mono); letter-spacing: .04em; color: var(--fg);
+  text-shadow: 0 0 12px var(--bg), 0 0 4px var(--bg); transition: opacity .35s }
+.lbl small { display: block; font-weight: 400; color: var(--muted); letter-spacing: 0 }
+.lbl.off { opacity: 0 }
+.lbl.faint { opacity: .5 }
+
+/* HUD */
+.hud { position: fixed; z-index: 10; font: 500 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted) }
+.hud.tl { top: calc(18px + env(safe-area-inset-top, 0px)); left: var(--gutter-l); display: flex; gap: 10px; align-items: center }
+.hud.tl b { color: var(--fg); font-weight: 500 }
+.hud.tr { top: calc(14px + env(safe-area-inset-top, 0px)); right: var(--gutter-r); display: flex; gap: 10px; align-items: center; text-transform: none; letter-spacing: 0 }
+.hud.bl { bottom: calc(18px + env(safe-area-inset-bottom, 0px)); left: var(--gutter-l); display: flex; gap: 12px; align-items: baseline }
+.hud.br { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); right: var(--gutter-r); display: flex; gap: 16px; align-items: center }
+.chapter { font: italic 400 40px/1 var(--serif); color: var(--fg); letter-spacing: 0; text-transform: none; font-variant-numeric: tabular-nums }
+.seg { display: inline-flex; border: 1px solid var(--hair); border-radius: 999px; padding: 2px; backdrop-filter: blur(8px); background: rgba(5,7,13,.4) }
+.seg button { border: 0; background: none; padding: 6px 12px; border-radius: 999px; cursor: pointer; font-size: 12px; color: var(--muted) }
+.seg button[aria-pressed="true"] { background: var(--fg); color: var(--bg) }
+.sel { appearance: none; border: 1px solid var(--hair); border-radius: 999px; padding: 7px 30px 7px 12px; font-size: 12px; cursor: pointer;
+  background: rgba(5,7,13,.4) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%238391A3' stroke-width='1.3'/%3E%3C/svg%3E") no-repeat right 12px center; backdrop-filter: blur(8px) }
+.sel option { background: #0B0F18; color: var(--fg) }
+.count { display: flex; gap: 14px }
+.count span { display: flex; align-items: center; gap: 6px }
+.count i { width: 6px; height: 6px; border-radius: 50%; background: var(--k) }
+.count b { color: var(--fg); font-weight: 500; font-variant-numeric: tabular-nums }
+.ring { width: 38px; height: 38px; transform: rotate(-90deg) }
+.ring circle { fill: none; stroke-width: 1.5 }
+.hud-fade { transition: opacity .4s }
+.hud-fade.hide { opacity: 0 }
+
+/* content */
+main { position: relative; z-index: 5 }
+.screen { min-height: 100vh; min-height: 100svh; display: flex; align-items: center;
+  padding-left: max(16px, env(safe-area-inset-left, 0px), 7vw); padding-right: var(--gutter-r); padding-block: 96px }
+.hero { min-height: 92vh; min-height: 92svh; align-items: flex-end; padding-block: 120px 72px }
+.hero-in { display: grid; gap: 34px; max-width: 760px; min-width: 0 }
+.eyebrow { font: 500 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted) }
+h1 { font: 400 clamp(46px, 7.4vw, 104px)/.95 var(--serif); letter-spacing: -.015em; margin: 14px 0 0; text-wrap: balance }
+h1 em { color: var(--db) }
+.lede { max-width: 50ch; color: var(--muted); margin: 0; font-size: 17px }
+.boot { font: 400 12px/1.9 var(--mono); color: var(--muted); margin: 0; padding: 0; list-style: none }
+.boot li::before { content: "● "; color: var(--db) }
+.boot li:last-child::after { content: "▍"; color: var(--fg); margin-left: 4px; animation: blink 1.1s steps(1) infinite }
+@keyframes blink { 50% { opacity: 0 } }
+
+.picker { display: grid; border-top: 1px solid var(--hair); min-width: 0 }
+.pick { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 14px; align-items: baseline; text-align: left; padding: 14px 4px;
+  background: none; border: 0; border-bottom: 1px solid var(--hair); cursor: pointer; transition: padding .3s, background .3s }
+.pick .n { font: italic 400 20px/1 var(--serif); color: var(--muted) }
+.pick .t { font-size: 17px; font-weight: 500; min-width: 0 }
+.pick .m { display: block; font: 400 12px/1.4 var(--mono); color: var(--muted); margin-top: 3px; overflow-wrap: anywhere }
+.pick .go { font: 400 12px var(--mono); color: var(--muted) }
+.pick:hover, .pick[aria-current="true"] { padding-left: 14px; background: linear-gradient(90deg, rgba(236,241,247,.05), transparent) }
+.pick[aria-current="true"] .n, .pick:hover .go { color: var(--db) }
+
+.intro-in { max-width: 680px; display: grid; gap: 18px; min-width: 0 }
+.quote { font: italic 400 clamp(40px, 6vw, 84px)/1 var(--serif); margin: 0; text-wrap: balance; overflow-wrap: anywhere }
+.who { font: 400 13px var(--mono); color: var(--muted) }
+.scrollcue { font: 500 11px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 10px }
+.scrollcue::after { content: ""; width: 48px; height: 1px; background: var(--muted); transform-origin: left; animation: cue 2.2s ease-in-out infinite }
+@keyframes cue { 0% { transform: scaleX(0) } 60% { transform: scaleX(1) } 100% { transform: scaleX(1); opacity: 0 } }
+
+.card { max-width: 430px; display: grid; gap: 14px; min-width: 0; transition: opacity .5s, transform .5s; opacity: .22; transform: translateY(10px) }
+.step.on .card { opacity: 1; transform: none }
+.meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap }
+.tag { font: 500 10.5px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--k); display: inline-flex; align-items: center; gap: 7px }
+.tag::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--k); box-shadow: 0 0 12px var(--k) }
+.tag.new { color: var(--embed); border: 1px solid rgba(235,142,255,.4); padding: 4px 7px; border-radius: 999px }
+.tag.new::before { display: none }
+.card h3 { font: 400 clamp(34px, 3.8vw, 52px)/1.02 var(--serif); margin: 0; letter-spacing: -.01em; text-wrap: balance }
+.card p { margin: 0; color: #C3CCD8; font-size: 16.5px; max-width: 40ch }
+.card pre { margin: 0; font: 400 12px/1.6 var(--mono); color: var(--fg); background: rgba(236,241,247,.04); border-left: 1px solid var(--k);
+  padding: 10px 14px; white-space: pre-wrap; overflow-wrap: anywhere; overflow-x: auto }
+.ref { font: 400 11.5px var(--mono); color: var(--faint); overflow-wrap: anywhere }
+
+.compare { flex-direction: column; align-items: stretch; justify-content: center; gap: 40px }
+.compare h2 { font: 400 clamp(40px, 5.6vw, 76px)/1 var(--serif); margin: 0; max-width: 16ch; text-wrap: balance }
+.cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 980px; border-top: 1px solid var(--hair) }
+.col { padding: 22px 28px 8px 0; min-width: 0 }
+.col + .col { padding-left: 28px; border-left: 1px solid var(--hair) }
+.col h4 { margin: 0 0 14px; font: 500 11px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted) }
+.col:last-child h4 { color: var(--embed) }
+.col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px }
+.col li { font-size: 16px; color: #C3CCD8; padding-left: 18px; position: relative }
+.col li::before { content: ""; position: absolute; left: 0; top: .7em; width: 8px; height: 1px; background: var(--muted) }
+.same { max-width: 980px; color: var(--muted); margin: 0; font-size: 15px }
+.same b { color: var(--fg); font-weight: 500 }
+.actions { display: flex; flex-wrap: wrap; gap: 12px }
+.btn { border: 1px solid var(--hair); background: rgba(5,7,13,.5); border-radius: 999px; padding: 12px 20px; cursor: pointer; font-size: 14px; backdrop-filter: blur(8px); transition: background .3s, color .3s }
+.btn:hover { background: var(--fg); color: var(--bg) }
+.foot { font: 400 11px var(--mono); color: var(--faint); max-width: 980px; margin: 0 }
+
+.nogl { position: fixed; top: 64px; left: var(--gutter-l); right: var(--gutter-r); z-index: 11; font: 400 12px var(--mono); color: var(--muted) }
+
+@media (max-width: 900px) {
+  .scrim { background: linear-gradient(0deg, rgba(5,7,13,.92) 0%, rgba(5,7,13,.6) 34%, rgba(5,7,13,0) 58%) }
+  .step { align-items: flex-end; padding-bottom: 92px }
+  .hud.tl .proj { display: none }
+  .count { display: none }
+  .cols { grid-template-columns: minmax(0, 1fr) }
+  .col + .col { padding-left: 0; border-left: 0; border-top: 1px solid var(--hair) }
+  .chapter { font-size: 30px }
+}
+@media (max-width: 560px) {
+  .hud.tr .seg button { padding: 6px 9px }
+  .sel { max-width: 150px }
+  .hud.tl { display: none }
+  .hud.tr { left: var(--gutter-l); justify-content: space-between }
+  .card h3 { font-size: 32px }
+  .lbl { font-size: 10px }
+}
+@media (prefers-reduced-motion: reduce) {
+  .aurora, .scrollcue::after, .boot li:last-child::after { animation: none }
+  .card, .lbl, .pick { transition: none }
+}
+</style>
+
+<div class="aurora" aria-hidden="true"></div>
+<canvas id="cv" aria-hidden="true"></canvas>
+<div class="scrim" aria-hidden="true"></div>
+<div class="labels" id="labels" aria-hidden="true"></div>
+
+<div class="hud tl"><b>Agent Flow</b><span class="proj">· multi-agent-system</span></div>
+<div class="hud tr">
+  <select class="sel" id="storySel" aria-label="Story"></select>
+  <div class="seg" role="group" aria-label="Version">
+    <button id="m-now" aria-pressed="true">Today</button>
+    <button id="m-next" aria-pressed="false">Proposed</button>
+  </div>
+</div>
+<div class="hud bl hud-fade hide" id="hudBL"><span class="chapter" id="chap">01</span><span id="chapOf">/ 09</span></div>
+<div class="hud br hud-fade hide" id="hudBR">
+  <div class="count">
+    <span style="--k:var(--llm)"><i></i>LLM <b id="c-llm">0</b></span>
+    <span style="--k:var(--db)"><i></i>DB <b id="c-db">0</b></span>
+    <span style="--k:var(--embed)" id="embCount"><i></i>Embed <b id="c-emb">0</b></span>
+  </div>
+  <svg class="ring" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" stroke="rgba(236,241,247,.14)"/><circle id="ringFg" cx="20" cy="20" r="17" stroke="#ECF1F7" stroke-dasharray="106.8" stroke-dashoffset="106.8" stroke-linecap="round"/></svg>
+</div>
+
+<main>
+  <section class="screen hero" id="top">
+    <div class="hero-in">
+      <div>
+        <div class="eyebrow">LangGraph · FastAPI · Groq · Postgres</div>
+        <h1>Follow <em>one message</em> through the assistant.</h1>
+      </div>
+      <p class="lede">Pick a story and scroll. The message moves from your browser through the router, an agent, the model and the database, and every stop names the file that does the work.</p>
+      <ul class="boot">
+        <li>prompts loaded from app/prompts · 67 lines</li>
+        <li>4 graphs · 22 nodes</li>
+        <li>guardrails in Python: sign-in, ownership, cancel confirm, escalation</li>
+      </ul>
+      <nav class="picker" id="picker" aria-label="Stories"></nav>
+    </div>
+  </section>
+  <div id="story"></div>
+  <section class="screen compare" id="compare">
+    <h2>Today, and what could come next.</h2>
+    <div class="cols">
+      <div class="col"><h4>Today</h4><ul>
+        <li>The model fills a category form and SQL filters on it.</li>
+        <li>Rename the categories and search breaks.</li>
+        <li>Follow-up filters live inside one Python process.</li>
+        <li>Safety detection is the model alone.</li>
+      </ul></div>
+      <div class="col"><h4>Proposed · not built yet</h4><ul>
+        <li>The model rewrites the query. pgvector and full-text search find matches together.</li>
+        <li>Category becomes one ranking signal, not a gate.</li>
+        <li>Search state lives in Postgres and survives restarts.</li>
+        <li>The model or a narrow pattern can escalate. The pattern can't route anywhere else.</li>
+      </ul></div>
+    </div>
+    <p class="same"><b>The same in both:</b> owner-only lookups, template replies for orders, cancel only after you press Yes, one open ticket per order.</p>
+    <div class="actions">
+      <button class="btn" id="nextStory">Next story →</button>
+      <button class="btn" id="flipMode">Replay in the proposed design</button>
+      <button class="btn" id="toTop">Back to the top</button>
+    </div>
+    <p class="foot">Built from app/agents/*.py on the simplify-agents branch. Order numbers match the demo data; prices, ratings and reply text are illustrative.</p>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(() => {
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = id => document.getElementById(id);
+const KC = { http: '#FFB45E', llm: '#A08FFF', db: '#43E3C2', embed: '#EB8EFF', guard: '#FF6E86', code: '#A9B5C4' };
+const KN = { http: 'HTTP', llm: 'LLM call', db: 'Database', embed: 'Embedding', guard: 'Guardrail', code: 'Python' };
+
+/* ---------- nodes ---------- */
+const NODE = {
+  browser: { label: 'Browser', sub: 'chat UI', role: 'edge' },
+  api:     { label: 'FastAPI', sub: 'POST /chat', role: 'edge' },
+  router:  { label: 'Router', sub: 'LangGraph · classify', role: 'edge' },
+  cancel:  { label: '/cancel-order', sub: 'no model', role: 'guard' },
+  floor:   { label: 'Safety floor', sub: 'escalate only', role: 'guard', modes: ['next'] },
+  extract: { label: { now: 'extract_preferences', next: 'rewrite_query' }, sub: 'product agent' },
+  search:  { label: { now: 'find_products', next: 'hybrid_search' }, sub: { now: 'SQL filters', next: 'vector + keywords' } },
+  rank:    { label: { now: 'rank_products', next: 'rerank' }, sub: 'same kind? exact?' },
+  format:  { label: { now: 'format_recommendations', next: 'format_reply' }, sub: 'template' },
+  ofind:   { label: 'find_order', sub: 'order agent', role: 'guard' },
+  ostatus: { label: 'order_status', sub: 'template' },
+  sfind:   { label: 'find_order', sub: 'support agent', role: 'guard' },
+  scancel: { label: 'handle_cancellation', sub: 'asks, never acts', role: 'guard' },
+  sticket: { label: 'create_ticket', sub: 'one per order' },
+  safety:  { label: 'safety_escalation', sub: 'critical ticket', role: 'guard' },
+  signin:  { label: 'sign_in', sub: 'template', role: 'guard' },
+  groq:    { label: 'Groq', sub: 'qwen3.8-27b', role: 'llm' },
+  pg:      { label: 'Postgres', sub: { now: 'orders · products · tickets', next: '+ pgvector · session_state' }, role: 'db' },
+  embed:   { label: 'Embeddings', sub: 'API or local', role: 'embed', modes: ['next'] },
+};
+const ROLE = { edge: '#ECF1F7', agent: '#B7C2D0', guard: '#FF6E86', llm: '#A08FFF', db: '#43E3C2', embed: '#EB8EFF' };
+
+/* ---------- stories ---------- */
+const head = (mode, msg, call) => [
+  { k: 'http', path: ['browser', 'api'], title: 'The message lands',
+    line: 'The chat UI posts it to /chat. Who you are comes from the session cookie, never from the text.',
+    ref: 'app/main.py · chat()', pay: `POST /chat  {"message": "${msg}"}` },
+  mode === 'now'
+    ? { k: 'db', path: ['api', 'pg', 'api'], title: 'Recall the conversation',
+        line: 'Find the session, save the message, load the last 20 turns.', ref: 'main.py · get_or_create_session' }
+    : { k: 'db', path: ['api', 'pg', 'api'], isNew: true, title: 'Recall the conversation and the search',
+        line: 'The same, plus one session_state row: the last query, its filters and what was shown. A restart keeps it.', ref: 'proposed · session_state table' },
+  Object.assign({ k: 'llm', path: ['api', 'router', 'groq', 'router'], title: 'One decision',
+    line: 'The router makes one structured call with the last four messages and your own orders. It gets back intent, order, issue and risk.',
+    ref: 'router.py · classify · prompts/router.md' }, call),
+];
+
+const STORIES = [
+  { id: 'product', name: 'Refine a product search', msg: 'what about Logitech', who: 'after “wireless mouse under 1000”', lane: ['extract', 'search', 'rank', 'format'],
+    steps: m => [
+      ...head(m, 'what about Logitech', { pay: '→ {"intent": "product", "risk": "none"}' }),
+      ...(m === 'now' ? [
+        { k: 'llm', path: ['router', 'extract', 'groq', 'extract'], title: 'Fill the catalog form',
+          line: 'The model maps your words onto the catalog: category, subcategory, brand, price. Rename the categories and this is the step that breaks.',
+          ref: 'product_agent.py · extract_preferences', pay: '→ {"subcategory": "mouse", "brand": "Logitech",\n   "max_price": 1000, "keywords": ["wireless"]}' },
+        { k: 'db', path: ['extract', 'search', 'pg', 'search'], title: 'Filter in SQL',
+          line: 'Exact filters, best rated first. Nothing found? Relax type, then price by 25%, then brand, then keywords.',
+          ref: 'product_agent.py · find_products', pay: "WHERE subcategory = 'mouse' AND brand = 'Logitech'\n  AND price <= 1000 AND name ILIKE '%wireless%'" },
+      ] : [
+        { k: 'llm', path: ['router', 'extract', 'groq', 'extract'], isNew: true, title: 'Rewrite, don’t classify',
+          line: 'The model writes one standalone query and pulls out only hard limits. No category names, so a renamed catalog can’t break it.',
+          ref: 'proposed · prompts/query_rewrite.md', pay: '→ {"query": "wireless Logitech mouse",\n   "max_price": 1000, "brand": "Logitech"}' },
+        { k: 'embed', path: ['extract', 'search', 'embed', 'search'], isNew: true, title: 'Words into a vector',
+          line: 'An embedding model turns the query into 384 numbers. Every product was embedded once, offline.',
+          ref: 'proposed · embeddings', pay: '[0.021, -0.113, 0.087, … ]' },
+        { k: 'db', path: ['search', 'pg', 'search'], isNew: true, title: 'Meaning and keywords, one query',
+          line: 'pgvector finds similar products, full-text search finds exact words, and rank fusion merges them. Price and brand stay plain filters.',
+          ref: 'proposed · pgvector in the same Postgres', pay: "ORDER BY embedding <=> :query   -- meaning\n       ts_rank(tsv, :words)      -- keywords\nWHERE price <= 1000 AND brand = 'Logitech'" },
+      ]),
+      { k: 'llm', path: ['search', 'rank', 'groq', 'rank'], title: 'Same kind? Exact match?',
+        line: 'The ranker drops mouse pads from a mouse search. One score sorts the rest: rating, budget fit, match.',
+        ref: 'product_agent.py · rank_products', pay: '→ {"same_kind": [1, 2, 4, 5], "exact": [1, 2]}' },
+      m === 'now'
+        ? { k: 'code', path: ['rank', 'format'], title: 'Write the answer', line: 'A template, not a model. It says so when filters had to be widened.', ref: 'product_agent.py · format_recommendations' }
+        : { k: 'db', path: ['rank', 'format', 'pg', 'format'], isNew: true, title: 'Remember the change', line: 'Only what changed is saved, here the brand. Code merges it, not the model.', ref: 'proposed · session_state', pay: `state || '{"brand": "Logitech"}'` },
+      { k: 'http', path: ['format', 'api', 'browser'], title: 'Back to you',
+        line: m === 'now' ? 'The filters wait in a Python dict for your next message. A restart forgets them.' : 'A template reply. Your next message starts from the stored search.',
+        ref: 'main.py', pay: '1. Logitech M221 Silent Wireless   ₹799  ★4.3\n2. Logitech B170 Wireless          ₹695  ★4.2' },
+    ] },
+  { id: 'order', name: 'Track an order', msg: 'where is my TV order?', who: 'signed in as demo-user-1', lane: ['ofind', 'ostatus'],
+    steps: m => [
+      ...head(m, 'where is my TV order?', { line: 'Your own orders are in the prompt, so “my TV order” becomes ORD-2002. Python fixes the number format.',
+        pay: 'Their orders: ORD-2002 Mi 108cm LED TV (shipped) …\n→ {"intent": "order", "order_id": "ORD-2002"}' }),
+      { k: 'db', guard: true, path: ['router', 'ofind', 'pg', 'ofind'], title: 'Only your orders',
+        line: 'Every lookup filters by your user id. Someone else’s order number simply isn’t found.', ref: 'order_agent.py · find_order', pay: "WHERE order_id = 'ORD-2002' AND user_id = :you" },
+      { k: 'code', path: ['ofind', 'ostatus'], title: 'Answer from the row', line: 'Status and tracking come straight from the database through a template. No model writes the facts.', ref: 'order_agent.py · order_status' },
+      { k: 'http', path: ['ostatus', 'api', 'browser'], title: 'Back to you', line: 'One model call for the whole turn.', ref: 'main.py', pay: 'ORD-2002 · Mi 108cm LED TV · shipped' },
+    ] },
+  { id: 'damaged', name: 'Report a damaged item', msg: 'ORD-2004 arrived damaged', who: 'signed in as demo-user-1', lane: ['sfind', 'sticket'],
+    steps: m => [
+      ...head(m, 'ORD-2004 arrived damaged', { pay: '→ {"intent": "support", "issue": "damaged_delivery",\n   "order_id": "ORD-2004"}' }),
+      { k: 'db', guard: true, path: ['router', 'sfind', 'pg', 'sfind'], title: 'Only your orders', line: 'The same ownership filter. With no order number, it would ask which one.', ref: 'support_agent.py · find_order' },
+      { k: 'db', guard: true, path: ['sfind', 'sticket', 'pg', 'sticket'], title: 'One ticket per order',
+        line: 'A fixed map, not the model, turns damage, defects, wrong items and refunds into tickets. An open ticket is reused, never duplicated.',
+        ref: 'support_agent.py · route_support · create_ticket' },
+      { k: 'http', path: ['sticket', 'api', 'browser'], title: 'Back to you', line: 'You get the ticket number.', ref: 'main.py', pay: 'Ticket raised for ORD-2004 (damaged delivery).' },
+    ] },
+  { id: 'cancel', name: 'Cancel an order', msg: 'cancel ORD-2005', who: 'signed in as demo-user-1', lane: ['sfind', 'scancel'],
+    steps: m => [
+      ...head(m, 'cancel ORD-2005', { pay: '→ {"intent": "support", "issue": "cancel",\n   "order_id": "ORD-2005"}' }),
+      { k: 'db', guard: true, path: ['router', 'sfind', 'pg', 'sfind'], title: 'Only your orders', line: 'ORD-2005 is yours and still processing.', ref: 'support_agent.py · find_order' },
+      { k: 'guard', path: ['sfind', 'scancel'], title: 'Ask, never act', line: 'The graph has no way to cancel. It asks the UI for a Yes/No button instead.',
+        ref: 'support_agent.py · handle_cancellation', pay: '{"action_required": {"type": "confirm_cancel",\n                     "order_id": "ORD-2005"}}' },
+      { k: 'http', path: ['scancel', 'api', 'browser'], title: 'The question comes back', line: 'The chat shows two buttons.', ref: 'main.py', pay: 'Cancel ORD-2005?    [ Yes ]   [ No ]' },
+      { k: 'http', path: ['browser', 'cancel'], title: 'You press Yes', line: 'A separate endpoint takes over. No model from here on.', ref: 'main.py · /cancel-order', pay: 'POST /cancel-order  {"order_id": "ORD-2005"}' },
+      { k: 'db', guard: true, path: ['cancel', 'pg', 'cancel'], title: 'Yours, and still processing',
+        line: 'The update matches only your order, and only while it is processing. Guests get a 401.', ref: 'order_tools.py · cancel_order_in_db',
+        pay: "UPDATE orders SET status = 'cancelled'\nWHERE order_id = 'ORD-2005' AND user_id = :you\n  AND status = 'processing'" },
+      { k: 'http', path: ['cancel', 'browser'], title: 'Done', line: 'The confirmation is saved to the chat history too.', ref: 'CancelOrderResponse', pay: 'Order ORD-2005 has been cancelled successfully.' },
+    ] },
+  { id: 'safety', name: 'Report a safety risk', msg: 'my room heater caught fire and burned my hand', who: 'any visitor, signed in or not', lane: ['safety'],
+    steps: m => [
+      ...head(m, 'my room heater caught fire…', { pay: '→ {"intent": "support", "issue": "defective_product",\n   "risk": "safety"}',
+        line: m === 'now' ? 'The model flags risk “safety”. It is the only detector today. The old keyword gate was removed because it flagged “fire tv stick”.'
+                          : 'The model flags risk “safety”, and stays the main detector.' }),
+      ...(m === 'next' ? [{ k: 'guard', isNew: true, path: ['router', 'floor', 'router'], title: 'A floor under the model',
+        line: 'A short pattern runs beside the router. It can only escalate, and “Fire TV” doesn’t trip it.', ref: 'proposed · router.py', pay: 'caught fire | burned my | electric shock | sparks from' }] : []),
+      { k: 'guard', path: ['router', 'safety'], title: 'Safety outranks everything', line: 'Checked before intent and before sign-in, so even a guest reaches a human.', ref: 'router.py · route()' },
+      { k: 'db', guard: true, path: ['safety', 'pg', 'safety'], title: 'Critical ticket', line: 'Severity critical, safety alert on, straight to the human team.', ref: 'router.py · safety_escalation' },
+      { k: 'http', path: ['safety', 'api', 'browser'], title: 'Back to you', line: 'A fixed, careful reply.', ref: 'router.py · SAFETY_RESPONSE', pay: "If you're in immediate danger, please call\nemergency services. A human will follow up." },
+    ] },
+  { id: 'signin', name: 'Ask while signed out', msg: 'track my order', who: 'not signed in', lane: ['signin'],
+    steps: m => [
+      ...head(m, 'track my order', { line: 'With no sign-in, the prompt says “not signed in” instead of listing orders.', pay: '→ {"intent": "order", "order_id": null}' }),
+      { k: 'guard', path: ['router', 'signin'], title: 'Sign in first', line: 'A guest asking about orders stops here. No order data is touched.', ref: 'router.py · route()' },
+      { k: 'http', path: ['signin', 'api', 'browser'], title: 'Back to you', line: 'Product questions still work without signing in.', ref: 'router.py · respond_sign_in', pay: 'Please sign in and ask again.' },
+    ] },
+];
+
+/* ---------- state ---------- */
+let mode = 'now', story = 0, steps = [], lastI = -2, scene = null;
+let stepsTop = 0, stepH = 1, introTop = 0;
+const pick = v => (v && typeof v === 'object') ? v[mode] : v;
+const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+
+STORIES.forEach((s, i) => {
+  const b = document.createElement('button');
+  b.className = 'pick';
+  b.innerHTML = `<span class="n">${String(i + 1).padStart(2, '0')}</span><span class="t">${s.name}<span class="m">“${esc(s.msg)}”</span></span><span class="go">play →</span>`;
+  b.onclick = () => { setStory(i); jump('story'); };
+  $('picker').appendChild(b);
+  const o = document.createElement('option'); o.value = i; o.textContent = s.name; $('storySel').appendChild(o);
+});
+$('storySel').onchange = e => { setStory(+e.target.value); jump('story'); };
+function jump(id) { const el = $(id); if (el) el.scrollIntoView({ behavior: RM ? 'auto' : 'smooth', block: 'start' }); }
+
+function buildStory() {
+  const s = STORIES[story];
+  steps = s.steps(mode).map(x => ({ ...x }));
+  let prev = 'browser';
+  steps.forEach(st => { if (st.path[0] !== prev) st.path = [prev, ...st.path]; prev = st.path[st.path.length - 1]; });
+  const tag = st => `<span class="tag" style="--k:${KC[st.k]}">${KN[st.k]}</span>` + (st.guard && st.k !== 'guard' ? `<span class="tag" style="--k:${KC.guard}">Guardrail</span>` : '') + (st.isNew ? '<span class="tag new">Proposed</span>' : '');
+  $('story').innerHTML =
+    `<section class="screen intro" id="intro"><div class="intro-in">
+       <div class="eyebrow">Story ${String(story + 1).padStart(2, '0')} · ${s.name}${mode === 'next' ? ' · proposed design' : ''}</div>
+       <p class="quote">“${esc(s.msg)}”</p>
+       <div class="who">${esc(s.who)}</div>
+       <div class="scrollcue">Scroll to send it</div>
+     </div></section>` +
+    steps.map((st, i) => `<section class="screen step" data-i="${i}"><div class="card" style="--k:${KC[st.k]}">
+       <div class="meta">${tag(st)}</div>
+       <h3>${esc(st.title)}</h3>
+       <p>${esc(st.line)}</p>
+       ${st.pay ? `<pre>${esc(st.pay)}</pre>` : ''}
+       ${st.ref ? `<div class="ref">${esc(st.ref)}</div>` : ''}
+     </div></section>`).join('');
+  $('chapOf').textContent = '/ ' + String(steps.length).padStart(2, '0');
+  $('embCount').hidden = mode !== 'next';
+  document.querySelectorAll('.pick').forEach((b, i) => b.setAttribute('aria-current', i === story));
+  $('storySel').value = story;
+  $('flipMode').textContent = mode === 'now' ? 'Replay in the proposed design' : 'Replay with today’s code';
+  lastI = -2;
+  measure();
+  if (scene) scene.layout();
+}
+function setStory(i) { story = i; try { history.replaceState(null, '', '#' + STORIES[i].id); } catch (e) {} buildStory(); }
+function setMode(m) {
+  const inStory = progress().phase !== 'hero';
+  mode = m; $('m-now').setAttribute('aria-pressed', m === 'now'); $('m-next').setAttribute('aria-pressed', m === 'next');
+  buildStory();
+  if (inStory) jump('intro');
+}
+$('m-now').onclick = () => setMode('now');
+$('m-next').onclick = () => setMode('next');
+$('nextStory').onclick = () => { setStory((story + 1) % STORIES.length); jump('intro'); };
+$('flipMode').onclick = () => { setMode(mode === 'now' ? 'next' : 'now'); jump('intro'); };
+$('toTop').onclick = () => jump('top');
+
+function measure() {
+  const first = document.querySelector('.step');
+  if (!first) return;
+  stepsTop = first.getBoundingClientRect().top + scrollY;
+  stepH = first.offsetHeight || innerHeight;
+  introTop = $('intro').getBoundingClientRect().top + scrollY;
+}
+addEventListener('resize', measure);
+function progress() {
+  const y = scrollY + innerHeight * 0.5;
+  const p = (y - stepsTop) / stepH;
+  return { p, phase: y < introTop ? 'hero' : p < 0 ? 'intro' : p >= steps.length ? 'outro' : 'step' };
+}
+
+function updateUI(p, phase) {
+  const i = phase === 'step' ? Math.floor(p) : phase === 'outro' ? steps.length : -1;
+  $('hudBL').classList.toggle('hide', phase !== 'step');
+  $('hudBR').classList.toggle('hide', !(phase === 'step' || phase === 'outro'));
+  const frac = Math.max(0, Math.min(1, p / steps.length));
+  $('ringFg').setAttribute('stroke-dashoffset', (106.8 * (1 - frac)).toFixed(1));
+  if (i === lastI) return; lastI = i;
+  document.querySelectorAll('.step').forEach((el, j) => el.classList.toggle('on', j === i));
+  const upto = steps.slice(0, Math.max(0, Math.min(steps.length, i + 1)));
+  $('c-llm').textContent = upto.filter(x => x.k === 'llm').length;
+  $('c-db').textContent = upto.filter(x => x.k === 'db').length;
+  $('c-emb').textContent = upto.filter(x => x.k === 'embed').length;
+  if (phase === 'step') $('chap').textContent = String(i + 1).padStart(2, '0');
+}
+
+/* ---------- 3D ---------- */
+function build3d() {
+  if (typeof THREE === 'undefined') throw new Error('no three');
+  const canvas = $('cv'), labelsEl = $('labels');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setClearColor(0x000000, 0);
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.75));
+  const S = new THREE.Scene();
+  const cam = new THREE.PerspectiveCamera(34, 1, 0.1, 500);
+
+  const glowTex = (() => {
+    const c = document.createElement('canvas'); c.width = c.height = 128; const x = c.getContext('2d');
+    const g = x.createRadialGradient(64, 64, 0, 64, 64, 64);
+    g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(.18, 'rgba(255,255,255,.55)'); g.addColorStop(.5, 'rgba(255,255,255,.12)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+    x.fillStyle = g; x.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c);
+  })();
+  const sprite = (color, s, o) => { const m = new THREE.SpriteMaterial({ map: glowTex, color, transparent: true, opacity: o, depthWrite: false, blending: THREE.AdditiveBlending }); const sp = new THREE.Sprite(m); sp.scale.set(s, s, 1); return sp; };
+
+  { // stars
+    const n = 900, pos = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) { const r = 60 + Math.random() * 120, th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1);
+      pos[i * 3] = r * Math.sin(ph) * Math.cos(th); pos[i * 3 + 1] = r * Math.cos(ph) * .6; pos[i * 3 + 2] = r * Math.sin(ph) * Math.sin(th); }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    S.add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0x8FA3C0, size: .35, transparent: true, opacity: .55, depthWrite: false })));
+  }
+
+  const N = {};
+  for (const [id, d] of Object.entries(NODE)) {
+    const role = d.role || 'agent', color = new THREE.Color(ROLE[role]);
+    const g = new THREE.Group(); S.add(g);
+    const o = { id, d, g, role, color, r: .55 };
+    if (role === 'llm') {
+      const w = new THREE.Mesh(new THREE.IcosahedronGeometry(1.8, 1), new THREE.MeshBasicMaterial({ color, wireframe: true, transparent: true, opacity: .55 }));
+      g.add(w); o.spin = w; o.r = 1.9;
+      g.add(new THREE.Mesh(new THREE.SphereGeometry(.45, 20, 14), new THREE.MeshBasicMaterial({ color })));
+      o.halo = sprite(color, 7, .35);
+    } else if (role === 'db') {
+      for (let i = 0; i < 3; i++) { const t = new THREE.Mesh(new THREE.TorusGeometry(1.5, .045, 8, 72), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: .8 })); t.rotation.x = Math.PI / 2; t.position.y = -0.55 + i * .55; g.add(t); }
+      const v = new THREE.Mesh(new THREE.TorusGeometry(2.1, .03, 6, 90), new THREE.MeshBasicMaterial({ color: new THREE.Color(KC.embed), transparent: true, opacity: .9 }));
+      v.rotation.x = Math.PI / 2; g.add(v); o.vring = v;
+      g.add(new THREE.Mesh(new THREE.SphereGeometry(.4, 20, 14), new THREE.MeshBasicMaterial({ color })));
+      o.halo = sprite(color, 6.5, .32); o.r = 1.6;
+    } else if (role === 'embed') {
+      const w = new THREE.Mesh(new THREE.OctahedronGeometry(1.05, 0), new THREE.MeshBasicMaterial({ color, wireframe: true, transparent: true, opacity: .8 }));
+      g.add(w); o.spin = w; o.r = 1.1; o.halo = sprite(color, 4, .35);
+    } else {
+      g.add(new THREE.Mesh(new THREE.SphereGeometry(role === 'edge' ? .42 : .3, 24, 16), new THREE.MeshBasicMaterial({ color })));
+      o.halo = sprite(color, role === 'edge' ? 3.2 : 2.4, .4);
+    }
+    g.add(o.halo);
+    o.baseHalo = o.halo.scale.x;
+    const el = document.createElement('div'); el.className = 'lbl off';
+    el.innerHTML = '<span></span><small></small>'; labelsEl.appendChild(el); o.el = el;
+    N[id] = o;
+  }
+
+  const structural = new THREE.Group(); S.add(structural);
+  const ghostMat = new THREE.LineBasicMaterial({ color: 0xECF1F7, transparent: true, opacity: .1 });
+  const activeMat = new THREE.LineBasicMaterial({ transparent: true, opacity: .95 });
+  const aheadMat = new THREE.LineBasicMaterial({ transparent: true, opacity: .18 });
+  let activeLine = null, aheadLine = null;
+  const packet = new THREE.Group(); S.add(packet);
+  packet.add(new THREE.Mesh(new THREE.SphereGeometry(.2, 16, 12), new THREE.MeshBasicMaterial({ color: 0xffffff })));
+  const pGlow = sprite(new THREE.Color('#ffffff'), 3.2, .9); packet.add(pGlow);
+
+  let used = new Set(), curves = [], curI = -1;
+  const centroid = new THREE.Vector3();
+  const P = id => N[id].g.position;
+  function seg(a, b) {
+    const A = P(a).clone(), B = P(b).clone(), d = A.distanceTo(B), mid = A.clone().add(B).multiplyScalar(.5);
+    if (Math.abs(A.y - B.y) > 3) { mid.z += 1.6; mid.x += .6; } else mid.y += .6 + d * .07;
+    return new THREE.QuadraticBezierCurve3(A, mid, B);
+  }
+  function pathCurve(path) {
+    const cp = new THREE.CurvePath();
+    for (let i = 0; i < path.length - 1; i++) if (path[i] !== path[i + 1]) cp.add(seg(path[i], path[i + 1]));
+    if (!cp.curves.length) { const a = P(path[0]); cp.add(new THREE.LineCurve3(a.clone(), a.clone().add(new THREE.Vector3(0, .01, 0)))); }
+    return cp;
+  }
+  function setActive(i) {
+    curI = i;
+    [activeLine, aheadLine].forEach(l => { if (l) { l.geometry.dispose(); S.remove(l); } });
+    activeLine = aheadLine = null;
+    if (i < 0 || i >= steps.length) return;
+    const pts = curves[i].getPoints(160);
+    const color = new THREE.Color(KC[steps[i].k]);
+    activeMat.color.copy(color); aheadMat.color.copy(color); pGlow.material.color.copy(color);
+    aheadLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), aheadMat); S.add(aheadLine);
+    activeLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), activeMat); S.add(activeLine);
+    activeLine.userData.n = pts.length;
+  }
+  function layout() {
+    const s = STORIES[story];
+    used = new Set(['browser', 'api', 'router']); steps.forEach(st => st.path.forEach(id => used.add(id)));
+    const fixed = { browser: [-15, 0, 0], api: [-9, 0, 0], router: [-3, 0, 0], cancel: [-9, -3.4, 4.5], floor: [-3, -3.2, 3.6] };
+    s.lane.forEach((id, i) => fixed[id] = [3 + i * 5.2, 0, 0]);
+    const laneEnd = 3 + (s.lane.length - 1) * 5.2, gx = (laneEnd - 3) / 2 + 1;
+    fixed.groq = [gx, 6.6, -4]; fixed.pg = [gx, -6.6, -4]; fixed.embed = [laneEnd - 2, 5.8, -8];
+    centroid.set(0, 0, 0); let n = 0;
+    for (const o of Object.values(N)) {
+      const vis = used.has(o.id) && (!o.d.modes || o.d.modes.includes(mode));
+      o.g.visible = vis; o.vis = vis;
+      if (fixed[o.id]) o.g.position.set(...fixed[o.id]);
+      if (vis) { centroid.add(o.g.position); n++; }
+      o.el.firstChild.textContent = pick(o.d.label); o.el.lastChild.textContent = pick(o.d.sub) || '';
+      if (o.vring) o.vring.visible = mode === 'next';
+    }
+    centroid.multiplyScalar(1 / Math.max(1, n)); centroid.y = 0;
+    structural.children.slice().forEach(c => { c.geometry.dispose(); structural.remove(c); });
+    const seen = new Set();
+    steps.forEach(st => { for (let i = 0; i < st.path.length - 1; i++) {
+      const a = st.path[i], b = st.path[i + 1], key = [a, b].sort().join('|');
+      if (a === b || seen.has(key)) continue; seen.add(key);
+      structural.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(seg(a, b).getPoints(48)), ghostMat)); } });
+    curves = steps.map(st => pathCurve(st.path));
+    setActive(-1);
+  }
+
+  let W = 1, H = 1;
+  function resize() {
+    W = innerWidth; H = innerHeight;
+    renderer.setSize(W, H, false); cam.aspect = W / H;
+    if (W > 900) cam.setViewOffset(W, H, -W * .17, 0, W, H);
+    else cam.setViewOffset(W, H, 0, H * .16, W, H);
+    cam.updateProjectionMatrix();
+  }
+  addEventListener('resize', resize); resize();
+  const mouse = { x: 0, y: 0 };
+  addEventListener('pointermove', e => { mouse.x = e.clientX / W * 2 - 1; mouse.y = e.clientY / H * 2 - 1; }, { passive: true });
+
+  const camPos = new THREE.Vector3(0, 12, 50), look = new THREE.Vector3(), goalLook = new THREE.Vector3(), tmp = new THREE.Vector3(), goal = new THREE.Vector3();
+  const kindColor = new THREE.Color();
+  let pSmooth = null, clock = 0, last = performance.now();
+  const ease = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  const smooth = (a, b, x) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+
+  function frame(now) {
+    const dt = Math.min(.05, (now - last) / 1000); last = now; clock += dt;
+    const { p, phase } = progress();
+    if (pSmooth === null || RM) pSmooth = p; else pSmooth += (p - pSmooth) * (1 - Math.exp(-dt * 7));
+    updateUI(p, phase);
+
+    const sp = Math.max(-1, Math.min(steps.length - 1e-4, pSmooth));
+    const i = phase === 'hero' || sp < 0 ? -1 : Math.floor(sp);
+    if (i !== curI) setActive(i);
+    const f = i >= 0 ? ease(smooth(.12, .78, sp - i)) : 0;
+
+    let pk;
+    if (i >= 0 && activeLine) {
+      pk = curves[i].getPoint(Math.min(.9999, f));
+      activeLine.geometry.setDrawRange(0, Math.max(2, Math.floor(activeLine.userData.n * f)));
+    } else pk = P('browser').clone();
+    if (phase === 'outro') pk = P('browser').clone();
+    packet.position.copy(pk);
+    pGlow.scale.setScalar(3 + (RM ? 0 : Math.sin(clock * 4) * .35));
+    packet.visible = phase !== 'hero';
+    if (i >= 0) kindColor.set(KC[steps[i].k]);
+
+    const active = new Set(i >= 0 ? steps[i].path : []);
+    const showAll = phase !== 'step';
+    for (const o of Object.values(N)) {
+      if (!o.vis) { o.el.classList.add('off'); continue; }
+      const on = active.has(o.id);
+      const target = o.baseHalo * (on ? 1.55 : 1);
+      o.halo.scale.x += (target - o.halo.scale.x) * .12; o.halo.scale.y = o.halo.scale.x;
+      o.halo.material.color.lerp(on && i >= 0 ? kindColor : o.color, .1);
+      if (o.spin && !RM) { o.spin.rotation.y += dt * .3; o.spin.rotation.x += dt * .09; }
+      if (o.vring && !RM) o.vring.rotation.z += dt * .4;
+      tmp.copy(o.g.position); tmp.y += o.id === 'pg' ? -(o.r + .9) : o.r + .55;
+      tmp.project(cam);
+      if (!(showAll || on) || tmp.z > 1) { o.el.classList.add('off'); continue; }
+      o.el.classList.remove('off'); o.el.classList.toggle('faint', phase === 'hero' || phase === 'outro');
+      const x = (tmp.x + 1) / 2 * W, y = (1 - tmp.y) / 2 * H;
+      o.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, ${o.id === 'pg' ? '0' : '-100%'})`;
+    }
+
+    const narrow = Math.min(2, Math.max(1, 1.5 / cam.aspect));
+    let az, el, rad;
+    if (i >= 0 && phase === 'step') {
+      const pts = steps[i].path.map(P); goalLook.set(0, 0, 0); pts.forEach(v => goalLook.add(v)); goalLook.multiplyScalar(1 / pts.length);
+      goalLook.lerp(pk, .35);
+      const span = pts.reduce((m, v) => Math.max(m, v.distanceTo(goalLook)), 0);
+      az = -.42; el = .36; rad = (17 + span * 1.25) * narrow;
+    } else {
+      goalLook.copy(centroid);
+      az = -.42 + (RM ? 0 : Math.sin(clock * .07) * .22); el = .42; rad = 46 * narrow;
+    }
+    az += mouse.x * .07; el += mouse.y * .04;
+    goal.set(goalLook.x + rad * Math.cos(el) * Math.sin(az), goalLook.y + rad * Math.sin(el), goalLook.z + rad * Math.cos(el) * Math.cos(az));
+    const k = RM ? 1 : 1 - Math.exp(-dt * 2.4);
+    camPos.lerp(goal, k); look.lerp(goalLook, k);
+    cam.position.copy(camPos); cam.lookAt(look);
+    renderer.render(S, cam);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  return { layout };
+}
+
+/* ---------- boot ---------- */
+const fromHash = STORIES.findIndex(s => '#' + s.id === location.hash);
+story = fromHash >= 0 ? fromHash : 0;
+try { scene = build3d(); } catch (e) {
+  scene = null;
+  const d = document.createElement('div'); d.className = 'nogl'; d.textContent = 'The 3D scene needs WebGL. The story still reads top to bottom.'; document.body.appendChild(d);
+  (function loop() { const { p, phase } = progress(); updateUI(p, phase); requestAnimationFrame(loop); })();
+}
+buildStory();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+addEventListener('load', measure);
+})();
+</script>

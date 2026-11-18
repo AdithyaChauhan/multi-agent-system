@@ -2,6 +2,8 @@
 
 A production-style multi-agent customer service system built with **LangGraph**, **FastAPI**, and **PostgreSQL**. Three specialized LangGraph agents handle product discovery, order tracking, and customer support — all routed dynamically by an LLM-based intent classifier. Full observability through **LangSmith** and a **Grafana + Loki** monitoring dashboard.
 
+**Project docs:** [ROADMAP.md](ROADMAP.md) (phases and status) · [docs/plans/](docs/plans/) · [docs/decisions/](docs/decisions/README.md) (ADRs) · [docs/PROGRESS.md](docs/PROGRESS.md) · [CLAUDE.md](CLAUDE.md) (working rules for Claude Code sessions)
+
 ---
 
 ## Architecture
