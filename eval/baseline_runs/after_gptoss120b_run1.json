@@ -1,0 +1,1655 @@
+{
+ "label": "after_gptoss120b",
+ "run": 1,
+ "model": "openai/gpt-oss-120b",
+ "git_sha": "044b8bb",
+ "started_at": "2026-11-18T05:59:39+00:00",
+ "finished_at": "2026-11-18T06:13:39+00:00",
+ "summary": {
+  "conversations": 19,
+  "conversations_passed": 15,
+  "turns": 40,
+  "turns_passed": 35,
+  "llm_calls": 110,
+  "llm_calls_per_turn": 2.75,
+  "tokens": 106337,
+  "tokens_per_turn": 2658,
+  "seconds_per_turn_mean": 1.98,
+  "seconds_per_turn_median": 1.95,
+  "rate_limited_calls": 0,
+  "sdk_retries": 0,
+  "infra_error_conversations": [],
+  "failed_conversations": [
+   "p09",
+   "p10",
+   "p20",
+   "p25"
+  ],
+  "by_route": {
+   "product": {
+    "turns": 37,
+    "llm_calls": 107,
+    "seconds": 76.8,
+    "tokens": 102996,
+    "llm_calls_per_turn": 2.89,
+    "seconds_per_turn": 2.08,
+    "tokens_per_turn": 2784
+   },
+   "clarify": {
+    "turns": 3,
+    "llm_calls": 3,
+    "seconds": 2.3,
+    "tokens": 3341,
+    "llm_calls_per_turn": 1.0,
+    "seconds_per_turn": 0.78,
+    "tokens_per_turn": 1114
+   }
+  }
+ },
+ "conversations": [
+  {
+   "id": "p07",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "sonny headphones",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2567,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 3.757,
+     "paced_wait_seconds": 19.9,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "headphones",
+      "type": null,
+      "brand": "sonny",
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Sony WI-C100 Wireless Headphones with Customizable Equalizer",
+       "brand": "Sony",
+       "subcategory": "headphones"
+      }
+     ],
+     "response": "I couldn't find sonny headphones within your filters, so here are the closest options from other brands:\n\n1. **Sony WI-C100 Wireless Headphones with Customizable Equalizer for Deep Bass & 25 Hrs Battery, DSEE-Upscale, Splash Proof, 360RA, Fast Pair, in-Ear Bluetooth Headset with mic for Phone Calls (Black)** — Sony\n   ₹1,599 · 3.6/5\n"
+    },
+    {
+     "message": "lojitec mouse",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3000,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.553,
+     "paced_wait_seconds": 16.5,
+     "extracted": {
+      "category": "Computers & Accessories",
+      "subcategory": "mouse",
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Logitech G402 Hyperion Fury USB Wired Gaming Mouse, 4,000 DP",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      },
+      {
+       "name": "Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Na",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      },
+      {
+       "name": "Logitech Pebble M350 Wireless Mouse with Bluetooth or USB - ",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Logitech G402 Hyperion Fury USB Wired Gaming Mouse, 4,000 DPI, Lightweight, 8 Programmable Buttons, Compatible for PC/Mac - Black** — Logitech\n   ₹1,995 · 4.6/5\n\n2. **Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Nano Receiver, 1000 DPI Optical Tracking, 3 Buttons, 24 Month Life Battery, PC/Mac/Laptop - Black** — Logitech\n   ₹1,295 · 4.6/5\n\n3. **Logitech Pebble M350 Wireless Mouse with Bluetooth or USB - Silent, Slim Computer Mouse with Quiet Click for Laptop, Notebook, PC and Mac - Graphite** — Logitech\n   ₹1,490 · 4.6/5\n"
+    },
+    {
+     "message": "samsng tv",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3003,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.748,
+     "paced_wait_seconds": 21.1,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "tv",
+      "type": null,
+      "brand": "samsng",
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Samsung 80 cm (32 inches) Wondertainment Series HD Ready LED",
+       "brand": "Samsung",
+       "subcategory": "tv"
+      },
+      {
+       "name": "Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart ",
+       "brand": "Samsung",
+       "subcategory": "tv"
+      },
+      {
+       "name": "Samsung 138 cm (55 inches) Crystal 4K Series Ultra HD Smart ",
+       "brand": "Samsung",
+       "subcategory": "tv"
+      }
+     ],
+     "response": "I couldn't find samsng tv within your filters, so here are the closest options from other brands:\n\n1. **Samsung 80 cm (32 inches) Wondertainment Series HD Ready LED Smart TV UA32TE40AAKBXL (Titan Gray)** — Samsung\n   ₹15,490 · 4.3/5\n\n2. **Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart LED TV UA43AUE60AKLXL (Black)** — Samsung\n   ₹30,990 · 4.3/5\n\n3. **Samsung 138 cm (55 inches) Crystal 4K Series Ultra HD Smart LED TV UA55AUE60AKLXL (Black)** — Samsung\n   ₹45,999 · 4.3/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p08",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "something to keep me warm this winter",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2883,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.846,
+     "paced_wait_seconds": 21.0,
+     "extracted": {
+      "category": "Home & Kitchen",
+      "subcategory": "room heater",
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Melbon VM-905 2000-Watt Room Heater (ISI Certified, White Co",
+       "brand": "Melbon",
+       "subcategory": "room heater"
+      },
+      {
+       "name": "!!1000 Watt/2000-Watt Room Heater!! Fan Heater!!Pure White!!",
+       "brand": "!!1000",
+       "subcategory": "room heater"
+      },
+      {
+       "name": "Morphy Richards Aristo 2000 Watts PTC Room Heater (White)",
+       "brand": "Morphy",
+       "subcategory": "room heater"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Melbon VM-905 2000-Watt Room Heater (ISI Certified, White Color) Ideal Electric Fan Heater for Small to Medium Room/Area (Plastic Body)** — Melbon\n   ₹998 · 4.6/5\n\n2. **!!1000 Watt/2000-Watt Room Heater!! Fan Heater!!Pure White!!HN-2500!!Made in India!!** — !!1000\n   ₹784 · 4.5/5\n\n3. **Morphy Richards Aristo 2000 Watts PTC Room Heater (White)** — Morphy\n   ₹3,711 · 4.3/5\n"
+    },
+    {
+     "message": "something to make my chai",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3055,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.739,
+     "paced_wait_seconds": 20.9,
+     "extracted": {
+      "category": "Home & Kitchen",
+      "subcategory": "electric kettle",
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Havells Aqua Plus 1.2 litre Double Wall Kettle / 304 Stainle",
+       "brand": "Havells",
+       "subcategory": "electric kettle"
+      },
+      {
+       "name": "Philips HD9306/06 1.5-Litre Electric Kettle (Multicolor)",
+       "brand": "Philips",
+       "subcategory": "electric kettle"
+      },
+      {
+       "name": "Tesora - Inspired by you Large Premium Electric Kettle 1.8L,",
+       "brand": "Tesora",
+       "subcategory": "electric kettle"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Havells Aqua Plus 1.2 litre Double Wall Kettle / 304 Stainless Steel Inner Body / Cool touch outer body / Wider mouth/ 2 Year warranty (Black, 1500 Watt)** — Havells\n   ₹1,625 · 4.5/5\n\n2. **Philips HD9306/06 1.5-Litre Electric Kettle (Multicolor)** — Philips\n   ₹2,695 · 4.4/5\n\n3. **Tesora - Inspired by you Large Premium Electric Kettle 1.8L, Stainless Steel Inner Body - Auto Power Cut, Boil Dry Protection & Cool Touch Double Wall, Portable | 1500 Watts |1 Year Warranty | (White)** — Tesora\n   ₹1,349 · 4.4/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p09",
+   "tags": [
+    "product"
+   ],
+   "passed": false,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "chair",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 2298,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.943,
+     "paced_wait_seconds": 21.4,
+     "extracted": {
+      "category": null,
+      "subcategory": null,
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [],
+     "response": "Sorry, we don't carry chair. Here's what we do carry:\n\n• Electronics (463 products) — tv, headphones, smartwatch\n• Home & Kitchen (440 products) — room heater, water heater, mixer grinder\n• Computers & Accessories (402 products) — cable, mouse, adapter\n• Office Products (38 products) — stationery, art supplies, office electronics"
+    },
+    {
+     "message": "book",
+     "route": "clarify",
+     "rerouted_to_order": false,
+     "passed": false,
+     "failures": [
+      "route 'clarify' not in ['product']",
+      "none of [\"don't carry\", 'do not carry', \"don't have\", 'do not have', \"don't stock\", 'not available', \"doesn't carry\", 'not carry', 'unavailable', \"don't sell\", 'do not sell']"
+     ],
+     "llm_calls": 1,
+     "tokens": 1093,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 0.729,
+     "paced_wait_seconds": 16.2,
+     "extracted": {
+      "category": null,
+      "subcategory": null,
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [],
+     "response": "Hi! I can help you find products, check an order, or sort out a problem with one. What do you need?"
+    },
+    {
+     "message": "shoes",
+     "route": "clarify",
+     "rerouted_to_order": false,
+     "passed": false,
+     "failures": [
+      "route 'clarify' not in ['product']",
+      "none of [\"don't carry\", 'do not carry', \"don't have\", 'do not have', \"don't stock\", 'not available', \"doesn't carry\", 'not carry', 'unavailable', \"don't sell\", 'do not sell']"
+     ],
+     "llm_calls": 1,
+     "tokens": 1116,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 0.554,
+     "paced_wait_seconds": 7.9,
+     "extracted": {
+      "category": null,
+      "subcategory": null,
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [],
+     "response": "Hi! I can help you find electronics, computer accessories, home & kitchen items, or office products. What are you looking for?"
+    }
+   ]
+  },
+  {
+   "id": "p10",
+   "tags": [
+    "product"
+   ],
+   "passed": false,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "4k monitor",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": false,
+     "failures": [
+      "no product listing in reply",
+      "ranked_products empty"
+     ],
+     "llm_calls": 3,
+     "tokens": 2633,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.608,
+     "paced_wait_seconds": 8.3,
+     "extracted": {
+      "category": "Computers & Accessories",
+      "subcategory": "monitor",
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": [
+       "4k"
+      ]
+     },
+     "shown": [],
+     "response": "I couldn't find any monitor matching your request. Try a different budget, brand or product."
+    }
+   ]
+  },
+  {
+   "id": "p11",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "sony headphones",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2552,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.083,
+     "paced_wait_seconds": 19.2,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "headphones",
+      "type": null,
+      "brand": "sony",
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Sony WI-C100 Wireless Headphones with Customizable Equalizer",
+       "brand": "Sony",
+       "subcategory": "headphones"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Sony WI-C100 Wireless Headphones with Customizable Equalizer for Deep Bass & 25 Hrs Battery, DSEE-Upscale, Splash Proof, 360RA, Fast Pair, in-Ear Bluetooth Headset with mic for Phone Calls (Black)** — Sony\n   ₹1,599 · 3.6/5\n"
+    },
+    {
+     "message": "under 3000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2726,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.615,
+     "paced_wait_seconds": 18.1,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "headphones",
+      "type": null,
+      "brand": "sony",
+      "max_price": 3000,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Sony WI-C100 Wireless Headphones with Customizable Equalizer",
+       "brand": "Sony",
+       "subcategory": "headphones"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Sony WI-C100 Wireless Headphones with Customizable Equalizer for Deep Bass & 25 Hrs Battery, DSEE-Upscale, Splash Proof, 360RA, Fast Pair, in-Ear Bluetooth Headset with mic for Phone Calls (Black)** — Sony\n   ₹1,599 · 3.6/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p12",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "show me a mouse",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2915,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.743,
+     "paced_wait_seconds": 19.9,
+     "extracted": {
+      "category": "Computers & Accessories",
+      "subcategory": "mouse",
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Logitech G402 Hyperion Fury USB Wired Gaming Mouse, 4,000 DP",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      },
+      {
+       "name": "Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Na",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      },
+      {
+       "name": "Logitech Pebble M350 Wireless Mouse with Bluetooth or USB - ",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Logitech G402 Hyperion Fury USB Wired Gaming Mouse, 4,000 DPI, Lightweight, 8 Programmable Buttons, Compatible for PC/Mac - Black** — Logitech\n   ₹1,995 · 4.6/5\n\n2. **Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Nano Receiver, 1000 DPI Optical Tracking, 3 Buttons, 24 Month Life Battery, PC/Mac/Laptop - Black** — Logitech\n   ₹1,295 · 4.6/5\n\n3. **Logitech Pebble M350 Wireless Mouse with Bluetooth or USB - Silent, Slim Computer Mouse with Quiet Click for Laptop, Notebook, PC and Mac - Graphite** — Logitech\n   ₹1,490 · 4.6/5\n"
+    },
+    {
+     "message": "gaming ones under 2000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3086,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.296,
+     "paced_wait_seconds": 21.3,
+     "extracted": {
+      "category": "Computers & Accessories",
+      "subcategory": "mouse",
+      "type": null,
+      "brand": null,
+      "max_price": 2000,
+      "min_rating": null,
+      "keywords": [
+       "gaming"
+      ]
+     },
+     "shown": [
+      {
+       "name": "Logitech G402 Hyperion Fury USB Wired Gaming Mouse, 4,000 DP",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      },
+      {
+       "name": "Logitech G102 USB Light Sync Gaming Mouse with Customizable ",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      },
+      {
+       "name": "Zebronics Zeb-Transformer-M Optical USB Gaming Mouse with LE",
+       "brand": "Zebronics",
+       "subcategory": "mouse"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Logitech G402 Hyperion Fury USB Wired Gaming Mouse, 4,000 DPI, Lightweight, 8 Programmable Buttons, Compatible for PC/Mac - Black** — Logitech\n   ₹1,995 · 4.6/5\n\n2. **Logitech G102 USB Light Sync Gaming Mouse with Customizable RGB Lighting, 6 Programmable Buttons, Gaming Grade Sensor, 8K DPI Tracking, 16.8mn Color, Light Weight - Black** — Logitech\n   ₹1,495 · 4.5/5\n\n3. **Zebronics Zeb-Transformer-M Optical USB Gaming Mouse with LED Effect(Black)** — Zebronics\n   ₹399 · 4.4/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p13",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "smartwatches under 3000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2937,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.727,
+     "paced_wait_seconds": 22.1,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "smartwatch",
+      "type": null,
+      "brand": null,
+      "max_price": 3000,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Spo",
+       "brand": "Fire-Boltt",
+       "subcategory": "smartwatch"
+      },
+      {
+       "name": "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",1",
+       "brand": "Fire-Boltt",
+       "subcategory": "smartwatch"
+      },
+      {
+       "name": "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",1",
+       "brand": "Fire-Boltt",
+       "subcategory": "smartwatch"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Sports Mode, 8 UI Interactions, Built in Speaker & Mic, 7 Days Battery & Fire-Boltt Health Suite** — Fire-Boltt\n   ₹2,999 · 4.4/5\n\n2. **Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 240*240 PX High Res with SpO2, Heart Rate Monitoring & IP67 Rating** — Fire-Boltt\n   ₹1,998 · 4.3/5\n\n3. **Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 240*240 PX High Res with SpO2, Heart Rate Monitoring & IP67 Rating** — Fire-Boltt\n   ₹1,999 · 4.3/5\n"
+    },
+    {
+     "message": "what about Fire-Boltt",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3101,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 3.75,
+     "paced_wait_seconds": 21.5,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "smartwatch",
+      "type": null,
+      "brand": "Fire-Boltt",
+      "max_price": 3000,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Spo",
+       "brand": "Fire-Boltt",
+       "subcategory": "smartwatch"
+      },
+      {
+       "name": "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",1",
+       "brand": "Fire-Boltt",
+       "subcategory": "smartwatch"
+      },
+      {
+       "name": "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",1",
+       "brand": "Fire-Boltt",
+       "subcategory": "smartwatch"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Sports Mode, 8 UI Interactions, Built in Speaker & Mic, 7 Days Battery & Fire-Boltt Health Suite** — Fire-Boltt\n   ₹2,999 · 4.4/5\n\n2. **Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 240*240 PX High Res with SpO2, Heart Rate Monitoring & IP67 Rating** — Fire-Boltt\n   ₹1,998 · 4.3/5\n\n3. **Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 240*240 PX High Res with SpO2, Heart Rate Monitoring & IP67 Rating** — Fire-Boltt\n   ₹1,999 · 4.3/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p14",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "telly",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2862,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.492,
+     "paced_wait_seconds": 20.7,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "tv",
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Sony Bravia 164 cm (65 inches) 4K Ultra HD Smart LED Google ",
+       "brand": "Sony",
+       "subcategory": "tv"
+      },
+      {
+       "name": "Kodak 139 cm (55 inches) 4K Ultra HD Smart LED TV 55CA0909 (",
+       "brand": "Kodak",
+       "subcategory": "tv"
+      },
+      {
+       "name": "Mi 80 cm (32 inches) HD Ready Android Smart LED TV 4A PRO | ",
+       "brand": "Mi",
+       "subcategory": "tv"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Sony Bravia 164 cm (65 inches) 4K Ultra HD Smart LED Google TV KD-65X74K (Black)** — Sony\n   ₹77,990 · 4.7/5\n\n2. **Kodak 139 cm (55 inches) 4K Ultra HD Smart LED TV 55CA0909 (Black)** — Kodak\n   ₹29,999 · 4.4/5\n\n3. **Mi 80 cm (32 inches) HD Ready Android Smart LED TV 4A PRO | L32M5-AL (Black)** — Mi\n   ₹14,999 · 4.3/5\n"
+    },
+    {
+     "message": "blutooth speaker",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2962,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.967,
+     "paced_wait_seconds": 21.1,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "speakers",
+      "type": "bluetooth speaker",
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL ",
+       "brand": "JBL",
+       "subcategory": "speakers"
+      },
+      {
+       "name": "boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playb",
+       "brand": "boAt",
+       "subcategory": "speakers"
+      },
+      {
+       "name": "boAt Stone 250 Portable Wireless Speaker with 5W RMS Immersi",
+       "brand": "boAt",
+       "subcategory": "speakers"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL Signature Sound, Vibrant Color Options with IPX7 Waterproof & AUX (Blue)** — JBL\n   ₹1,999 · 4.3/5\n\n2. **boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playback, IPX5 and Integrated Controls (Blue)** — boAt\n   ₹1,799 · 4.2/5\n\n3. **boAt Stone 250 Portable Wireless Speaker with 5W RMS Immersive Audio, RGB LEDs, Up to 8HRS Playtime, IPX7 Water Resistance, Multi-Compatibility Modes(Black)** — boAt\n   ₹1,199 · 4.2/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p15",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "laptop under 50000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 2247,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.536,
+     "paced_wait_seconds": 21.4,
+     "extracted": {
+      "category": null,
+      "subcategory": null,
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [],
+     "response": "Sorry, we don't carry laptops. Would you like to see our laptop bag range instead?"
+    },
+    {
+     "message": "redmi charger",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2822,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.517,
+     "paced_wait_seconds": 16.2,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "charger",
+      "type": null,
+      "brand": "redmi",
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "MI 33W SonicCharge 2.0 USB Charger for Cellular Phones - Whi",
+       "brand": "MI",
+       "subcategory": "charger"
+      },
+      {
+       "name": "MI Xiaomi 22.5W Fast USB Type C Charger Combo for Tablets - ",
+       "brand": "MI",
+       "subcategory": "charger"
+      }
+     ],
+     "response": "We don't carry redmi charger, so here are the closest options from other brands:\n\n1. **MI 33W SonicCharge 2.0 USB Charger for Cellular Phones - White** — MI\n   ₹999 · 4.3/5\n\n2. **MI Xiaomi 22.5W Fast USB Type C Charger Combo for Tablets - White** — MI\n   ₹649 · 4.2/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p16",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "best rated air fryer",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2787,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.227,
+     "paced_wait_seconds": 19.8,
+     "extracted": {
+      "category": "Home & Kitchen",
+      "subcategory": "air fryer",
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": 4.0,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Instant Pot Air Fryer, Vortex 2QT, Touch Control Panel, 360°",
+       "brand": "Instant",
+       "subcategory": "air fryer"
+      },
+      {
+       "name": "INALSA Air Fryer Digital 4L Nutri Fry - 1400W with Smart Air",
+       "brand": "INALSA",
+       "subcategory": "air fryer"
+      },
+      {
+       "name": "PHILIPS Digital Air Fryer HD9252/90 with Touch Panel, uses u",
+       "brand": "PHILIPS",
+       "subcategory": "air fryer"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Instant Pot Air Fryer, Vortex 2QT, Touch Control Panel, 360° EvenCrisp™ Technology, Uses 95 % less Oil, 4-in-1 Appliance: Air Fry, Roast, Bake, Reheat (Vortex 1.97Litre, Black)** — Instant\n   ₹4,995 · 4.8/5\n\n2. **INALSA Air Fryer Digital 4L Nutri Fry - 1400W with Smart AirCrisp Technology| 8-Preset Menu, Touch Control & Digital Display|Variable Temperature & Timer Control|Free Recipe book|2 Yr Warranty (Black)** — INALSA\n   ₹6,790 · 4.5/5\n\n3. **PHILIPS Digital Air Fryer HD9252/90 with Touch Panel, uses up to 90% less fat, 7 Pre-set Menu, 1400W, 4.1 Liter, with Rapid Air Technology (Black), Large** — PHILIPS\n   ₹8,799 · 4.4/5\n"
+    },
+    {
+     "message": "under 6000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2784,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.963,
+     "paced_wait_seconds": 19.8,
+     "extracted": {
+      "category": "Home & Kitchen",
+      "subcategory": "air fryer",
+      "type": null,
+      "brand": null,
+      "max_price": 6000,
+      "min_rating": 4.0,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Instant Pot Air Fryer, Vortex 2QT, Touch Control Panel, 360°",
+       "brand": "Instant",
+       "subcategory": "air fryer"
+      },
+      {
+       "name": "Pigeon Healthifry Digital Air Fryer, 360° High Speed Air Cir",
+       "brand": "Pigeon",
+       "subcategory": "air fryer"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Instant Pot Air Fryer, Vortex 2QT, Touch Control Panel, 360° EvenCrisp™ Technology, Uses 95 % less Oil, 4-in-1 Appliance: Air Fry, Roast, Bake, Reheat (Vortex 1.97Litre, Black)** — Instant\n   ₹4,995 · 4.8/5\n\n2. **Pigeon Healthifry Digital Air Fryer, 360° High Speed Air Circulation Technology 1200 W with Non-Stick 4.2 L Basket - Green** — Pigeon\n   ₹3,599 · 4.2/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p17",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "wireless mouse",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2917,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.759,
+     "paced_wait_seconds": 20.0,
+     "extracted": {
+      "category": "Computers & Accessories",
+      "subcategory": "mouse",
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": [
+       "wireless"
+      ]
+     },
+     "shown": [
+      {
+       "name": "Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Na",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      },
+      {
+       "name": "Logitech Pebble M350 Wireless Mouse with Bluetooth or USB - ",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      },
+      {
+       "name": "Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, 12 ",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Nano Receiver, 1000 DPI Optical Tracking, 3 Buttons, 24 Month Life Battery, PC/Mac/Laptop - Black** — Logitech\n   ₹1,295 · 4.6/5\n\n2. **Logitech Pebble M350 Wireless Mouse with Bluetooth or USB - Silent, Slim Computer Mouse with Quiet Click for Laptop, Notebook, PC and Mac - Graphite** — Logitech\n   ₹1,490 · 4.6/5\n\n3. **Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, 12 Month Life Battery, Compatible with Windows, Mac, Chromebook/PC/Laptop** — Logitech\n   ₹699 · 4.5/5\n"
+    },
+    {
+     "message": "under 500",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 2268,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.343,
+     "paced_wait_seconds": 21.3,
+     "extracted": {
+      "category": null,
+      "subcategory": null,
+      "type": null,
+      "brand": null,
+      "max_price": 500,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [],
+     "response": "What are you looking for? Here's what we carry:\n\n• Electronics (463 products) — tv, headphones, smartwatch\n• Home & Kitchen (440 products) — room heater, water heater, mixer grinder\n• Computers & Accessories (402 products) — cable, mouse, adapter\n• Office Products (38 products) — stationery, art supplies, office electronics"
+    }
+   ]
+  },
+  {
+   "id": "p18",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "mixer grinder under 2000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2993,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.149,
+     "paced_wait_seconds": 16.6,
+     "extracted": {
+      "category": "Home & Kitchen",
+      "subcategory": "mixer grinder",
+      "type": null,
+      "brand": null,
+      "max_price": 2000,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Bajaj Rex 500W Mixer Grinder with Nutri-Pro Feature, 3 Jars,",
+       "brand": "Bajaj",
+       "subcategory": "mixer grinder"
+      },
+      {
+       "name": "NutriPro Juicer Mixer Grinder - Smoothie Maker - 500 Watts (",
+       "brand": "NutriPro",
+       "subcategory": "mixer grinder"
+      },
+      {
+       "name": "Croma 500W Mixer Grinder with 3 Stainless Steel Leak-proof J",
+       "brand": "Croma",
+       "subcategory": "mixer grinder"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Bajaj Rex 500W Mixer Grinder with Nutri-Pro Feature, 3 Jars, White** — Bajaj\n   ₹1,999 · 4.2/5\n\n2. **NutriPro Juicer Mixer Grinder - Smoothie Maker - 500 Watts (3 Jars 2 Blades)** — NutriPro\n   ₹1,969 · 4.1/5\n\n3. **Croma 500W Mixer Grinder with 3 Stainless Steel Leak-proof Jars, 3 speed & Pulse function, 2 years warranty (CRAK4184, White & Purple)** — Croma\n   ₹1,290 · 4.0/5\n"
+    },
+    {
+     "message": "what about Bajaj",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2779,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.935,
+     "paced_wait_seconds": 21.5,
+     "extracted": {
+      "category": "Home & Kitchen",
+      "subcategory": "mixer grinder",
+      "type": null,
+      "brand": "Bajaj",
+      "max_price": 2000,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Bajaj Rex 500W Mixer Grinder with Nutri-Pro Feature, 3 Jars,",
+       "brand": "Bajaj",
+       "subcategory": "mixer grinder"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Bajaj Rex 500W Mixer Grinder with Nutri-Pro Feature, 3 Jars, White** — Bajaj\n   ₹1,999 · 4.2/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p19",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "usb hub with ethernet",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2742,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.582,
+     "paced_wait_seconds": 20.0,
+     "extracted": {
+      "category": "Computers & Accessories",
+      "subcategory": "usb hub",
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": [
+       "ethernet"
+      ]
+     },
+     "shown": [
+      {
+       "name": "Portronics MPORT 31 4 Ports USB Hub (USB A to 4 USB-A Ports ",
+       "brand": "Portronics",
+       "subcategory": "usb hub"
+      },
+      {
+       "name": "Portronics MPORT 31C 4-in-1 USB Hub (Type C to 4 USB-A Ports",
+       "brand": "Portronics",
+       "subcategory": "usb hub"
+      },
+      {
+       "name": "ZEBRONICS Zeb-100HB 4 Ports USB Hub for Laptop, PC Computers",
+       "brand": "ZEBRONICS",
+       "subcategory": "usb hub"
+      }
+     ],
+     "response": "I couldn't find an exact match, so I widened some features:\n\n1. **Portronics MPORT 31 4 Ports USB Hub (USB A to 4 USB-A Ports 4 in 1 Connector USB HUB(Grey)** — Portronics\n   ₹499 · 4.3/5\n\n2. **Portronics MPORT 31C 4-in-1 USB Hub (Type C to 4 USB-A Ports) with Fast Data Transfer** — Portronics\n   ₹570 · 4.2/5\n\n3. **ZEBRONICS Zeb-100HB 4 Ports USB Hub for Laptop, PC Computers, Plug & Play, Backward Compatible - Black** — ZEBRONICS\n   ₹330 · 3.7/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p20",
+   "tags": [
+    "product"
+   ],
+   "passed": false,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "products list",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 1009,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.665,
+     "paced_wait_seconds": 20.1,
+     "extracted": {
+      "category": null,
+      "subcategory": null,
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [],
+     "response": "What are you looking for? Here's what we carry:\n\n• Electronics (463 products) — tv, headphones, smartwatch\n• Home & Kitchen (440 products) — room heater, water heater, mixer grinder\n• Computers & Accessories (402 products) — cable, mouse, adapter\n• Office Products (38 products) — stationery, art supplies, office electronics"
+    },
+    {
+     "message": "calculator",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": false,
+     "failures": [
+      "no product listing in reply",
+      "ranked_products empty",
+      "missing 'casio'"
+     ],
+     "llm_calls": 2,
+     "tokens": 2319,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.0,
+     "paced_wait_seconds": 5.3,
+     "extracted": {
+      "category": null,
+      "subcategory": null,
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [],
+     "response": "Sorry, we don't carry calculator. Would you like to see our office electronics range instead?"
+    }
+   ]
+  },
+  {
+   "id": "p21",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "smartwatch with calling feature",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3016,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.045,
+     "paced_wait_seconds": 17.3,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "smartwatch",
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": [
+       "calling"
+      ]
+     },
+     "shown": [
+      {
+       "name": "Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Spo",
+       "brand": "Fire-Boltt",
+       "subcategory": "smartwatch"
+      },
+      {
+       "name": "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",1",
+       "brand": "Fire-Boltt",
+       "subcategory": "smartwatch"
+      },
+      {
+       "name": "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",1",
+       "brand": "Fire-Boltt",
+       "subcategory": "smartwatch"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Sports Mode, 8 UI Interactions, Built in Speaker & Mic, 7 Days Battery & Fire-Boltt Health Suite** — Fire-Boltt\n   ₹2,999 · 4.4/5\n\n2. **Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 240*240 PX High Res with SpO2, Heart Rate Monitoring & IP67 Rating** — Fire-Boltt\n   ₹1,998 · 4.3/5\n\n3. **Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 240*240 PX High Res with SpO2, Heart Rate Monitoring & IP67 Rating** — Fire-Boltt\n   ₹1,999 · 4.3/5\n"
+    },
+    {
+     "message": "under 2000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3056,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.242,
+     "paced_wait_seconds": 21.8,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "smartwatch",
+      "type": null,
+      "brand": null,
+      "max_price": 2000,
+      "min_rating": null,
+      "keywords": [
+       "calling"
+      ]
+     },
+     "shown": [
+      {
+       "name": "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",1",
+       "brand": "Fire-Boltt",
+       "subcategory": "smartwatch"
+      },
+      {
+       "name": "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",1",
+       "brand": "Fire-Boltt",
+       "subcategory": "smartwatch"
+      },
+      {
+       "name": "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",1",
+       "brand": "Fire-Boltt",
+       "subcategory": "smartwatch"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 240*240 PX High Res with SpO2, Heart Rate Monitoring & IP67 Rating** — Fire-Boltt\n   ₹1,998 · 4.3/5\n\n2. **Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 240*240 PX High Res with SpO2, Heart Rate Monitoring & IP67 Rating** — Fire-Boltt\n   ₹1,999 · 4.3/5\n\n3. **Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 240*240 PX High Res with SpO2, Heart Rate Monitoring & IP67 Rating** — Fire-Boltt\n   ₹1,999 · 4.3/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p22",
+   "tags": [
+    "product",
+    "router"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "show me headphones",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2898,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.652,
+     "paced_wait_seconds": 21.9,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "headphones",
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Redgear Cosmo 7,1 Usb Gaming Wired Over Ear Headphones With ",
+       "brand": "Redgear",
+       "subcategory": "headphones"
+      },
+      {
+       "name": "Samsung Ehs64 Ehs64Avfwecinu Hands-Free Wired In Ear Earphon",
+       "brand": "Samsung",
+       "subcategory": "headphones"
+      },
+      {
+       "name": "Samsung Original EHS64 Wired in Ear Earphones with Mic, Blac",
+       "brand": "Samsung",
+       "subcategory": "headphones"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Redgear Cosmo 7,1 Usb Gaming Wired Over Ear Headphones With Mic With Virtual Surround Sound,50Mm Driver, Rgb Leds & Remote Control(Black)** — Redgear\n   ₹1,990 · 4.3/5\n\n2. **Samsung Ehs64 Ehs64Avfwecinu Hands-Free Wired In Ear Earphones With Mic With Remote Note (White)** — Samsung\n   ₹499 · 4.2/5\n\n3. **Samsung Original EHS64 Wired in Ear Earphones with Mic, Black** — Samsung\n   ₹949 · 4.2/5\n"
+    },
+    {
+     "message": "hi",
+     "route": "clarify",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1132,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.063,
+     "paced_wait_seconds": 21.2,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "headphones",
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [],
+     "response": "Hi! I can help you find products, check an order status, or assist with any order issues. What would you like to do?"
+    },
+    {
+     "message": "bose speakers",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3070,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.138,
+     "paced_wait_seconds": 7.9,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "speakers",
+      "type": null,
+      "brand": "bose",
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL ",
+       "brand": "JBL",
+       "subcategory": "speakers"
+      },
+      {
+       "name": "boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playb",
+       "brand": "boAt",
+       "subcategory": "speakers"
+      },
+      {
+       "name": "Zebronics Zeb-JUKEBAR 3900, 80W Multimedia soundbar with sub",
+       "brand": "Zebronics",
+       "subcategory": "speakers"
+      }
+     ],
+     "response": "We don't carry bose speakers, so here are the closest options from other brands:\n\n1. **JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL Signature Sound, Vibrant Color Options with IPX7 Waterproof & AUX (Blue)** — JBL\n   ₹1,999 · 4.3/5\n\n2. **boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playback, IPX5 and Integrated Controls (Blue)** — boAt\n   ₹1,799 · 4.2/5\n\n3. **Zebronics Zeb-JUKEBAR 3900, 80W Multimedia soundbar with subwoofer Supporting Bluetooth, HDMI(ARC), Coaxial Input, AUX, USB & Remote Control (Black)** — Zebronics\n   ₹4,999 · 4.2/5\n"
+    },
+    {
+     "message": "bajaj smartwatches",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3148,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.915,
+     "paced_wait_seconds": 22.1,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "smartwatch",
+      "type": null,
+      "brand": "bajaj",
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Spo",
+       "brand": "Fire-Boltt",
+       "subcategory": "smartwatch"
+      },
+      {
+       "name": "Fire-Boltt Gladiator 1.96\" Biggest Display Smart Watch with ",
+       "brand": "Fire-Boltt",
+       "subcategory": "smartwatch"
+      },
+      {
+       "name": "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",1",
+       "brand": "Fire-Boltt",
+       "subcategory": "smartwatch"
+      }
+     ],
+     "response": "We don't carry bajaj smartwatch, so here are the closest options from other brands:\n\n1. **Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Sports Mode, 8 UI Interactions, Built in Speaker & Mic, 7 Days Battery & Fire-Boltt Health Suite** — Fire-Boltt\n   ₹2,999 · 4.4/5\n\n2. **Fire-Boltt Gladiator 1.96\" Biggest Display Smart Watch with Bluetooth Calling, Voice Assistant &123 Sports Modes, 8 Unique UI Interactions, SpO2, 24/7 Heart Rate Tracking** — Fire-Boltt\n   ₹3,999 · 4.4/5\n\n3. **Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 240*240 PX High Res with SpO2, Heart Rate Monitoring & IP67 Rating** — Fire-Boltt\n   ₹1,998 · 4.3/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p23",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "sony headphones under 500",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2922,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.861,
+     "paced_wait_seconds": 22.9,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "headphones",
+      "type": null,
+      "brand": "sony",
+      "max_price": 500,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Samsung Ehs64 Ehs64Avfwecinu Hands-Free Wired In Ear Earphon",
+       "brand": "Samsung",
+       "subcategory": "headphones"
+      },
+      {
+       "name": "boAt BassHeads 122 Wired Earphones with Heavy Bass, Integrat",
+       "brand": "boAt",
+       "subcategory": "headphones"
+      },
+      {
+       "name": "boAt Bassheads 102 Wired in Ear Earphones with Mic (Mint Gre",
+       "brand": "boAt",
+       "subcategory": "headphones"
+      }
+     ],
+     "response": "I couldn't find sony headphones within your filters, so here are the closest options from other brands:\n\n1. **Samsung Ehs64 Ehs64Avfwecinu Hands-Free Wired In Ear Earphones With Mic With Remote Note (White)** — Samsung\n   ₹499 · 4.2/5\n\n2. **boAt BassHeads 122 Wired Earphones with Heavy Bass, Integrated Controls and Mic (Gun Metal)** — boAt\n   ₹399 · 4.2/5\n\n3. **boAt Bassheads 102 Wired in Ear Earphones with Mic (Mint Green)** — boAt\n   ₹399 · 4.2/5\n"
+    },
+    {
+     "message": "under 3000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2792,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.055,
+     "paced_wait_seconds": 21.2,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "headphones",
+      "type": null,
+      "brand": "sony",
+      "max_price": 3000,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Sony WI-C100 Wireless Headphones with Customizable Equalizer",
+       "brand": "Sony",
+       "subcategory": "headphones"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Sony WI-C100 Wireless Headphones with Customizable Equalizer for Deep Bass & 25 Hrs Battery, DSEE-Upscale, Splash Proof, 360RA, Fast Pair, in-Ear Bluetooth Headset with mic for Phone Calls (Black)** — Sony\n   ₹1,599 · 3.6/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p24",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "geyser under 5000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2949,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.526,
+     "paced_wait_seconds": 20.0,
+     "extracted": {
+      "category": "Home & Kitchen",
+      "subcategory": "water heater",
+      "type": null,
+      "brand": null,
+      "max_price": 5000,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Havells Instanio 1-Litre 3KW Instant Water Heater (Geyser), ",
+       "brand": "Havells",
+       "subcategory": "water heater"
+      },
+      {
+       "name": "Havells Instanio 3-Litre Instant Geyser (White/Blue)",
+       "brand": "Havells",
+       "subcategory": "water heater"
+      },
+      {
+       "name": "Havells Instanio 3-Litre 4.5KW Instant Water Heater (Geyser)",
+       "brand": "Havells",
+       "subcategory": "water heater"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Havells Instanio 1-Litre 3KW Instant Water Heater (Geyser), White Blue** — Havells\n   ₹2,599 · 4.4/5\n\n2. **Havells Instanio 3-Litre Instant Geyser (White/Blue)** — Havells\n   ₹3,600 · 4.3/5\n\n3. **Havells Instanio 3-Litre 4.5KW Instant Water Heater (Geyser), White Blue** — Havells\n   ₹3,645 · 4.2/5\n"
+    },
+    {
+     "message": "noise cancelling headphones",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2975,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.054,
+     "paced_wait_seconds": 20.8,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "headphones",
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": [
+       "noise cancelling"
+      ]
+     },
+     "shown": [
+      {
+       "name": "PTron Boom Ultima 4D Dual Driver, in-Ear Gaming Wired Headph",
+       "brand": "PTron",
+       "subcategory": "headphones"
+      },
+      {
+       "name": "Hp Wired On Ear Headphones With Mic With 3.5 Mm Drivers, In-",
+       "brand": "Hp",
+       "subcategory": "headphones"
+      },
+      {
+       "name": "JBL C100SI Wired In Ear Headphones with Mic, JBL Pure Bass S",
+       "brand": "JBL",
+       "subcategory": "headphones"
+      }
+     ],
+     "response": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **PTron Boom Ultima 4D Dual Driver, in-Ear Gaming Wired Headphones with in-line Mic, Volume Control & Passive Noise Cancelling Boom 3 Earphones - (Dark Blue)** — PTron\n   ₹299 · 3.6/5\n\n2. **Hp Wired On Ear Headphones With Mic With 3.5 Mm Drivers, In-Built Noise Cancelling, Foldable And Adjustable For Laptop/Pc/Office/Home/ 1 Year Warranty (B4B09Pa)** — Hp\n   ₹649 · 3.5/5\n\n3. **JBL C100SI Wired In Ear Headphones with Mic, JBL Pure Bass Sound, One Button Multi-function Remote, Angled Buds for Comfort fit (Black)** — JBL\n   ₹599 · 4.1/5\n"
+    },
+    {
+     "message": "smart tv",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3185,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.67,
+     "paced_wait_seconds": 21.4,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "tv",
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": [
+       "smart"
+      ]
+     },
+     "shown": [
+      {
+       "name": "Sony Bravia 164 cm (65 inches) 4K Ultra HD Smart LED Google ",
+       "brand": "Sony",
+       "subcategory": "tv"
+      },
+      {
+       "name": "Cotbolt Silicone Protective Case Cover for LG an MR21GA Magi",
+       "brand": "Cotbolt",
+       "subcategory": "tv"
+      },
+      {
+       "name": "Kodak 139 cm (55 inches) 4K Ultra HD Smart LED TV 55CA0909 (",
+       "brand": "Kodak",
+       "subcategory": "tv"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Sony Bravia 164 cm (65 inches) 4K Ultra HD Smart LED Google TV KD-65X74K (Black)** — Sony\n   ₹77,990 · 4.7/5\n\n2. **Cotbolt Silicone Protective Case Cover for LG an MR21GA Magic Remote Shockproof for LG Smart TV Remote 2021 Protective Skin Waterproof Anti Lost (Black) (Remote Not Included)** — Cotbolt\n   ₹399 · 4.5/5\n\n3. **Kodak 139 cm (55 inches) 4K Ultra HD Smart LED TV 55CA0909 (Black)** — Kodak\n   ₹29,999 · 4.4/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p25",
+   "tags": [
+    "product",
+    "safety"
+   ],
+   "passed": false,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "amazon fire tv stick",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": false,
+     "failures": [
+      "no product listing in reply",
+      "ranked_products empty"
+     ],
+     "llm_calls": 3,
+     "tokens": 2738,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 2.09,
+     "paced_wait_seconds": 23.5,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "streaming device",
+      "type": null,
+      "brand": "amazon",
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [],
+     "response": "I couldn't find any streaming device matching your request. Try a different budget, brand or product."
+    }
+   ]
+  }
+ ]
+}

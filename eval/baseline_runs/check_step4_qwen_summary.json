@@ -1,0 +1,31 @@
+{
+ "label": "check_step4_qwen",
+ "model": "qwen/qwen3.8-27b",
+ "runs": 1,
+ "git_sha": "2048779",
+ "conversation_ids": [
+  "p02",
+  "p03",
+  "s10",
+  "s15"
+ ],
+ "conversations_passed_per_run": [
+  3
+ ],
+ "conversations_total": 4,
+ "pass_rate_mean": 0.75,
+ "turns_passed_per_run": [
+  6
+ ],
+ "turns_total": 8,
+ "llm_calls_per_turn_mean": 2.25,
+ "tokens_per_turn_mean": 2662,
+ "seconds_per_turn_mean": 1.11,
+ "seconds_per_turn_median_mean": 0.99,
+ "rate_limited_calls": 0,
+ "failed_conversations_per_run": [
+  [
+   "p02"
+  ]
+ ]
+}

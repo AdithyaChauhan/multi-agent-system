@@ -1,0 +1,49 @@
+{
+ "label": "after_gptoss120b",
+ "model": "openai/gpt-oss-120b",
+ "runs": 1,
+ "git_sha": "044b8bb",
+ "conversation_ids": [
+  "p07",
+  "p08",
+  "p09",
+  "p10",
+  "p11",
+  "p12",
+  "p13",
+  "p14",
+  "p15",
+  "p16",
+  "p17",
+  "p18",
+  "p19",
+  "p20",
+  "p21",
+  "p22",
+  "p23",
+  "p24",
+  "p25"
+ ],
+ "conversations_passed_per_run": [
+  15
+ ],
+ "conversations_total": 19,
+ "pass_rate_mean": 0.7895,
+ "turns_passed_per_run": [
+  35
+ ],
+ "turns_total": 40,
+ "llm_calls_per_turn_mean": 2.75,
+ "tokens_per_turn_mean": 2658,
+ "seconds_per_turn_mean": 1.98,
+ "seconds_per_turn_median_mean": 1.95,
+ "rate_limited_calls": 0,
+ "failed_conversations_per_run": [
+  [
+   "p09",
+   "p10",
+   "p20",
+   "p25"
+  ]
+ ]
+}
