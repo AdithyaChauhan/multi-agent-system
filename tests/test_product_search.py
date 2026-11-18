@@ -53,9 +53,9 @@ class TestRankProducts:
         with patch.object(pa, "call_llm", return_value=ranking):
             return pa.rank_products({"search_results": results, "preferences": prefs or {}, "user_message": "x"})
 
-    def test_relevant_before_maybe_and_rejects_dropped(self):
+    def test_exact_before_same_kind_and_other_kinds_dropped(self):
         results = [_product(1, rating=4.9), _product(2, rating=3.0), _product(3, name="Mouse Pad")]
-        out = self._rank(Ranking(relevant=[2], maybe=[1, 99]), results)
+        out = self._rank(Ranking(same_kind=[1, 2, 99], exact=[2]), results)
         assert [p["product_id"] for p in out["ranked_products"]] == ["P2", "P1"]
         assert [p["llm_tier"] for p in out["ranked_products"]] == [0, 1]
 
@@ -115,7 +115,9 @@ class TestReplies:
         text = self._format({"subcategory": "mouse"}, [{**_product(1), "llm_tier": 1}])
         assert text.startswith("These don't match everything")
 
-    @pytest.mark.parametrize("stocked,prefix", [([], "We don't carry Bose."), ([_product(1)], "I couldn't find")])
+    @pytest.mark.parametrize(
+        "stocked,prefix", [([], "We don't carry Bose speakers."), ([_product(1)], "I couldn't find")]
+    )
     def test_no_results(self, stocked, prefix):
         with patch.object(pa, "search_products", return_value=stocked):
             text = pa.respond_no_results({"preferences": {"subcategory": "speakers", "brand": "Bose"}})[
@@ -131,7 +133,7 @@ class TestReplies:
 def test_graph_end_to_end():
     schema = pa.search_schema()
     prefs = schema.model_validate({"category": "Computers & Accessories", "keywords": ["wireless mouse"]})
-    with patch.object(pa, "call_llm", side_effect=[prefs, Ranking(relevant=[1])]), patch.object(
+    with patch.object(pa, "call_llm", side_effect=[prefs, Ranking(same_kind=[1], exact=[1])]), patch.object(
         pa, "search_products", return_value=[_product(1)]
     ):
         out = pa.product_agent_graph.invoke({"user_message": "wireless mouse", "preferences": {}})

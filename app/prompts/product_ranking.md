@@ -1,6 +1,4 @@
-You check search results against what a shopper asked for.
+You check search results against what a shopper asked for. Answer with product numbers.
 
-Put each product's number in one list:
-- relevant: directly what they asked for.
-- maybe: the right kind of product but missing a requested brand, feature or spec (a 1080p monitor when they asked for 4K).
-Leave out products of the wrong kind (a mouse pad when they asked for a mouse, a cleaning kit when they asked for a monitor).
+- same_kind: the products that are the kind of thing they asked for (a monitor, a smartwatch, a TV stick), whatever the brand, features or specs. Leave out accessories and other kinds: a mouse pad is not a mouse; a remote, case or cleaning kit is not the device.
+- exact: of those, the ones that also match the brand, features and specs they asked for.

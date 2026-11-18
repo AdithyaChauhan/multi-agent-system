@@ -278,8 +278,8 @@ def find_products(state: AgentState) -> dict:
 class Ranking(BaseModel):
     """1-based indices of the listed products."""
 
-    relevant: List[int] = Field(default_factory=list, description="directly match the request")
-    maybe: List[int] = Field(default_factory=list, description="right kind of product, missing a requested detail")
+    same_kind: List[int] = Field(default_factory=list, description="the kind of product asked for, any brand/spec")
+    exact: List[int] = Field(default_factory=list, description="of those, also matching brand, features and specs")
 
 
 def rank_products(state: AgentState) -> dict:
@@ -300,12 +300,13 @@ def rank_products(state: AgentState) -> dict:
         ],
         schema=Ranking,
     )
-    if ranking is None:  # no usable answer: keep the search order, flagged as "maybe"
-        ranking = Ranking(maybe=list(range(1, min(5, len(candidates)) + 1)))
+    if ranking is None:  # no usable answer: keep the search order, flagged as inexact
+        ranking = Ranking(same_kind=list(range(1, min(5, len(candidates)) + 1)))
 
     prefs = state.get("preferences") or {}
+    exact = [i for i in ranking.exact if i in ranking.same_kind or not ranking.same_kind]
     picked, seen = [], set()
-    for tier, indices in ((0, ranking.relevant), (1, ranking.maybe)):
+    for tier, indices in ((0, exact), (1, ranking.same_kind)):
         for i in indices:
             if 1 <= i <= len(candidates) and i not in seen:
                 seen.add(i)
@@ -381,8 +382,8 @@ def respond_no_results(state: AgentState) -> dict:
     label = _label(prefs)
     reply = f"I couldn't find any {label} matching your request."
     brand = prefs.get("brand")
-    if brand and not search_products(brand=brand, limit=1):
-        reply = f"We don't carry {brand}. " + reply
+    if brand and not search_products(brand=brand, subcategory=prefs.get("subcategory"), limit=1):
+        reply = f"We don't carry {brand} {label}. " + reply
     return {"final_response": reply + " Try a different budget, brand or product."}
 
 
