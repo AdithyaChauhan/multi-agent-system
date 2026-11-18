@@ -1,6 +1,6 @@
-# Phase 2: Search v2
-- **Status:** Not started
-- **Branch:** `phase-2-search-v2`
+# Phase 3: Hybrid search (conditional)
+- **Status:** Not started. **Start only if** the Phase 1 results leave a gap: attribute recall@5 below 0.85, a recall@5 drop of more than 5 points on the renamed catalog, or vague and Hinglish queries below 0.85. If not, mark this phase Dropped and say why.
+- **Branch:** `phase-3-hybrid-search`
 - **Depends on:** Phase 0 (measurement) and Phase 1 (clean data and attributes)
 - **Decisions:** [0006](../decisions/0006-hybrid-search-pgvector.md); the embedding-source ADR is written at the start of this phase
 
@@ -8,7 +8,7 @@
 Product search that understands meaning, doesn't depend on category names, and keeps hard filters (price, brand, attributes) exact.
 
 ## Tasks
-- [ ] Plan mode: choose the embedding source (an embeddings API, or a local model through `fastembed`), the model and its dimension. Record the choice as ADR 0009.
+- [ ] Plan mode: check the go/no-go condition above against Phase 1's Results. If it's a go, choose the embedding source (an embeddings API, or a local model through `fastembed`), the model and its dimension, and record the choice as the next ADR.
 - [ ] Postgres with pgvector:
   - switch docker compose from `postgres:15-alpine` and Helm from `postgres` to `pgvector/pgvector:pg15`;
   - check that Render allows `CREATE EXTENSION vector`;

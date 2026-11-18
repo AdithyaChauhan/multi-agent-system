@@ -51,4 +51,6 @@ docker exec multiagent-db psql -U postgres -d multi_agent_baseline -c "<read-onl
 - Guardrails stay in Python: sign-in, order ownership, cancel only via `/cancel-order` after the user presses Yes, and escalation to tickets. Never give the model a tool that acts on orders or takes a user id (ADR 0002).
 - Groq free tier: 200K tokens a day and 8K a minute, per model. Estimate tokens before any live run; a full baseline costs about 180K. Use `openai/gpt-oss-20b` / `-120b` (separate quotas), spread runs across days, or use replay mode (from Phase 0).
 - Measure before and after any change to prompts, search, data or models (ADR 0004). Say how a number was measured (model, runs, database).
+- Don't over-engineer prompts (ADR 0010): fix model mistakes in data, code or tests. Never add a prompt rule for a single conversation; add the case to the evals instead. Every prompt stays under 40 lines.
+- Use LangGraph features only where they replace hand-written code (ADR 0009). No new agents, supervisor agent, or tool calling for deterministic flows.
 - Give the user bash syntax for anything they run by hand.

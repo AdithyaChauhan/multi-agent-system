@@ -1,7 +1,7 @@
 # Phase 4: Reliability and safety
 - **Status:** Not started
 - **Branch:** `phase-4-reliability`
-- **Depends on:** nothing hard. It can run alongside Phase 3.
+- **Depends on:** nothing hard. It can run alongside Phases 2 and 3.
 - **Decisions:** [0002](../decisions/0002-guardrails-in-python.md), [0008](../decisions/0008-safety-floor.md)
 
 ## Goal

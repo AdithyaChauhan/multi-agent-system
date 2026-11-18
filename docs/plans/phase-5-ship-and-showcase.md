@@ -22,6 +22,7 @@ Meet the definition of done in `ROADMAP.md` and present the project with measure
 - [ ] `docs/CASE_STUDY.md`: the problem, measured before and after, the decisions (with ADR links), and the trade-offs.
 - [ ] **Update the visual explainer** (`docs/visual/agent-flow.html`, see `docs/visual/README.md`):
   - built steps lose their "Proposed" tag and the "not built yet" wording;
+  - add what Phase 2 built: the subgraphs, the search loop, the cancel pause and resume, and the ticket handoff (use the saved graph diagram);
   - illustrative numbers are replaced with measured ones;
   - file references are checked against the code;
   - republish to the same artifact URL.

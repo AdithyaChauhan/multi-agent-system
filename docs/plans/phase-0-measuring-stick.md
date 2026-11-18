@@ -107,5 +107,5 @@ With the categories renamed, every search answered "I couldn't find any …". Ou
 
 **Notes:**
 - Fixing my label rules raised v1 precision@3 from 0.865 to 0.897. The labels still need a person to review them.
-- Replay can't run the renamed check for free: the extraction prompt contains the catalog list, so a different database means different prompts. Phase 2 removes that list.
+- Replay can't run the renamed check for free: the extraction prompt contains the catalog list, so a different database means different prompts. Phase 3 (hybrid search) removes that list.
 - A CI replay step would need Postgres in CI, because search runs real SQL. Deferred.

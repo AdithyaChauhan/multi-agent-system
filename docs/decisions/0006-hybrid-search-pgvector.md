@@ -1,5 +1,5 @@
 # 0006. Hybrid search with pgvector in the existing Postgres
-- **Status:** Accepted, conditional on Phase 2 results
+- **Status:** Accepted, conditional. Now Phase 3, started only if Phase 1 leaves a gap (the phase numbers in the text below are from the original plan).
 - **Date:** 2026-11-18
 
 ## Context

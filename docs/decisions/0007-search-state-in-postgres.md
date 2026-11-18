@@ -1,5 +1,5 @@
 # 0007. Search state in Postgres; refinements as patches
-- **Status:** Accepted
+- **Status:** Accepted. Storage superseded by [0009](0009-langgraph-primitives.md): a LangGraph checkpointer replaces the `session_state` table. Patches and filter chips still apply.
 - **Date:** 2026-11-18
 
 ## Context
