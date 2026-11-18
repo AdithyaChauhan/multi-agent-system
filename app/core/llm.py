@@ -4,6 +4,7 @@ import os
 import time
 
 from dotenv import load_dotenv
+from groq import BadRequestError
 from langchain_groq import ChatGroq
 
 from app.core.config import GROQ_MODEL
@@ -49,7 +50,19 @@ def call_llm(agent: str, node: str, messages: list, schema=None):
         _record(agent, node, message, time.perf_counter() - start)
         return (message.content or "").strip()
 
-    out = llm.with_structured_output(schema, include_raw=True).invoke(messages, config=config)
+    structured = llm.with_structured_output(schema, include_raw=True)
+    for attempt in (1, 2):
+        try:
+            out = structured.invoke(messages, config=config)
+            break
+        except BadRequestError as exc:
+            # Groq checks tool-call arguments against the schema and rejects malformed calls
+            # (code tool_use_failed). Retry once, then let the caller fall back.
+            if "tool_use_failed" not in str(exc):
+                raise
+            logger.error(f"request_id={get_request_id()} | {agent}.{node} tool_use_failed (attempt {attempt})")
+            if attempt == 2:
+                return None
     _record(agent, node, out.get("raw"), time.perf_counter() - start)
     if out.get("parsing_error"):
         logger.error(f"request_id={get_request_id()} | {agent}.{node} parse error | {out['parsing_error']}")

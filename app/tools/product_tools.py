@@ -14,24 +14,6 @@ _BRAND_LOCK = threading.Lock()
 _BRAND_TTL = 300  # seconds
 
 
-def get_all_categories() -> dict:
-    """Return the curated category metadata used by legacy tests and UI helpers."""
-    return {
-        "headphones": {
-            "label": "Headphones",
-            "form_factor_options": ["neckband", "tws earbuds", "wired earphones", "over-ear headphones"],
-        },
-        "laptop": {
-            "label": "Laptops",
-            "form_factor_options": [],
-        },
-        "clothes": {
-            "label": "Clothes",
-            "form_factor_options": [],
-        },
-    }
-
-
 def _get_known_brands() -> list[str]:
     now = time.time()
     with _BRAND_LOCK:
@@ -142,8 +124,8 @@ def search_products(
                 )
                 query = query.filter(keyword_filter)
 
-        # Execute query
-        products = query.limit(limit).all()
+        # Best-rated first, so the ranker sees the strongest candidates and runs are repeatable
+        products = query.order_by(Product.rating.desc().nulls_last(), Product.product_id).limit(limit).all()
 
         # Convert to dict format
         results = []
@@ -168,97 +150,3 @@ def search_products(
     finally:
         db.close()
 
-
-def get_product_by_id(product_id: str) -> Optional[dict]:
-    """
-    Fetch one product by product_id.
-    Returns the product as a dict or None if not found.
-    """
-    db = SessionLocal()
-
-    try:
-        product = db.query(Product).filter(Product.product_id == product_id).first()
-
-        if not product:
-            logger.info(f"request_id={get_request_id()} | " f"Product not found | product_id={product_id}")
-            return None
-
-        logger.info(f"request_id={get_request_id()} | " f"Product fetched | product_id={product_id}")
-        return _product_to_dict(product)
-
-    finally:
-        db.close()
-
-
-def fetch_reviews(product_id: str) -> list[dict]:
-    """
-    Fetch all reviews for a given product_id.
-    Returns list of review dicts.
-    """
-    from app.models.review import Review
-
-    db = SessionLocal()
-
-    try:
-        reviews = db.query(Review).filter(Review.product_id == product_id).all()
-
-        logger.info(
-            f"request_id={get_request_id()} | " f"Reviews fetched | product_id={product_id} | count={len(reviews)}"
-        )
-
-        return [
-            {
-                "review_id": r.review_id,
-                "product_id": r.product_id,
-                "rating": r.rating,
-                "review_text": r.review_text,
-                "reviewer": r.reviewer,
-            }
-            for r in reviews
-        ]
-
-    finally:
-        db.close()
-
-
-def fetch_specs(product_id: str) -> list[dict]:
-    """
-    Fetch all specs for a given product_id.
-    Returns list of spec dicts.
-    """
-    from app.models.spec import Spec
-
-    db = SessionLocal()
-
-    try:
-        specs = db.query(Spec).filter(Spec.product_id == product_id).all()
-
-        logger.info(f"request_id={get_request_id()} | " f"Specs fetched | product_id={product_id} | count={len(specs)}")
-
-        return [
-            {
-                "spec_id": s.spec_id,
-                "product_id": s.product_id,
-                "spec_key": s.spec_key,
-                "spec_value": s.spec_value,
-            }
-            for s in specs
-        ]
-
-    finally:
-        db.close()
-
-
-def _product_to_dict(product: Product) -> dict:
-    """Internal helper — converts SQLAlchemy Product object to plain dict."""
-    return {
-        "product_id": product.product_id,
-        "name": product.name,
-        "type": product.type,
-        "brand": product.brand,
-        "price": product.price,
-        "description": product.description,
-        "in_stock": product.in_stock,
-        "rating": product.rating,
-        "attributes": product.attributes,
-    }

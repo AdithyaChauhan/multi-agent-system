@@ -25,10 +25,7 @@ class AgentState(TypedDict, total=False):
     not_carried: Optional[dict]
     search_results: Optional[List[dict]]
     ranked_products: Optional[List[dict]]
-    broaden_attempt: int
     relaxed_filters: Optional[List[str]]
-    filters_exhausted: bool
-    keyword_recovery_attempted: bool
 
     # Support agent
     support_issue: Optional[dict]

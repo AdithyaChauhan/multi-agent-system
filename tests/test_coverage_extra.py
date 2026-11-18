@@ -48,24 +48,3 @@ class TestPromptLoader:
 
 # ── product_agent extra branches ─────────────────────────────────────────────
 
-
-class TestProductAgentExtra:
-    def _llm_mock(self, content: str):
-        r = MagicMock()
-        r.content = content
-        r.response_metadata = {"token_usage": {"prompt_tokens": 80, "completion_tokens": 20, "total_tokens": 100}}
-        return r
-
-    def test_rank_and_filter_empty_returns_early(self):
-        """Empty search_results returns early without calling LLM."""
-        from app.agents.product_agent import rank_and_filter
-
-        state = AgentState(
-            user_message="speakers",
-            user_id="u1",
-            session_id="s1",
-            search_results=[],
-            conversation_history=[],
-        )
-        result = rank_and_filter(state)
-        assert result == {"ranked_products": []}

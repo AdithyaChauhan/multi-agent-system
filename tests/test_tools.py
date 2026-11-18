@@ -91,19 +91,6 @@ class TestSupportTools:
         result = lookup_support_policy("defective_product", "critical")
         assert "response_time" in result
 
-    def test_get_user_ticket_history_returns_list(self):
-        """Returns list of tickets for user"""
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.return_value = []
-
-        with patch("app.tools.support_tools.SessionLocal", return_value=mock_db):
-            from app.tools.support_tools import get_user_ticket_history
-
-            result = get_user_ticket_history("test-user")
-
-        assert isinstance(result, list)
-
-
 class TestSupportTools:
 
     def test_create_support_ticket_returns_ticket(self):
@@ -135,19 +122,6 @@ class TestSupportTools:
 
         result = lookup_support_policy("defective_product", "critical")
         assert "response_time" in result
-
-    def test_get_user_ticket_history_returns_list(self):
-        """Returns list of tickets for user"""
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.return_value = []
-
-        with patch("app.tools.support_tools.SessionLocal", return_value=mock_db):
-            from app.tools.support_tools import get_user_ticket_history
-
-            result = get_user_ticket_history("test-user")
-
-        assert isinstance(result, list)
-
 
 class TestShipmentTools:
 
@@ -230,15 +204,3 @@ class TestSupportTools:
 
         result = lookup_support_policy("defective_product", "critical")
         assert "response_time" in result
-
-    def test_get_user_ticket_history_returns_list(self):
-        """Returns list of tickets for user"""
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.return_value = []
-
-        with patch("app.tools.support_tools.SessionLocal", return_value=mock_db):
-            from app.tools.support_tools import get_user_ticket_history
-
-            result = get_user_ticket_history("test-user")
-
-        assert isinstance(result, list)

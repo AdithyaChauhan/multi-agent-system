@@ -1,6 +1,5 @@
-import json
 import copy
-import re
+import json
 from functools import lru_cache
 from typing import List, Literal, Optional
 
@@ -9,8 +8,7 @@ from langgraph.graph import StateGraph, END
 from pydantic import BaseModel, Field, field_validator
 
 from app.agents.state import AgentState
-from app.agents.product_agent_subgraph import product_enrichment_subgraph
-from app.tools.product_tools import search_products, _get_known_brands
+from app.tools.product_tools import search_products
 from app.core.llm import call_llm
 from app.core.logger import get_logger, get_request_id
 from app.core.prompt_loader import load_prompt
@@ -104,9 +102,13 @@ def _subcategories() -> tuple:
 
 @lru_cache(maxsize=1)
 def search_schema():
-    """Pydantic schema for the extraction call. Enums come from the DB catalog."""
+    """Pydantic schema for the extraction call.
+
+    Subcategory values come from the DB catalog. The model sees them in the prompt rather than as a
+    JSON-schema enum, because Groq rejects a whole tool call (HTTP 400) when one value is off-list;
+    the validator below enforces the catalog instead and turns unknown values into null.
+    """
     subs = _subcategories()
-    SubLiteral = Literal[subs] if subs else str
     allowed = {
         "category": SERVED_CATEGORIES,
         "subcategory": subs,
@@ -118,7 +120,7 @@ def search_schema():
         """Catalog search filters for what the shopper wants now."""
 
         category: Optional[Literal[SERVED_CATEGORIES]] = Field(None, description="catalog category")
-        subcategory: Optional[SubLiteral] = Field(None, description="catalog subcategory, null if none fits")
+        subcategory: Optional[str] = Field(None, description="one of the catalog subcategories, or null")
         type: Optional[Literal[PRODUCT_TYPES]] = Field(None, description="only for headphones and speakers")
         brand: Optional[str] = None
         max_price: Optional[int] = Field(None, description="rupees")
@@ -136,8 +138,9 @@ def search_schema():
             options = allowed[info.field_name]
             if not options:  # catalog unavailable: accept the model's value as written
                 return value.strip() or None
-            wanted = value.strip().lower()
-            return next((a for a in options if a.lower() == wanted), None)
+            word = value.strip().lower()
+            forms = {word, word + "s", word[:-1] if word.endswith("s") else word, word[:-2] if word.endswith("es") else word}
+            return next((a for a in options if a.lower() in forms), None)  # "TVs" → "tv"
 
         @field_validator("keywords", mode="before")
         @classmethod
@@ -145,6 +148,10 @@ def search_schema():
             return [k for k in value if isinstance(k, str) and k.strip()] if isinstance(value, list) else []
 
     return ProductSearch
+
+
+def catalog_lines() -> str:
+    return "\n".join(f"{c}: {' | '.join(subs)}" for c, subs in load_catalog().items())
 
 
 def _category_of(subcategory: Optional[str], given: Optional[str]) -> Optional[str]:
@@ -175,7 +182,7 @@ def extract_preferences(state: AgentState) -> dict:
         "product",
         "extract_preferences",
         [
-            SystemMessage(content=load_prompt("product_extraction")),
+            SystemMessage(content=load_prompt("product_extraction", catalog=catalog_lines())),
             HumanMessage(content=f"Previous: {json.dumps(previous)} | Message: {message}"),
         ],
         schema=search_schema(),
@@ -192,9 +199,7 @@ def extract_preferences(state: AgentState) -> dict:
         "preferences": preferences,
         "original_preferences": copy.deepcopy(preferences),
         "not_carried": {"item": not_carried, "suggestion": out.get("suggestion")} if not_carried else None,
-        "broaden_attempt": 0,
         "relaxed_filters": [],
-        "filters_exhausted": False,
     }
 
 
@@ -216,176 +221,6 @@ def respond_unavailable(state: AgentState) -> dict:
     return {"final_response": reply}
 
 
-# Order in which optional filters are dropped when a search finds nothing.
-RELAXATION_ORDER = [
-    "type",
-    "price_increase",
-    "brand",
-    "keywords",
-]
-
-
-# ── Product search ───────────────────────────────────────────────────────────
-
-
-def do_search_products(state: AgentState) -> dict:
-    """Deterministic node — reads preferences from state and calls search_products directly."""
-    prefs = state.get("preferences") or {}
-    logger.info(
-        f"request_id={get_request_id()} | Searching | category={prefs.get('category')} | subcategory={prefs.get('subcategory')}"
-    )
-    results = search_products(
-        category=prefs.get("category"),
-        subcategory=prefs.get("subcategory"),
-        product_type=prefs.get("type"),
-        brand=prefs.get("brand"),
-        max_price=prefs.get("max_price"),
-        min_price=prefs.get("min_price"),
-        min_rating=prefs.get("min_rating"),
-        keywords=prefs.get("keywords") or [],
-        limit=10,
-    )
-    logger.info(f"request_id={get_request_id()} | Found {len(results)} products")
-    return {"search_results": results}
-
-
-def broaden_search(state: AgentState) -> dict:
-    prefs = (state.get("preferences") or {}).copy()
-    attempt = state.get("broaden_attempt", 0)
-    relaxed = list(state.get("relaxed_filters") or [])
-
-    # Walk forward through the relaxation order until we find a filter we can actually relax.
-    # Using a loop instead of recursion so each graph invocation does one unit of work
-    # and the graph edge (broaden → search_products) handles the retry — traceable in LangSmith.
-    while attempt < len(RELAXATION_ORDER):
-        filter_to_relax = RELAXATION_ORDER[attempt]
-        attempt += 1
-
-        if filter_to_relax == "price_increase":
-            if prefs.get("max_price"):
-                old_price = prefs["max_price"]
-                prefs["max_price"] = int(old_price * 1.25)
-                relaxed.append(f"price increased from {old_price} to {prefs['max_price']}")
-                break
-        else:
-            if prefs.get(filter_to_relax):
-                relaxed.append(filter_to_relax)
-                prefs[filter_to_relax] = None
-                break
-    else:
-        return {"broaden_attempt": attempt, "filters_exhausted": True}
-
-    # Category alone is enough to fetch a candidate set for the ranker.
-    has_specificity = (
-        prefs.get("category")
-        or prefs.get("subcategory")
-        or prefs.get("brand")
-        or prefs.get("type")
-        or prefs.get("keywords")
-    )
-    if not has_specificity:
-        return {"broaden_attempt": attempt, "filters_exhausted": True}
-
-    return {
-        "preferences": prefs,
-        "broaden_attempt": attempt,
-        "relaxed_filters": relaxed,
-        "filters_exhausted": False,
-    }
-
-
-def respond_no_results(state: AgentState) -> dict:
-    logger.info(f"request_id={get_request_id()} | No results after exhausting filters")
-    original = state.get("original_preferences") or {}
-    brand = original.get("brand")
-    # Restore context from original so follow-up messages (e.g. "under 2000") keep subcategory.
-    # Relaxation strips preferences to null by the time this node fires; without restoration
-    # the next turn has no category/subcategory context and returns unrelated products.
-    _restored = {**original, "brand": None}
-
-    if brand:
-        subcategory = original.get("subcategory")
-        category = original.get("category")
-        # Distinguish a brand we stock (filters just too narrow) from one we genuinely don't carry.
-        known_brands = _get_known_brands()
-        brand_in_catalog = any(k.lower() == brand.lower() for k in known_brands)
-        if brand_in_catalog:
-            # Check if this brand makes the requested product at all (ignoring filters).
-            brand_has_product = bool(search_products(brand=brand, subcategory=subcategory, limit=1))
-            if brand_has_product:
-                # Brand makes the product but price/rating filters were too tight.
-                # Clear the constraints we're telling the user to relax — the next turn's
-                # price ("under 3000") should not be intersected with the old tight filters.
-                label = subcategory or category or "products"
-                return {
-                    "final_response": (
-                        f"I couldn't find any {brand} {label} matching your filters. "
-                        f"Try relaxing the price or rating — or let me know if you'd like to see other brands."
-                    ),
-                    "preferences": {**original, "max_price": None, "min_price": None, "min_rating": None},
-                }
-            # Brand is in our catalog but doesn't make this product — show alternatives.
-            no_carry_msg = f"We carry {brand} but not {subcategory or category or 'that product'}."
-        else:
-            no_carry_msg = f"We don't carry {brand}."
-        alternatives = search_products(category=category, subcategory=subcategory, limit=10)
-        if alternatives:
-            top3 = sorted(alternatives, key=lambda p: p.get("rating") or 0, reverse=True)[:3]
-            label = subcategory or category or "products"
-            lines = [f"{no_carry_msg} Here are our top-rated {label} from brands we stock:\n"]
-            for i, p in enumerate(top3, 1):
-                price = f"₹{p['price']:,}" if p.get("price") else ""
-                rating = f"{p['rating']}/5" if p.get("rating") else ""
-                lines.append(f"{i}. **{p['name']}** by {p.get('brand', '')}")
-                lines.append(f"   {price} | ⭐ {rating}\n")
-            return {"final_response": "\n".join(lines), "preferences": _restored}
-        return {
-            "final_response": f"{no_carry_msg} Let me know what you need and I can suggest alternatives from brands we stock.",
-            "preferences": _restored,
-        }
-
-    return {
-        "final_response": (
-            "I couldn't find any products matching your requirements, "
-            "even after relaxing several filters. Try a different category or higher budget."
-        ),
-        "preferences": _restored,
-    }
-
-
-def format_recommendations(state: AgentState) -> dict:
-    ranked = state.get("ranked_products") or []
-    relaxed = state.get("relaxed_filters") or []
-
-    if not ranked:
-        return {"final_response": "I found some products but could not rank them."}
-
-    top3 = ranked[:3]
-    all_maybe = all(p.get("llm_tier", 0) == 1 for p in top3) or bool(state.get("keyword_recovery_attempted"))
-
-    lines = []
-    if relaxed and not state.get("keyword_recovery_attempted"):
-        lines.append("I found close matches after broadening a few optional filters:\n")
-    elif all_maybe:
-        lines.append(
-            "I couldn't find products that exactly match your request, but here are some related options — let me know if any of these work for you or if you'd like me to look for something else:\n"
-        )
-    else:
-        lines.append("Here are my top recommendations for you:\n")
-
-    for i, p in enumerate(top3, 1):
-        brand = p.get("brand") or "Unknown brand"
-        rating = f"{p['rating']:.1f}/5" if p.get("rating") is not None else "Not rated"
-        lines.append(f"{i}. **{p['name']}** — {brand}")
-        lines.append(f"   ₹{p['price']:,} · {rating}")
-        lines.append("")
-
-    return {"final_response": "\n".join(lines)}
-
-
-# ROUTING FUNCTIONS (only one of each!)
-
-
 def route_after_extraction(state: AgentState) -> Literal["search", "ask", "unavailable"]:
     if state.get("not_carried"):
         return "unavailable"
@@ -394,156 +229,175 @@ def route_after_extraction(state: AgentState) -> Literal["search", "ask", "unava
     return "search" if has_signal else "ask"
 
 
-def route_after_search(state: AgentState) -> Literal["rank", "broaden"]:
-    results = state.get("search_results") or []
-    return "rank" if results else "broaden"
+# Optional filters, dropped one at a time (cumulatively) when a search finds nothing.
+# Subcategory and category are never dropped: showing a different kind of product is not a match.
+RELAXATION_ORDER = ["type", "price", "brand", "keywords"]
 
 
-def rank_and_filter(state: AgentState) -> dict:
-    """LLM node — ranks raw search results by relevance to the user's request."""
-    search_results = state.get("search_results") or []
-    user_message = state.get("user_message", "")
-
-    if not search_results:
-        return {"ranked_products": []}
-
-    candidates = search_results[:10]
-    product_list = "\n".join(
-        [
-            f"{i+1}. {p['name'][:60]} | ₹{p['price']} | {p['rating']}★ | {p.get('brand', 'N/A')}"
-            for i, p in enumerate(candidates)
-        ]
+def _run_search(filters: dict, limit: int = 10) -> list:
+    return search_products(
+        category=filters.get("category"),
+        subcategory=filters.get("subcategory"),
+        product_type=filters.get("type"),
+        brand=filters.get("brand"),
+        max_price=filters.get("max_price"),
+        min_price=filters.get("min_price"),
+        min_rating=filters.get("min_rating"),
+        keywords=filters.get("keywords") or [],
+        limit=limit,
     )
 
-    messages = [
-        SystemMessage(content=load_prompt("product_ranking")),
-        HumanMessage(content=f'User request: "{user_message}"\n\nProducts:\n{product_list}'),
-    ]
 
-    raw = call_llm("product", "rank_and_filter", messages)
-    logger.info(f"request_id={get_request_id()} | ranker_raw={raw!r} | candidates={len(candidates)}")
+def find_products(state: AgentState) -> dict:
+    """Deterministic search with one fallback loop: relax optional filters until something matches.
 
-    try:
-        try:
-            parsed = json.loads(raw)
-        except json.JSONDecodeError:
-            match = re.search(r"(\{.*\}|\[.*\])", raw, re.DOTALL)
-            parsed = json.loads(match.group()) if match else {}
-        if isinstance(parsed, list):
-            relevant_idx = parsed
-            maybe_idx = []
-        else:
-            relevant_idx = parsed.get("relevant") or []
-            maybe_idx = parsed.get("maybe") or []
-
-        ranked = []
-        seen = set()
-        for tier, idx_list in ((0, relevant_idx), (1, maybe_idx)):
-            for idx in idx_list:
-                if isinstance(idx, int) and 1 <= idx <= len(candidates):
-                    p = candidates[idx - 1]
-                    if p["product_id"] not in seen:
-                        ranked.append({**p, "llm_tier": tier})
-                        seen.add(p["product_id"])
-        # ranked stays [] if ranker explicitly put everything in "no" — let broaden handle it
-
-    except Exception as e:
-        logger.error(f"request_id={get_request_id()} | rank_and_filter parse error | error={e}")
-        ranked = [{**p, "llm_tier": 1} for p in candidates[:5]]
-
-    logger.info(
-        f"request_id={get_request_id()} | rank_and_filter | {len(ranked)} products "
-        f"(tier 0: {sum(1 for p in ranked if p.get('llm_tier') == 0)}, "
-        f"tier 1: {sum(1 for p in ranked if p.get('llm_tier') == 1)})"
-    )
-    return {"ranked_products": ranked}
-
-
-def route_after_rank(state: AgentState) -> Literal["enrich", "broaden"]:
-    ranked = state.get("ranked_products") or []
-    return "enrich" if ranked else "broaden"
-
-
-def route_after_broaden(state: AgentState) -> Literal["retry_search", "keyword_recovery", "no_results"]:
-    if not state.get("filters_exhausted"):
-        return "retry_search"
-    original_kw = (state.get("original_preferences") or {}).get("keywords") or []
-    keywords_were_relaxed = "keywords" in (state.get("relaxed_filters") or [])
-    if original_kw and keywords_were_relaxed and not state.get("keyword_recovery_attempted"):
-        return "keyword_recovery"
-    return "no_results"
-
-
-def keyword_recovery(state: AgentState) -> dict:
-    """Last-resort cross-catalog search using only the user's original keywords.
-    Fires once after full filter exhaustion — finds products under a different
-    subcategory than what was searched (e.g. ethernet adapter for 'usb hub with ethernet').
+    Works on a copy, so the shopper's own preferences (kept for the next turn) are never relaxed.
     """
-    original_kw = (state.get("original_preferences") or {}).get("keywords") or []
-    logger.info(f"request_id={get_request_id()} | keyword_recovery | keywords={original_kw}")
-    results = search_products(keywords=original_kw, limit=20)
-    if results:
-        return {"search_results": results, "keyword_recovery_attempted": True, "filters_exhausted": False}
-    return {"keyword_recovery_attempted": True, "filters_exhausted": True}
+    filters = dict(state.get("preferences") or {})
+    relaxed: list = []
+    results = _run_search(filters)
+    for name in RELAXATION_ORDER:
+        if results:
+            break
+        if name == "price" and filters.get("max_price"):
+            filters["max_price"] = int(filters["max_price"] * 1.25)
+            relaxed.append("price")
+        elif name != "price" and filters.get(name):
+            filters[name] = [] if name == "keywords" else None
+            relaxed.append(name)
+        else:
+            continue
+        results = _run_search(filters)
+    logger.info(f"request_id={get_request_id()} | search | found={len(results)} | relaxed={relaxed}")
+    return {"search_results": results, "relaxed_filters": relaxed}
 
 
-def route_after_keyword_recovery(state: AgentState) -> Literal["rank", "no_results"]:
-    if state.get("filters_exhausted") or not state.get("search_results"):
-        return "no_results"
-    return "rank"
+class Ranking(BaseModel):
+    """1-based indices of the listed products."""
+
+    relevant: List[int] = Field(default_factory=list, description="directly match the request")
+    maybe: List[int] = Field(default_factory=list, description="right kind of product, missing a requested detail")
 
 
-# GRAPH
+def rank_products(state: AgentState) -> dict:
+    """LLM node: drop candidates that aren't what the shopper asked for, then order the rest."""
+    candidates = (state.get("search_results") or [])[:10]
+    if not candidates:
+        return {"ranked_products": []}
+    listing = "\n".join(
+        f"{i}. {p['name'][:60]} | ₹{p['price']} | {p['rating']}★ | {p.get('brand') or 'N/A'}"
+        for i, p in enumerate(candidates, 1)
+    )
+    ranking = call_llm(
+        "product",
+        "rank_products",
+        [
+            SystemMessage(content=load_prompt("product_ranking")),
+            HumanMessage(content=f'User request: "{state.get("user_message", "")}"\n\nProducts:\n{listing}'),
+        ],
+        schema=Ranking,
+    )
+    if ranking is None:  # no usable answer: keep the search order, flagged as "maybe"
+        ranking = Ranking(maybe=list(range(1, min(5, len(candidates)) + 1)))
+
+    prefs = state.get("preferences") or {}
+    picked, seen = [], set()
+    for tier, indices in ((0, ranking.relevant), (1, ranking.maybe)):
+        for i in indices:
+            if 1 <= i <= len(candidates) and i not in seen:
+                seen.add(i)
+                picked.append({**candidates[i - 1], "llm_tier": tier, "score": score(candidates[i - 1], prefs)})
+    picked.sort(key=lambda p: (p["llm_tier"], -p["score"]))
+    return {"ranked_products": picked[:5]}
+
+
+def score(product: dict, prefs: dict) -> float:
+    """Three factors: rating, how well the price uses the budget, and match on brand/type/keywords."""
+    rating = (product.get("rating") or 0) / 5
+    budget = prefs.get("max_price")
+    if budget:
+        ratio = (product.get("price") or 0) / budget
+        price_fit = 0.0 if ratio > 1 else (1.0 if ratio >= 0.5 else 0.5)
+    else:
+        price_fit = 0.5
+    text = f"{product.get('name', '')} {product.get('brand', '')} {product.get('type', '')}".lower()
+    wanted = [w.lower() for w in [prefs.get("brand"), prefs.get("type"), *(prefs.get("keywords") or [])] if w]
+    match = sum(w in text for w in wanted) / len(wanted) if wanted else 0.5
+    return round(0.5 * rating + 0.25 * price_fit + 0.25 * match, 3)
+
+
+def route_after_rank(state: AgentState) -> Literal["recommend", "no_results"]:
+    return "recommend" if state.get("ranked_products") else "no_results"
+
+
+def _label(prefs: dict) -> str:
+    return prefs.get("subcategory") or (prefs.get("keywords") or [None])[0] or prefs.get("category") or "products"
+
+
+def _brand_note(prefs: dict, shown: list) -> str:
+    """Say plainly when the brand asked for isn't in the results."""
+    brand = prefs.get("brand")
+    if not brand or any(brand.lower() in (p.get("brand") or "").lower() for p in shown):
+        return ""
+    label = _label(prefs)
+    if search_products(brand=brand, subcategory=prefs.get("subcategory"), limit=1):
+        return f"I couldn't find {brand} {label} within your filters, so here are the closest options from other brands:\n"
+    return f"We don't carry {brand} {label}, so here are the closest options from other brands:\n"
+
+
+RELAXED_WORDS = {"type": "the type", "price": "the price limit (+25%)", "brand": "the brand", "keywords": "some features"}
+
+
+def format_recommendations(state: AgentState) -> dict:
+    prefs = state.get("preferences") or {}
+    top3 = (state.get("ranked_products") or [])[:3]
+    relaxed = state.get("relaxed_filters") or []
+    header = _brand_note(prefs, top3)
+    if not header and relaxed:
+        header = f"I couldn't find an exact match, so I widened {', '.join(RELAXED_WORDS[r] for r in relaxed)}:\n"
+    if not header and all(p["llm_tier"] == 1 for p in top3):
+        header = "These don't match everything you asked for, but they're the closest options we have:\n"
+    lines = [header or "Here are my top recommendations for you:\n"]
+    for i, p in enumerate(top3, 1):
+        rating = f"{p['rating']:.1f}/5" if p.get("rating") is not None else "Not rated"
+        lines.append(f"{i}. **{p['name']}** — {p.get('brand') or 'Unknown brand'}")
+        lines.append(f"   ₹{p['price']:,} · {rating}")
+        lines.append("")
+    return {"final_response": "\n".join(lines)}
+
+
+def respond_no_results(state: AgentState) -> dict:
+    prefs = state.get("preferences") or {}
+    label = _label(prefs)
+    reply = f"I couldn't find any {label} matching your request."
+    brand = prefs.get("brand")
+    if brand and not search_products(brand=brand, limit=1):
+        reply = f"We don't carry {brand}. " + reply
+    return {"final_response": reply + " Try a different budget, brand or product."}
 
 
 def build_product_agent_graph():
     graph = StateGraph(AgentState)
-
     graph.add_node("extract_preferences", extract_preferences)
     graph.add_node("ask_for_preferences", ask_for_preferences)
     graph.add_node("respond_unavailable", respond_unavailable)
-    graph.add_node("search_products", do_search_products)
-    graph.add_node("broaden_search", broaden_search)
-    graph.add_node("keyword_recovery", keyword_recovery)
-    graph.add_node("respond_no_results", respond_no_results)
-    graph.add_node("rank_and_filter", rank_and_filter)
-    graph.add_node("product_enrichment", product_enrichment_subgraph)
+    graph.add_node("find_products", find_products)
+    graph.add_node("rank_products", rank_products)
     graph.add_node("format_recommendations", format_recommendations)
+    graph.add_node("respond_no_results", respond_no_results)
 
     graph.set_entry_point("extract_preferences")
-
     graph.add_conditional_edges(
         "extract_preferences",
         route_after_extraction,
-        {"search": "search_products", "ask": "ask_for_preferences", "unavailable": "respond_unavailable"},
+        {"search": "find_products", "ask": "ask_for_preferences", "unavailable": "respond_unavailable"},
     )
-
+    graph.add_edge("find_products", "rank_products")
     graph.add_conditional_edges(
-        "search_products", route_after_search, {"rank": "rank_and_filter", "broaden": "broaden_search"}
+        "rank_products", route_after_rank, {"recommend": "format_recommendations", "no_results": "respond_no_results"}
     )
-
-    graph.add_conditional_edges(
-        "broaden_search",
-        route_after_broaden,
-        {"retry_search": "search_products", "keyword_recovery": "keyword_recovery", "no_results": "respond_no_results"},
-    )
-
-    graph.add_conditional_edges(
-        "keyword_recovery",
-        route_after_keyword_recovery,
-        {"rank": "rank_and_filter", "no_results": "respond_no_results"},
-    )
-
-    graph.add_conditional_edges(
-        "rank_and_filter", route_after_rank, {"enrich": "product_enrichment", "broaden": "broaden_search"}
-    )
-
-    graph.add_edge("product_enrichment", "format_recommendations")
-    graph.add_edge("ask_for_preferences", END)
-    graph.add_edge("respond_unavailable", END)
-    graph.add_edge("respond_no_results", END)
-    graph.add_edge("format_recommendations", END)
-
+    for node in ("ask_for_preferences", "respond_unavailable", "format_recommendations", "respond_no_results"):
+        graph.add_edge(node, END)
     return graph.compile()
 
 

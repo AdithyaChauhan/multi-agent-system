@@ -26,7 +26,7 @@ def get_logger(name: str) -> logging.Logger:
 
     try:
         Path(LOG_FILE).parent.mkdir(parents=True, exist_ok=True)
-        file_handler = RotatingFileHandler(LOG_FILE, maxBytes=5_000_000, backupCount=3)
+        file_handler = RotatingFileHandler(LOG_FILE, maxBytes=5_000_000, backupCount=3, encoding="utf-8")
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
     except (PermissionError, OSError):
