@@ -3,16 +3,16 @@
 **Goal:** take the assistant from about 5.8/10 to 9/10. That means short prompts, a clean LangGraph architecture that shows how agents are built (subgraphs, loops, a human-in-the-loop pause, ticket handoff), measured quality, and escalations that reach a real person. The work is split into phases, and each phase is worth keeping even if work stops after it.
 
 ## Now
-- **Current phase:** Phase 0, Measuring stick (in progress)
-- **Branch:** `phase-0-evals` (off `simplify-agents`).
-- **Next action:** run q088–q100 after the daily caps reset (the command is in the Phase 0 plan), replay once, then close Phase 0 and start Phase 1 **in a new chat**. The user should review the labels in `eval/product_queries.json`.
-- **Headline so far:** recall@5 0.85 and precision@3 0.87 on 87 queries (3 models). Attribute queries 0.65, Hinglish 0.60. The app says "we don't carry" for products it does stock. Renaming categories drops recall@5 from 0.97 to 0.00.
+- **Current phase:** Phase 1, Clean product data (not started). Phase 0 is done, except the label review.
+- **Branch:** `phase-0-evals` (off `simplify-agents`). Start `phase-1-catalog` from it.
+- **Next action:** in a **new chat**, `/resume`, then plan Phase 1 in plan mode: the type list and attribute schemas need the user's review before any extraction. The user should also review the Phase 0 labels in `eval/product_queries.json`.
+- **Phase 0 baseline:** recall@5 0.874 and precision@3 0.870 on all 100 queries. Attribute queries 0.75, Hinglish 0.60, plain and typo 1.00. The app says "we don't carry" for products it does stock. Renaming categories drops recall@5 from 0.97 to 0.00.
 - **Blocked on:** nothing.
 
 ## Phases
 | # | Phase | Status | Plan | Exit criteria (short) |
 |---|---|---|---|---|
-| 0 | Measuring stick | In progress | [plan](docs/plans/phase-0-measuring-stick.md) | 100 labelled product queries; today's recall@5 measured; LLM replay mode |
+| 0 | Measuring stick | Done (labels await review) | [plan](docs/plans/phase-0-measuring-stick.md) | 100 labelled product queries; today's recall@5 measured; LLM replay mode |
 | 1 | Clean product data | Not started | [plan](docs/plans/phase-1-clean-product-data.md) | Every product typed, key attributes filled, catalog constants removed |
 | 2 | LangGraph-native architecture | Not started | [plan](docs/plans/phase-2-langgraph-architecture.md) | Checkpointer, `interrupt()` for cancel, search loop as graph edges, subgraph schemas, streaming, escalation subgraph, filter chips |
 | 3 | Hybrid search (conditional) | Not started | [plan](docs/plans/phase-3-hybrid-search.md) | Only if Phase 1 leaves a gap; must beat v1 on Phase 0 metrics |

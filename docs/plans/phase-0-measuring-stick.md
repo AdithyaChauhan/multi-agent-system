@@ -1,5 +1,5 @@
 # Phase 0: Measuring stick
-- **Status:** In progress (started 2026-11-18)
+- **Status:** Done on 2026-11-18, except the human review of the labels (see Acceptance criteria)
 - **Branch:** `phase-0-evals`
 - **Depends on:** nothing
 - **Decisions:** [0004](../decisions/0004-measure-before-changing.md)
@@ -46,7 +46,7 @@ Phases 1 and 2 change the data and the search. Without a fixed yardstick it's im
   - computes the metrics above;
   - writes `eval/retrieval_runs/<label>.json` and prints a table;
   - takes the same options as `run_baseline.py`: `--label`, `--model`, `--database-url`, `--only`, `--tags`.
-- [ ] Today's numbers: 87 of 100 done across 3 models (see Results). To finish: `eval/run_retrieval.py --label v1-gptoss20b --model openai/gpt-oss-20b --resume --only q088,q089,q090,q091,q092,q093,q094,q095,q096,q097,q098,q099,q100` (about 60K tokens). Original wording:
+- [x] Today's numbers: all 100 measured across 3 models, and a replay of each part matched exactly at 0 tokens (see Results). Earlier note: 87 of 100 done across 3 models. To finish: `eval/run_retrieval.py --label v1-gptoss20b --model openai/gpt-oss-20b --resume --only q088,q089,q090,q091,q092,q093,q094,q095,q096,q097,q098,q099,q100` (about 60K tokens). Original wording:
   - one live run on `openai/gpt-oss-20b`, recorded;
   - one replay run, which must give identical numbers;
   - optionally, one live qwen run when quota allows.
@@ -72,7 +72,39 @@ Phases 1 and 2 change the data and the search. Without a fixed yardstick it's im
 ## Results
 All runs were on 2026-11-18, 1 run each, code at `phase-0-evals`. Files are in `eval/retrieval_runs/`, scored against the labels after the rule fixes (`--rescore`).
 
-**v1 baseline so far: 87 of 100 queries, 1 run, `multi_agent_baseline`** · `v1-combined-summary.json`
+**Final v1 baseline: all 100 queries, 1 run, `multi_agent_baseline`** · `v1-combined-summary.json`
+Queries are split by model because of the daily caps:
+- gpt-oss-20b: q001–q055 and q088–q100 (the last 13 on a second Groq key, `.env.eval`);
+- gpt-oss-120b: q056–q074;
+- qwen3.8-27b: q075–q087.
+
+A replay of each part reproduced every result exactly at 0 tokens (`*-replay.json`).
+
+| Metric | Value |
+|---|---|
+| recall@5 | 0.874 |
+| precision@3 | 0.870 |
+| MRR | 0.837 |
+| empty rate | 9.5% |
+| correct refusals | 4 of 5 |
+| tokens per query | ~2,230 |
+| latency p50 / p95 | 1.1 s / 1.7 s |
+
+| Tag (n) | recall@5 | precision@3 | empty rate |
+|---|---|---|---|
+| plain (20) | 1.00 | 0.98 | 0% |
+| typo (5) | 1.00 | 1.00 | 0% |
+| brand (16) | 0.94 | 0.90 | 6% |
+| follow-up (15) | 0.93 | 0.84 | 7% |
+| price (15) | 0.80 | 0.80 | 13% |
+| vague (10) | 0.80 | 0.73 | 20% |
+| brand we don't carry (5) | 0.80 | 0.80 | 0% |
+| attribute (24) | 0.75 | 0.78 | 21% |
+| Hinglish (5) | 0.60 | 0.80 | 20% |
+
+These are the numbers Phase 1 must beat, query by query, on the same model for each query.
+
+**Partial view at 87 of 100 queries, 1 run, `multi_agent_baseline`** · `v1-combined-summary.json`
 Every model hit Groq's daily cap, so the queries are split by model: q001–q055 on gpt-oss-20b, q056–q074 on gpt-oss-120b, q075–q087 on qwen3.8-27b. q088–q100 (follow-ups) are still to run. Later comparisons must pair each query with the same model; the cassettes are per model.
 
 | Metric | Value |

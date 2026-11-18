@@ -53,4 +53,5 @@ docker exec multiagent-db psql -U postgres -d multi_agent_baseline -c "<read-onl
 - Measure before and after any change to prompts, search, data or models (ADR 0004). Say how a number was measured (model, runs, database).
 - Don't over-engineer prompts (ADR 0010): fix model mistakes in data, code or tests. Never add a prompt rule for a single conversation; add the case to the evals instead. Every prompt stays under 40 lines.
 - Use LangGraph features only where they replace hand-written code (ADR 0009). No new agents, supervisor agent, or tool calling for deterministic flows.
+- A second Groq key, in another organization with its own quota, may exist in `.env.eval` (git-ignored). Use it with `--env-file .env.eval` on eval scripts when the main key is capped. Never print it, and make sure `GROQ_API_KEY` isn't exported in the shell, because that would win.
 - Give the user bash syntax for anything they run by hand.

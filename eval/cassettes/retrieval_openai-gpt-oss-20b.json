@@ -18,6 +18,27 @@
    "type": null
   }
  },
+ "007e62677d380a8999f82040aeaa3860": {
+  "agent": "product",
+  "message": "User request: \"and a keyboard\"\n\nProducts:\n1. Logitech K380 Wireless Multi-Device Keyboard for Windows, Ap | ₹2640 | 4.5★ | Logitech\n2. Redragon K617 Fizz 60% Wired RGB Gaming Keyboard, 61 Keys Co | ₹2",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 639,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
  "0337dd0263da425c3d76768dd914b6af": {
   "agent": "product",
   "message": "Previous: {} | Message: speakers",
@@ -69,6 +90,25 @@
    "same_kind": []
   }
  },
+ "0c67eb50108986860773a88d97ee1e92": {
+  "agent": "product",
+  "message": "Previous: {\"category\": \"Electronics\", \"subcategory\": \"speakers\", \"type\": \"bluetooth speaker\"} | Message: under 2000",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1287,
+  "value": {
+   "brand": null,
+   "category": null,
+   "keywords": [],
+   "max_price": 2000,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "speakers",
+   "suggestion": null,
+   "type": "bluetooth speaker"
+  }
+ },
  "10674b64452448fde37e78286b5e7a46": {
   "agent": "product",
   "message": "Previous: {} | Message: oil filled radiator heater",
@@ -105,6 +145,28 @@
     6,
     7,
     8
+   ]
+  }
+ },
+ "12465d6df44af176499b69d86ddbd5bb": {
+  "agent": "product",
+  "message": "User request: \"under 1000\"\n\nProducts:\n1. Samsung Ehs64 Ehs64Avfwecinu Hands-Free Wired In Ear Earphon | ₹499 | 4.2★ | Samsung\n2. Samsung Original EHS64 Wired in Ear Earphones with Mic, Blac | ₹949 | 4",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 639,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
    ]
   }
  },
@@ -175,6 +237,27 @@
    ]
   }
  },
+ "1a912e7826ba2aab884f75d6439e2f1f": {
+  "agent": "product",
+  "message": "Previous: {} | Message: type c cable",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1284,
+  "value": {
+   "brand": null,
+   "category": null,
+   "keywords": [
+    "type c"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "cable",
+   "suggestion": null,
+   "type": null
+  }
+ },
  "1af16d995631d2831629f4138a85d93b": {
   "agent": "product",
   "message": "User request: \"what about Logitech\"\n\nProducts:\n1. Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, 12  | ₹699 | 4.5★ | Logitech\n2. Logitech B170 Wireless Mouse, 2.4 GHz with USB Nano Receiver ",
@@ -192,6 +275,25 @@
     2,
     3
    ]
+  }
+ },
+ "1c7cb8e69801574b06a652fb0d8dff07": {
+  "agent": "product",
+  "message": "Previous: {} | Message: geyser",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1276,
+  "value": {
+   "brand": null,
+   "category": "Home & Kitchen",
+   "keywords": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "water heater",
+   "suggestion": null,
+   "type": null
   }
  },
  "1d9f684dcae302f99944af37ce9e9ece": {
@@ -274,6 +376,43 @@
    "subcategory": "router",
    "suggestion": null,
    "type": null
+  }
+ },
+ "2456031c633b2719a03731b3ac55d9ed": {
+  "agent": "product",
+  "message": "User request: \"an oil filled one\"\n\nProducts:\n1. Borosil Volcano 13 Fin Oil Filled Radiator Room Heater, 2900 | ₹9495 | 4.2★ | Borosil\n2. Bajaj OFR Room Heater, 13 Fin 2900 Watts Oil Filled Room Hea | ",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 477,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4
+   ]
+  }
+ },
+ "246c2630bd96acc5b1144a1919ba12a5": {
+  "agent": "product",
+  "message": "User request: \"32 inch tv\"\n\nProducts:\n1. Sony Bravia 164 cm (65 inches) 4K Ultra HD Smart LED Google  | ₹77990 | 4.7★ | Sony\n2. Cotbolt Silicone Protective Case Cover for LG an MR21GA Magi | ₹399 | 4.",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 666,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    4,
+    5,
+    6,
+    9
+   ]
   }
  },
  "2546ffdfb98a232d76bf70747e4077f4": {
@@ -405,6 +544,27 @@
    "type": null
   }
  },
+ "32e1bb3e6df4cabef886ddb62883c733": {
+  "agent": "product",
+  "message": "Previous: {\"category\": \"Home & Kitchen\", \"subcategory\": \"electric kettle\"} | Message: 1.5 litre",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1284,
+  "value": {
+   "brand": null,
+   "category": null,
+   "keywords": [
+    "1.5 litre"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "electric kettle",
+   "suggestion": null,
+   "type": null
+  }
+ },
  "33650d054d81b9724245bef50a6c6b26": {
   "agent": "product",
   "message": "Previous: {} | Message: earbuds with noise cancellation",
@@ -466,6 +626,28 @@
    "type": null
   }
  },
+ "3659071e5a5099b07ce21cd39d87c4d5": {
+  "agent": "product",
+  "message": "User request: \"make it 43 inch\"\n\nProducts:\n1. Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart  | ₹30990 | 4.3★ | Samsung\n2. Mi 108 cm (43 inches) Full HD Android LED TV 4C | L43M6-INC  | ₹",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 677,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
  "3660dc4228e0fb74f27139bcd752fcb4": {
   "agent": "product",
   "message": "User request: \"bajaj room heater\"\n\nProducts:\n1. Bajaj Majesty RX11 2000 Watts Heat Convector Room Heater (Wh | ₹2169 | 4.1★ | Bajaj\n2. Bajaj OFR Room Heater, 13 Fin 2900 Watts Oil Filled Room Hea | ₹9",
@@ -515,7 +697,7 @@
   "message": "Previous: {} | Message: vacuum cleaner",
   "model": "openai/gpt-oss-20b",
   "node": "extract_preferences",
-  "total_tokens": 1268,
+  "total_tokens": 1269,
   "value": {
    "brand": null,
    "category": "Home & Kitchen",
@@ -697,6 +879,25 @@
    "type": null
   }
  },
+ "49a8d966634f0c011b4ab432447c7ef7": {
+  "agent": "product",
+  "message": "Previous: {} | Message: 32 inch tv",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1265,
+  "value": {
+   "brand": null,
+   "category": "Electronics",
+   "keywords": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "tv",
+   "suggestion": null,
+   "type": null
+  }
+ },
  "4ab508ce9972b8fa5ada2328d5fa8a3d": {
   "agent": "product",
   "message": "User request: \"smartwatch\"\n\nProducts:\n1. Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Spo | ₹2999 | 4.4★ | Fire-Boltt\n2. Fire-Boltt Gladiator 1.96\" Biggest Display Smart Watch with  | ₹399",
@@ -779,6 +980,27 @@
    "type": null
   }
  },
+ "52840a1d700f33c922d4a41f1494fe29": {
+  "agent": "product",
+  "message": "Previous: {\"category\": \"Computers & Accessories\", \"subcategory\": \"pen drive\"} | Message: 128 gb",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1307,
+  "value": {
+   "brand": null,
+   "category": null,
+   "keywords": [
+    "128 gb"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "pen drive",
+   "suggestion": null,
+   "type": null
+  }
+ },
  "53f7724696fc93cb8f8a60950d664147": {
   "agent": "product",
   "message": "Previous: {} | Message: smartwatch under 2000",
@@ -815,6 +1037,25 @@
    "subcategory": "electric kettle",
    "suggestion": null,
    "type": null
+  }
+ },
+ "5b0f3ca7a9b798c273dfc4d8770048fb": {
+  "agent": "product",
+  "message": "User request: \"only Bajaj\"\n\nProducts:\n1. Bajaj Rex 500W Mixer Grinder with Nutri-Pro Feature, 3 Jars, | ₹1999 | 4.2★ | Bajaj\n2. Bajaj Rex 750W Mixer Grinder with Nutri Pro Feature, 4 Jars, | ₹3249 | 4",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 421,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3
+   ],
+   "same_kind": [
+    1,
+    2,
+    3
+   ]
   }
  },
  "5ff03bddbf37702b35cf083031dd4bba": {
@@ -869,6 +1110,39 @@
    "type": null
   }
  },
+ "6342f9006de3cf5c7f50ab114890d71d": {
+  "agent": "product",
+  "message": "User request: \"type c cable\"\n\nProducts:\n1. REDTECH USB-C to Lightning Cable 3.3FT, [Apple MFi Certified | ₹249 | 5.0★ | REDTECH\n2. Belkin USB C to USB-C Fast Charging Type C Cable, 60W PD, 3. | ₹599 |",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 682,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
  "65c2557a4b3f94209af81e156b6991b0": {
   "agent": "product",
   "message": "Previous: {} | Message: mixer grinder",
@@ -884,6 +1158,27 @@
    "min_rating": null,
    "not_carried": null,
    "subcategory": "mixer grinder",
+   "suggestion": null,
+   "type": null
+  }
+ },
+ "68bd175b45809373ace9c1b9dfad66fd": {
+  "agent": "product",
+  "message": "Previous: {\"category\": \"Home & Kitchen\", \"subcategory\": \"room heater\"} | Message: an oil filled one",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1280,
+  "value": {
+   "brand": null,
+   "category": null,
+   "keywords": [
+    "oil filled"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "room heater",
    "suggestion": null,
    "type": null
   }
@@ -905,6 +1200,23 @@
    "subcategory": "kitchen scale",
    "suggestion": null,
    "type": null
+  }
+ },
+ "6ae80d2472cb59dc03c41554a82574ed": {
+  "agent": "product",
+  "message": "User request: \"128 gb\"\n\nProducts:\n1. SanDisk Ultra 128 GB USB 3.0 Pen Drive (Black) | ₹889 | 4.3★ | SanDisk\n2. SanDisk Ultra Dual Drive Luxe USB Type C Flash Drive (Silver | ₹1299 | 4.3★ | SanDisk",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 427,
+  "value": {
+   "exact": [
+    1,
+    2
+   ],
+   "same_kind": [
+    1,
+    2
+   ]
   }
  },
  "6cb3422f89fd032ed574e87c1db46b53": {
@@ -948,6 +1260,44 @@
     9,
     10
    ]
+  }
+ },
+ "705da753863b49dd2e19b9777d45a0be": {
+  "agent": "product",
+  "message": "Previous: {\"category\": \"Computers & Accessories\", \"subcategory\": \"mouse\", \"keywords\": [\"wireless\"]} | Message: and a keyboard",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1291,
+  "value": {
+   "brand": null,
+   "category": "Computers & Accessories",
+   "keywords": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "keyboard",
+   "suggestion": null,
+   "type": null
+  }
+ },
+ "751c0bf737c2c0823051fab226937c62": {
+  "agent": "product",
+  "message": "Previous: {\"category\": \"Electronics\", \"subcategory\": \"headphones\", \"brand\": \"boat\", \"max_price\": 500} | Message: ok, under 2000 then",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1298,
+  "value": {
+   "brand": "boat",
+   "category": "Electronics",
+   "keywords": [],
+   "max_price": 2000,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "headphones",
+   "suggestion": null,
+   "type": null
   }
  },
  "77b0b9263e30683382c3ec7debb97627": {
@@ -1058,6 +1408,25 @@
    "type": null
   }
  },
+ "8635c7dbb27a1e957519f061995b7309": {
+  "agent": "product",
+  "message": "User request: \"boat headphones under 500\"\n\nProducts:\n1. boAt BassHeads 122 Wired Earphones with Heavy Bass, Integrat | ₹399 | 4.2★ | boAt\n2. boAt Bassheads 102 Wired in Ear Earphones with Mic (Mint Gr",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 540,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ]
+  }
+ },
  "867fd4fad3f9dc997df03654793b8b5f": {
   "agent": "product",
   "message": "Previous: {} | Message: sandwich maker",
@@ -1075,6 +1444,28 @@
    "subcategory": "sandwich maker",
    "suggestion": null,
    "type": null
+  }
+ },
+ "876f762eb9efb6eca2dab55a70b1a0e3": {
+  "agent": "product",
+  "message": "User request: \"geyser\"\n\nProducts:\n1. Swiffer Instant Electric Water Heater Faucet Tap Home-Kitche | ₹1439 | 4.8★ | Swiffer\n2. Campfire Spring Chef Prolix Instant Portable Water Heater Ge | ₹1499 | 4.7",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 660,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
   }
  },
  "889a4bfacde77e47010b811589452f6c": {
@@ -1126,6 +1517,26 @@
    ]
   }
  },
+ "8c20722bf6bbc3910a30e478e58764c4": {
+  "agent": "product",
+  "message": "User request: \"under 2000\"\n\nProducts:\n1. JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL  | ₹1999 | 4.3★ | JBL\n2. boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playb | ₹1799 | 4.2",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 594,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ]
+  }
+ },
  "8ca52931b19c108766f92a6796277c76": {
   "agent": "product",
   "message": "Previous: {} | Message: duracell batteries",
@@ -1150,7 +1561,7 @@
   "message": "User request: \"headphones\"\n\nProducts:\n1. Redgear Cosmo 7,1 Usb Gaming Wired Over Ear Headphones With  | ₹1990 | 4.3★ | Redgear\n2. Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwat | ₹3999 |",
   "model": "openai/gpt-oss-20b",
   "node": "rank_products",
-  "total_tokens": 706,
+  "total_tokens": 689,
   "value": {
    "exact": [],
    "same_kind": [
@@ -1184,6 +1595,39 @@
    "type": null
   }
  },
+ "8fb60687e5e66162a4591c204a4f5ed7": {
+  "agent": "product",
+  "message": "User request: \"with calling\"\n\nProducts:\n1. Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Spo | ₹2999 | 4.4★ | Fire-Boltt\n2. Fire-Boltt Gladiator 1.96\" Biggest Display Smart Watch with  | ₹3",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 701,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
  "90f70346e77e08f463be31571bcd480e": {
   "agent": "product",
   "message": "Previous: {} | Message: philips iron",
@@ -1208,7 +1652,7 @@
   "message": "User request: \"mixer grinder\"\n\nProducts:\n1. Sujata Dynamix DX Mixer Grinder, 900W, 3 Jars (White) | ₹6120 | 4.6★ | Sujata\n2. Sujata Dynamix, Mixer Grinder, 900 Watts, 3 Jars (White) | ₹6120 | 4.6★ | S",
   "model": "openai/gpt-oss-20b",
   "node": "rank_products",
-  "total_tokens": 689,
+  "total_tokens": 692,
   "value": {
    "exact": [],
    "same_kind": [
@@ -1221,6 +1665,48 @@
     8,
     10
    ]
+  }
+ },
+ "957219bfa0434955e1bb8101695f799d": {
+  "agent": "product",
+  "message": "Previous: {\"category\": \"Electronics\", \"subcategory\": \"smartwatch\"} | Message: with calling",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1275,
+  "value": {
+   "brand": null,
+   "category": "Electronics",
+   "keywords": [
+    "calling"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "smartwatch",
+   "suggestion": null,
+   "type": null
+  }
+ },
+ "9611e34c3673a6af796458c044a36a8a": {
+  "agent": "product",
+  "message": "Previous: {\"category\": \"Electronics\", \"subcategory\": \"tv\"} | Message: make it 43 inch",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1284,
+  "value": {
+   "brand": null,
+   "category": "Electronics",
+   "keywords": [
+    "43 inch"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "tv",
+   "suggestion": null,
+   "type": null
   }
  },
  "9857e477e6df320827d7a0daac7e6085": {
@@ -1306,6 +1792,37 @@
    "type": null
   }
  },
+ "9b1777001ab4ec9487eea65c8c3dfac2": {
+  "agent": "product",
+  "message": "User request: \"something cheaper, under 3000\"\n\nProducts:\n1. Eureka Forbes Euroclean Paper Vacuum Cleaner Dust Bags for E | ₹253 | 4.3★ | Eureka\n2. VR 18 Pcs - 3 Different Size Plastic Food Snack Bag P",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 622,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ]
+  }
+ },
  "9ecb8499b0b5a5fb8afb94d9c6b3f906": {
   "agent": "product",
   "message": "Previous: {} | Message: fire-boltt smartwatch",
@@ -1323,6 +1840,39 @@
    "subcategory": "smartwatch",
    "suggestion": null,
    "type": null
+  }
+ },
+ "9fcb929d640d2fe06b2551cef4194d69": {
+  "agent": "product",
+  "message": "User request: \"ok, under 2000 then\"\n\nProducts:\n1. boAt BassHeads 900 On-Ear Wired Headphones with Mic (White) | ₹849 | 4.2★ | boAt\n2. boAt BassHeads 122 Wired Earphones with Heavy Bass, Integrat | ₹39",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 673,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
   }
  },
  "a033e1d64d6c842806b7d73418858272": {
@@ -1402,6 +1952,22 @@
    "subcategory": "headphones",
    "suggestion": null,
    "type": null
+  }
+ },
+ "a6a09a0d06a00970ba3f44ef18a9eba0": {
+  "agent": "product",
+  "message": "User request: \"instant one, 3 litre\"\n\nProducts:\n1. V-Guard Zio Instant Water Geyser | 3 Litre | 3000 W Heating  | ₹2699 | 4.2★ | V-Guard\n2. Bajaj Splendora 3 Litre 3KW IWH Instant Water Heater (Geyser",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 479,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4
+   ]
   }
  },
  "a761758ae17e25dc9a1ef4e3b91985a7": {
@@ -1592,6 +2158,25 @@
    ]
   }
  },
+ "bb3118b5dc84f4db43dadf729f59c347": {
+  "agent": "product",
+  "message": "User request: \"1.5 litre\"\n\nProducts:\n1. AGARO Royal Double Layered Kettle, 1.5 Litres, Double Layere | ₹1260 | 4.3★ | AGARO\n2. INALSA Electric Kettle 1.5 Litre with Stainless Steel Body - | ₹699 | 4.1",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 567,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ]
+  }
+ },
  "bb92fdca5175fbebb21721197e562917": {
   "agent": "product",
   "message": "User request: \"power bank\"\n\nProducts:\n1. MI Power Bank 3i 20000mAh Lithium Polymer 18W Fast Power Del | ₹2049 | 4.3★ | MI\n2. MI 10000mAh 3i Lithium Polymer Power Bank Dual Input(Micro-U | ₹1149 | 4.3★",
@@ -1650,6 +2235,44 @@
    "min_rating": null,
    "not_carried": null,
    "subcategory": "room heater",
+   "suggestion": null,
+   "type": null
+  }
+ },
+ "c15c65b962a83630714767990ded7658": {
+  "agent": "product",
+  "message": "Previous: {\"category\": \"Home & Kitchen\", \"subcategory\": \"vacuum cleaner\"} | Message: something cheaper, under 3000",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1290,
+  "value": {
+   "brand": null,
+   "category": null,
+   "keywords": [],
+   "max_price": 3000,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "vacuum cleaner",
+   "suggestion": null,
+   "type": null
+  }
+ },
+ "c8c7bc4373bdeee5ae37d09e7b3744b4": {
+  "agent": "product",
+  "message": "Previous: {} | Message: boat headphones under 500",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1303,
+  "value": {
+   "brand": "boat",
+   "category": "Electronics",
+   "keywords": [],
+   "max_price": 500,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "headphones",
    "suggestion": null,
    "type": null
   }
@@ -1750,6 +2373,28 @@
    "type": null
   }
  },
+ "ce542a7116b85ceea194532ce7b130fd": {
+  "agent": "product",
+  "message": "Previous: {\"category\": \"Computers & Accessories\", \"subcategory\": \"cable\", \"keywords\": [\"type c\"]} | Message: braided ones",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1289,
+  "value": {
+   "brand": null,
+   "category": null,
+   "keywords": [
+    "type c",
+    "braided"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "cable",
+   "suggestion": null,
+   "type": null
+  }
+ },
  "cec62b8d194f72c6b29faa74f56de380": {
   "agent": "product",
   "message": "Previous: {} | Message: 128gb pen drive",
@@ -1834,6 +2479,25 @@
    "type": null
   }
  },
+ "d63d135b87772e696f9137832712d249": {
+  "agent": "product",
+  "message": "Previous: {\"category\": \"Home & Kitchen\", \"subcategory\": \"mixer grinder\"} | Message: only Bajaj",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1290,
+  "value": {
+   "brand": "Bajaj",
+   "category": "Home & Kitchen",
+   "keywords": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "mixer grinder",
+   "suggestion": null,
+   "type": null
+  }
+ },
  "d9778c4e8e9d74583f203c1bdf547420": {
   "agent": "product",
   "message": "Previous: {} | Message: iphone 15",
@@ -1877,7 +2541,7 @@
   "message": "User request: \"wireless mouse\"\n\nProducts:\n1. Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Na | ₹1295 | 4.6★ | Logitech\n2. Logitech Pebble M350 Wireless Mouse with Bluetooth or USB -  | ₹1",
   "model": "openai/gpt-oss-20b",
   "node": "rank_products",
-  "total_tokens": 655,
+  "total_tokens": 654,
   "value": {
    "exact": [],
    "same_kind": [
@@ -1912,6 +2576,29 @@
     8,
     9,
     10
+   ]
+  }
+ },
+ "dd53efb7ca927d08865b764511fec389": {
+  "agent": "product",
+  "message": "User request: \"braided ones\"\n\nProducts:\n1. oraimo 65W Type C to C Fast Charging Cable USB C to USB C Ca | ₹349 | 4.5★ | oraimo\n2. Belkin Apple Certified Lightning To Type C Cable, Tough Unbr | ₹1599 |",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 650,
+  "value": {
+   "exact": [
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "same_kind": [
+    5,
+    6,
+    7,
+    8,
+    9
    ]
   }
  },
@@ -2032,6 +2719,28 @@
     3,
     4
    ]
+  }
+ },
+ "e2679b82009deff87979fb7f763cd6fb": {
+  "agent": "product",
+  "message": "Previous: {\"category\": \"Home & Kitchen\", \"subcategory\": \"water heater\"} | Message: instant one, 3 litre",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1290,
+  "value": {
+   "brand": null,
+   "category": null,
+   "keywords": [
+    "instant",
+    "3 litre"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "water heater",
+   "suggestion": null,
+   "type": null
   }
  },
  "e4e52d20ec94003be719f972bbc5b303": {
@@ -2159,6 +2868,25 @@
    "min_rating": null,
    "not_carried": null,
    "subcategory": "ceiling fan",
+   "suggestion": null,
+   "type": null
+  }
+ },
+ "ebdf52ebcf706471329282ffb0576afb": {
+  "agent": "product",
+  "message": "Previous: {\"category\": \"Electronics\", \"subcategory\": \"headphones\"} | Message: under 1000",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1278,
+  "value": {
+   "brand": null,
+   "category": "Electronics",
+   "keywords": [],
+   "max_price": 1000,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "headphones",
    "suggestion": null,
    "type": null
   }

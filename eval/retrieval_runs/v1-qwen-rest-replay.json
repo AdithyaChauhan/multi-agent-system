@@ -1,0 +1,576 @@
+{
+ "label": "v1-qwen-rest-replay",
+ "model": "qwen/qwen3.8-27b",
+ "mode": "replay",
+ "database": "multi_agent_baseline",
+ "cassette": "eval\\cassettes\\retrieval_qwen-qwen3-8-27b.json",
+ "started": "2026-11-18T12:16:29+00:00",
+ "queries": [
+  {
+   "id": "q075",
+   "query": "accha wala bluetooth speaker",
+   "history": [],
+   "tags": [
+    "hinglish",
+    "attribute"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": null,
+    "subcategory": null,
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "What are you looking for? Here's what we carry:\n\n• Electronics (463 products) — tv, headphones, smartwatch\n• Home & Kitchen (440 products) — room heater, water heater, mixer grinder\n• Computers & Accessories (402 products) — cable, mouse, adapter\n• Office Products (38 products) — stationery, art sup",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.03
+  },
+  {
+   "id": "q076",
+   "query": "bose speakers",
+   "history": [],
+   "tags": [
+    "brand_missing"
+   ],
+   "shown": [
+    "B07B88KQZ8",
+    "B07NC12T2R",
+    "B08SMJT55F",
+    "B07W6VWZ8C",
+    "B07W7Z6DVL"
+   ],
+   "shown_names": [
+    "JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL Signature Sound, Vib",
+    "boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playback, IPX5 and Integr",
+    "boAt Stone 250 Portable Wireless Speaker with 5W RMS Immersive Audio, RGB LEDs, ",
+    "Infinity (JBL Fuze Pint, Wireless Ultra Portable Mini Speaker with Mic, Deep Bas",
+    "Infinity (JBL Fuze 100, Wireless Portable Bluetooth Speaker with Mic, Deep Bass,"
+   ],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "speakers",
+    "type": null,
+    "brand": "Bose",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [
+    "brand"
+   ],
+   "reply": "We don't carry Bose speakers, so here are the closest options from other brands:\n\n1. **JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL Signature Sound, Vibrant Color Options with IPX7 Waterproof & AUX (Blue)** — JBL\n   ₹1,999 · 4.3/5\n\n2. **boAt Stone 650 10W Bluetooth Speaker with Upto 7",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.06
+  },
+  {
+   "id": "q077",
+   "query": "apple airpods",
+   "history": [],
+   "tags": [
+    "brand_missing"
+   ],
+   "shown": [
+    "B079S811J3",
+    "B01F25X6RQ",
+    "B01F262EUU",
+    "B078W65FJ7",
+    "B07QZ3CZ48"
+   ],
+   "shown_names": [
+    "Redgear Cosmo 7,1 Usb Gaming Wired Over Ear Headphones With Mic With Virtual Sur",
+    "Samsung Ehs64 Ehs64Avfwecinu Hands-Free Wired In Ear Earphones With Mic With Rem",
+    "Samsung Original EHS64 Wired in Ear Earphones with Mic, Black",
+    "boAt BassHeads 900 On-Ear Wired Headphones with Mic (White)",
+    "boAt BassHeads 122 Wired Earphones with Heavy Bass, Integrated Controls and Mic "
+   ],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "headphones",
+    "type": null,
+    "brand": "Apple",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": [
+     "AirPods"
+    ]
+   },
+   "relaxed": [
+    "brand",
+    "keywords"
+   ],
+   "reply": "We don't carry Apple headphones, so here are the closest options from other brands:\n\n1. **Redgear Cosmo 7,1 Usb Gaming Wired Over Ear Headphones With Mic With Virtual Surround Sound,50Mm Driver, Rgb Leds & Remote Control(Black)** — Redgear\n   ₹1,990 · 4.3/5\n\n2. **Samsung Ehs64 Ehs64Avfwecinu Hands-F",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.05
+  },
+  {
+   "id": "q078",
+   "query": "dyson vacuum cleaner",
+   "history": [],
+   "tags": [
+    "brand_missing"
+   ],
+   "shown": [
+    "B072J83V9W",
+    "B0B19VJXQZ",
+    "B00JBNZPFM",
+    "B072NCN9M4",
+    "B07H3N8RJH"
+   ],
+   "shown_names": [
+    "Philips PowerPro FC9352/01 Compact Bagless Vacuum Cleaner (Blue)",
+    "ECOVACS DEEBOT N8 2-in-1 Robotic Vacuum Cleaner, 2022 New Launch, Most Powerful ",
+    "Karcher WD3 EU Wet and Dry Vacuum Cleaner, 1000 Watts Powerful Suction, 17 L Cap",
+    "AMERICAN MICRONIC- Imported Wet & Dry Vacuum Cleaner, 21 Litre Stainless Steel w",
+    "AmazonBasics Cylinder Bagless Vacuum Cleaner with Power Suction, Low Sound, High"
+   ],
+   "preferences": {
+    "category": "Home & Kitchen",
+    "subcategory": "vacuum cleaner",
+    "type": null,
+    "brand": "Dyson",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [
+    "brand"
+   ],
+   "reply": "We don't carry Dyson vacuum cleaner, so here are the closest options from other brands:\n\n1. **Philips PowerPro FC9352/01 Compact Bagless Vacuum Cleaner (Blue)** — Philips\n   ₹8,999 · 4.4/5\n\n2. **ECOVACS DEEBOT N8 2-in-1 Robotic Vacuum Cleaner, 2022 New Launch, Most Powerful Suction, Covers 2000+ Sq.",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.03
+  },
+  {
+   "id": "q079",
+   "query": "garmin smartwatch",
+   "history": [],
+   "tags": [
+    "brand_missing"
+   ],
+   "shown": [
+    "B0BNXFDTZ2",
+    "B0BP18W8TM",
+    "B0B3RRWSF6",
+    "B0B3RS9DNF",
+    "B0B3RSDSZ3"
+   ],
+   "shown_names": [
+    "Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Sports Mode, 8 UI Inter",
+    "Fire-Boltt Gladiator 1.96\" Biggest Display Smart Watch with Bluetooth Calling, V",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24"
+   ],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "smartwatch",
+    "type": null,
+    "brand": "Garmin",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [
+    "brand"
+   ],
+   "reply": "We don't carry Garmin smartwatch, so here are the closest options from other brands:\n\n1. **Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Sports Mode, 8 UI Interactions, Built in Speaker & Mic, 7 Days Battery & Fire-Boltt Health Suite** — Fire-Boltt\n   ₹2,999 · 4.4/5\n\n2. **Fire-Boltt Gladi",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.03
+  },
+  {
+   "id": "q080",
+   "query": "breville electric kettle",
+   "history": [],
+   "tags": [
+    "brand_missing"
+   ],
+   "shown": [
+    "B083GKDRKR",
+    "B00TI8E7BI",
+    "B09VGS66FV",
+    "B0B3TBY2YX",
+    "B078V8R9BS"
+   ],
+   "shown_names": [
+    "Havells Aqua Plus 1.2 litre Double Wall Kettle / 304 Stainless Steel Inner Body ",
+    "Philips HD9306/06 1.5-Litre Electric Kettle (Multicolor)",
+    "Tesora - Inspired by you Large Premium Electric Kettle 1.8L, Stainless Steel Inn",
+    "AGARO Royal Double Layered Kettle, 1.5 Litres, Double Layered Cool Touch , Dry B",
+    "Butterfly EKN 1.5-Litre Electric Kettle (Silver with Black)"
+   ],
+   "preferences": {
+    "category": "Home & Kitchen",
+    "subcategory": "electric kettle",
+    "type": null,
+    "brand": "Breville",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [
+    "brand"
+   ],
+   "reply": "We don't carry Breville electric kettle, so here are the closest options from other brands:\n\n1. **Havells Aqua Plus 1.2 litre Double Wall Kettle / 304 Stainless Steel Inner Body / Cool touch outer body / Wider mouth/ 2 Year warranty (Black, 1500 Watt)** — Havells\n   ₹1,625 · 4.5/5\n\n2. **Philips HD93",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.03
+  },
+  {
+   "id": "q081",
+   "query": "iphone 15",
+   "history": [],
+   "tags": [
+    "out_of_scope"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": null,
+    "subcategory": null,
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "Sorry, we don't carry iphone 15. Would you like to see our phone case range instead?",
+   "score": {
+    "kind": "none",
+    "correct_refusal": true,
+    "shown": 0
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.0
+  },
+  {
+   "id": "q082",
+   "query": "gaming laptop",
+   "history": [],
+   "tags": [
+    "out_of_scope"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": null,
+    "subcategory": null,
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "Sorry, we don't carry laptops. Would you like to see our laptop bag range instead?",
+   "score": {
+    "kind": "none",
+    "correct_refusal": true,
+    "shown": 0
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.01
+  },
+  {
+   "id": "q083",
+   "query": "samsung galaxy tablet",
+   "history": [],
+   "tags": [
+    "out_of_scope"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": null,
+    "subcategory": null,
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "Sorry, we don't carry tablets. Here's what we do carry:\n\n• Electronics (463 products) — tv, headphones, smartwatch\n• Home & Kitchen (440 products) — room heater, water heater, mixer grinder\n• Computers & Accessories (402 products) — cable, mouse, adapter\n• Office Products (38 products) — stationery,",
+   "score": {
+    "kind": "none",
+    "correct_refusal": true,
+    "shown": 0
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.0
+  },
+  {
+   "id": "q084",
+   "query": "washing machine",
+   "history": [],
+   "tags": [
+    "out_of_scope"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": null,
+    "subcategory": null,
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": [
+     "washing machine"
+    ]
+   },
+   "relaxed": [],
+   "reply": "I couldn't find any washing machine matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "none",
+    "correct_refusal": true,
+    "shown": 0
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.03
+  },
+  {
+   "id": "q085",
+   "query": "running shoes",
+   "history": [],
+   "tags": [
+    "out_of_scope"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": null,
+    "subcategory": null,
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "What are you looking for? Here's what we carry:\n\n• Electronics (463 products) — tv, headphones, smartwatch\n• Home & Kitchen (440 products) — room heater, water heater, mixer grinder\n• Computers & Accessories (402 products) — cable, mouse, adapter\n• Office Products (38 products) — stationery, art sup",
+   "score": {
+    "kind": "none",
+    "correct_refusal": false,
+    "shown": 0
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.01
+  },
+  {
+   "id": "q086",
+   "query": "what about Logitech",
+   "history": [
+    "wireless mouse under 1000"
+   ],
+   "tags": [
+    "followup",
+    "brand"
+   ],
+   "shown": [
+    "B01MQ2A86A",
+    "B07X2L5Z8C",
+    "B004IO5BMQ",
+    "B0148NPH9I",
+    "B00MUTWLW4"
+   ],
+   "shown_names": [
+    "Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Nano Receiver, 1000 DP",
+    "Logitech Pebble M350 Wireless Mouse with Bluetooth or USB - Silent, Slim Compute",
+    "Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, 12 Month Life Battery, ",
+    "Logitech K380 Wireless Multi-Device Keyboard for Windows, Apple iOS, Apple TV An",
+    "Logitech K480 Wireless Multi-Device Keyboard for Windows, macOS, iPadOS, Android"
+   ],
+   "preferences": {
+    "category": null,
+    "subcategory": null,
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": [
+     "wireless"
+    ]
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Nano Receiver, 1000 DPI Optical Tracking, 3 Buttons, 24 Month Life Battery, PC/Mac/Laptop - Black** — Logitech\n   ₹1,295 · 4.6/5\n\n2. **Logitech Pebble M350 Wireless Mouse with Bluetooth or USB - ",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 0.333,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.03
+  },
+  {
+   "id": "q087",
+   "query": "Samsung",
+   "history": [
+    "show me some TVs"
+   ],
+   "tags": [
+    "followup",
+    "brand"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": null,
+    "subcategory": null,
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "What are you looking for? Here's what we carry:\n\n• Electronics (463 products) — tv, headphones, smartwatch\n• Home & Kitchen (440 products) — room heater, water heater, mixer grinder\n• Computers & Accessories (402 products) — cable, mouse, adapter\n• Office Products (38 products) — stationery, art sup",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.01
+  }
+ ],
+ "finished": "2026-11-18T12:16:29+00:00",
+ "summary": {
+  "queries": 13,
+  "scored": 13,
+  "errors": 0,
+  "recall@5": 0.625,
+  "precision@3": 0.625,
+  "mrr": 0.542,
+  "empty_rate": 0.25,
+  "correct_refusal_rate": 0.8,
+  "llm_calls_per_query": 0.0,
+  "tokens_per_query": 0.0,
+  "p50_seconds": 0.03,
+  "p95_seconds": 0.06
+ },
+ "by_tag": {
+  "attribute": {
+   "scored": 1,
+   "recall@5": 0.0,
+   "precision@3": 0.0,
+   "mrr": 0.0,
+   "empty_rate": 1.0
+  },
+  "brand": {
+   "scored": 2,
+   "recall@5": 0.5,
+   "precision@3": 0.5,
+   "mrr": 0.167,
+   "empty_rate": 0.5
+  },
+  "brand_missing": {
+   "scored": 5,
+   "recall@5": 0.8,
+   "precision@3": 0.8,
+   "mrr": 0.8,
+   "empty_rate": 0.0
+  },
+  "followup": {
+   "scored": 2,
+   "recall@5": 0.5,
+   "precision@3": 0.5,
+   "mrr": 0.167,
+   "empty_rate": 0.5
+  },
+  "hinglish": {
+   "scored": 1,
+   "recall@5": 0.0,
+   "precision@3": 0.0,
+   "mrr": 0.0,
+   "empty_rate": 1.0
+  },
+  "out_of_scope": {
+   "scored": 5,
+   "correct_refusal_rate": 0.8
+  }
+ }
+}

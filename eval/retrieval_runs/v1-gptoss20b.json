@@ -2410,36 +2410,669 @@
    "llm_calls": 2,
    "tokens": 1927,
    "seconds": 1.35
+  },
+  {
+   "id": "q088",
+   "query": "under 1000",
+   "history": [
+    "headphones"
+   ],
+   "tags": [
+    "followup",
+    "price"
+   ],
+   "shown": [
+    "B01F262EUU",
+    "B078W65FJ7",
+    "B0B5GJRTHB",
+    "B01DEWVZ2C",
+    "B01DF26V7A"
+   ],
+   "shown_names": [
+    "Samsung Original EHS64 Wired in Ear Earphones with Mic, Black",
+    "boAt BassHeads 900 On-Ear Wired Headphones with Mic (White)",
+    "Wecool Moonwalk M1 ENC True Wireless in Ear Earbuds with Mic, Titanium Drivers f",
+    "JBL C100SI Wired In Ear Headphones with Mic, JBL Pure Bass Sound, One Button Mul",
+    "JBL C100SI Wired In Ear Headphones with Mic, JBL Pure Bass Sound, One Button Mul"
+   ],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "headphones",
+    "type": null,
+    "brand": null,
+    "max_price": 1000,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Samsung Original EHS64 Wired in Ear Earphones with Mic, Black** — Samsung\n   ₹949 · 4.2/5\n\n2. **boAt BassHeads 900 On-Ear Wired Headphones with Mic (White)** — boAt\n   ₹849 · 4.2/5\n\n3. **Wecool Moonwalk M1 ENC",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 0.5,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 4,
+   "tokens": 3866,
+   "seconds": 1.21
+  },
+  {
+   "id": "q089",
+   "query": "only Bajaj",
+   "history": [
+    "mixer grinder"
+   ],
+   "tags": [
+    "followup",
+    "brand"
+   ],
+   "shown": [
+    "B00HVXS7WC",
+    "B08G8H8DPL",
+    "B09MFR93KS"
+   ],
+   "shown_names": [
+    "Bajaj Rex 500W Mixer Grinder with Nutri-Pro Feature, 3 Jars, White",
+    "Bajaj Rex 750W Mixer Grinder with Nutri Pro Feature, 4 Jars, White",
+    "Bajaj Rex DLX 750 W 4 Jars Mixer Grinder, White and Blue"
+   ],
+   "preferences": {
+    "category": "Home & Kitchen",
+    "subcategory": "mixer grinder",
+    "type": null,
+    "brand": "Bajaj",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Bajaj Rex 500W Mixer Grinder with Nutri-Pro Feature, 3 Jars, White** — Bajaj\n   ₹1,999 · 4.2/5\n\n2. **Bajaj Rex 750W Mixer Grinder with Nutri Pro Feature, 4 Jars, White** — Bajaj\n   ₹3,249 · 4.0/5\n\n3. **Bajaj Rex DLX 750 W 4 Jars Mixer Grinder, White and",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 3
+   },
+   "llm_calls": 4,
+   "tokens": 3674,
+   "seconds": 0.97
+  },
+  {
+   "id": "q090",
+   "query": "an oil filled one",
+   "history": [
+    "room heater"
+   ],
+   "tags": [
+    "followup",
+    "attribute"
+   ],
+   "shown": [
+    "B09M3F4HGB",
+    "B01N1XVVLC",
+    "B01M5F614J",
+    "B08QHLXWV3"
+   ],
+   "shown_names": [
+    "Borosil Volcano 13 Fin Oil Filled Radiator Room Heater, 2900 W, Black",
+    "Bajaj OFR Room Heater, 13 Fin 2900 Watts Oil Filled Room Heater with 400W PTC Ce",
+    "Morphy Richards OFR Room Heater, 09 Fin 2000 Watts Oil Filled Room Heater , ISI ",
+    "Kenstar 2400 Watts 9 Fins Oil Filled Radiator with PTC Fan Heater (BLACK GOLD)"
+   ],
+   "preferences": {
+    "category": "Home & Kitchen",
+    "subcategory": "room heater",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": [
+     "oil filled"
+    ]
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Borosil Volcano 13 Fin Oil Filled Radiator Room Heater, 2900 W, Black** — Borosil\n   ₹9,495 · 4.2/5\n\n2. **Bajaj OFR Room Heater, 13 Fin 2900 Watts Oil Filled Room Heater with 400W PTC Ceramic Fan Heater, ISI Approved (Majesty 13F Plus Black)** — Bajaj\n ",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 4
+   },
+   "llm_calls": 4,
+   "tokens": 3687,
+   "seconds": 0.81
+  },
+  {
+   "id": "q091",
+   "query": "with calling",
+   "history": [
+    "smartwatch"
+   ],
+   "tags": [
+    "followup",
+    "attribute"
+   ],
+   "shown": [
+    "B0BNXFDTZ2",
+    "B0BP18W8TM",
+    "B0B3RRWSF6",
+    "B0B3RS9DNF",
+    "B0B3RSDSZ3"
+   ],
+   "shown_names": [
+    "Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Sports Mode, 8 UI Inter",
+    "Fire-Boltt Gladiator 1.96\" Biggest Display Smart Watch with Bluetooth Calling, V",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24"
+   ],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "smartwatch",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": [
+     "calling"
+    ]
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Sports Mode, 8 UI Interactions, Built in Speaker & Mic, 7 Days Battery & Fire-Boltt Health Suite** — Fire-Boltt\n   ₹2,999 · 4.4/5\n\n2. **Fire-Boltt Gladiator 1.96\" Biggest Display Smart Watch with ",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 4,
+   "tokens": 3904,
+   "seconds": 1.39
+  },
+  {
+   "id": "q092",
+   "query": "make it 43 inch",
+   "history": [
+    "32 inch tv"
+   ],
+   "tags": [
+    "followup",
+    "attribute"
+   ],
+   "shown": [
+    "B092BJMT8Q",
+    "B09JPC82QC",
+    "B09MJ77786",
+    "B0B15CPR37",
+    "B0B1YY6JJL"
+   ],
+   "shown_names": [
+    "Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart LED TV UA43AUE60AKLX",
+    "Mi 108 cm (43 inches) Full HD Android LED TV 4C | L43M6-INC (Black)",
+    "MI 108 cm (43 inches) 5X Series 4K Ultra HD LED Smart Android TV L43M6-ES (Grey)",
+    "Samsung 108 cm (43 inches) Crystal 4K Neo Series Ultra HD Smart LED TV UA43AUE65",
+    "Acer 109 cm (43 inches) I Series 4K Ultra HD Android Smart LED TV AR43AR2851UDFL"
+   ],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "tv",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": [
+     "43 inch"
+    ]
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart LED TV UA43AUE60AKLXL (Black)** — Samsung\n   ₹30,990 · 4.3/5\n\n2. **Mi 108 cm (43 inches) Full HD Android LED TV 4C | L43M6-INC (Black)** — Mi\n   ₹19,",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 4,
+   "tokens": 3892,
+   "seconds": 0.79
+  },
+  {
+   "id": "q093",
+   "query": "under 2000",
+   "history": [
+    "bluetooth speaker"
+   ],
+   "tags": [
+    "followup",
+    "price"
+   ],
+   "shown": [
+    "B07B88KQZ8",
+    "B07NC12T2R",
+    "B08SMJT55F",
+    "B07W7Z6DVL",
+    "B0B12K5BPM"
+   ],
+   "shown_names": [
+    "JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL Signature Sound, Vib",
+    "boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playback, IPX5 and Integr",
+    "boAt Stone 250 Portable Wireless Speaker with 5W RMS Immersive Audio, RGB LEDs, ",
+    "Infinity (JBL Fuze 100, Wireless Portable Bluetooth Speaker with Mic, Deep Bass,",
+    "ZEBRONICS Zeb-Astra 20 Wireless BT v5.0 Portable Speaker with 10W RMS Output, TW"
+   ],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "speakers",
+    "type": "bluetooth speaker",
+    "brand": null,
+    "max_price": 2000,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL Signature Sound, Vibrant Color Options with IPX7 Waterproof & AUX (Blue)** — JBL\n   ₹1,999 · 4.3/5\n\n2. **boAt Stone 650 10W Bluetooth Speaker with Up",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 4,
+   "tokens": 3734,
+   "seconds": 1.16
+  },
+  {
+   "id": "q094",
+   "query": "1.5 litre",
+   "history": [
+    "electric kettle"
+   ],
+   "tags": [
+    "followup",
+    "attribute"
+   ],
+   "shown": [
+    "B0B3TBY2YX",
+    "B07QDSN9V6",
+    "B08C7TYHPB",
+    "B07T4D9FNY",
+    "B07VNFP3C2"
+   ],
+   "shown_names": [
+    "AGARO Royal Double Layered Kettle, 1.5 Litres, Double Layered Cool Touch , Dry B",
+    "INALSA Electric Kettle 1.5 Litre with Stainless Steel Body - Absa|Auto Shut Off ",
+    "iBELL Castor CTEK15L Premium 1.5 Litre Stainless Steel Electric Kettle,1500W Aut",
+    "iBELL SEK15L Premium 1.5 Litre Stainless Steel Electric Kettle,1500W Auto Cut-Of",
+    "Prestige 1.5 Litre Kettle 1500-watts, Red"
+   ],
+   "preferences": {
+    "category": "Home & Kitchen",
+    "subcategory": "electric kettle",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": [
+     "1.5 litre"
+    ]
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **AGARO Royal Double Layered Kettle, 1.5 Litres, Double Layered Cool Touch , Dry Boiling Protection, Black** — AGARO\n   ₹1,260 · 4.3/5\n\n2. **INALSA Electric Kettle 1.5 Litre with Stainless Steel Body - Absa|Auto",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 4,
+   "tokens": 3772,
+   "seconds": 1.17
+  },
+  {
+   "id": "q095",
+   "query": "and a keyboard",
+   "history": [
+    "wireless mouse"
+   ],
+   "tags": [
+    "followup"
+   ],
+   "shown": [
+    "B0148NPH9I",
+    "B09BVCVTBC",
+    "B00MUTWLW4",
+    "B00ZYLMQH0",
+    "B01N4EV2TL"
+   ],
+   "shown_names": [
+    "Logitech K380 Wireless Multi-Device Keyboard for Windows, Apple iOS, Apple TV An",
+    "Redragon K617 Fizz 60% Wired RGB Gaming Keyboard, 61 Keys Compact Mechanical Key",
+    "Logitech K480 Wireless Multi-Device Keyboard for Windows, macOS, iPadOS, Android",
+    "Dell KB216 Wired Multimedia USB Keyboard with Super Quite Plunger Keys with Spil",
+    "Logitech MK240 Nano Wireless USB Keyboard and Mouse Set, 12 Function Keys 2.4GHz"
+   ],
+   "preferences": {
+    "category": "Computers & Accessories",
+    "subcategory": "keyboard",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Logitech K380 Wireless Multi-Device Keyboard for Windows, Apple iOS, Apple TV Android or Chrome, Bluetooth, Compact Space-Saving Design, PC/Mac/Laptop/Smartphone/Tablet (Dark Grey)** — Logitech\n   ₹2,640 · 4.5",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 4,
+   "tokens": 3860,
+   "seconds": 1.07
+  },
+  {
+   "id": "q096",
+   "query": "ok, under 2000 then",
+   "history": [
+    "boat headphones under 500"
+   ],
+   "tags": [
+    "followup",
+    "price",
+    "brand"
+   ],
+   "shown": [
+    "B01FSYQ2A4",
+    "B07PR1CL3S",
+    "B078W65FJ7",
+    "B07QZ3CZ48",
+    "B08MTLLSL8"
+   ],
+   "shown_names": [
+    "boAt Rockerz 400 Bluetooth On Ear Headphones With Mic With Upto 8 Hours Playback",
+    "boAt Rockerz 450 Bluetooth On Ear Headphones with Mic, Upto 15 Hours Playback, 4",
+    "boAt BassHeads 900 On-Ear Wired Headphones with Mic (White)",
+    "boAt BassHeads 122 Wired Earphones with Heavy Bass, Integrated Controls and Mic ",
+    "boAt Bassheads 102 Wired in Ear Earphones with Mic (Mint Green)"
+   ],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "headphones",
+    "type": null,
+    "brand": "boat",
+    "max_price": 2000,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **boAt Rockerz 400 Bluetooth On Ear Headphones With Mic With Upto 8 Hours Playback & Soft Padded Ear Cushions(Grey/Green)** — boAt\n   ₹1,399 · 4.1/5\n\n2. **boAt Rockerz 450 Bluetooth On Ear Headphones with Mic, Upto 15 Hours Playback, 40MM Drivers, Padded ",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 0.333,
+    "precision3": 0.333,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 4,
+   "tokens": 3814,
+   "seconds": 1.02
+  },
+  {
+   "id": "q097",
+   "query": "instant one, 3 litre",
+   "history": [
+    "geyser"
+   ],
+   "tags": [
+    "followup",
+    "attribute"
+   ],
+   "shown": [
+    "B0B9RN5X8B",
+    "B097R2V1W8",
+    "B09DL9978Y",
+    "B07WKB69RS"
+   ],
+   "shown_names": [
+    "V-Guard Zio Instant Water Geyser | 3 Litre | 3000 W Heating | White-Blue | | 2 Y",
+    "Bajaj Splendora 3 Litre 3KW IWH Instant Water Heater (Geyser), White",
+    "Hindware Atlantic Compacto 3 Litre Instant water heater with Stainless Steel Tan",
+    "Lifelong LLWH106 Flash 3 Litres Instant Water Heater for Home Use, 8 Bar Pressur"
+   ],
+   "preferences": {
+    "category": "Home & Kitchen",
+    "subcategory": "water heater",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": [
+     "instant",
+     "3 litre"
+    ]
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **V-Guard Zio Instant Water Geyser | 3 Litre | 3000 W Heating | White-Blue | | 2 Year Warranty** — V-Guard\n   ₹2,699 · 4.2/5\n\n2. **Bajaj Splendora 3 Litre 3KW IWH Instant Water Heater (Geyser), White** — Bajaj\n ",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 0.667,
+    "empty": false,
+    "shown": 4
+   },
+   "llm_calls": 4,
+   "tokens": 3705,
+   "seconds": 1.2
+  },
+  {
+   "id": "q098",
+   "query": "128 gb",
+   "history": [
+    "pen drive"
+   ],
+   "tags": [
+    "followup",
+    "attribute"
+   ],
+   "shown": [
+    "B07JJFSG2B",
+    "B084PJSSQ1"
+   ],
+   "shown_names": [
+    "SanDisk Ultra 128 GB USB 3.0 Pen Drive (Black)",
+    "SanDisk Ultra Dual Drive Luxe USB Type C Flash Drive (Silver, 128 GB, 5Y - SDDDC"
+   ],
+   "preferences": {
+    "category": "Computers & Accessories",
+    "subcategory": "pen drive",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": [
+     "128 gb"
+    ]
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **SanDisk Ultra 128 GB USB 3.0 Pen Drive (Black)** — SanDisk\n   ₹889 · 4.3/5\n\n2. **SanDisk Ultra Dual Drive Luxe USB Type C Flash Drive (Silver, 128 GB, 5Y - SDDDC4-128G-I35)** — SanDisk\n   ₹1,299 · 4.3/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 2
+   },
+   "llm_calls": 4,
+   "tokens": 3656,
+   "seconds": 1.16
+  },
+  {
+   "id": "q099",
+   "query": "braided ones",
+   "history": [
+    "type c cable"
+   ],
+   "tags": [
+    "followup",
+    "attribute"
+   ],
+   "shown": [
+    "B07PFJ5VQD",
+    "B081FG1QYX",
+    "B081FJWN52",
+    "B08CT62BM1",
+    "B08CTNJ985"
+   ],
+   "shown_names": [
+    "Agaro Blaze USBA to micro +Type C 2in1 Braided 1.2M Cable",
+    "Wayona Type C Cable Nylon Braided USB C QC 3.0 Fast Charging Short Power Bank Ca",
+    "Wayona Usb Type C To Usb Nylon Braided Quick Charger Fast Charging Short Cable F",
+    "Wayona USB Type C Fast Charging Cable Charger Cord 3A QC 3.0 Data Cable Compatib",
+    "Wayona USB Type C 65W Fast Charging 2M/6Ft Long Flash Charge Cable 3A QC 3.0 Dat"
+   ],
+   "preferences": {
+    "category": "Computers & Accessories",
+    "subcategory": "cable",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": [
+     "type c",
+     "braided"
+    ]
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Agaro Blaze USBA to micro +Type C 2in1 Braided 1.2M Cable** — Agaro\n   ₹159 · 4.3/5\n\n2. **Wayona Type C Cable Nylon Braided USB C QC 3.0 Fast Charging Short Power Bank Cable for Samsung Galaxy S10e/S10+/S10/S9/S9+/Note 9/S8/Note 8, LG G7 G5 G6, Moto G6 ",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 4,
+   "tokens": 3905,
+   "seconds": 1.07
+  },
+  {
+   "id": "q100",
+   "query": "something cheaper, under 3000",
+   "history": [
+    "vacuum cleaner"
+   ],
+   "tags": [
+    "followup",
+    "price"
+   ],
+   "shown": [
+    "B07SRM58TP",
+    "B00V9NHDI4",
+    "B09SZ5TWHW",
+    "B09XTQFFCG",
+    "B0B1MDZV9C"
+   ],
+   "shown_names": [
+    "AGARO Regal 800 Watts Handheld Vacuum Cleaner, Lightweight & Durable Body, Small",
+    "Eureka Forbes Trendy Zip 1000 Watts powerful suction vacuum cleaner with resuabl",
+    "Swiss Military VC03 Wireless Car Vacuum Cleaner | Wireless Vacuum Cleaner for Ho",
+    "FYA Handheld Vacuum Cleaner Cordless, Wireless Hand Vacuum&Air Blower 2-in-1, Mi",
+    "INALSA Upright Vacuum Cleaner, 2-in-1,Handheld & Stick for Home & Office Use,800"
+   ],
+   "preferences": {
+    "category": "Home & Kitchen",
+    "subcategory": "vacuum cleaner",
+    "type": null,
+    "brand": null,
+    "max_price": 3000,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **AGARO Regal 800 Watts Handheld Vacuum Cleaner, Lightweight & Durable Body, Small/Mini Size ( Black)** — AGARO\n   ₹1,665 · 4.0/5\n\n2. **Eureka Forbes Trendy Zip 1000 Watts powerful suction vacuum cleaner with resuable dust bag & 5 accessories,1 year warra",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 0.667,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 4,
+   "tokens": 3836,
+   "seconds": 1.07
   }
  ],
- "finished": "2026-11-18T11:42:28+00:00",
+ "finished": "2026-11-18T12:15:50+00:00",
  "summary": {
-  "queries": 55,
-  "scored": 55,
+  "queries": 68,
+  "scored": 68,
   "errors": 0,
-  "recall@5": 0.891,
-  "precision@3": 0.903,
-  "mrr": 0.873,
-  "empty_rate": 0.091,
+  "recall@5": 0.912,
+  "precision@3": 0.902,
+  "mrr": 0.88,
+  "empty_rate": 0.074,
   "correct_refusal_rate": null,
-  "llm_calls_per_query": 1.964,
-  "tokens_per_query": 1886.436,
+  "llm_calls_per_query": 2.353,
+  "tokens_per_query": 2250.868,
   "p50_seconds": 1.11,
-  "p95_seconds": 2.15
+  "p95_seconds": 1.77
  },
  "by_tag": {
   "attribute": {
-   "scored": 16,
-   "recall@5": 0.688,
-   "precision@3": 0.75,
-   "mrr": 0.656,
-   "empty_rate": 0.25
+   "scored": 23,
+   "recall@5": 0.783,
+   "precision@3": 0.812,
+   "mrr": 0.761,
+   "empty_rate": 0.174
   },
   "brand": {
-   "scored": 10,
+   "scored": 12,
    "recall@5": 1.0,
-   "precision@3": 1.0,
-   "mrr": 1.0,
+   "precision@3": 0.944,
+   "mrr": 0.944,
+   "empty_rate": 0.0
+  },
+  "followup": {
+   "scored": 13,
+   "recall@5": 1.0,
+   "precision@3": 0.897,
+   "mrr": 0.91,
    "empty_rate": 0.0
   },
   "plain": {
@@ -2450,12 +3083,11 @@
    "empty_rate": 0.0
   },
   "price": {
-   "scored": 10,
-   "recall@5": 0.8,
-   "precision@3": 0.8,
-   "mrr": 0.75,
-   "empty_rate": 0.2
+   "scored": 14,
+   "recall@5": 0.857,
+   "precision@3": 0.786,
+   "mrr": 0.738,
+   "empty_rate": 0.143
   }
- },
- "rescored": "2026-11-18T11:53:20+00:00"
+ }
 }

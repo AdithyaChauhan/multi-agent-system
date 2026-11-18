@@ -12,6 +12,14 @@ Newest first. `/handoff` adds an entry at the end of every session. Keep entries
 - **Commits:**
 -->
 
+## 2026-11-18 · Phase 0 · Baseline complete (100/100); phase closed
+- **Done:** ran q088–q100 on gpt-oss-20b using a second Groq key (`.env.eval`, git-ignored, never printed). Replaying all three parts matched exactly at 0 tokens. Phase 0 closed, except the label review.
+- **Measured:** recall@5 0.874, precision@3 0.870, MRR 0.837, empty rate 9.5%. Follow-ups 0.93, attribute 0.75, Hinglish 0.60, plain and typo 1.00.
+- **Decisions:** none.
+- **Open questions:** the user's label review.
+- **Next:** new chat, `/resume`, plan Phase 1 (the type list and attribute schemas need the user's review before extraction).
+- **Commits:** this handoff.
+
 ## 2026-11-18 · Phase 0 · 87/100 measured; re-planned around prompts and architecture
 - **Done:**
   - v1 baseline on 87 of 100 queries (gpt-oss-20b, then gpt-oss-120b, then qwen, each until its daily cap);
