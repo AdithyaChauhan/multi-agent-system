@@ -10,20 +10,38 @@ A production-style multi-agent customer service system built with **LangGraph**,
 POST /chat
     │
     ▼
-Router (LLM intent classifier)
-    ├── product_agent  ──► product_enrichment_subgraph
-    ├── order_agent    ──► shipment_tracking_subgraph
-    └── support_agent  ──► escalation_handler_subgraph
+Router — one structured LLM call: intent, order_id, support issue, risk
+    ├── safety risk ──► critical ticket for a human (any user)
+    ├── unclear     ──► the router's own short reply
+    ├── order/support while anonymous ──► sign-in prompt
+    ├── product_agent  extract filters (LLM) → search with one relaxation loop → rank (LLM) → reply
+    ├── order_agent    owner-only DB lookup + carrier API → templated status (no LLM)
+    └── support_agent  policy / ask which order / UI-confirmed cancel / ticket / drafted reply (LLM, low severity only)
 ```
+
+What the model decides and what the code decides:
+
+- **Model:** intent, which of the user's orders they mean, the support issue, whether there's a
+  safety or legal risk, the product filters (with the previous turn's filters as input), and which
+  search results actually match.
+- **Code (deterministic):** sign-in before orders/support; every order lookup is filtered by the
+  signed-in user; cancellation only after the user presses "Yes" in the UI (`POST /cancel-order`);
+  safety, legal and damaged/wrong/refund issues become tickets for a human, one open ticket per order.
+
+LLM calls per message: router only for orders, support, sign-in, clarify and safety; +1 for a
+low-severity support reply; product searches make 3 (router, filters, ranking).
+
+Prompts live in [`app/prompts/`](app/prompts/) (router, product extraction, product ranking,
+support resolution) and are read from disk. The file in git is the prompt that runs.
 
 | Layer | Technology |
 |---|---|
 | Backend | FastAPI + Uvicorn |
 | Agents | LangGraph (StateGraph) |
-| LLM | Groq (Qwen 3.8 27B) |
+| LLM | Groq `qwen/qwen3.8-27b` (one setting: `GROQ_MODEL` in `app/core/config.py`) |
 | Database | PostgreSQL (SQLAlchemy 2.0) |
 | Auth | Google OAuth 2.0 + JWT |
-| Observability | LangSmith (tracing + prompts + eval) |
+| Observability | LangSmith (tracing + eval) |
 | Monitoring | Grafana + Loki + Promtail |
 | CI/CD | GitHub Actions (6 stages) |
 
@@ -48,7 +66,9 @@ add that same callback URL in Google Cloud Console. The service health check is
 ### Prerequisites
 
 - Docker + Docker Compose
-- Groq API key
+- Groq API key. On Groq's free tier the app's model allows 200,000 tokens/day and 8,000 tokens/minute:
+  roughly 2 product searches a minute and ~70 a day across all users. Past that, Groq returns 429 and
+  chats fail until the quota refills. A paid Groq tier removes this ceiling.
 - LangSmith account (free tier at [smith.langchain.com](https://smith.langchain.com))
 - Google OAuth credentials (for the login UI)
 
@@ -95,7 +115,13 @@ docker exec -i multiagent-db psql -U postgres -d multi_agent_db \
   < backups/mobiles_dissolution_20260531.sql
 docker exec -i multiagent-db psql -U postgres -d multi_agent_db \
   < backups/remaining_category_cleanup_20260531.sql
+
+# Restart the app so it picks up the restored data
+docker compose restart app
 ```
+
+The app adds the `support_tickets` columns this backup predates on startup. You can also run
+`docker compose exec app alembic upgrade head`; `migrations/env.py` uses the container's `DATABASE_URL`.
 
 ### 4. Open the chat UI
 
@@ -133,7 +159,7 @@ docker compose build app && docker compose up -d --no-recreate db && docker comp
 
 ### Session management
 
-Pass `X-Session-ID` header to continue an existing session. The response always includes `X-Session-ID`. Sessions expire after `SESSION_EXPIRY_MINUTES` (default 60) of inactivity — a 410 response signals a new session is needed.
+Pass `X-Session-ID` header to continue an existing session. The response always includes `X-Session-ID`. Sessions expire after `SESSION_EXPIRY_MINUTES` (default 30) of inactivity — a 410 response signals a new session is needed.
 
 ```bash
 # First turn
@@ -154,10 +180,10 @@ curl -X POST http://localhost:8000/chat \
 
 ## LangSmith
 
-All traces, prompt versions, and evaluation results are visible in LangSmith.
+Traces and evaluation results are visible in LangSmith. Prompts are **not** loaded from the
+LangSmith hub any more: they live in `app/prompts/*.md` and git is their history.
 
 - **Project:** `multi-agent-ecommerce`
-- **Prompts in Hub:** `router-classification-prompt`, `support-classification-prompt`
 - **Evaluation dataset:** `multi-agent-ecommerce-eval`
 
 ### View traces
@@ -166,26 +192,35 @@ All traces, prompt versions, and evaluation results are visible in LangSmith.
 2. Open the **multi-agent-ecommerce** project
 3. Each chat request appears as a top-level run with nested node executions, LLM calls, and tool calls
 
-### Push updated prompts
-
-After editing `ROUTER_SYSTEM_PROMPT` in `app/agents/router.py`:
-
-```bash
-python3 push_router_prompt.py
-```
-
 ### Run evaluation
 
 ```bash
-# Against the LangSmith dataset (uses real LLM)
-source venv/bin/activate && python3 app/evaluation/run_eval.py
+# Router accuracy on the LangSmith dataset (calls the app's own router node)
+python app/evaluation/run_eval.py
 
-# CI fixture mode (no API calls)
+# CI fixture mode (stored responses, rule-based metrics, no API calls)
 python eval/run_deepeval.py
 
-# Live mode (calls the running app)
+# Live mode (calls the running app). The gpt-4o-mini GEval judge needs EVAL_OPENAI_API_KEY;
+# without it, live mode uses the rule-based metrics and says so.
 RUN_LIVE_EVAL=true python eval/run_deepeval.py
 ```
+
+### Behavioural baseline
+
+`eval/baseline_conversations.json` holds 51 multi-turn conversations (the eval dataset, the old
+regression suites and one case per bug fixed in the git history) with plain assertions.
+`eval/run_baseline.py` replays them through the real `/chat` endpoint and graph and records pass/fail,
+LLM calls, tokens and seconds per turn. It needs the `db` and `mock-carrier-api` containers and a
+restored database:
+
+```bash
+python eval/run_baseline.py --label after --runs 1                       # all conversations
+python eval/run_baseline.py --label check --only p01,s08 --model openai/gpt-oss-20b
+```
+
+It paces itself under Groq's tokens-per-minute limit; a full run of the current app uses about
+170K tokens, close to one model's daily free quota. Results land in `eval/baseline_runs/`.
 
 ---
 
@@ -242,9 +277,10 @@ Required GitHub Actions secrets: `LANGCHAIN_API_KEY`, `KUBECONFIG`, `APP_URL`.
 
 ```
 app/
-  agents/       router.py + product/order/support agents + subgraphs + state
+  agents/       router.py + product/order/support agents + state
   api/          Google OAuth (auth.py)
-  core/         config, logger, JWT utils, LangSmith prompt loader
+  core/         config (GROQ_MODEL), shared LLM client (llm.py), logger, JWT utils, prompt loader
+  prompts/      the four system prompts, read from disk
   db/           SQLAlchemy engine + seed scripts
   models/       ORM models (Product, Order, User, Session, Message, Review, Spec, SupportTicket)
   tools/        DB query functions used by agents
@@ -254,9 +290,11 @@ eval/
   dataset.json  12 test cases for CI evaluation
   config.yaml   Metric thresholds
   run_deepeval.py  DeepEval evaluation script
+  baseline_conversations.json + run_baseline.py  behavioural baseline (see above)
+  baseline_runs/   measured before/after results
 helm/           Kubernetes Helm charts
 monitoring/     Grafana + Loki + Promtail configuration
-tests/          pytest test suite (81% coverage)
+tests/          pytest test suite (90% coverage)
 backups/        DB backup snapshots + migration SQL files
 ```
 
@@ -270,9 +308,10 @@ See [.env.example](.env.example) for the full list. Key variables:
 |---|---|
 | `DATABASE_URL` | PostgreSQL connection string |
 | `GROQ_API_KEY` | Groq API key for the chatbot model |
+| `GROQ_MODEL` | Optional: Groq model ID (default `qwen/qwen3.8-27b`). `LLM_MODEL`/`MODEL_NAME` in old `.env` files are not read. |
 | `LANGCHAIN_API_KEY` | LangSmith API key |
 | `LANGCHAIN_PROJECT` | LangSmith project name (`multi-agent-ecommerce`) |
 | `GOOGLE_CLIENT_ID` | Google OAuth client ID |
 | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
 | `JWT_SECRET_KEY` | Secret for signing JWT tokens |
-| `SESSION_EXPIRY_MINUTES` | Session inactivity timeout (default: 60) |
+| `SESSION_EXPIRY_MINUTES` | Session inactivity timeout (default: 30) |
