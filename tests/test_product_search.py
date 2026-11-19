@@ -43,10 +43,12 @@ class TestSearchFilters:
 
 
 class TestFindProducts:
+    """The search loop subgraph: plan → search → loosen → search …"""
+
     def test_no_relaxation_when_first_search_matches(self):
         with patch.object(pa, "search_products", return_value=[_product(1)]) as search:
-            out = pa.find_products({"preferences": {"product": "mouse", "max_price": 1000}})
-        assert out == {"search_results": [_product(1)], "relaxed_filters": []}
+            out = pa.find_products.invoke({"preferences": {"product": "mouse", "max_price": 1000}})
+        assert (out["search_results"], out["relaxed_filters"]) == ([_product(1)], [])
         assert search.call_count == 1
         assert search.call_args.kwargs["product_type"] == "mouse"
 
@@ -59,7 +61,7 @@ class TestFindProducts:
 
         prefs = {"product": "mouse", "brand": "Bose", "max_price": 1000, "features": ["wireless"]}
         with patch.object(pa, "search_products", side_effect=fake_search):
-            out = pa.find_products({"preferences": prefs})
+            out = pa.find_products.invoke({"preferences": prefs})
         assert out["relaxed_filters"] == ["price", "brand"]
         assert calls[1]["max_price"] == 1250
         assert all(c["product_type"] == "mouse" for c in calls)
@@ -67,9 +69,22 @@ class TestFindProducts:
         assert prefs["brand"] == "Bose"  # the shopper's preferences are not modified
 
     def test_gives_up_after_the_last_step(self):
-        with patch.object(pa, "search_products", return_value=[]):
-            out = pa.find_products({"preferences": {"product": "mouse", "features": ["silent", "pink"]}})
-        assert out == {"search_results": [], "relaxed_filters": ["attributes", "keywords"]}
+        with patch.object(pa, "search_products", return_value=[]) as search:
+            out = pa.find_products.invoke({"preferences": {"product": "mouse", "features": ["silent", "pink"]}})
+        assert (out["search_results"], out["relaxed_filters"]) == ([], ["attributes", "keywords"])
+        assert search.call_count == 3  # first search + one per loosened filter
+
+    def test_every_filter_set_means_at_most_five_searches(self):
+        prefs = {"product": "mouse", "brand": "Bose", "max_price": 1000, "features": ["wireless", "pink"]}
+        with patch.object(pa, "search_products", return_value=[]) as search:
+            out = pa.find_products.invoke({"preferences": prefs})
+        assert out["relaxed_filters"] == pa.RELAXATION_ORDER
+        assert search.call_count == 1 + len(pa.RELAXATION_ORDER)
+
+    def test_next_relaxation_skips_unset_filters(self):
+        filters = {"max_price": None, "brand": None, "attributes": {"connectivity": "wireless"}, "keywords": []}
+        assert pa.next_relaxation(filters, []) == "attributes"
+        assert pa.next_relaxation({**filters, "attributes": {}}, ["attributes"]) is None
 
 
 class TestRankProducts:

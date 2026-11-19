@@ -23,6 +23,7 @@ class AgentState(TypedDict, total=False):
     preferences: Optional[dict]
     original_preferences: Optional[dict]
     not_carried: Optional[dict]
+    search_filters: Optional[dict]  # the search loop's working copy, loosened step by step
     search_results: Optional[List[dict]]
     ranked_products: Optional[List[dict]]
     relaxed_filters: Optional[List[str]]

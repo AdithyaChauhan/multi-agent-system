@@ -150,32 +150,68 @@ def search_filters(prefs: dict) -> dict:
     }
 
 
+# ── Search loop: plan → search → (nothing found?) loosen → search … ──────────────
 # Optional filters, dropped one at a time (cumulatively) when a search finds nothing.
 # The product type is never dropped: showing a different kind of product is not a match.
 RELAXATION_ORDER = ["price", "brand", "attributes", "keywords"]
 
 
-def find_products(state: AgentState) -> dict:
-    """Deterministic search with one fallback loop: relax optional filters until something matches.
+def plan_search(state: AgentState) -> dict:
+    """Working filters for this turn. The loop loosens these, never the shopper's preferences."""
+    return {"search_filters": search_filters(state.get("preferences") or {}), "relaxed_filters": []}
 
-    Works on a copy, so the shopper's own preferences (kept for the next turn) are never relaxed.
-    """
-    filters = search_filters(state.get("preferences") or {})
-    relaxed: list = []
+
+def search(state: AgentState) -> dict:
+    filters = state["search_filters"]
     results = search_products(**filters, limit=10)
-    for name in RELAXATION_ORDER:
-        if results:
-            break
-        if name == "price" and filters.get("max_price"):
-            filters["max_price"] = int(filters["max_price"] * 1.25)
-        elif name != "price" and filters.get(name):
-            filters[name] = {} if name == "attributes" else [] if name == "keywords" else None
-        else:
-            continue
-        relaxed.append(name)
-        results = search_products(**filters, limit=10)
-    logger.info(f"request_id={get_request_id()} | search | {filters} | found={len(results)} | relaxed={relaxed}")
-    return {"search_results": results, "relaxed_filters": relaxed}
+    logger.info(
+        f"request_id={get_request_id()} | search | {filters} | found={len(results)}"
+        f" | relaxed={state.get('relaxed_filters')}"
+    )
+    return {"search_results": results}
+
+
+def next_relaxation(filters: dict, relaxed: list) -> Optional[str]:
+    """The next filter to loosen: later in RELAXATION_ORDER than the last one, and actually set."""
+    start = RELAXATION_ORDER.index(relaxed[-1]) + 1 if relaxed else 0
+    for name in RELAXATION_ORDER[start:]:
+        if filters.get("max_price" if name == "price" else name):
+            return name
+    return None
+
+
+def route_after_search(state: AgentState) -> Literal["loosen", "done"]:
+    if state.get("search_results"):
+        return "done"
+    return "loosen" if next_relaxation(state["search_filters"], state.get("relaxed_filters") or []) else "done"
+
+
+def loosen(state: AgentState) -> dict:
+    """Price goes up 25%; brand, attributes or keywords are dropped."""
+    filters = dict(state["search_filters"])
+    relaxed = state.get("relaxed_filters") or []
+    name = next_relaxation(filters, relaxed)
+    if name == "price":
+        filters["max_price"] = int(filters["max_price"] * 1.25)
+    else:
+        filters[name] = {} if name == "attributes" else [] if name == "keywords" else None
+    return {"search_filters": filters, "relaxed_filters": [*relaxed, name]}
+
+
+def build_search_loop():
+    """At most 1 + len(RELAXATION_ORDER) searches: each loosen step moves further down the order."""
+    graph = StateGraph(AgentState)
+    graph.add_node("plan_search", plan_search)
+    graph.add_node("search", search)
+    graph.add_node("loosen", loosen)
+    graph.set_entry_point("plan_search")
+    graph.add_edge("plan_search", "search")
+    graph.add_conditional_edges("search", route_after_search, {"loosen": "loosen", "done": END})
+    graph.add_edge("loosen", "search")
+    return graph.compile()
+
+
+find_products = build_search_loop()
 
 
 class Ranking(BaseModel):
