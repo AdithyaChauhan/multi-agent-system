@@ -163,7 +163,6 @@ def new_turn(user_message: str, user_id: str, session_id: str, conversation_hist
         "relaxed_filters": None,
         "order_data": None,
         "support_order": None,
-        "action_required": None,
         "final_response": None,
     }
 

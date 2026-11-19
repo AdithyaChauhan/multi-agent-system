@@ -19,8 +19,9 @@ from app.models.user import User
 from app.models.session import Session
 from app.models.message import Message
 
+from langgraph.types import Command
+
 from app.agents.router import new_turn, router_graph
-from app.tools.order_tools import cancel_order_in_db
 
 from app.schemas.chat import ChatRequest, SessionMessagesResponse, ChatResponse
 from app.core.logger import get_logger, set_request_id, get_request_id
@@ -290,6 +291,27 @@ def health():
     return {"status": "ok"}
 
 
+def check_resume(session: Session, user_id: str, thread: dict) -> Optional[str]:
+    """A Yes/No answer resumes the paused graph only for the signed-in owner of the conversation, and
+    only while a question is actually waiting. Returns the reason to refuse, or None."""
+    if user_id.startswith("anon-") or session.user_id != user_id:
+        logger.warning(f"request_id={get_request_id()} | resume refused: not this user's conversation")
+        return "Please sign in to the account this conversation belongs to."
+    if not router_graph.get_state(thread).interrupts:
+        return "There's nothing waiting for your confirmation. What would you like to do?"
+    return None
+
+
+def _reply(db, response: Response, session: Session, user_id: str, text: str, action=None, run_id=None):
+    """Store the assistant's reply and return it."""
+    db.add(Message(session_id=session.session_id, role="assistant", content=text, langsmith_run_id=run_id))
+    db.commit()
+    logger.info(f"request_id={get_request_id()} | Assistant message stored")
+    response.headers["X-Session-ID"] = session.session_id
+    response.headers["X-User-ID"] = user_id
+    return ChatResponse(session_id=session.session_id, user_id=user_id, response=text, action=action, run_id=run_id)
+
+
 @app.post("/chat", response_model=ChatResponse)
 def chat(
     request_obj: Request,
@@ -320,13 +342,22 @@ def chat(
         conversation_history = load_conversation_history(db, session.session_id)
         logger.info(f"request_id={get_request_id()} | Loaded {len(conversation_history)} history messages")
 
+        # One checkpointed graph thread per chat session: search filters carry over between turns and
+        # survive restarts, and a paused question (cancel this order?) waits there for the answer.
+        thread = {"configurable": {"thread_id": session.session_id}}
+        if chat_request.confirm is None:
+            graph_input = new_turn(chat_request.message, user_id, session.session_id, conversation_history)
+        else:
+            refusal = check_resume(session, user_id, thread)
+            if refusal:
+                return _reply(db, response, session, user_id, refusal)
+            graph_input = Command(resume={"confirm": chat_request.confirm, "user_id": user_id})
+
         with collect_runs() as cb:
             graph_result = router_graph.invoke(
-                new_turn(chat_request.message, user_id, session.session_id, conversation_history),
+                graph_input,
                 config={
-                    # One checkpointed graph thread per chat session: search filters carry over
-                    # between turns and survive restarts.
-                    "configurable": {"thread_id": session.session_id},
+                    **thread,
                     "tags": [f"user:{user_id}", f"session:{session.session_id}"],
                     "metadata": {
                         "user_id": user_id,
@@ -343,7 +374,9 @@ def chat(
         langsmith_run_id = str(cb.traced_runs[0].id) if cb.traced_runs else None
         logger.info(f"request_id={get_request_id()} | langsmith_run_id={langsmith_run_id}")
 
-        final_response = graph_result.get("final_response") or "Something went wrong."
+        paused = graph_result.get("__interrupt__") or []
+        action = paused[0].value if paused else None
+        final_response = (action or {}).get("question") or graph_result.get("final_response") or "Something went wrong."
         logger.info(f"request_id={get_request_id()} | Graph completed | final_response_preview={final_response[:80]}")
 
         # Submit per-turn feedback scores to LangSmith (fire-and-forget, non-blocking)
@@ -354,26 +387,7 @@ def chat(
                 daemon=True,
             ).start()
 
-        # Store the assistant response
-        assistant_message = Message(
-            session_id=session.session_id, role="assistant", content=final_response, langsmith_run_id=langsmith_run_id
-        )
-        db.add(assistant_message)
-        db.commit()
-
-        logger.info(f"request_id={get_request_id()} | Assistant message stored")
-
-        response.headers["X-Session-ID"] = session.session_id
-        response.headers["X-User-ID"] = user_id
-
-        action = graph_result.get("action_required")
-        return ChatResponse(
-            session_id=session.session_id,
-            user_id=user_id,
-            response=final_response,
-            action=action,
-            run_id=langsmith_run_id,
-        )
+        return _reply(db, response, session, user_id, final_response, action=action, run_id=langsmith_run_id)
 
     except HTTPException:
         db.rollback()
@@ -413,48 +427,6 @@ def submit_feedback(body: FeedbackRequest):
     except Exception as e:
         logger.error(f"LangSmith feedback error | run_id={body.run_id} | error={e}")
         raise HTTPException(status_code=500, detail="Failed to submit feedback")
-
-
-class CancelOrderRequest(BaseModel):
-    order_id: str
-    session_id: str
-
-
-class CancelOrderResponse(BaseModel):
-    success: bool
-    message: str
-
-
-@app.post("/cancel-order", response_model=CancelOrderResponse)
-def cancel_order_endpoint(
-    request_obj: Request,
-    body: CancelOrderRequest,
-):
-    """Deterministic cancel order endpoint — no LLM, no ambiguity. Called from UI confirm button."""
-    user_id = get_current_user_id(request_obj)
-    if user_id.startswith("anon-"):
-        raise HTTPException(status_code=401, detail="Authentication required to cancel orders.")
-
-    db = SessionLocal()
-    try:
-        success = cancel_order_in_db(body.order_id, user_id)
-        if success:
-            msg = f"Order {body.order_id} has been cancelled successfully."
-            # Store confirmation in session history
-            session = db.query(Session).filter(Session.session_id == body.session_id).first()
-            if session:
-                db.add(Message(session_id=session.session_id, role="assistant", content=msg))
-                db.commit()
-            logger.info(
-                f"request_id={get_request_id()} | Order cancelled via endpoint | order_id={body.order_id} | user_id={user_id}"
-            )
-            return CancelOrderResponse(success=True, message=msg)
-        return CancelOrderResponse(
-            success=False,
-            message=f"Could not cancel {body.order_id}. It may have already shipped or doesn't belong to your account.",
-        )
-    finally:
-        db.close()
 
 
 @app.get("/messages/{session_id}", response_model=SessionMessagesResponse)

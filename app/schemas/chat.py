@@ -6,6 +6,8 @@ from datetime import datetime
 class ChatRequest(BaseModel):
     message: str
     session_id: Optional[str] = None
+    # The answer to a paused question (the Yes / No buttons for "cancel this order?").
+    confirm: Optional[bool] = None
 
 
 class MessageResponse(BaseModel):

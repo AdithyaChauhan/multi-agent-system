@@ -579,31 +579,22 @@ def run_conversation(client, conv, router_rec, reroute_rec, phrase_sets, args):
             phrase_sets=phrase_sets,
         )
 
-        # UI "Yes, cancel" button → POST /cancel-order (only after the assistant asked).
-        if "confirm_cancel" in turn:
-            spec = turn["confirm_cancel"]
+        # The UI's "Yes, cancel it" button: /chat with confirm=true resumes the paused graph.
+        # "cancel_endpoint" sends the same answer when nothing was asked (no pause to resume).
+        for key, what in (("confirm_cancel", "confirm cancel"), ("cancel_endpoint", "unasked confirm")):
+            if key not in turn:
+                continue
+            spec = turn[key]
             r = client.post(
-                "/cancel-order",
-                json={"order_id": spec["order_id"], "session_id": session_id or ""},
+                "/chat",
+                json={"message": "Yes, cancel it", "confirm": True, "session_id": session_id or ""},
                 headers={"X-User-ID": user_id},
             )
-            ok = r.status_code == 200 and r.json().get("success") is True
+            ok = r.status_code == 200 and order_status(spec["order_id"]) == "cancelled"
             if ok != spec["expect_success"]:
-                failures.append(f"confirm cancel success={ok} != {spec['expect_success']}")
+                failures.append(f"{what} success={ok} != {spec['expect_success']}")
             if order_status(spec["order_id"]) != spec["db_after"]:
-                failures.append(f"after confirm {spec['order_id']} is {order_status(spec['order_id'])!r}")
-        if "cancel_endpoint" in turn:
-            spec = turn["cancel_endpoint"]
-            r = client.post(
-                "/cancel-order",
-                json={"order_id": spec["order_id"], "session_id": session_id or ""},
-                headers={"X-User-ID": user_id},
-            )
-            ok = r.status_code == 200 and r.json().get("success") is True
-            if ok != spec["expect_success"]:
-                failures.append(f"direct cancel success={ok} != {spec['expect_success']}")
-            if order_status(spec["order_id"]) != spec["db_after"]:
-                failures.append(f"after direct cancel {spec['order_id']} is {order_status(spec['order_id'])!r}")
+                failures.append(f"after {what} {spec['order_id']} is {order_status(spec['order_id'])!r}")
 
         prefs = (state or {}).get("preferences") or {}
         turns_out.append(

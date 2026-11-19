@@ -2,6 +2,9 @@
 
 The router has already decided the issue, the order and whether there is a legal threat.
 Everything here is deterministic except the drafted reply for low-severity issues.
+
+Cancelling pauses the graph (`interrupt`) until the shopper presses Yes or No in the UI; the order
+is cancelled only by plain Python after that, for its owner and only while it is still processing.
 """
 
 import json
@@ -9,13 +12,14 @@ from typing import Literal
 
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import END, StateGraph
+from langgraph.types import interrupt
 
 from app.agents.order_agent import order_lines
 from app.agents.state import SupportInput, SupportOutput, SupportState
 from app.core.llm import call_llm
 from app.core.logger import get_logger, get_request_id
 from app.core.prompt_loader import load_prompt
-from app.tools.order_tools import fetch_order_from_db, fetch_user_orders
+from app.tools.order_tools import cancel_order_in_db, fetch_order_from_db, fetch_user_orders
 from app.tools.support_tools import create_support_ticket, get_open_ticket_for_order, lookup_support_policy
 
 logger = get_logger("app.agents.support_agent")
@@ -87,17 +91,17 @@ def ask_for_order(state: SupportState) -> dict:
     }
 
 
+def _status(order: dict) -> str:
+    return (order.get("status") or "").lower().replace(" ", "_")
+
+
 def handle_cancellation(state: SupportState) -> dict:
-    """Never cancels by itself: a processing order gets a confirm button in the UI (POST /cancel-order)."""
+    """Explain why an order can't be cancelled; a processing order goes on to ask the shopper."""
     order = state.get("support_order") or {}
     order_id = order.get("order_id")
-    status = (order.get("status") or "").lower().replace(" ", "_")
-    product = order.get("product_name", "your order")
+    status = _status(order)
     if status == "processing":
-        return {
-            "final_response": f"Your order **{order_id}** ({product}) is in processing and can still be cancelled.",
-            "action_required": {"type": "confirm_cancel", "order_id": order_id, "product_name": product},
-        }
+        return {}
     if status in ("shipped", "out_for_delivery", "in_transit"):
         reply = f"Order **{order_id}** has already shipped — cancellation isn't possible. Once it arrives, I can help you initiate a return."
     elif status == "delivered":
@@ -107,6 +111,50 @@ def handle_cancellation(state: SupportState) -> dict:
     else:
         reply = f"Order **{order_id}** has status '{order.get('status')}', so I can't cancel it here. A support agent can help."
     return {"final_response": reply}
+
+
+def route_cancellation(state: SupportState) -> Literal["confirm", "done"]:
+    return "confirm" if _status(state.get("support_order") or {}) == "processing" else "done"
+
+
+def confirm_cancel(state: SupportState) -> dict:
+    """Pause the graph until the shopper answers. Nothing happens before the pause, because the node
+    runs again from the top when the graph resumes; the answer is what `interrupt` returns."""
+    order = state.get("support_order") or {}
+    product = order.get("product_name", "your order")
+    answer = interrupt(
+        {
+            "type": "confirm_cancel",
+            "order_id": order.get("order_id"),
+            "product_name": product,
+            "question": f"Your order **{order.get('order_id')}** ({product}) is in processing and can still be "
+            "cancelled. Do you want to cancel it?",
+        }
+    )
+    return {"cancel_answer": answer if isinstance(answer, dict) else {}}
+
+
+def route_answer(state: SupportState) -> Literal["cancel", "keep"]:
+    return "cancel" if (state.get("cancel_answer") or {}).get("confirm") is True else "keep"
+
+
+def cancel_order(state: SupportState) -> dict:
+    """The only place an order is cancelled: the person who pressed Yes must be the person in this
+    conversation, and the database update re-checks the owner and that the order is still processing."""
+    order_id = (state.get("support_order") or {}).get("order_id")
+    caller = (state.get("cancel_answer") or {}).get("user_id")
+    if caller and caller == state.get("user_id") and cancel_order_in_db(order_id, caller):
+        logger.info(f"request_id={get_request_id()} | order cancelled after confirmation | {order_id}")
+        return {"final_response": f"Order **{order_id}** has been cancelled."}
+    logger.warning(f"request_id={get_request_id()} | cancel refused | order_id={order_id} | caller={caller}")
+    return {
+        "final_response": f"I couldn't cancel **{order_id}**. It may have shipped already, or it isn't on your "
+        "account. A support agent can help if you think this is wrong."
+    }
+
+
+def keep_order(state: SupportState) -> dict:
+    return {"final_response": "No problem! Your order is still active."}
 
 
 def create_ticket(state: SupportState) -> dict:
@@ -170,6 +218,9 @@ def build_support_agent_graph():
     graph.add_node("answer_policy", answer_policy)
     graph.add_node("ask_for_order", ask_for_order)
     graph.add_node("handle_cancellation", handle_cancellation)
+    graph.add_node("confirm_cancel", confirm_cancel)
+    graph.add_node("cancel_order", cancel_order)
+    graph.add_node("keep_order", keep_order)
     graph.add_node("create_ticket", create_ticket)
     graph.add_node("draft_resolution", draft_resolution)
     graph.set_entry_point("find_order")
@@ -184,7 +235,9 @@ def build_support_agent_graph():
             "draft": "draft_resolution",
         },
     )
-    for node in ("answer_policy", "ask_for_order", "handle_cancellation", "create_ticket", "draft_resolution"):
+    graph.add_conditional_edges("handle_cancellation", route_cancellation, {"confirm": "confirm_cancel", "done": END})
+    graph.add_conditional_edges("confirm_cancel", route_answer, {"cancel": "cancel_order", "keep": "keep_order"})
+    for node in ("answer_policy", "ask_for_order", "cancel_order", "keep_order", "create_ticket", "draft_resolution"):
         graph.add_edge(node, END)
     return graph.compile()
 

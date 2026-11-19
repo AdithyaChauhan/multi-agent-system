@@ -1,5 +1,5 @@
 # 0002. Guardrails live in Python, not in prompts or model tools
-- **Status:** Accepted, implemented on `simplify-agents`
+- **Status:** Accepted, implemented on `simplify-agents`. Phase 2 replaced `/cancel-order` with an `interrupt()` pause resumed from `/chat` (0009); the rule is unchanged.
 - **Date:** 2026-11-18 (records the design of that branch)
 
 ## Context

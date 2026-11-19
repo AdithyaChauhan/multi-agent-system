@@ -75,13 +75,10 @@ class TestReplies:
 
 
 class TestCancellation:
-    def test_processing_asks_for_ui_confirmation_and_cancels_nothing(self):
-        out = sa.handle_cancellation({"support_order": _order("processing")})
-        assert out["action_required"] == {
-            "type": "confirm_cancel",
-            "order_id": "ORD-2005",
-            "product_name": "Logitech M221 Wireless Mouse",
-        }
+    def test_processing_goes_on_to_ask_the_shopper(self):
+        state = {"support_order": _order("processing")}
+        assert sa.handle_cancellation(state) == {}
+        assert sa.route_cancellation(state) == "confirm"  # the pause itself: tests/test_cancel_confirmation.py
 
     @pytest.mark.parametrize(
         "status,phrase",
@@ -94,8 +91,9 @@ class TestCancellation:
         ],
     )
     def test_other_statuses_cannot_be_cancelled(self, status, phrase):
-        out = sa.handle_cancellation({"support_order": _order(status)})
-        assert phrase in out["final_response"] and "action_required" not in out
+        state = {"support_order": _order(status)}
+        assert phrase in sa.handle_cancellation(state)["final_response"]
+        assert sa.route_cancellation(state) == "done"
 
 
 class TestCreateTicket:
@@ -130,11 +128,3 @@ def test_draft_resolution_sends_policy_and_order():
     assert out["final_response"] == "We'll send the missing part."
     context = call.call_args.args[2][1].content
     assert "ORD-2004" in context and "Policy:" in context and "missing parts" in context
-
-
-def test_graph_end_to_end_cancel():
-    with patch.object(sa, "fetch_order_from_db", return_value=_order("processing")):
-        out = sa.support_agent_graph.invoke(
-            {"user_id": "demo-user-1", "order_id": "ORD-2005", "support_issue": {"category": "cancel"}}
-        )
-    assert out["action_required"]["type"] == "confirm_cancel"

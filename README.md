@@ -27,7 +27,8 @@ What the model decides and what the code decides:
   safety or legal risk, the product filters (with the previous turn's filters as input), and which
   search results actually match.
 - **Code (deterministic):** sign-in before orders/support; every order lookup is filtered by the
-  signed-in user; cancellation only after the user presses "Yes" in the UI (`POST /cancel-order`);
+  signed-in user; cancellation only after the user presses "Yes" in the UI, which resumes the paused graph
+  (`interrupt()`); a plain Python node then cancels, for the owner and only while processing;
   safety, legal and damaged/wrong/refund issues become tickets for a human, one open ticket per order.
 
 LLM calls per message: router only for orders, support, sign-in, clarify and safety; +1 for a

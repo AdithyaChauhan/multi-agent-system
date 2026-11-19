@@ -516,7 +516,7 @@
             addMessage("Hi! I'm your AI shopping assistant. Ask me about your orders, products, or support issues.", 'assistant');
         }
 
-        function addConfirmButtons(msgRow, orderId, productName) {
+        function addConfirmButtons(msgRow) {
             const col = msgRow.querySelector('.msg-col');
             const actions = document.createElement('div');
             actions.className = 'confirm-actions';
@@ -545,10 +545,11 @@
                 messageInput.focus();
             }
 
-            yesBtn.addEventListener('click', async () => {
+            // The assistant's graph is paused on this question; the answer resumes it.
+            async function answer(confirm, label) {
                 actions.remove();
                 unlockInput();
-                addMessage('Yes, cancel it', 'user');
+                addMessage(label, 'user');
                 const typingRow = document.createElement('div');
                 typingRow.className = 'typing-row';
                 const ta = document.createElement('div'); ta.className = 'bot-avatar'; ta.textContent = '🤖';
@@ -559,23 +560,20 @@
 
                 const headers = { 'Content-Type': 'application/json' };
                 if (token && !isGuest) headers['Authorization'] = `Bearer ${token}`;
+                if (sessionId) headers['X-Session-ID'] = sessionId;
                 try {
-                    const res = await fetch('/cancel-order', { method: 'POST', headers, body: JSON.stringify({ order_id: orderId, session_id: sessionId }) });
+                    const res = await fetch('/chat', { method: 'POST', headers, body: JSON.stringify({ message: label, confirm }) });
                     const data = await res.json();
                     typingRow.remove();
-                    addMessage(data.message, 'assistant');
+                    addMessage(res.ok ? data.response : `Error: ${data.detail || 'Something went wrong'}`, 'assistant');
                 } catch(e) {
                     typingRow.remove();
                     addMessage('Something went wrong. Please try again.', 'assistant');
                 }
-            });
+            }
 
-            noBtn.addEventListener('click', () => {
-                actions.remove();
-                unlockInput();
-                addMessage('No, keep it', 'user');
-                addMessage('No problem! Your order is still active.', 'assistant');
-            });
+            yesBtn.addEventListener('click', () => answer(true, 'Yes, cancel it'));
+            noBtn.addEventListener('click', () => answer(false, 'No, keep it'));
         }
 
         async function sendMessage() {
@@ -613,7 +611,7 @@
                     localStorage.setItem('chat_session_id', sessionId);
                     const msgRow = addMessage(data.response, 'assistant', data.run_id || null);
                     if (data.action && data.action.type === 'confirm_cancel') {
-                        addConfirmButtons(msgRow, data.action.order_id, data.action.product_name);
+                        addConfirmButtons(msgRow);
                     }
                 } else if (response.status === 401) {
                     localStorage.removeItem('access_token');

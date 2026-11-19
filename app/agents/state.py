@@ -24,7 +24,6 @@ class RouterState(TypedDict, total=False):
     relaxed_filters: Optional[List[str]]
     order_data: Optional[dict]
     support_order: Optional[dict]
-    action_required: Optional[dict]  # cancel needs the user's explicit "Yes" in the UI
 
     final_response: Optional[str]
 
@@ -94,9 +93,9 @@ class SupportInput(TypedDict, total=False):
 
 class SupportOutput(TypedDict, total=False):
     support_order: Optional[dict]
-    action_required: Optional[dict]
     final_response: Optional[str]
 
 
 class SupportState(SupportInput, SupportOutput, total=False):
     user_orders: Optional[List[dict]]
+    cancel_answer: Optional[dict]  # what the shopper answered when the graph paused: {confirm, user_id}
