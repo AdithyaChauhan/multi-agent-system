@@ -183,7 +183,7 @@ def build_router_graph(checkpointer=None):
     graph.add_node("clarify", clarify)
     graph.add_node("sign_in", respond_sign_in)
     graph.add_node("safety", safety_escalation)
-    graph.add_node("escalate", escalation_graph)
+    graph.add_node("safety_handoff", escalation_graph)
     graph.add_node("safety_reply", safety_reply)
     graph.add_node("product_agent", product_agent_graph)
     graph.add_node("order_agent", order_agent_graph)
@@ -205,8 +205,8 @@ def build_router_graph(checkpointer=None):
             "support": "support_agent",
         },
     )
-    graph.add_edge("safety", "escalate")
-    graph.add_edge("escalate", "safety_reply")
+    graph.add_edge("safety", "safety_handoff")
+    graph.add_edge("safety_handoff", "safety_reply")
     for node in ("clarify", "sign_in", "safety_reply", "product_agent", "order_agent", "support_agent"):
         graph.add_edge(node, END)
     return graph.compile(checkpointer=checkpointer)
