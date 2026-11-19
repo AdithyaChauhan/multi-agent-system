@@ -616,7 +616,12 @@ def run_conversation(client, conv, router_rec, reroute_rec, phrase_sets, args):
                     if prefs
                 },
                 "shown": [
-                    {"name": (p.get("name") or "")[:60], "brand": p.get("brand"), "type": p.get("type"), "kind": (p.get("attributes") or {}).get("kind")}
+                    {
+                        "name": (p.get("name") or "")[:60],
+                        "brand": p.get("brand"),
+                        "type": p.get("type"),
+                        "kind": (p.get("attributes") or {}).get("kind"),
+                    }
                     for p in ((state or {}).get("ranked_products") or [])[:3]
                 ],
                 "response": text[:700],

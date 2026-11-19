@@ -223,6 +223,7 @@
         .typing span:nth-child(1) { animation-delay: -0.32s; }
         .typing span:nth-child(2) { animation-delay: -0.16s; }
         @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        .typing .step-label { margin-left: 8px; font-size: 0.85rem; color: #6b7280; }
 
         /* ── Cancel confirm buttons ── */
         .confirm-actions {
@@ -562,8 +563,8 @@
                 if (token && !isGuest) headers['Authorization'] = `Bearer ${token}`;
                 if (sessionId) headers['X-Session-ID'] = sessionId;
                 try {
-                    const res = await fetch('/chat', { method: 'POST', headers, body: JSON.stringify({ message: label, confirm }) });
-                    const data = await res.json();
+                    const res = await postChat({ message: label, confirm }, headers, (step) => showStep(tb, step));
+                    const data = res.data;
                     typingRow.remove();
                     addMessage(res.ok ? data.response : `Error: ${data.detail || 'Something went wrong'}`, 'assistant');
                 } catch(e) {
@@ -574,6 +575,56 @@
 
             yesBtn.addEventListener('click', () => answer(true, 'Yes, cancel it'));
             noBtn.addEventListener('click', () => answer(false, 'No, keep it'));
+        }
+
+        // Sends a turn to /chat/stream and shows each step ("Searching products…") through onStep.
+        // Resolves to { ok, status, data } with data shaped like /chat's reply. Falls back to /chat only
+        // when streaming never started, so a turn is never sent twice.
+        async function postChat(body, headers, onStep) {
+            let started = false;
+            try {
+                const res = await fetch('/chat/stream', { method: 'POST', headers, body: JSON.stringify(body) });
+                if (!res.ok) return { ok: false, status: res.status, data: await res.json().catch(() => ({})) };
+                if (res.body && (res.headers.get('content-type') || '').startsWith('text/event-stream')) {
+                    started = true;
+                    const reader = res.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = '';
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+                        buffer += decoder.decode(value, { stream: true });
+                        let end;
+                        while ((end = buffer.indexOf('\n\n')) >= 0) {
+                            const block = buffer.slice(0, end);
+                            buffer = buffer.slice(end + 2);
+                            const name = (/^event: (.*)$/m.exec(block) || [])[1];
+                            const raw = (/^data: (.*)$/m.exec(block) || [])[1];
+                            if (!name || !raw) continue;
+                            const data = JSON.parse(raw);
+                            if (name === 'step') onStep(data.label);
+                            else if (name === 'reply') return { ok: true, status: 200, data };
+                            else if (name === 'error') return { ok: false, status: 500, data };
+                        }
+                    }
+                    return { ok: false, status: 500, data: { detail: 'The connection closed early. Please try again.' } };
+                }
+            } catch (e) {
+                if (started) return { ok: false, status: 500, data: { detail: 'The connection closed early. Please try again.' } };
+            }
+            const res = await fetch('/chat', { method: 'POST', headers, body: JSON.stringify(body) });
+            return { ok: res.ok, status: res.status, data: await res.json().catch(() => ({})) };
+        }
+
+        function showStep(typingBubble, label) {
+            let el = typingBubble.querySelector('.step-label');
+            if (!el) {
+                el = document.createElement('em');
+                el.className = 'step-label';
+                typingBubble.appendChild(el);
+            }
+            el.textContent = label;
+            chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
         async function sendMessage() {
@@ -602,8 +653,8 @@
                 if (token && !isGuest) headers['Authorization'] = `Bearer ${token}`;
                 if (sessionId) headers['X-Session-ID'] = sessionId;
 
-                const response = await fetch('/chat', { method: 'POST', headers, body: JSON.stringify({ message }) });
-                const data = await response.json();
+                const response = await postChat({ message }, headers, (label) => showStep(typingBubble, label));
+                const data = response.data;
                 typingRow.remove();
 
                 if (response.ok) {

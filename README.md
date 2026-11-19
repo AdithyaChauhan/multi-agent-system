@@ -168,6 +168,7 @@ docker compose build app && docker compose up -d --no-recreate db && docker comp
 | Method | Path | Description |
 |---|---|---|
 | `POST` | `/chat` | Send a message; returns agent response + session ID. With `"confirm": true/false` it answers a paused question (the cancel Yes/No buttons). |
+| `POST` | `/chat/stream` | Same as `/chat`, as server-sent events: `step` labels ("Searching products…") while the graph runs, then one `reply` event with the `/chat` body. The chat UI uses this. |
 | `GET` | `/messages/{session_id}` | Retrieve conversation history for a session |
 | `GET` | `/health` | Health check |
 | `GET` | `/auth/login` | Initiate Google OAuth flow |

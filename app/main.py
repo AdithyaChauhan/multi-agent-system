@@ -1,10 +1,12 @@
+import json
 import os
 import threading
 import uuid
 from datetime import datetime, timezone, timedelta
 from contextlib import asynccontextmanager
+from dataclasses import dataclass
 
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, StreamingResponse
 
 from fastapi import FastAPI, HTTPException, Header, Request, Response
 from pydantic import BaseModel
@@ -42,6 +44,7 @@ from fastapi.staticfiles import StaticFiles
 
 
 from langchain_core.tracers.context import collect_runs
+from langchain_core.tracers.run_collector import RunCollectorCallbackHandler
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 from app.core.metrics import http_requests_total, http_request_duration_seconds
 
@@ -302,14 +305,76 @@ def check_resume(session: Session, user_id: str, thread: dict) -> Optional[str]:
     return None
 
 
-def _reply(db, response: Response, session: Session, user_id: str, text: str, action=None, run_id=None):
-    """Store the assistant's reply and return it."""
+def _store_reply(db, session: Session, text: str, run_id=None) -> None:
     db.add(Message(session_id=session.session_id, role="assistant", content=text, langsmith_run_id=run_id))
     db.commit()
     logger.info(f"request_id={get_request_id()} | Assistant message stored")
-    response.headers["X-Session-ID"] = session.session_id
-    response.headers["X-User-ID"] = user_id
-    return ChatResponse(session_id=session.session_id, user_id=user_id, response=text, action=action, run_id=run_id)
+
+
+@dataclass
+class Turn:
+    """One chat turn, ready to run: who, which conversation, and the graph input (or why not)."""
+
+    user_id: str
+    session: Session
+    config: dict
+    graph_input: object = None
+    refusal: Optional[str] = None
+
+
+def start_turn(db, request_obj: Request, chat_request: ChatRequest, x_session_id: Optional[str]) -> Turn:
+    """Shared by /chat and /chat/stream: user, session, the stored user message and the graph input."""
+    user_id = get_current_user_id(request_obj)
+    logger.info(f"request_id={get_request_id()} | user_id={user_id} | message={chat_request.message}")
+    get_or_create_user(db, user_id)
+    session = get_or_create_session(db, x_session_id or chat_request.session_id, user_id)
+    db.add(Message(session_id=session.session_id, role="user", content=chat_request.message))
+    db.commit()
+    logger.info(f"request_id={get_request_id()} | User message stored | session_id={session.session_id}")
+
+    # One checkpointed graph thread per chat session: search filters carry over between turns and
+    # survive restarts, and a paused question (cancel this order?) waits there for the answer.
+    thread = {"configurable": {"thread_id": session.session_id}}
+    config = {
+        **thread,
+        "tags": [f"user:{user_id}", f"session:{session.session_id}"],
+        "metadata": {
+            "user_id": user_id,
+            "session_id": session.session_id,
+            "request_id": get_request_id(),
+            # thread_id groups all turns of one session for LangSmith thread-level evaluators
+            "thread_id": session.session_id,
+        },
+        "run_name": f"chat_request_{get_request_id()[:8]}",
+    }
+    turn = Turn(user_id=user_id, session=session, config=config)
+    if chat_request.confirm is None:
+        history = load_conversation_history(db, session.session_id)
+        turn.graph_input = new_turn(chat_request.message, user_id, session.session_id, history)
+    else:
+        turn.refusal = check_resume(session, user_id, thread)
+        if not turn.refusal:
+            turn.graph_input = Command(resume={"confirm": chat_request.confirm, "user_id": user_id})
+    return turn
+
+
+def finish_turn(db, turn: Turn, chat_request: ChatRequest, graph_result: dict, run_id=None) -> ChatResponse:
+    """Shared by /chat and /chat/stream: the reply (or the paused question), stored and returned."""
+    paused = graph_result.get("__interrupt__") or []
+    action = paused[0].value if paused else None
+    text = (action or {}).get("question") or graph_result.get("final_response") or "Something went wrong."
+    logger.info(f"request_id={get_request_id()} | Graph completed | final_response_preview={text[:80]}")
+    if run_id:  # per-turn feedback scores to LangSmith, fire-and-forget
+        threading.Thread(target=_submit_turn_feedback, args=(run_id, chat_request.message, text), daemon=True).start()
+    _store_reply(db, turn.session, text, run_id)
+    return ChatResponse(
+        session_id=turn.session.session_id, user_id=turn.user_id, response=text, action=action, run_id=run_id
+    )
+
+
+def _refused(db, turn: Turn) -> ChatResponse:
+    _store_reply(db, turn.session, turn.refusal)
+    return ChatResponse(session_id=turn.session.session_id, user_id=turn.user_id, response=turn.refusal)
 
 
 @app.post("/chat", response_model=ChatResponse)
@@ -319,75 +384,18 @@ def chat(
     response: Response,
     x_session_id: Optional[str] = Header(default=None),
 ):
-    # Get user_id from JWT or X-User-ID header or anonymous
-    user_id = get_current_user_id(request_obj)
-
-    logger.info(f"request_id={get_request_id()} | user_id={user_id} | message={chat_request.message}")
-
     db = SessionLocal()
-
     try:
-        get_or_create_user(db, user_id)
-        session = get_or_create_session(db, x_session_id or chat_request.session_id, user_id)
-
-        new_message = Message(session_id=session.session_id, role="user", content=chat_request.message)
-        db.add(new_message)
-        db.commit()
-
-        logger.info(f"request_id={get_request_id()} | User message stored | session_id={session.session_id}")
-
-        # Invoke the router graph with LangSmith tracking
-        logger.info(f"request_id={get_request_id()} | Invoking router")
-
-        conversation_history = load_conversation_history(db, session.session_id)
-        logger.info(f"request_id={get_request_id()} | Loaded {len(conversation_history)} history messages")
-
-        # One checkpointed graph thread per chat session: search filters carry over between turns and
-        # survive restarts, and a paused question (cancel this order?) waits there for the answer.
-        thread = {"configurable": {"thread_id": session.session_id}}
-        if chat_request.confirm is None:
-            graph_input = new_turn(chat_request.message, user_id, session.session_id, conversation_history)
-        else:
-            refusal = check_resume(session, user_id, thread)
-            if refusal:
-                return _reply(db, response, session, user_id, refusal)
-            graph_input = Command(resume={"confirm": chat_request.confirm, "user_id": user_id})
-
+        turn = start_turn(db, request_obj, chat_request, x_session_id)
+        response.headers["X-Session-ID"] = turn.session.session_id
+        response.headers["X-User-ID"] = turn.user_id
+        if turn.refusal:
+            return _refused(db, turn)
         with collect_runs() as cb:
-            graph_result = router_graph.invoke(
-                graph_input,
-                config={
-                    **thread,
-                    "tags": [f"user:{user_id}", f"session:{session.session_id}"],
-                    "metadata": {
-                        "user_id": user_id,
-                        "session_id": session.session_id,
-                        "request_id": get_request_id(),
-                        # thread_id groups all turns of one session for LangSmith
-                        # thread-level evaluators (Knowledge Retention, User Satisfaction, etc.)
-                        "thread_id": session.session_id,
-                    },
-                    "run_name": f"chat_request_{get_request_id()[:8]}",
-                },
-            )
-
-        langsmith_run_id = str(cb.traced_runs[0].id) if cb.traced_runs else None
-        logger.info(f"request_id={get_request_id()} | langsmith_run_id={langsmith_run_id}")
-
-        paused = graph_result.get("__interrupt__") or []
-        action = paused[0].value if paused else None
-        final_response = (action or {}).get("question") or graph_result.get("final_response") or "Something went wrong."
-        logger.info(f"request_id={get_request_id()} | Graph completed | final_response_preview={final_response[:80]}")
-
-        # Submit per-turn feedback scores to LangSmith (fire-and-forget, non-blocking)
-        if langsmith_run_id:
-            threading.Thread(
-                target=_submit_turn_feedback,
-                args=(langsmith_run_id, chat_request.message, final_response),
-                daemon=True,
-            ).start()
-
-        return _reply(db, response, session, user_id, final_response, action=action, run_id=langsmith_run_id)
+            graph_result = router_graph.invoke(turn.graph_input, config=turn.config)
+        run_id = str(cb.traced_runs[0].id) if cb.traced_runs else None
+        logger.info(f"request_id={get_request_id()} | langsmith_run_id={run_id}")
+        return finish_turn(db, turn, chat_request, graph_result, run_id)
 
     except HTTPException:
         db.rollback()
@@ -408,6 +416,73 @@ def chat(
         )
     finally:
         db.close()
+
+
+# What the chat window shows while a step runs. Only these labels and the final reply are streamed,
+# never raw model output, so streaming can't bypass a guardrail.
+STEP_LABELS = {
+    "classify": "Understanding your message…",
+    "extract_preferences": "Working out what you're looking for…",
+    "search": "Searching products…",
+    "loosen": "Nothing exact yet, widening the search…",
+    "rank_products": "Picking the best matches…",
+    "find_order": "Checking your order…",
+    "order_status": "Getting the latest tracking…",
+    "draft_resolution": "Writing a reply…",
+    "open_ticket": "Creating a support ticket…",
+    "notify": "Letting our support team know…",
+    "cancel_order": "Cancelling your order…",
+}
+
+
+def _event(name: str, data: dict) -> str:
+    return f"event: {name}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
+
+
+@app.post("/chat/stream")
+def chat_stream(
+    request_obj: Request,
+    chat_request: ChatRequest,
+    x_session_id: Optional[str] = Header(default=None),
+):
+    """Same turn as /chat, as server-sent events: `step` labels while the graph runs, then one `reply`
+    event whose data is the ChatResponse /chat would return (or an `error` event)."""
+    db = SessionLocal()
+    try:
+        turn = start_turn(db, request_obj, chat_request, x_session_id)  # 401 / 410 are raised here
+    except Exception:
+        db.rollback()
+        db.close()
+        raise
+
+    def events():
+        try:
+            if turn.refusal:
+                yield _event("reply", _refused(db, turn).model_dump())
+                return
+            last = None
+            # collect_runs() keeps its collector in a context variable, and Starlette steps this
+            # generator from worker threads with different contexts: pass the collector directly.
+            collector = RunCollectorCallbackHandler()
+            config = {**turn.config, "callbacks": [collector]}
+            for _, chunk in router_graph.stream(turn.graph_input, config=config, stream_mode="tasks", subgraphs=True):
+                label = STEP_LABELS.get(chunk.get("name")) if "input" in chunk else None  # a task starting
+                if label and label != last:
+                    last = label
+                    yield _event("step", {"label": label})
+            run_id = str(collector.traced_runs[0].id) if collector.traced_runs else None
+            state = router_graph.get_state(turn.config)
+            result = {**state.values, "__interrupt__": list(state.interrupts)}
+            yield _event("reply", finish_turn(db, turn, chat_request, result, run_id).model_dump())
+        except Exception as e:
+            logger.error(f"request_id={get_request_id()} | STREAM_ERROR | {str(e)}")
+            db.rollback()
+            yield _event("error", {"detail": "Something went wrong on our end. Please try again."})
+        finally:
+            db.close()
+
+    headers = {"X-Session-ID": turn.session.session_id, "X-User-ID": turn.user_id, "Cache-Control": "no-cache"}
+    return StreamingResponse(events(), media_type="text/event-stream", headers=headers)
 
 
 class FeedbackRequest(BaseModel):

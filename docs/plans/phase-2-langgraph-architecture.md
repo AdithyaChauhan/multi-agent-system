@@ -50,7 +50,7 @@ Each step is its own commit with tests.
   - create the ticket, then notify (`ESCALATION_WEBHOOK_URL`, or a WARNING log if unset; it never blocks the reply);
   - used by the safety and support tickets;
   - gate: baseline replay identical.
-- [ ] **7. Streaming:** `POST /chat/stream` sends server-sent events: step labels from `stream_mode="updates", subgraphs=True`, then one final reply event. `chat.html` uses it with a fallback to `/chat`.
+- [x] **7. Streaming:** `POST /chat/stream` sends server-sent events: step labels from `stream_mode="updates", subgraphs=True`, then one final reply event. `chat.html` uses it with a fallback to `/chat`.
 - [ ] **8. Filter chips with patch extraction (0007):**
   - the model returns only changed fields plus `clear`, and `merge_preferences` merges them in code;
   - `ChatResponse.active_filters`;
@@ -85,4 +85,6 @@ Each step is its own commit with tests.
 - **The retrieval cassettes are stale:** the Phase 1 catalog fixes made after the v2 run changed the `{types}` list in the extraction prompt, so retrieval replay misses on every query. Step 9's live run re-records them. Step 2 was checked another way: old loop against graph loop on all 100 recorded v2 preferences gives identical results and loosening steps (0 tokens).
 - **Steps 2–6, baseline replay** (0 tokens, 0 cassette misses): 45/51, identical to the before-run on every turn except the cancel question, which now ends "Do you want to cancel it?" (s08, s09).
 - **Postgres checkpointer verified** against `multi_agent_baseline`: filters carry over to a fresh graph and pool (a restart), and a pending cancel question survives a restart and resumes. The saver creates `checkpoints`, `checkpoint_blobs`, `checkpoint_writes` and `checkpoint_migrations` (outside Alembic).
+- **Streaming** uses `stream_mode="tasks"` rather than the planned `updates`: it reports each node, subgraphs included, when it *starts*, so the label shows while the step runs. Run ids come from a `RunCollectorCallbackHandler` in the config, because `collect_runs()` breaks when Starlette steps the generator from other threads.
+- **Live check in Docker** (2026-11-20, gpt-oss-120b, `multi_agent_db`): `/chat/stream` "43 inch 4k tv" showed 4 step labels, then the reply. After `docker restart multiagent-app`, "under 30000 please" on the same session kept tv, 43 inch and 4k and added max_price 30000. App image 265 → 270 MB.
 - **Tests:** 242 pass, coverage 92%. The pinned packages install cleanly (`pip check` clean); `uvloop` is Linux-only, so it's skipped on Windows.
