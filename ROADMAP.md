@@ -3,11 +3,11 @@
 **Goal:** take the assistant from about 5.8/10 to 9/10. That means short prompts, a clean LangGraph architecture that shows how agents are built (subgraphs, loops, a human-in-the-loop pause, ticket handoff), measured quality, and escalations that reach a real person. The work is split into phases, and each phase is worth keeping even if work stops after it.
 
 ## Now
-- **Current phase:** Phase 2, LangGraph-native architecture (not started; needs plan mode). Phases 0 and 1 are done.
-- **Branch:** `phase-1-catalog` holds all of Phase 1 and is **not committed yet**. Commit it, then branch `phase-2-langgraph` off it.
-- **Next action:** in a new chat, run `/resume` and plan Phase 2. The three remaining search misses are Phase 2 problems: a follow-up loses the product (q087), "washing machine" isn't refused (q084), and the brand gets dropped (q027). Before deciding on Phase 3, run the renamed-catalog sample on v2 (about 70K tokens).
-- **Phase 1 result (v2, 100 queries, `multi_agent_baseline`):** recall@5 0.958 and precision@3 0.926 (v1: 0.874 and 0.870). Empty rate 0%, attribute 1.0, Hinglish 0.80, vague 0.80, follow-up 1.0. The search targets in the definition of done are met.
-- **Still open:** the user's review of the Phase 0 labels; the user skipped the 50-product spot check.
+- **Current phase:** Phase 2, LangGraph-native architecture (in progress; plan approved 2026-11-20). Phases 0 and 1 are done.
+- **Branch:** `phase-2-architecture` (off `phase-1-catalog` at `0e9a8e2`).
+- **Next action:** step 1 of the plan. Port the 51-conversation baseline to the Phase 1 types (it still checks the removed `subcategory`), add replay mode to it, and record a "before" run (about 180K tokens, gpt-oss-20b).
+- **Phase 1 result (v2, 100 queries, `multi_agent_baseline`):** recall@5 0.958 and precision@3 0.926 (v1: 0.874 and 0.870). Open misses: q027 brand dropped, q084 "washing machine" not refused, q087 follow-up lost the product.
+- **Still open:** the user's review of the Phase 0 labels; the user skipped the 50-product spot check; the renamed-catalog sample on v2 (Phase 3 gate).
 - **Blocked on:** nothing.
 
 ## Phases
@@ -15,7 +15,7 @@
 |---|---|---|---|---|
 | 0 | Measuring stick | Done (labels await review) | [plan](docs/plans/phase-0-measuring-stick.md) | 100 labelled product queries; today's recall@5 measured; LLM replay mode |
 | 1 | Clean product data | Done | [plan](docs/plans/phase-1-clean-product-data.md) | Every product typed, key attributes filled, catalog constants removed |
-| 2 | LangGraph-native architecture | Not started | [plan](docs/plans/phase-2-langgraph-architecture.md) | Checkpointer, `interrupt()` for cancel, search loop as graph edges, subgraph schemas, streaming, escalation subgraph, filter chips |
+| 2 | LangGraph-native architecture | In progress | [plan](docs/plans/phase-2-langgraph-architecture.md) | Checkpointer, `interrupt()` for cancel, search loop as graph edges, subgraph schemas, streaming, escalation subgraph, filter chips |
 | 3 | Hybrid search (conditional) | Not started | [plan](docs/plans/phase-3-hybrid-search.md) | Only if Phase 1 leaves a gap; must beat v1 on Phase 0 metrics |
 | 4 | Reliability and safety | Not started | [plan](docs/plans/phase-4-reliability-and-safety.md) | Friendly quota message, fallback model, safety floor, 0 injection failures |
 | 5 | Ship and showcase | Not started | [plan](docs/plans/phase-5-ship-and-showcase.md) | Admin tickets, auth review, dashboards, load test, case study, updated visual |

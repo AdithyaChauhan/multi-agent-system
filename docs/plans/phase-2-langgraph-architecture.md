@@ -1,7 +1,7 @@
 # Phase 2: LangGraph-native architecture
-- **Status:** Not started
+- **Status:** In progress (plan approved 2026-11-20)
 - **Branch:** `phase-2-architecture`
-- **Depends on:** Phase 0 (replay makes the refactors cheap to verify). Phase 1 helps but isn't required.
+- **Depends on:** Phase 0 (replay makes the refactors cheap to verify) and Phase 1 (committed as `0e9a8e2`; this branch starts from it).
 - **Decisions:** [0009](../decisions/0009-langgraph-primitives.md) (supersedes the storage part of 0007), [0010](../decisions/0010-prompt-budget.md)
 
 ## Goal
@@ -19,35 +19,48 @@ Replace hand-written control flow with LangGraph's built-in features where they 
   - the admin page, which stays in Phase 5;
   - any change to prompt wording.
 
+## Found in planning (2026-11-20)
+- **The 51-conversation baseline is out of date.** It checks `subcategory` in 39 places and `result_subcategory` in 25, and Phase 1 removed that field, so it must be ported before it can give a "before" number.
+- **The baseline has no replay mode,** unlike the retrieval eval. Adding one makes every refactor step free to verify.
+- **`langgraph-checkpoint-postgres` 3.2.1 needs `langgraph-checkpoint` ≥ 4.3** (4.1.0 is installed), `psycopg` 3 and `psycopg-pool`.
+- **`original_preferences` is redundant:** search relaxes a copy, so it always equals `preferences`. Remove it.
+
 ## Tasks
-- [ ] Plan mode: confirm the order below and the new dependency (`langgraph-checkpoint-postgres`, which uses psycopg 3) with the user. Record the dependency in ADR 0009.
-- [ ] **Checkpointer.**
-  - Compile the router graph with the Postgres checkpointer; thread id = chat session id.
-  - Delete `_session_preferences` from `app/main.py`.
-  - Keep the `messages` table for the UI history.
-  - Test: restarting the app mid-conversation keeps the filters.
-- [ ] **Cancellation with `interrupt()`.**
-  - `handle_cancellation` pauses the graph with `{"type": "confirm_cancel", "order_id": ...}` and `/chat` returns the question with Yes and No buttons.
-  - The Yes button resumes the same thread with `Command(resume=True)`.
-  - A plain Python node then cancels, only for the signed-in owner and only while the order is processing.
-  - Tests:
-    - no cancellation without a resume;
-    - a resume from another user is refused;
-    - a resume after the order shipped is refused;
-    - "No" leaves the order unchanged.
-  - Retire `/cancel-order`, or keep it as a thin wrapper until the UI is switched over.
-- [ ] **Search loop as graph edges.** `find_products` becomes `search → check → loosen → search`, at most 4 passes, with the same loosening order as today. Because no prompt changes, **Phase 0 replay must give identical results at 0 tokens.**
-- [ ] **Subgraph schemas.** Product, order and support subgraphs declare their own input and output fields. The router passes only those.
-- [ ] **Streaming.** `/chat/stream` (server-sent events) built on `graph.stream(stream_mode="updates")`. The UI shows short step labels ("Checking your order…") and then the reply. `/chat` keeps working unchanged.
-- [ ] **Escalation subgraph.** Create ticket → notify (a webhook or log hook, configurable) → mark waiting. The notification target is a setting. The human reply path comes with the Phase 5 admin page.
-- [ ] **Filter chips** (from ADR 0007):
-  - the model returns only what changed, and code merges it into the checkpointed state;
-  - `ChatResponse` gains `active_filters`, shown as removable chips in `app/static/chat.html`.
-- [ ] Measure:
-  - Phase 0 replay (identical results expected for the loop refactor);
-  - a live Phase 0 run after the patch change;
-  - the 51-conversation baseline;
-  - prompt line count and agent code line count, before and after.
+Each step is its own commit with tests.
+- [x] Plan mode, approved 2026-11-20. Phase 1 committed; branch `phase-2-architecture` created.
+- [ ] **1. Measuring stick for conversations.**
+  - Port the baseline expectations: `subcategory` becomes `product_type`, resolved from `prefs.product` through the catalog; `result_subcategory` becomes `result_type`; `category` is dropped.
+  - Add `--mode record|replay` to `run_baseline.py`.
+  - Record the "before" run: gpt-oss-20b, 1 run, `multi_agent_baseline`, about 180K tokens.
+- [ ] **2. Search loop as graph edges:** `search → check → loosen → search`, at most 4 passes. Gate: retrieval replay identical to `v2-combined` and baseline replay identical.
+- [ ] **3. Subgraph schemas:** product, order and support each declare input and output schemas. Remove `original_preferences`. Gate: both replays identical.
+- [ ] **4. Checkpointer:**
+  - `PostgresSaver` on Postgres, `InMemorySaver` otherwise; thread id = session id;
+  - per-turn keys are reset in the turn input;
+  - delete `_session_preferences`;
+  - restart test;
+  - pin the new packages and check the image size.
+- [ ] **5. Cancellation with `interrupt()`:**
+  - a `confirm_cancel` node pauses;
+  - `/chat` with `confirm` resumes with `Command(resume={"confirm", "user_id"})`;
+  - `cancel_order` re-checks owner and status;
+  - `/cancel-order` is deleted, and the UI and baseline harness switch to resume;
+  - five guardrail tests.
+- [ ] **6. Escalation subgraph:**
+  - create the ticket, then notify (`ESCALATION_WEBHOOK_URL`, or a WARNING log if unset; it never blocks the reply);
+  - used by the safety and support tickets;
+  - gate: baseline replay identical.
+- [ ] **7. Streaming:** `POST /chat/stream` sends server-sent events: step labels from `stream_mode="updates", subgraphs=True`, then one final reply event. `chat.html` uses it with a fallback to `/chat`.
+- [ ] **8. Filter chips with patch extraction (0007):**
+  - the model returns only changed fields plus `clear`, and `merge_preferences` merges them in code;
+  - `ChatResponse.active_filters`;
+  - chip removal re-runs the search with no LLM call;
+  - the prompt is rewritten and stays under 40 lines.
+- [ ] **9. Measure:**
+  - live retrieval on 100 queries (about 220K tokens; no drop below 0.958 / 0.926);
+  - live baseline (about 180K tokens; no regression against step 1);
+  - prompt and agent-code line counts;
+  - the Mermaid graph goes to `docs/architecture/graph.md`.
 - [ ] Fill in Results, update the ROADMAP and run `/handoff`.
 
 ## Acceptance criteria

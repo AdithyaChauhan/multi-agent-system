@@ -14,6 +14,12 @@ services running and the restored baseline database):
 
     python eval/run_baseline.py --label before --runs 3
     python eval/run_baseline.py --label step1 --only p01,p02 --runs 1
+    python eval/run_baseline.py --label step2 --mode replay      # 0 tokens: reuse recorded answers
+
+Modes: `record` (default) calls Groq and saves every answer in eval/cassettes/baseline_<model>.json;
+`replay` answers from that file and counts any call it has no answer for (a changed prompt);
+`live` calls Groq without saving. Record and replay use per-conversation ticket ids, so a reply
+that quotes a ticket id is the same in both.
 
 Environment:
     BASELINE_DATABASE_URL  default postgresql://postgres:mypassword@localhost:5433/multi_agent_baseline
@@ -25,6 +31,7 @@ to eval/baseline_runs/<label>_summary.json.
 """
 
 import argparse
+import hashlib
 import json
 import logging
 import math
@@ -36,12 +43,14 @@ import sys
 import tempfile
 import threading
 import time
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 CONVERSATIONS_FILE = REPO / "eval" / "baseline_conversations.json"
 OUT_DIR = REPO / "eval" / "baseline_runs"
+CASSETTE_DIR = REPO / "eval" / "cassettes"
 DEFAULT_DB = "postgresql://postgres:mypassword@localhost:5433/multi_agent_baseline"
 
 # Orders the support/order conversations rely on. Reset before every signed-in conversation
@@ -199,6 +208,53 @@ def pace(tpm_budget: int, estimate: int) -> float:
     return waited
 
 
+# ── Record / replay ────────────────────────────────────────────────────────────
+
+
+def cassette_for(model: str) -> Path:
+    return CASSETTE_DIR / f"baseline_{re.sub(r'[^a-z0-9]+', '-', model.lower()).strip('-')}.json"
+
+
+class TicketIds:
+    """Stands in for `uuid` in support_tools: ticket ids that depend only on the conversation."""
+
+    def __init__(self):
+        self.conversation = ""
+        self.count = 0
+
+    def start(self, conversation_id: str) -> None:
+        self.conversation, self.count = conversation_id, 0
+
+    def uuid4(self):
+        self.count += 1
+        return uuid.UUID(hashlib.md5(f"{self.conversation}-{self.count}".encode()).hexdigest())
+
+
+TICKET_IDS = TicketIds()
+MISSES = {"count": 0}
+
+
+def install_cassette(mode: str, path: Path) -> None:
+    os.environ["LLM_CASSETTE_MODE"] = "" if mode == "live" else mode
+    os.environ["LLM_CASSETTE_PATH"] = str(path)
+    if mode == "live":
+        return
+    import app.core.llm as llm
+    import app.tools.support_tools as support_tools
+
+    support_tools.uuid = TICKET_IDS
+    original = llm._replay
+
+    def counted(messages, schema=None):
+        try:
+            return original(messages, schema)
+        except llm.CassetteMiss:
+            MISSES["count"] += 1
+            raise
+
+    llm._replay = counted
+
+
 # ── App wiring ─────────────────────────────────────────────────────────────────
 
 
@@ -299,6 +355,40 @@ def _alnum(s) -> str:
     return re.sub(r"[^a-z0-9]", "", _norm(s))
 
 
+# Expected products are written as shopper words ("air fryer", "monitor"). A word the catalog knows
+# is compared by product type (and kind, when both sides name one); any other word must appear in
+# the text, so a product the catalog has no type for (one Acer monitor) can still be checked.
+
+
+def _resolve(word):
+    from app.catalog.runtime import get_catalog
+
+    return get_catalog().resolve_product(word)
+
+
+def same_product(got, expected: str) -> bool:
+    """Did the search preferences name the expected product?"""
+    if not got:
+        return False
+    want_type, want_kind = _resolve(expected)
+    if want_type is None:
+        return _norm(expected) in _norm(got)
+    got_type, got_kind = _resolve(got)
+    if got_type is None or got_type.name != want_type.name:
+        return False
+    return not (want_kind and got_kind) or want_kind == got_kind
+
+
+def shows_product(product: dict, expected: str) -> bool:
+    """Is a shown product the expected kind of thing?"""
+    want_type, want_kind = _resolve(expected)
+    if want_type is None:
+        return _norm(expected) in _norm(product.get("name"))
+    if product.get("type") != want_type.name:
+        return False
+    return not want_kind or (product.get("attributes") or {}).get("kind") == want_kind
+
+
 def has_product_listing(text: str) -> bool:
     return "₹" in text and bool(re.search(r"(?m)^\s*1\.\s+\S", text))
 
@@ -345,12 +435,10 @@ def check_turn(expect: dict, *, text, status_code, state, route, api_json, user_
     if state:
         prefs = state.get("original_preferences") or state.get("preferences") or {}
 
-    if "category" in expect and _norm(prefs.get("category")) != _norm(expect["category"]):
-        failures.append(f"category {prefs.get('category')!r} != {expect['category']!r}")
-    if "subcategory" in expect:
-        allowed = expect["subcategory"] if isinstance(expect["subcategory"], list) else [expect["subcategory"]]
-        if _norm(prefs.get("subcategory")) not in [_norm(a) for a in allowed]:
-            failures.append(f"subcategory {prefs.get('subcategory')!r} not in {allowed}")
+    if "product" in expect:
+        allowed = expect["product"] if isinstance(expect["product"], list) else [expect["product"]]
+        if not any(same_product(prefs.get("product"), a) for a in allowed):
+            failures.append(f"product {prefs.get('product')!r} is not {allowed}")
     if "brand" in expect:
         got, want = _alnum(prefs.get("brand")), _alnum(expect["brand"])
         if not got or not (want in got or got in want):
@@ -378,12 +466,12 @@ def check_turn(expect: dict, *, text, status_code, state, route, api_json, user_
             failures.append("ranked_products empty")
     if expect.get("no_results") and has_product_listing(text):
         failures.append("reply lists products but none were expected")
-    if "result_subcategory" in expect and shown:
-        allowed = [_norm(a) for a in expect["result_subcategory"]]
-        hits = sum(1 for p in shown if _norm(p.get("subcategory")) in allowed or _norm(p.get("type")) in allowed)
+    if "result_product" in expect and shown:
+        allowed = expect["result_product"]
+        hits = sum(1 for p in shown if any(shows_product(p, a) for a in allowed))
         if hits < math.ceil(len(shown) / 2):
-            got = [p.get("subcategory") for p in shown]
-            failures.append(f"shown subcategories {got} mostly not in {expect['result_subcategory']}")
+            got = [f"{p.get('type')}/{(p.get('attributes') or {}).get('kind')}" for p in shown]
+            failures.append(f"shown products {got} mostly not {allowed}")
     if "result_brand" in expect and shown:
         want = _alnum(expect["result_brand"])
         bad = [
@@ -444,6 +532,7 @@ def run_conversation(client, conv, router_rec, reroute_rec, phrase_sets, args):
     signed_in = not user_id.startswith("anon-")
     if signed_in:
         reset_fixtures()
+    TICKET_IDS.start(conv["id"])
 
     turns_out = []
     session_id = None
@@ -451,7 +540,7 @@ def run_conversation(client, conv, router_rec, reroute_rec, phrase_sets, args):
         if turn.get("new_session"):
             session_id = None
             user_id = f"{user_id}-2" if not signed_in else user_id
-        estimate = args.turn_token_estimate
+        estimate = 0 if args.mode == "replay" else args.turn_token_estimate
         paced = pace(args.tpm_budget, estimate)
 
         router_rec.last = None
@@ -607,10 +696,16 @@ def main() -> int:
     parser.add_argument("--env-file", default="", help="load environment variables from this .env file")
     parser.add_argument("--model", default="", help="Groq model for this measurement (default: the app's GROQ_MODEL)")
     parser.add_argument("--exclude", default="", help="comma-separated conversation ids to skip")
+    parser.add_argument("--mode", choices=["record", "replay", "live"], default="record")
+    parser.add_argument("--cassette", default="", help="cassette file (default eval/cassettes/baseline_<model>.json)")
     args = parser.parse_args()
 
     configure_environment(args)
     install_meter()
+    from app.core.config import GROQ_MODEL as model
+
+    cassette = Path(args.cassette) if args.cassette else cassette_for(model)
+    install_cassette(args.mode, cassette)
     app_main, router_rec, reroute_rec = load_app()
     from fastapi.testclient import TestClient
 
@@ -628,7 +723,7 @@ def main() -> int:
         convs = [c for c in convs if c["id"] not in skip]
     from app.core.config import GROQ_MODEL
 
-    print(f"model={GROQ_MODEL} conversations={len(convs)}", flush=True)
+    print(f"model={GROQ_MODEL} mode={args.mode} conversations={len(convs)}", flush=True)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     run_summaries = []
@@ -663,6 +758,7 @@ def main() -> int:
                 "label": args.label,
                 "run": run_idx,
                 "model": GROQ_MODEL,
+                "mode": args.mode,
                 "git_sha": git_sha(),
                 "started_at": started,
                 "finished_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -703,10 +799,15 @@ def main() -> int:
                 statistics.mean(s["seconds_per_turn_median"] for s in run_summaries), 2
             ),
             "rate_limited_calls": sum(s["rate_limited_calls"] for s in run_summaries),
+            "mode": args.mode,
+            "cassette_misses": MISSES["count"],
             "failed_conversations_per_run": [s["failed_conversations"] for s in run_summaries],
         }
         (OUT_DIR / f"{args.label}_summary.json").write_text(json.dumps(agg, indent=1), encoding="utf-8")
         print(json.dumps(agg, indent=1))
+    if MISSES["count"]:
+        print(f"REPLAY INCOMPLETE: {MISSES['count']} model calls had no recorded answer (a prompt changed?)")
+        return 1
     return 0
 
 
