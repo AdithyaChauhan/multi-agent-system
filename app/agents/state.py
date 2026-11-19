@@ -18,8 +18,11 @@ class RouterState(TypedDict, total=False):
     support_issue: Optional[dict]
     route: Optional[str]  # set by terminal router nodes: clarify / sign_in / safety
 
+    filter_edit: Optional[dict]  # a removed filter chip: {field, value}; skips the router's model call
+
     # Agent outputs
     preferences: Optional[dict]  # the shopper's current search filters, kept for the next turn
+    active_filters: Optional[List[dict]]  # those filters as chips
     ranked_products: Optional[List[dict]]
     relaxed_filters: Optional[List[str]]
     order_data: Optional[dict]
@@ -38,10 +41,12 @@ class RouterState(TypedDict, total=False):
 class ProductInput(TypedDict, total=False):
     user_message: str
     preferences: Optional[dict]
+    filter_edit: Optional[dict]
 
 
 class ProductOutput(TypedDict, total=False):
     preferences: Optional[dict]
+    active_filters: Optional[List[dict]]
     ranked_products: Optional[List[dict]]
     relaxed_filters: Optional[List[str]]
     final_response: Optional[str]

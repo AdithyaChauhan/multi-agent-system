@@ -225,6 +225,19 @@
         @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
         .typing .step-label { margin-left: 8px; font-size: 0.85rem; color: #6b7280; }
 
+        /* ── Active search filters ── */
+        .filter-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .filter-chip {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 10px; border-radius: 999px; font-size: 0.8rem;
+            background: #eef2ff; color: #3730a3; border: 1px solid #c7d2fe;
+        }
+        .chip-remove {
+            border: none; background: none; cursor: pointer; padding: 0 0 0 2px;
+            color: #6366f1; font-size: 0.75rem; line-height: 1;
+        }
+        .chip-remove:hover { color: #dc2626; }
+
         /* ── Cancel confirm buttons ── */
         .confirm-actions {
             display: flex; gap: 8px; margin-top: 10px;
@@ -627,12 +640,38 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
-        async function sendMessage() {
-            const message = messageInput.value.trim();
+        // Active search filters as chips under a product reply; removing one searches again.
+        function addFilterChips(msgRow, chips) {
+            const row = document.createElement('div');
+            row.className = 'filter-chips';
+            for (const chip of chips) {
+                const el = document.createElement('span');
+                el.className = 'filter-chip';
+                el.textContent = chip.label;
+                if (chip.removable) {
+                    const x = document.createElement('button');
+                    x.className = 'chip-remove';
+                    x.title = `Remove ${chip.label}`;
+                    x.textContent = '✕';
+                    x.addEventListener('click', () => {
+                        row.remove();
+                        const edit = { field: chip.field };
+                        if (chip.value !== undefined) edit.value = chip.value;
+                        sendMessage(`Remove ${chip.label}`, { remove_filter: edit });
+                    });
+                    el.appendChild(x);
+                }
+                row.appendChild(el);
+            }
+            msgRow.querySelector('.msg-col').appendChild(row);
+        }
+
+        async function sendMessage(text, extra) {
+            const message = (typeof text === 'string' ? text : messageInput.value).trim();
             if (!message) return;
 
             addMessage(message, 'user');
-            messageInput.value = '';
+            if (typeof text !== 'string') messageInput.value = '';
             sendButton.disabled = true;
 
             const typingRow = document.createElement('div');
@@ -653,7 +692,7 @@
                 if (token && !isGuest) headers['Authorization'] = `Bearer ${token}`;
                 if (sessionId) headers['X-Session-ID'] = sessionId;
 
-                const response = await postChat({ message }, headers, (label) => showStep(typingBubble, label));
+                const response = await postChat({ message, ...(extra || {}) }, headers, (label) => showStep(typingBubble, label));
                 const data = response.data;
                 typingRow.remove();
 
@@ -663,6 +702,8 @@
                     const msgRow = addMessage(data.response, 'assistant', data.run_id || null);
                     if (data.action && data.action.type === 'confirm_cancel') {
                         addConfirmButtons(msgRow);
+                    } else if (data.active_filters && data.active_filters.length) {
+                        addFilterChips(msgRow, data.active_filters);
                     }
                 } else if (response.status === 401) {
                     localStorage.removeItem('access_token');

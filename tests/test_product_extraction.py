@@ -31,10 +31,9 @@ class TestSchema:
 
 
 class TestExtractPreferences:
-    def test_previous_filters_are_sent_and_complete_filters_returned(self):
+    def test_filters_so_far_are_sent_and_only_the_change_comes_back(self):
         previous = {"product": "tv", "max_price": 15000, "brand": None}
-        out = {"product": "tv", "brand": "Samsung", "max_price": 15000}
-        result, call = _extract("what about Samsung", out, previous)
+        result, call = _extract("what about Samsung", {"brand": "Samsung"}, previous)
 
         human = call.call_args.args[2][1].content
         assert '"product": "tv"' in human and '"brand"' not in human  # only non-empty previous filters
@@ -97,3 +96,66 @@ class TestRespondUnavailable:
             reply = pa.respond_unavailable({"not_carried": {"item": "chairs", "suggestion": None}})
         assert reply["final_response"].startswith("Sorry, we don't carry chairs.")
         assert "Electronics" in reply["final_response"]
+
+
+class TestMergePreferences:
+    """Code keeps the conversation's filters; the model reports only what the message changes."""
+
+    PREV = {"product": "tv", "features": ["4k"], "brand": "Sony", "max_price": 30000}
+
+    def test_a_refinement_keeps_the_product(self):
+        merged = pa.merge_preferences(self.PREV, {"brand": "Samsung"})
+        assert (merged["product"], merged["brand"], merged["max_price"], merged["features"]) == (
+            "tv",
+            "Samsung",
+            30000,
+            ["4k"],
+        )
+
+    def test_a_product_of_another_type_starts_fresh(self):
+        merged = pa.merge_preferences(self.PREV, {"product": "headphones", "max_price": 2000})
+        assert merged == {**pa.EMPTY_PREFERENCES, "product": "headphones", "max_price": 2000}
+
+    def test_the_same_type_in_other_words_keeps_the_filters(self):
+        merged = pa.merge_preferences(self.PREV, {"product": "television"})
+        assert (merged["product"], merged["brand"]) == ("television", "Sony")
+
+    def test_clear_drops_filters_and_features_accumulate(self):
+        merged = pa.merge_preferences(
+            self.PREV, {"clear": ["brand", "product", "nonsense"], "features": ["4K", "55 inch"]}
+        )
+        assert merged["brand"] is None and merged["product"] == "tv"  # the product can't be cleared
+        assert merged["features"] == ["4k", "55 inch"]  # "4K" is already there
+
+    def test_a_brand_before_any_product_is_kept(self):
+        assert pa.merge_preferences({"brand": "Sony"}, {"product": "headphones"})["brand"] == "Sony"
+
+
+class TestFilterChips:
+    def test_chips_for_every_filter_and_the_product_is_fixed(self):
+        prefs = {**pa.EMPTY_PREFERENCES, "product": "tv", "features": ["4k"], "brand": "Sony", "max_price": 30000}
+        chips = pa.active_filters({**prefs, "min_rating": 4.0})
+        assert [c["label"] for c in chips] == ["tv", "4k", "Sony", "under ₹30,000", "4★ and up"]
+        assert [c["removable"] for c in chips] == [False, True, True, True, True]
+
+    def test_removing_a_chip_drops_that_filter_only(self):
+        prefs = {"product": "tv", "features": ["4k", "smart"], "brand": "Sony"}
+        out = pa.apply_filter_edit({"preferences": prefs, "filter_edit": {"field": "features", "value": "4k"}})
+        assert out["preferences"]["features"] == ["smart"] and out["preferences"]["brand"] == "Sony"
+        out = pa.apply_filter_edit({"preferences": prefs, "filter_edit": {"field": "brand"}})
+        assert out["preferences"]["brand"] is None
+
+    def test_a_chip_for_an_unknown_field_changes_nothing(self):
+        prefs = {"product": "tv", "brand": "Sony"}
+        out = pa.apply_filter_edit({"preferences": prefs, "filter_edit": {"field": "product"}})
+        assert out["preferences"]["product"] == "tv" and out["preferences"]["brand"] == "Sony"
+
+    def test_chip_removal_searches_again_without_the_model(self):
+        tv = {"product_id": "T1", "name": "Sony TV", "brand": "Sony", "price": 20000, "rating": 4.1, "type": "tv"}
+        state = {"preferences": {"product": "tv", "brand": "Sony"}, "filter_edit": {"field": "brand"}}
+        with patch.object(pa, "call_llm") as model, patch.object(pa, "search_products", return_value=[tv]) as search:
+            out = pa.product_agent_graph.invoke(state)
+        model.assert_not_called()
+        assert search.call_args.kwargs["brand"] is None
+        assert out["ranked_products"][0]["product_id"] == "T1" and "Sony TV" in out["final_response"]
+        assert [c["field"] for c in out["active_filters"]] == ["product"]

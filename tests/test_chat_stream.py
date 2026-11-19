@@ -61,3 +61,24 @@ def test_a_failing_turn_ends_with_an_error_event(client):
 def test_a_refused_confirm_is_a_single_reply(client):
     events = _events(client.post("/chat/stream", json={"message": "Yes", "confirm": True}).text)
     assert [name for name, _ in events] == ["reply"] and "sign in" in events[0][1]["response"]
+
+
+def test_chips_come_back_and_removing_one_skips_every_model_call(client, yaml_catalog):
+    with patch.object(router, "call_llm", return_value=RouteDecision(intent="product")), patch.object(
+        pa, "call_llm", side_effect=[pa.ProductSearch(product="mouse", brand="Logitech"), pa.Ranking(same_kind=[1])]
+    ), patch.object(pa, "search_products", return_value=[MOUSE]):
+        first = client.post("/chat", json={"message": "logitech mouse"}, headers={"x-user-id": "chip-user"}).json()
+    assert [c["label"] for c in first["active_filters"]] == ["mouse", "Logitech"]
+
+    with patch.object(router, "call_llm") as router_model, patch.object(pa, "call_llm") as product_model, patch.object(
+        pa, "search_products", return_value=[MOUSE]
+    ) as search:
+        second = client.post(
+            "/chat",
+            json={"message": "Remove Logitech", "remove_filter": {"field": "brand"}, "session_id": first["session_id"]},
+            headers={"x-user-id": "chip-user"},
+        ).json()
+    router_model.assert_not_called()
+    product_model.assert_not_called()
+    assert search.call_args.kwargs["brand"] is None and search.call_args.kwargs["product_type"] == "mouse"
+    assert [c["label"] for c in second["active_filters"]] == ["mouse"]

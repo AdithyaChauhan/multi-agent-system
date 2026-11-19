@@ -8,6 +8,8 @@ class ChatRequest(BaseModel):
     session_id: Optional[str] = None
     # The answer to a paused question (the Yes / No buttons for "cancel this order?").
     confirm: Optional[bool] = None
+    # A filter chip the shopper removed: {"field": "brand"} or {"field": "features", "value": "4k"}.
+    remove_filter: Optional[dict] = None
 
 
 class MessageResponse(BaseModel):
@@ -34,3 +36,4 @@ class ChatResponse(BaseModel):
     response: str
     action: Optional[dict] = None
     run_id: Optional[str] = None
+    active_filters: Optional[List[dict]] = None  # the product search's filters, shown as chips

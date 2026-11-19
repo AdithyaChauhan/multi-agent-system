@@ -2,12 +2,13 @@ import json
 from typing import List, Literal, Optional
 
 from langchain_core.messages import SystemMessage, HumanMessage
-from langgraph.graph import StateGraph, END
+from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, Field, field_validator
 
 from app.agents.state import ProductInput, ProductOutput, ProductState, SearchInput, SearchOutput, SearchState
 from app.catalog.features import features_to_filters, match_attributes
 from app.catalog.runtime import catalog_blurb, get_catalog
+from app.catalog.schema import norm
 from app.tools.product_tools import search_products
 from app.core.llm import call_llm
 from app.core.logger import get_logger, get_request_id
@@ -20,7 +21,7 @@ CATALOG_BLURB = catalog_blurb()
 
 
 class ProductSearch(BaseModel):
-    """Catalog search filters for what the shopper wants now."""
+    """What this message changes in the shopper's search filters. Code merges it into the previous ones."""
 
     product: Optional[str] = Field(None, description="the product: a type or kind from the list, or the shopper's word")
     features: List[str] = Field(default_factory=list, description="features and specs asked for")
@@ -29,13 +30,16 @@ class ProductSearch(BaseModel):
     min_price: Optional[int] = Field(None, description="rupees")
     min_rating: Optional[float] = Field(None, description="out of 5")
     not_carried: Optional[str] = Field(None, description="what they asked for, if we don't sell that kind of thing")
+    clear: List[str] = Field(
+        default_factory=list, description="filters the shopper drops: features, brand, prices, rating"
+    )
 
     @field_validator("product", "brand", "not_carried", mode="before")
     @classmethod
     def _text_or_none(cls, value):
         return value.strip() or None if isinstance(value, str) else None
 
-    @field_validator("features", mode="before")
+    @field_validator("features", "clear", mode="before")
     @classmethod
     def _list(cls, value):
         return [k.strip() for k in value if isinstance(k, str) and k.strip()] if isinstance(value, list) else []
@@ -55,8 +59,61 @@ EMPTY_PREFERENCES = {
 }
 
 
+# Filters a shopper can drop, by name ("any brand" → clear brand). The product itself is replaced, not dropped.
+FILTER_FIELDS = ("features", "brand", "max_price", "min_price", "min_rating")
+
+
+def _different_product(old: Optional[str], new: str) -> bool:
+    """A product of another type ("earphones" after "smartwatch") starts a new search."""
+    if not old:
+        return False
+    catalog = get_catalog()
+    (a, _), (b, _) = catalog.resolve_product(old), catalog.resolve_product(new)
+    if a is not None and b is not None:
+        return a.name != b.name
+    return norm(old) != norm(new)
+
+
+def merge_preferences(previous: dict, patch: dict) -> dict:
+    """The conversation's filters, kept by code: the model only reports what the new message changes.
+
+    A different product starts fresh (the old brand, prices and features go, unless restated); `clear`
+    drops filters; new features are added to the ones already asked for.
+    """
+    merged = {**EMPTY_PREFERENCES, **{k: v for k, v in (previous or {}).items() if k in EMPTY_PREFERENCES}}
+    product = patch.get("product")
+    if product and _different_product(merged["product"], product):
+        merged = dict(EMPTY_PREFERENCES)
+    if product:
+        merged["product"] = product
+    for name in patch.get("clear") or []:
+        if name in FILTER_FIELDS:
+            merged[name] = [] if name == "features" else None
+    for name in ("brand", "max_price", "min_price", "min_rating"):
+        if patch.get(name) is not None:
+            merged[name] = patch[name]
+    have = list(merged["features"] or [])
+    merged["features"] = have + [f for f in patch.get("features") or [] if norm(f) not in {norm(h) for h in have}]
+    return merged
+
+
+def active_filters(prefs: dict) -> list:
+    """The filters shown as chips under the reply. Every chip but the product can be removed."""
+    chips = [{"field": "product", "label": prefs["product"], "removable": False}] if prefs.get("product") else []
+    chips += [{"field": "features", "value": f, "label": f, "removable": True} for f in prefs.get("features") or []]
+    if prefs.get("brand"):
+        chips.append({"field": "brand", "label": prefs["brand"], "removable": True})
+    if prefs.get("max_price"):
+        chips.append({"field": "max_price", "label": f"under ₹{prefs['max_price']:,}", "removable": True})
+    if prefs.get("min_price"):
+        chips.append({"field": "min_price", "label": f"over ₹{prefs['min_price']:,}", "removable": True})
+    if prefs.get("min_rating"):
+        chips.append({"field": "min_rating", "label": f"{prefs['min_rating']:g}★ and up", "removable": True})
+    return chips
+
+
 def extract_preferences(state: ProductState) -> dict:
-    """LLM node: previous filters + new message → complete filters for what the shopper wants now."""
+    """LLM node: previous filters + new message → what changed; code merges it into the filters."""
     previous = {k: v for k, v in (state.get("preferences") or {}).items() if k in EMPTY_PREFERENCES and v}
     message = state.get("user_message", "")
     catalog = get_catalog()
@@ -65,34 +122,55 @@ def extract_preferences(state: ProductState) -> dict:
         "extract_preferences",
         [
             SystemMessage(content=load_prompt("product_extraction", types=catalog.type_lines())),
-            HumanMessage(content=f"Previous: {json.dumps(previous)} | Message: {message}"),
+            HumanMessage(content=f"So far: {json.dumps(previous)} | Message: {message}"),
         ],
         schema=ProductSearch,
     )
     out = parsed.model_dump() if parsed is not None else {}
-    preferences = {k: out.get(k, v) for k, v in EMPTY_PREFERENCES.items()}
-    preferences["features"] = out.get("features") or []
 
     # Whether we sell something is decided by the catalog, not the model: a type we stock but don't
     # sell (phones, laptops, tablets) gets its suggestion, and a "not carried" word that names a type
-    # we do sell (the model said we don't carry geysers) is ignored.
-    ptype, _ = catalog.resolve_product(preferences["product"])
+    # we do sell (the model said we don't carry geysers) is searched for instead.
+    ptype, _ = catalog.resolve_product(out.get("product"))
     claimed, _ = catalog.resolve_product(out.get("not_carried"))
     not_carried = None
-    for word, found in ((preferences["product"], ptype), (out.get("not_carried"), claimed)):
+    for word, found in ((out.get("product"), ptype), (out.get("not_carried"), claimed)):
         if found is not None and not found.served:
             not_carried = {"item": word, "suggestion": found.suggestion}
             break
     if not_carried is None and out.get("not_carried") and ptype is None and claimed is None:
         not_carried = {"item": out["not_carried"], "suggestion": None}
-    if claimed is not None and claimed.served and not preferences["product"]:
-        preferences["product"] = out["not_carried"]  # search for it instead of refusing
-    logger.info(f"request_id={get_request_id()} | EXTRACTED: {json.dumps(preferences)} | not_carried={not_carried}")
+    if claimed is not None and claimed.served and not out.get("product"):
+        out["product"] = out["not_carried"]
+    preferences = merge_preferences(state.get("preferences") or {}, out)
+    logger.info(
+        f"request_id={get_request_id()} | EXTRACTED: {json.dumps(out)} | MERGED: {json.dumps(preferences)}"
+        f" | not_carried={not_carried}"
+    )
     return {
         "preferences": preferences,
         "not_carried": not_carried,
         "relaxed_filters": [],
+        "active_filters": [] if not_carried else active_filters(preferences),
     }
+
+
+def apply_filter_edit(state: ProductState) -> dict:
+    """A chip was removed: drop that filter and search again. No model call."""
+    edit = state.get("filter_edit") or {}
+    prefs = {**EMPTY_PREFERENCES, **(state.get("preferences") or {})}
+    field = edit.get("field")
+    if field == "features":
+        prefs["features"] = [f for f in prefs.get("features") or [] if f != edit.get("value")]
+    elif field in FILTER_FIELDS:
+        prefs[field] = None
+    else:
+        logger.info(f"request_id={get_request_id()} | filter edit ignored | {edit}")
+    return {"preferences": prefs, "not_carried": None, "relaxed_filters": [], "active_filters": active_filters(prefs)}
+
+
+def route_entry(state: ProductState) -> Literal["edit", "extract"]:
+    return "edit" if state.get("filter_edit") else "extract"
 
 
 def ask_for_preferences(state: ProductState) -> dict:
@@ -178,7 +256,7 @@ def next_relaxation(filters: dict, relaxed: list) -> Optional[str]:
     return None
 
 
-def route_after_search(state: SearchState) -> Literal["loosen", "done"]:
+def route_after_loosen_check(state: SearchState) -> Literal["loosen", "done"]:
     if state.get("search_results"):
         return "done"
     return "loosen" if next_relaxation(state["search_filters"], state.get("relaxed_filters") or []) else "done"
@@ -204,7 +282,7 @@ def build_search_loop():
     graph.add_node("loosen", loosen)
     graph.set_entry_point("plan_search")
     graph.add_edge("plan_search", "search")
-    graph.add_conditional_edges("search", route_after_search, {"loosen": "loosen", "done": END})
+    graph.add_conditional_edges("search", route_after_loosen_check, {"loosen": "loosen", "done": END})
     graph.add_edge("loosen", "search")
     return graph.compile()
 
@@ -265,6 +343,18 @@ def score(product: dict, prefs: dict) -> float:
     wanted = [w.lower() for w in [prefs.get("brand"), *(prefs.get("features") or [])] if w]
     match = sum(w in text for w in wanted) / len(wanted) if wanted else 0.5
     return round(0.5 * rating + 0.25 * price_fit + 0.25 * match, 3)
+
+
+def order_by_score(state: ProductState) -> dict:
+    """Ranking without the model, after a chip removal: the filters are the shopper's own, so every
+    result already is what they asked for; order them by rating, budget fit and feature match."""
+    prefs = state.get("preferences") or {}
+    scored = [{**p, "llm_tier": 0, "score": score(p, prefs)} for p in (state.get("search_results") or [])[:10]]
+    return {"ranked_products": sorted(scored, key=lambda p: -p["score"])[:5]}
+
+
+def route_after_search(state: ProductState) -> Literal["rank", "score"]:
+    return "score" if state.get("filter_edit") else "rank"
 
 
 def route_after_rank(state: ProductState) -> Literal["recommend", "no_results"]:
@@ -334,6 +424,8 @@ def respond_no_results(state: ProductState) -> dict:
 def build_product_agent_graph():
     graph = StateGraph(ProductState, input_schema=ProductInput, output_schema=ProductOutput)
     graph.add_node("extract_preferences", extract_preferences)
+    graph.add_node("apply_filter_edit", apply_filter_edit)
+    graph.add_node("order_by_score", order_by_score)
     graph.add_node("ask_for_preferences", ask_for_preferences)
     graph.add_node("respond_unavailable", respond_unavailable)
     graph.add_node("find_products", find_products)
@@ -341,16 +433,16 @@ def build_product_agent_graph():
     graph.add_node("format_recommendations", format_recommendations)
     graph.add_node("respond_no_results", respond_no_results)
 
-    graph.set_entry_point("extract_preferences")
+    graph.add_conditional_edges(START, route_entry, {"edit": "apply_filter_edit", "extract": "extract_preferences"})
+    after_filters = {"search": "find_products", "ask": "ask_for_preferences", "unavailable": "respond_unavailable"}
+    graph.add_conditional_edges("extract_preferences", route_after_extraction, after_filters)
+    graph.add_conditional_edges("apply_filter_edit", route_after_extraction, after_filters)
     graph.add_conditional_edges(
-        "extract_preferences",
-        route_after_extraction,
-        {"search": "find_products", "ask": "ask_for_preferences", "unavailable": "respond_unavailable"},
+        "find_products", route_after_search, {"rank": "rank_products", "score": "order_by_score"}
     )
-    graph.add_edge("find_products", "rank_products")
-    graph.add_conditional_edges(
-        "rank_products", route_after_rank, {"recommend": "format_recommendations", "no_results": "respond_no_results"}
-    )
+    after_rank = {"recommend": "format_recommendations", "no_results": "respond_no_results"}
+    graph.add_conditional_edges("rank_products", route_after_rank, after_rank)
+    graph.add_conditional_edges("order_by_score", route_after_rank, after_rank)
     for node in ("ask_for_preferences", "respond_unavailable", "format_recommendations", "respond_no_results"):
         graph.add_edge(node, END)
     return graph.compile()

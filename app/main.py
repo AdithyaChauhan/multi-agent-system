@@ -350,7 +350,9 @@ def start_turn(db, request_obj: Request, chat_request: ChatRequest, x_session_id
     turn = Turn(user_id=user_id, session=session, config=config)
     if chat_request.confirm is None:
         history = load_conversation_history(db, session.session_id)
-        turn.graph_input = new_turn(chat_request.message, user_id, session.session_id, history)
+        turn.graph_input = new_turn(
+            chat_request.message, user_id, session.session_id, history, filter_edit=chat_request.remove_filter
+        )
     else:
         turn.refusal = check_resume(session, user_id, thread)
         if not turn.refusal:
@@ -368,7 +370,12 @@ def finish_turn(db, turn: Turn, chat_request: ChatRequest, graph_result: dict, r
         threading.Thread(target=_submit_turn_feedback, args=(run_id, chat_request.message, text), daemon=True).start()
     _store_reply(db, turn.session, text, run_id)
     return ChatResponse(
-        session_id=turn.session.session_id, user_id=turn.user_id, response=text, action=action, run_id=run_id
+        session_id=turn.session.session_id,
+        user_id=turn.user_id,
+        response=text,
+        action=action,
+        run_id=run_id,
+        active_filters=graph_result.get("active_filters"),
     )
 
 

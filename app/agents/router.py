@@ -2,7 +2,7 @@ import re
 from typing import Literal, Optional
 
 from langchain_core.messages import HumanMessage, SystemMessage
-from langgraph.graph import END, StateGraph
+from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, Field
 
 from app.agents.escalation import escalation_graph
@@ -152,7 +152,7 @@ def safety_reply(state: RouterState) -> dict:
     return {"final_response": SAFETY_RESPONSE}
 
 
-def new_turn(user_message: str, user_id: str, session_id: str, conversation_history: list) -> dict:
+def new_turn(user_message: str, user_id: str, session_id: str, conversation_history: list, filter_edit=None) -> dict:
     """Graph input for one chat turn. The checkpoint carries the conversation's state between turns;
     everything the last turn decided or answered is cleared, so only `preferences` carries over."""
     return {
@@ -160,12 +160,14 @@ def new_turn(user_message: str, user_id: str, session_id: str, conversation_hist
         "user_id": user_id,
         "session_id": session_id,
         "conversation_history": conversation_history,
+        "filter_edit": filter_edit,
         "intent": None,
         "order_id": None,
         "risk": None,
         "support_issue": None,
         "route": None,
         "ranked_products": None,
+        "active_filters": None,
         "relaxed_filters": None,
         "order_data": None,
         "support_order": None,
@@ -187,7 +189,10 @@ def build_router_graph(checkpointer=None):
     graph.add_node("order_agent", order_agent_graph)
     graph.add_node("support_agent", support_agent_graph)
 
-    graph.set_entry_point("classify")
+    # A removed filter chip goes straight to the product agent: nothing to classify.
+    graph.add_conditional_edges(
+        START, lambda s: "product_agent" if s.get("filter_edit") else "classify", ["product_agent", "classify"]
+    )
     graph.add_conditional_edges(
         "classify",
         route,
