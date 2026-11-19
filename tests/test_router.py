@@ -139,3 +139,39 @@ def test_current_message_is_not_repeated_in_history():
     _, call = _classify(RouteDecision(intent="product"), user_message="4k monitor", conversation_history=history)
     assert "Recent conversation" not in call.call_args.args[2][1].content
 
+
+class TestCheckpointedThread:
+    """One graph thread per chat session: filters carry over, a turn's answer doesn't."""
+
+    TV = {"product_id": "T1", "name": "TV", "brand": "Samsung", "price": 20000, "rating": 4.0, "type": "tv"}
+
+    def _turn(self, graph, message, decision, extracted=None):
+        import app.agents.product_agent as pa
+
+        replies = [extracted, pa.Ranking(same_kind=[1])] if extracted else []
+        with patch.object(router, "call_llm", return_value=decision), patch.object(
+            pa, "call_llm", side_effect=replies
+        ) as call, patch.object(pa, "search_products", return_value=[self.TV]):
+            out = graph.invoke(router.new_turn(message, "anon-1", "s1", []), {"configurable": {"thread_id": "s1"}})
+        return out, call
+
+    def test_filters_survive_a_restart(self, yaml_catalog):
+        import app.agents.product_agent as pa
+        from langgraph.checkpoint.memory import InMemorySaver
+
+        saver = InMemorySaver()  # stands in for Postgres: shared by both "processes"
+        product = RouteDecision(intent="product")
+        self._turn(router.build_router_graph(saver), "tv", product, pa.ProductSearch(product="tv"))
+        restarted = router.build_router_graph(saver)  # a new graph object, as after an app restart
+        _, call = self._turn(restarted, "what about Samsung", product, pa.ProductSearch(product="tv", brand="Samsung"))
+        assert '"product": "tv"' in call.call_args_list[0].args[2][1].content
+
+    def test_last_turns_answer_is_cleared(self, yaml_catalog):
+        import app.agents.product_agent as pa
+        from langgraph.checkpoint.memory import InMemorySaver
+
+        graph = router.build_router_graph(InMemorySaver())
+        first, _ = self._turn(graph, "hi", RouteDecision(intent="unclear", reply="Hello!"))
+        assert first["route"] == "clarify"
+        second, _ = self._turn(graph, "tv", RouteDecision(intent="product"), pa.ProductSearch(product="tv"))
+        assert second["route"] is None and second["ranked_products"][0]["product_id"] == "T1"

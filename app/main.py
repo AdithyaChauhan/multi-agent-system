@@ -19,10 +19,8 @@ from app.models.user import User
 from app.models.session import Session
 from app.models.message import Message
 
-from app.agents.router import router_graph
+from app.agents.router import new_turn, router_graph
 from app.tools.order_tools import cancel_order_in_db
-
-_session_preferences: dict = {}
 
 from app.schemas.chat import ChatRequest, SessionMessagesResponse, ChatResponse
 from app.core.logger import get_logger, set_request_id, get_request_id
@@ -324,14 +322,11 @@ def chat(
 
         with collect_runs() as cb:
             graph_result = router_graph.invoke(
-                {
-                    "user_message": chat_request.message,
-                    "user_id": user_id,
-                    "session_id": session.session_id,
-                    "conversation_history": conversation_history,
-                    "preferences": _session_preferences.get(session.session_id),
-                },
+                new_turn(chat_request.message, user_id, session.session_id, conversation_history),
                 config={
+                    # One checkpointed graph thread per chat session: search filters carry over
+                    # between turns and survive restarts.
+                    "configurable": {"thread_id": session.session_id},
                     "tags": [f"user:{user_id}", f"session:{session.session_id}"],
                     "metadata": {
                         "user_id": user_id,
@@ -347,9 +342,6 @@ def chat(
 
         langsmith_run_id = str(cb.traced_runs[0].id) if cb.traced_runs else None
         logger.info(f"request_id={get_request_id()} | langsmith_run_id={langsmith_run_id}")
-
-        if graph_result.get("preferences"):
-            _session_preferences[session.session_id] = graph_result["preferences"]
 
         final_response = graph_result.get("final_response") or "Something went wrong."
         logger.info(f"request_id={get_request_id()} | Graph completed | final_response_preview={final_response[:80]}")

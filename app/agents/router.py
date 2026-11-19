@@ -9,6 +9,7 @@ from app.agents.order_agent import order_agent_graph
 from app.agents.product_agent import product_agent_graph
 from app.agents.state import RouterState
 from app.agents.support_agent import support_agent_graph
+from app.core.checkpoint import make_checkpointer
 from app.core.llm import call_llm
 from app.core.logger import get_logger, get_request_id
 from app.core.metrics import agent_requests_total
@@ -145,7 +146,29 @@ def safety_escalation(state: RouterState) -> dict:
     return {"route": "safety", "final_response": SAFETY_RESPONSE}
 
 
-def build_router_graph():
+def new_turn(user_message: str, user_id: str, session_id: str, conversation_history: list) -> dict:
+    """Graph input for one chat turn. The checkpoint carries the conversation's state between turns;
+    everything the last turn decided or answered is cleared, so only `preferences` carries over."""
+    return {
+        "user_message": user_message,
+        "user_id": user_id,
+        "session_id": session_id,
+        "conversation_history": conversation_history,
+        "intent": None,
+        "order_id": None,
+        "risk": None,
+        "support_issue": None,
+        "route": None,
+        "ranked_products": None,
+        "relaxed_filters": None,
+        "order_data": None,
+        "support_order": None,
+        "action_required": None,
+        "final_response": None,
+    }
+
+
+def build_router_graph(checkpointer=None):
     graph = StateGraph(RouterState)
     graph.add_node("classify", classify)
     graph.add_node("clarify", clarify)
@@ -170,7 +193,7 @@ def build_router_graph():
     )
     for node in ("clarify", "sign_in", "safety", "product_agent", "order_agent", "support_agent"):
         graph.add_edge(node, END)
-    return graph.compile()
+    return graph.compile(checkpointer=checkpointer)
 
 
-router_graph = build_router_graph()
+router_graph = build_router_graph(make_checkpointer())
