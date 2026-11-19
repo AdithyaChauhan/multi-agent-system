@@ -1,0 +1,74 @@
+{
+ "label": "v2b-gptoss20b",
+ "parts": {
+  "v2b-gptoss20b-replay": "64 queries replayed at 0 tokens",
+  "v2b-gptoss20b-changed": "q041, q049, q054, q095 re-recorded"
+ },
+ "model": "openai/gpt-oss-20b",
+ "database": "multi_agent_baseline",
+ "summary": {
+  "queries": 68,
+  "scored": 68,
+  "errors": 0,
+  "recall@5": 0.985,
+  "precision@3": 0.966,
+  "mrr": 0.953,
+  "empty_rate": 0.0,
+  "correct_refusal_rate": null,
+  "llm_calls_per_query": 0.147,
+  "tokens_per_query": 135.824,
+  "p50_seconds": 0.02,
+  "p95_seconds": 0.57
+ },
+ "by_tag": {
+  "attribute": {
+   "scored": 23,
+   "recall@5": 1.0,
+   "precision@3": 0.986,
+   "mrr": 0.978,
+   "empty_rate": 0.0
+  },
+  "brand": {
+   "scored": 12,
+   "recall@5": 0.917,
+   "precision@3": 0.917,
+   "mrr": 0.861,
+   "empty_rate": 0.0
+  },
+  "followup": {
+   "scored": 13,
+   "recall@5": 1.0,
+   "precision@3": 0.923,
+   "mrr": 0.872,
+   "empty_rate": 0.0
+  },
+  "plain": {
+   "scored": 20,
+   "recall@5": 1.0,
+   "precision@3": 0.967,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "price": {
+   "scored": 14,
+   "recall@5": 1.0,
+   "precision@3": 0.929,
+   "mrr": 0.881,
+   "empty_rate": 0.0
+  }
+ },
+ "v1_same_queries": {
+  "queries": 68,
+  "scored": 68,
+  "errors": 0,
+  "recall@5": 0.912,
+  "precision@3": 0.902,
+  "mrr": 0.88,
+  "empty_rate": 0.074,
+  "correct_refusal_rate": null,
+  "llm_calls_per_query": 2.353,
+  "tokens_per_query": 2250.868,
+  "p50_seconds": 1.11,
+  "p95_seconds": 1.77
+ }
+}

@@ -1,6 +1,5 @@
 import copy
 import json
-from functools import lru_cache
 from typing import List, Literal, Optional
 
 from langchain_core.messages import SystemMessage, HumanMessage
@@ -8,6 +7,8 @@ from langgraph.graph import StateGraph, END
 from pydantic import BaseModel, Field, field_validator
 
 from app.agents.state import AgentState
+from app.catalog.features import features_to_filters, match_attributes
+from app.catalog.runtime import catalog_blurb, get_catalog
 from app.tools.product_tools import search_products
 from app.core.llm import call_llm
 from app.core.logger import get_logger, get_request_id
@@ -15,167 +16,43 @@ from app.core.prompt_loader import load_prompt
 
 logger = get_logger("app.agents.product_agent")
 
-
-SERVED_CATEGORIES = ("Computers & Accessories", "Electronics", "Home & Kitchen", "Office Products")
-
-# Product kinds that have rows in the DB but are not sold. Exact catalog scope: never offered.
-NOT_SERVED = frozenset(
-    {"smartphone", "laptop", "tablet", "clothing", "shoes", "furniture", "book", "toy", "sports equipment"}
-)
-
-# The only `type` values that refine a subcategory in the catalog (headphones, speakers).
-PRODUCT_TYPES = (
-    "neckband",
-    "tws earbuds",
-    "wired earphones",
-    "over-ear headphones",
-    "bluetooth speaker",
-    "soundbar",
-    "home theatre",
-)
+# What we sell lives in the product_types table (ADR 0005): no catalog constants in code.
+CATALOG_BLURB = catalog_blurb()
 
 
-def _is_served(subcategory: str) -> bool:
-    return subcategory.lower().rstrip("s") not in NOT_SERVED and subcategory.lower() not in NOT_SERVED
+class ProductSearch(BaseModel):
+    """Catalog search filters for what the shopper wants now."""
+
+    product: Optional[str] = Field(None, description="the product: a type or kind from the list, or the shopper's word")
+    features: List[str] = Field(default_factory=list, description="features and specs asked for")
+    brand: Optional[str] = None
+    max_price: Optional[int] = Field(None, description="rupees")
+    min_price: Optional[int] = Field(None, description="rupees")
+    min_rating: Optional[float] = Field(None, description="out of 5")
+    not_carried: Optional[str] = Field(None, description="what they asked for, if we don't sell that kind of thing")
+
+    @field_validator("product", "brand", "not_carried", mode="before")
+    @classmethod
+    def _text_or_none(cls, value):
+        return value.strip() or None if isinstance(value, str) else None
+
+    @field_validator("features", mode="before")
+    @classmethod
+    def _list(cls, value):
+        return [k.strip() for k in value if isinstance(k, str) and k.strip()] if isinstance(value, list) else []
 
 
-@lru_cache(maxsize=1)
-def load_catalog() -> dict:
-    """{category: [subcategory, ...]} for what we sell, read once from the products table."""
-    from app.db.database import SessionLocal
-    from app.models.product import Product
-
-    db = SessionLocal()
-    try:
-        rows = (
-            db.query(Product.category, Product.subcategory)
-            .filter(Product.category.in_(SERVED_CATEGORIES), Product.subcategory.isnot(None))
-            .distinct()
-            .all()
-        )
-    except Exception:  # pragma: no cover - DB not reachable at import time
-        return {}
-    finally:
-        db.close()
-    catalog: dict = {}
-    for category, subcategory in rows:
-        if _is_served(subcategory):
-            catalog.setdefault(category, []).append(subcategory)
-    return {c: sorted(s) for c, s in sorted(catalog.items())}
-
-
-def build_catalog_blurb() -> str:
-    """Short catalog summary shown when the shopper hasn't said what they want."""
-    from app.db.database import SessionLocal
-    from app.models.product import Product
-    from sqlalchemy import func
-
-    db = SessionLocal()
-    try:
-        rows = (
-            db.query(Product.category, Product.subcategory, func.count(Product.product_id))
-            .filter(Product.category.in_(SERVED_CATEGORIES), Product.subcategory.isnot(None))
-            .group_by(Product.category, Product.subcategory)
-            .order_by(Product.category, func.count(Product.product_id).desc())
-            .all()
-        )
-    except Exception:  # pragma: no cover
-        return ""
-    finally:
-        db.close()
-    totals: dict = {}
-    examples: dict = {}
-    for category, subcategory, count in rows:
-        totals[category] = totals.get(category, 0) + count
-        if _is_served(subcategory) and len(examples.setdefault(category, [])) < 3:
-            examples[category].append(subcategory)
-    ordered = sorted(totals, key=totals.get, reverse=True)
-    return "\n".join(f"• {c} ({totals[c]} products) — {', '.join(examples.get(c, []))}" for c in ordered)
-
-
-CATALOG_BLURB = build_catalog_blurb()
-
-
-def _subcategories() -> tuple:
-    return tuple(sorted({s for subs in load_catalog().values() for s in subs}))
-
-
-@lru_cache(maxsize=1)
 def search_schema():
-    """Pydantic schema for the extraction call.
-
-    Subcategory values come from the DB catalog. The model sees them in the prompt rather than as a
-    JSON-schema enum, because Groq rejects a whole tool call (HTTP 400) when one value is off-list;
-    the validator below enforces the catalog instead and turns unknown values into null.
-    """
-    subs = _subcategories()
-    allowed = {
-        "category": SERVED_CATEGORIES,
-        "subcategory": subs,
-        "suggestion": subs,
-        "type": PRODUCT_TYPES,
-    }
-
-    class ProductSearch(BaseModel):
-        """Catalog search filters for what the shopper wants now."""
-
-        category: Optional[Literal[SERVED_CATEGORIES]] = Field(None, description="catalog category")
-        subcategory: Optional[str] = Field(None, description="one of the catalog subcategories, or null")
-        type: Optional[Literal[PRODUCT_TYPES]] = Field(None, description="only for headphones and speakers")
-        brand: Optional[str] = None
-        max_price: Optional[int] = Field(None, description="rupees")
-        min_price: Optional[int] = Field(None, description="rupees")
-        min_rating: Optional[float] = Field(None, description="out of 5")
-        keywords: List[str] = Field(default_factory=list, description="features not covered by other fields")
-        not_carried: Optional[str] = Field(None, description="what they asked for, if we don't sell that at all")
-        suggestion: Optional[str] = Field(None, description="with not_carried: closest subcategory we sell")
-
-        @field_validator("category", "subcategory", "suggestion", "type", mode="before")
-        @classmethod
-        def _known_value_or_none(cls, value, info):
-            if not isinstance(value, str):
-                return None
-            options = allowed[info.field_name]
-            if not options:  # catalog unavailable: accept the model's value as written
-                return value.strip() or None
-            word = value.strip().lower()
-            forms = {
-                word,
-                word + "s",
-                word[:-1] if word.endswith("s") else word,
-                word[:-2] if word.endswith("es") else word,
-            }
-            return next((a for a in options if a.lower() in forms), None)  # "TVs" → "tv"
-
-        @field_validator("keywords", mode="before")
-        @classmethod
-        def _list(cls, value):
-            return [k for k in value if isinstance(k, str) and k.strip()] if isinstance(value, list) else []
-
     return ProductSearch
 
 
-def catalog_lines() -> str:
-    return "\n".join(f"{c}: {' | '.join(subs)}" for c, subs in load_catalog().items())
-
-
-def _category_of(subcategory: Optional[str], given: Optional[str]) -> Optional[str]:
-    """The catalog decides which category a subcategory belongs to; the model can't get it wrong."""
-    if not subcategory:
-        return given
-    owners = [c for c, subs in load_catalog().items() if subcategory in subs]
-    return given if given in owners else (owners[0] if owners else given)
-
-
 EMPTY_PREFERENCES = {
-    "category": None,
-    "subcategory": None,
-    "type": None,
+    "product": None,
+    "features": [],
     "brand": None,
     "max_price": None,
     "min_price": None,
     "min_rating": None,
-    "keywords": [],
 }
 
 
@@ -183,25 +60,39 @@ def extract_preferences(state: AgentState) -> dict:
     """LLM node: previous filters + new message → complete filters for what the shopper wants now."""
     previous = {k: v for k, v in (state.get("preferences") or {}).items() if k in EMPTY_PREFERENCES and v}
     message = state.get("user_message", "")
+    catalog = get_catalog()
     parsed = call_llm(
         "product",
         "extract_preferences",
         [
-            SystemMessage(content=load_prompt("product_extraction", catalog=catalog_lines())),
+            SystemMessage(content=load_prompt("product_extraction", types=catalog.type_lines())),
             HumanMessage(content=f"Previous: {json.dumps(previous)} | Message: {message}"),
         ],
-        schema=search_schema(),
+        schema=ProductSearch,
     )
     out = parsed.model_dump() if parsed is not None else {}
     preferences = {k: out.get(k, v) for k, v in EMPTY_PREFERENCES.items()}
-    preferences["keywords"] = out.get("keywords") or []
-    preferences["category"] = _category_of(preferences["subcategory"], preferences["category"])
-    not_carried = out.get("not_carried")
-    logger.info(f"request_id={get_request_id()} | EXTRACTED: {json.dumps(preferences)} | not_carried={not_carried!r}")
+    preferences["features"] = out.get("features") or []
+
+    # Whether we sell something is decided by the catalog, not the model: a type we stock but don't
+    # sell (phones, laptops, tablets) gets its suggestion, and a "not carried" word that names a type
+    # we do sell (the model said we don't carry geysers) is ignored.
+    ptype, _ = catalog.resolve_product(preferences["product"])
+    claimed, _ = catalog.resolve_product(out.get("not_carried"))
+    not_carried = None
+    for word, found in ((preferences["product"], ptype), (out.get("not_carried"), claimed)):
+        if found is not None and not found.served:
+            not_carried = {"item": word, "suggestion": found.suggestion}
+            break
+    if not_carried is None and out.get("not_carried") and ptype is None and claimed is None:
+        not_carried = {"item": out["not_carried"], "suggestion": None}
+    if claimed is not None and claimed.served and not preferences["product"]:
+        preferences["product"] = out["not_carried"]  # search for it instead of refusing
+    logger.info(f"request_id={get_request_id()} | EXTRACTED: {json.dumps(preferences)} | not_carried={not_carried}")
     return {
         "preferences": preferences,
         "original_preferences": copy.deepcopy(preferences),
-        "not_carried": {"item": not_carried, "suggestion": out.get("suggestion")} if not_carried else None,
+        "not_carried": not_carried,
         "relaxed_filters": [],
     }
 
@@ -228,27 +119,40 @@ def route_after_extraction(state: AgentState) -> Literal["search", "ask", "unava
     if state.get("not_carried"):
         return "unavailable"
     prefs = state.get("preferences") or {}
-    has_signal = any(prefs.get(k) for k in ("category", "subcategory", "type", "keywords", "brand"))
+    has_signal = any(prefs.get(k) for k in ("product", "features", "brand"))
     return "search" if has_signal else "ask"
 
 
+def search_filters(prefs: dict) -> dict:
+    """Shopper preferences → search_products arguments, using the catalog (no model call).
+
+    The product word picks the type (and kind); feature words that name an attribute value become
+    attribute filters; anything else is matched against product names. An unknown product word is
+    searched by name across every served type.
+    """
+    ptype, kind = get_catalog().resolve_product(prefs.get("product"))
+    attributes, keywords = features_to_filters(ptype, prefs.get("features") or [])
+    if ptype is not None:
+        # "immersion rod" names the type and also its heater_type; the word itself is never a keyword.
+        attributes = {**match_attributes(ptype, prefs["product"]), **attributes}
+        if kind:
+            attributes["kind"] = kind
+    elif prefs.get("product"):
+        keywords = [prefs["product"], *keywords]
+    return {
+        "product_type": ptype.name if ptype else None,
+        "attributes": attributes,
+        "brand": prefs.get("brand"),
+        "max_price": prefs.get("max_price"),
+        "min_price": prefs.get("min_price"),
+        "min_rating": prefs.get("min_rating"),
+        "keywords": keywords,
+    }
+
+
 # Optional filters, dropped one at a time (cumulatively) when a search finds nothing.
-# Subcategory and category are never dropped: showing a different kind of product is not a match.
-RELAXATION_ORDER = ["type", "price", "brand", "keywords"]
-
-
-def _run_search(filters: dict, limit: int = 10) -> list:
-    return search_products(
-        category=filters.get("category"),
-        subcategory=filters.get("subcategory"),
-        product_type=filters.get("type"),
-        brand=filters.get("brand"),
-        max_price=filters.get("max_price"),
-        min_price=filters.get("min_price"),
-        min_rating=filters.get("min_rating"),
-        keywords=filters.get("keywords") or [],
-        limit=limit,
-    )
+# The product type is never dropped: showing a different kind of product is not a match.
+RELAXATION_ORDER = ["price", "brand", "attributes", "keywords"]
 
 
 def find_products(state: AgentState) -> dict:
@@ -256,22 +160,21 @@ def find_products(state: AgentState) -> dict:
 
     Works on a copy, so the shopper's own preferences (kept for the next turn) are never relaxed.
     """
-    filters = dict(state.get("preferences") or {})
+    filters = search_filters(state.get("preferences") or {})
     relaxed: list = []
-    results = _run_search(filters)
+    results = search_products(**filters, limit=10)
     for name in RELAXATION_ORDER:
         if results:
             break
         if name == "price" and filters.get("max_price"):
             filters["max_price"] = int(filters["max_price"] * 1.25)
-            relaxed.append("price")
         elif name != "price" and filters.get(name):
-            filters[name] = [] if name == "keywords" else None
-            relaxed.append(name)
+            filters[name] = {} if name == "attributes" else [] if name == "keywords" else None
         else:
             continue
-        results = _run_search(filters)
-    logger.info(f"request_id={get_request_id()} | search | found={len(results)} | relaxed={relaxed}")
+        relaxed.append(name)
+        results = search_products(**filters, limit=10)
+    logger.info(f"request_id={get_request_id()} | search | {filters} | found={len(results)} | relaxed={relaxed}")
     return {"search_results": results, "relaxed_filters": relaxed}
 
 
@@ -316,7 +219,7 @@ def rank_products(state: AgentState) -> dict:
 
 
 def score(product: dict, prefs: dict) -> float:
-    """Three factors: rating, how well the price uses the budget, and match on brand/type/keywords."""
+    """Three factors: rating, how well the price uses the budget, and match on brand and features."""
     rating = (product.get("rating") or 0) / 5
     budget = prefs.get("max_price")
     if budget:
@@ -325,7 +228,7 @@ def score(product: dict, prefs: dict) -> float:
     else:
         price_fit = 0.5
     text = f"{product.get('name', '')} {product.get('brand', '')} {product.get('type', '')}".lower()
-    wanted = [w.lower() for w in [prefs.get("brand"), prefs.get("type"), *(prefs.get("keywords") or [])] if w]
+    wanted = [w.lower() for w in [prefs.get("brand"), *(prefs.get("features") or [])] if w]
     match = sum(w in text for w in wanted) / len(wanted) if wanted else 0.5
     return round(0.5 * rating + 0.25 * price_fit + 0.25 * match, 3)
 
@@ -335,16 +238,24 @@ def route_after_rank(state: AgentState) -> Literal["recommend", "no_results"]:
 
 
 def _label(prefs: dict) -> str:
-    return prefs.get("subcategory") or (prefs.get("keywords") or [None])[0] or prefs.get("category") or "products"
+    return prefs.get("product") or (prefs.get("features") or [None])[0] or "products"
+
+
+def _stocks_brand(prefs: dict) -> bool:
+    """Do we sell this brand in this product type at all, ignoring every other filter?"""
+    product_type = search_filters(prefs)["product_type"]
+    return bool(search_products(brand=prefs["brand"], product_type=product_type, limit=1))
 
 
 def _brand_note(prefs: dict, shown: list) -> str:
     """Say plainly when the brand asked for isn't in the results."""
     brand = prefs.get("brand")
-    if not brand or any(brand.lower() in (p.get("brand") or "").lower() for p in shown):
+    resolved = get_catalog().resolve_brand(brand) if brand else None
+    names = {brand.lower(), resolved[1].lower()} if resolved else {(brand or "").lower()}
+    if not brand or any((p.get("brand") or "").lower() in names for p in shown):
         return ""
     label = _label(prefs)
-    if search_products(brand=brand, subcategory=prefs.get("subcategory"), limit=1):
+    if _stocks_brand(prefs):
         return (
             f"I couldn't find {brand} {label} within your filters, so here are the closest options from other brands:\n"
         )
@@ -352,10 +263,10 @@ def _brand_note(prefs: dict, shown: list) -> str:
 
 
 RELAXED_WORDS = {
-    "type": "the type",
     "price": "the price limit (+25%)",
     "brand": "the brand",
-    "keywords": "some features",
+    "attributes": "some features",
+    "keywords": "some keywords",
 }
 
 
@@ -371,7 +282,7 @@ def format_recommendations(state: AgentState) -> dict:
     lines = [header or "Here are my top recommendations for you:\n"]
     for i, p in enumerate(top3, 1):
         rating = f"{p['rating']:.1f}/5" if p.get("rating") is not None else "Not rated"
-        lines.append(f"{i}. **{p['name']}** — {p.get('brand') or 'Unknown brand'}")
+        lines.append(f"{i}. **{p.get('title') or p['name']}** — {p.get('brand') or 'Unknown brand'}")
         lines.append(f"   ₹{p['price']:,} · {rating}")
         lines.append("")
     return {"final_response": "\n".join(lines)}
@@ -381,9 +292,8 @@ def respond_no_results(state: AgentState) -> dict:
     prefs = state.get("preferences") or {}
     label = _label(prefs)
     reply = f"I couldn't find any {label} matching your request."
-    brand = prefs.get("brand")
-    if brand and not search_products(brand=brand, subcategory=prefs.get("subcategory"), limit=1):
-        reply = f"We don't carry {brand} {label}. " + reply
+    if prefs.get("brand") and not _stocks_brand(prefs):
+        reply = f"We don't carry {prefs['brand']} {label}. " + reply
     return {"final_response": reply + " Try a different budget, brand or product."}
 
 

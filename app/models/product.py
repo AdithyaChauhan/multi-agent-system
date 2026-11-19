@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, JSON
+from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, JSON, ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 from sqlalchemy.types import TypeDecorator
@@ -15,6 +15,28 @@ class _JSONB(TypeDecorator):  # pragma: no cover
         if dialect.name == "postgresql":
             return dialect.type_descriptor(JSONB())
         return dialect.type_descriptor(JSON())
+
+
+class ProductType(Base):
+    """A kind of product shoppers ask for, with the attributes they filter on (ADR 0005)."""
+
+    __tablename__ = "product_types"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True, nullable=False)
+    category = Column(String, nullable=False)
+    served = Column(Boolean, nullable=False, default=True)  # false: in the DB but not sold
+    synonyms = Column(_JSONB, nullable=False, default=list)
+    suggestion = Column(String, nullable=True)  # served = false: what to offer instead
+    attribute_schema = Column(_JSONB, nullable=False, default=dict)
+
+
+class Brand(Base):
+    __tablename__ = "brands"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True, nullable=False)
+    aliases = Column(_JSONB, nullable=False, default=list)
 
 
 class Product(Base):
@@ -34,5 +56,12 @@ class Product(Base):
     description = Column(String, nullable=True)
     in_stock = Column(Boolean, default=True)
     rating = Column(Float, default=0.0)
-    attributes = Column(JSON, nullable=True)  # type-specific fields
+    attributes = Column(_JSONB, nullable=True)  # type-specific fields, validated against the type's schema
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Typed catalog (ADR 0005), filled by scripts/enrich_catalog.py apply. The raw columns above stay.
+    type_id = Column(Integer, ForeignKey("product_types.id"), nullable=True, index=True)
+    brand_id = Column(Integer, ForeignKey("brands.id"), nullable=True, index=True)
+    title = Column(String, nullable=True)  # short, clean name
+    extracted_by = Column(String, nullable=True)  # regex | llm | human
+    confidence = Column(Float, nullable=True)

@@ -14,6 +14,7 @@ One file per decision that would be costly to reverse, or easy to undo by accide
 | [0008](0008-safety-floor.md) | Safety: model risk flag plus an escalate-only pattern | Accepted |
 | [0009](0009-langgraph-primitives.md) | Use LangGraph's built-in features instead of hand-written control flow | Accepted, planned for Phase 2 |
 | [0010](0010-prompt-budget.md) | Fix behaviour in code, data or tests, not with more prompt rules | Accepted |
+| [0011](0011-catalog-words-resolved-in-code.md) | The model names the product; code resolves it against the catalog | Accepted, implemented |
 
 ## Template
 ```markdown

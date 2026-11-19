@@ -1,0 +1,19 @@
+# Brand merges (ADR 0005). Seeded into the brands table by `scripts/enrich_catalog.py apply`.
+#
+# Only real merges live here. Spelling variants that differ just in case or trademark signs
+# (ZEBRONICS / Zebronics, Usha / USHA, pTron / PTron, SanDisk) fold together automatically:
+# the canonical name is the most common spelling in the catalog.
+# Redmi counts as Xiaomi (user decision, 2026-11-18).
+
+brands:
+  Xiaomi: [MI, Mi, Redmi, Xiaomi, Mi Xiaomi]
+  Amazon: [Amazon, AmazonBasics, Amazonbasics, Amazon Basics, Amazon Brand, Solimo, Firestick]
+  boAt: [boAt, Boat]
+  Noise: [Noise, Noise_Colorfit, NoiseFit]
+  Western Digital: [Western Digital, WD, Western]
+  Black+Decker: [Black+Decker, Black & Decker, Black]
+  Morphy Richards: [Morphy Richards, Morphy]
+  Eureka Forbes: [Eureka Forbes, Eureka, Aquasure, Aquaguard]
+  Apple: [Apple, iPhone]
+  realme: [realme, Realme]
+  TP-Link: [TP-Link, TP-link, TP-LINK, Tapo]

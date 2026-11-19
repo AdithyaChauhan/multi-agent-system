@@ -125,6 +125,19 @@ docker compose restart app
 The app adds the `support_tickets` columns this backup predates on startup. You can also run
 `docker compose exec app alembic upgrade head`; `migrations/env.py` uses the container's `DATABASE_URL`.
 
+Then load the typed catalog: product types, brands, clean titles and attributes (ADR 0005). Product
+search needs this step. It reads `data/catalog/` and makes no model calls:
+
+```bash
+docker compose exec app alembic upgrade head
+docker compose exec app sh -c 'python scripts/enrich_catalog.py apply --database-url "$DATABASE_URL"'
+docker compose restart app
+```
+
+`data/catalog/product_types.yaml` and `brands.yaml` define the types and brand merges.
+`enriched_products.jsonl` holds the one-time labelling output (regex plus LLM), and `review.csv` holds the
+human corrections. To relabel, see the steps at the top of `scripts/enrich_catalog.py`.
+
 ### 4. Open the chat UI
 
 Navigate to **http://localhost:8000** — you'll be redirected to the chat interface. Sign in with Google to enable order tracking.

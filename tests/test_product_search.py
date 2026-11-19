@@ -8,44 +8,68 @@ import app.agents.product_agent as pa
 from app.agents.product_agent import Ranking
 
 
-def _product(i, brand="Logitech", price=900, rating=4.4, subcategory="mouse", name=None):
+def _product(i, brand="Logitech", price=900, rating=4.4, name=None):
     return {
         "product_id": f"P{i}",
         "name": name or f"{brand} Wireless Mouse {i}",
         "brand": brand,
         "price": price,
         "rating": rating,
-        "subcategory": subcategory,
-        "type": None,
+        "type": "mouse",
     }
+
+
+@pytest.fixture(autouse=True)
+def catalog(yaml_catalog):
+    return yaml_catalog
+
+
+class TestSearchFilters:
+    def test_product_word_resolves_to_type_kind_and_attributes(self):
+        f = pa.search_filters({"product": "geysers", "features": ["15 litre", "wifi"], "max_price": 9000})
+        assert f["product_type"] == "water heater"
+        assert f["attributes"] == {"capacity_l": 15}
+        assert f["keywords"] == ["wifi"]  # not an attribute of water heaters: matched in names
+        assert f["max_price"] == 9000
+
+    def test_kind_and_product_word_attributes(self):
+        assert pa.search_filters({"product": "pen drive"})["attributes"] == {"kind": "pen drive"}
+        f = pa.search_filters({"product": "immersion rod"})
+        assert (f["product_type"], f["attributes"]) == ("water heater", {"heater_type": "immersion rod"})
+
+    def test_unknown_product_is_searched_by_name(self):
+        f = pa.search_filters({"product": "drone", "features": ["4k"]})
+        assert (f["product_type"], f["attributes"], f["keywords"]) == (None, {}, ["drone", "4k"])
 
 
 class TestFindProducts:
     def test_no_relaxation_when_first_search_matches(self):
         with patch.object(pa, "search_products", return_value=[_product(1)]) as search:
-            out = pa.find_products({"preferences": {"subcategory": "mouse", "max_price": 1000}})
+            out = pa.find_products({"preferences": {"product": "mouse", "max_price": 1000}})
         assert out == {"search_results": [_product(1)], "relaxed_filters": []}
         assert search.call_count == 1
+        assert search.call_args.kwargs["product_type"] == "mouse"
 
-    def test_relaxes_in_order_and_never_touches_subcategory(self):
+    def test_relaxes_in_order_and_never_touches_the_type(self):
         calls = []
 
         def fake_search(**kwargs):
             calls.append(kwargs)
             return [_product(1)] if kwargs["brand"] is None else []
 
-        prefs = {"subcategory": "mouse", "brand": "Bose", "max_price": 1000, "keywords": ["rgb"]}
+        prefs = {"product": "mouse", "brand": "Bose", "max_price": 1000, "features": ["wireless"]}
         with patch.object(pa, "search_products", side_effect=fake_search):
             out = pa.find_products({"preferences": prefs})
         assert out["relaxed_filters"] == ["price", "brand"]
         assert calls[1]["max_price"] == 1250
-        assert all(c["subcategory"] == "mouse" for c in calls)
+        assert all(c["product_type"] == "mouse" for c in calls)
+        assert calls[-1]["attributes"] == {"connectivity": "wireless"}
         assert prefs["brand"] == "Bose"  # the shopper's preferences are not modified
 
     def test_gives_up_after_the_last_step(self):
         with patch.object(pa, "search_products", return_value=[]):
-            out = pa.find_products({"preferences": {"subcategory": "mouse", "keywords": ["x"], "type": "y"}})
-        assert out == {"search_results": [], "relaxed_filters": ["type", "keywords"]}
+            out = pa.find_products({"preferences": {"product": "mouse", "features": ["silent", "pink"]}})
+        assert out == {"search_results": [], "relaxed_filters": ["attributes", "keywords"]}
 
 
 class TestRankProducts:
@@ -91,38 +115,36 @@ class TestReplies:
             )["final_response"]
 
     def test_plain_recommendations(self):
-        text = self._format({"subcategory": "mouse"}, [{**_product(1), "llm_tier": 0}])
+        text = self._format({"product": "mouse"}, [{**_product(1), "llm_tier": 0}])
         assert text.startswith("Here are my top recommendations")
         assert "**Logitech Wireless Mouse 1** — Logitech" in text and "₹900 · 4.4/5" in text
 
     def test_says_which_filters_were_widened(self):
-        text = self._format({"subcategory": "mouse"}, [{**_product(1), "llm_tier": 0}], relaxed=["price"])
+        text = self._format({"product": "mouse"}, [{**_product(1), "llm_tier": 0}], relaxed=["price"])
         assert "I widened the price limit (+25%)" in text
 
     def test_brand_we_do_not_carry(self):
-        text = self._format({"subcategory": "speakers", "brand": "Bose"}, [{**_product(1, brand="JBL"), "llm_tier": 1}])
-        assert text.startswith("We don't carry Bose speakers")
+        text = self._format({"product": "speaker", "brand": "Bose"}, [{**_product(1, brand="JBL"), "llm_tier": 1}])
+        assert text.startswith("We don't carry Bose speaker")
 
     def test_brand_we_carry_outside_the_filters(self):
         ranked = [{**_product(1, brand="boAt"), "llm_tier": 1}]
         with patch.object(pa, "search_products", return_value=[_product(9, brand="Sony")]):
             text = pa.format_recommendations(
-                {"preferences": {"subcategory": "headphones", "brand": "Sony"}, "ranked_products": ranked}
+                {"preferences": {"product": "headphones", "brand": "Sony"}, "ranked_products": ranked}
             )
         assert text["final_response"].startswith("I couldn't find Sony headphones within your filters")
 
     def test_only_maybe_results(self):
-        text = self._format({"subcategory": "mouse"}, [{**_product(1), "llm_tier": 1}])
+        text = self._format({"product": "mouse"}, [{**_product(1), "llm_tier": 1}])
         assert text.startswith("These don't match everything")
 
     @pytest.mark.parametrize(
-        "stocked,prefix", [([], "We don't carry Bose speakers."), ([_product(1)], "I couldn't find")]
+        "stocked,prefix", [([], "We don't carry Bose speaker."), ([_product(1)], "I couldn't find")]
     )
     def test_no_results(self, stocked, prefix):
         with patch.object(pa, "search_products", return_value=stocked):
-            text = pa.respond_no_results({"preferences": {"subcategory": "speakers", "brand": "Bose"}})[
-                "final_response"
-            ]
+            text = pa.respond_no_results({"preferences": {"product": "speaker", "brand": "Bose"}})["final_response"]
         assert text.startswith(prefix)
 
     def test_ask_for_preferences_shows_catalog(self):
@@ -131,11 +153,31 @@ class TestReplies:
 
 
 def test_graph_end_to_end():
-    schema = pa.search_schema()
-    prefs = schema.model_validate({"category": "Computers & Accessories", "keywords": ["wireless mouse"]})
+    prefs = pa.ProductSearch.model_validate({"product": "mouse", "features": ["wireless"]})
     with patch.object(pa, "call_llm", side_effect=[prefs, Ranking(same_kind=[1], exact=[1])]), patch.object(
         pa, "search_products", return_value=[_product(1)]
     ):
         out = pa.product_agent_graph.invoke({"user_message": "wireless mouse", "preferences": {}})
     assert out["final_response"].startswith("Here are my top recommendations")
-    assert out["preferences"]["keywords"] == ["wireless mouse"]
+    assert out["preferences"]["features"] == ["wireless"]
+
+
+class TestProductPhrases:
+    @pytest.mark.parametrize(
+        "phrase, expected",
+        [
+            ("neckband headphones", ("headphones", "neckband")),
+            ("tv remote cover", ("tv accessory", "remote cover")),
+            ("laptop bag for 15 inch", ("laptop bag", None)),
+            ("phone case", (None, None)),  # never "we don't carry phones"
+            ("hoverboard", (None, None)),
+        ],
+    )
+    def test_phrases_of_known_words(self, catalog, phrase, expected):
+        ptype, kind = catalog.resolve_product(phrase)
+        assert ((ptype.name if ptype else None), kind) == expected
+
+    def test_bluetooth_counts_as_wireless_for_keyboards(self):
+        assert pa.search_filters({"product": "keyboard", "features": ["bluetooth"]})["attributes"] == {
+            "connectivity": "wireless"
+        }

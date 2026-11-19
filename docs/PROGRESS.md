@@ -12,6 +12,21 @@ Newest first. `/handoff` adds an entry at the end of every session. Keep entries
 - **Commits:**
 -->
 
+## 2026-11-19 · Phase 1 · Typed catalog live; search targets met; phase closed
+- **Done:**
+  - 47 product types and brand merges in `data/catalog/*.yaml`, plus migration `a7d4e2c9b1f0`;
+  - `scripts/enrich_catalog.py` (regex, classify, attributes, review, apply). All 1,350 products are typed, titled and branded, with 99.3% of served products fully attributed, on both databases. `multi_agent_db` was backed up first, to `%TEMP%`;
+  - search runs on types, attributes and brand aliases, and the catalog constants and the prompt list are gone;
+  - 221 tests pass, coverage 91%, lint clean.
+- **Measured:** v2 against v1 on 100 queries, with the same model per query, 1 run, `multi_agent_baseline`. Recall@5 0.874 → 0.958, precision@3 0.870 → 0.926, empty rate 9.5% → 0%, attribute 0.75 → 1.0, Hinglish 0.60 → 0.80. Enrichment cost about 350K tokens.
+- **Decisions:** [0011](decisions/0011-catalog-words-resolved-in-code.md).
+- **Open questions:**
+  - the user skipped their 50-product spot check; Claude's check found 6 of 50 wrong, all fixed;
+  - the Phase 0 label review is still pending;
+  - Phase 3 go/no-go: Hinglish and vague are at 0.80, and the renamed catalog is unmeasured.
+- **Next:** commit `phase-1-catalog`, then in a new chat run `/resume` and plan Phase 2.
+- **Commits:** none yet; everything is uncommitted on `phase-1-catalog`.
+
 ## 2026-11-18 · Phase 0 · Baseline complete (100/100); phase closed
 - **Done:** ran q088–q100 on gpt-oss-20b using a second Groq key (`.env.eval`, git-ignored, never printed). Replaying all three parts matched exactly at 0 tokens. Phase 0 closed, except the label review.
 - **Measured:** recall@5 0.874, precision@3 0.870, MRR 0.837, empty rate 9.5%. Follow-ups 0.93, attribute 0.75, Hinglish 0.60, plain and typo 1.00.

@@ -1,5 +1,5 @@
 # 0005. Typed product catalog: types, brands and attributes as data
-- **Status:** Accepted
+- **Status:** Accepted, implemented in Phase 1 (search side and deviations recorded in 0011)
 - **Date:** 2026-11-18
 
 ## Context

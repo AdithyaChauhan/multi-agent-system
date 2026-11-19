@@ -16,7 +16,9 @@ logs/
 
 # Dataset / large files
 *.zip
-data/
+data/*
+# Versioned catalog definition and enrichment output (Phase 1, ADR 0005)
+!data/catalog/
 
 # OS/editor files
 .DS_Store

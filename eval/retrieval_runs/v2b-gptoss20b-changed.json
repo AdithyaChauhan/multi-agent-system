@@ -1,0 +1,217 @@
+{
+ "label": "v2b-gptoss20b-changed",
+ "model": "openai/gpt-oss-20b",
+ "mode": "record",
+ "database": "multi_agent_baseline",
+ "cassette": "eval\\cassettes\\retrieval_openai-gpt-oss-20b.json",
+ "started": "2026-11-19T05:27:19+00:00",
+ "queries": [
+  {
+   "id": "q041",
+   "query": "wireless mouse",
+   "history": [],
+   "tags": [
+    "attribute"
+   ],
+   "shown": [
+    "B09ZHCJDP1",
+    "B01MQ2A86A",
+    "B07X2L5Z8C",
+    "B004IO5BMQ",
+    "B01J0XWYKQ"
+   ],
+   "shown_names": [
+    "Amazon Basics Wireless Mouse | 2.4 GHz Connection, 1600 DPI | Type - C Adapter |",
+    "Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Nano Receiver, 1000 DP",
+    "Logitech Pebble M350 Wireless Mouse with Bluetooth or USB - Silent, Slim Compute",
+    "Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, 12 Month Life Battery, ",
+    "Logitech B170 Wireless Mouse, 2.4 GHz with USB Nano Receiver, Optical Tracking, "
+   ],
+   "preferences": {
+    "product": "mouse",
+    "features": [
+     "wireless"
+    ],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Amazon Basics Wireless Mouse 2.4 GHz** — Amazon\n   ₹499 · 5.0/5\n\n2. **Logitech M331 Silent Plus Wireless Mouse** — Logitech\n   ₹1,295 · 4.6/5\n\n3. **Logitech Pebble M350 Wireless Mouse** — Logitech\n   ₹1,490 · ",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 2,
+   "tokens": 1896,
+   "seconds": 1.03
+  },
+  {
+   "id": "q049",
+   "query": "neckband earphones",
+   "history": [],
+   "tags": [
+    "attribute"
+   ],
+   "shown": [
+    "B08TV2P1N8",
+    "B092X94QNQ",
+    "B08D77XZX5",
+    "B07LG59NPV",
+    "B09NR6G588"
+   ],
+   "shown_names": [
+    "boAt Rockerz 255 Pro+ in-Ear Bluetooth Neckband with Upto 40 Hours Playback, ASA",
+    "boAt Rockerz 330 in-Ear Bluetooth Neckband with Upto 30 Hours Playtime, ASAP  Ch",
+    "PTron Tangentbeat in-Ear Bluetooth 5.0 Wireless Headphones with Mic, Enhanced Ba",
+    "Boult Audio Probass Curve Bluetooth Wireless in Ear Earphones with Mic with Ipx5",
+    "Boult Audio ZCharge Bluetooth Wireless in Ear Earphones with Mic, 40H Playtime a"
+   ],
+   "preferences": {
+    "product": "neckband headphones",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **boAt Rockerz 255 Pro+ Bluetooth Neckband** — boAt\n   ₹1,399 · 4.1/5\n\n2. **boAt Rockerz 330 Bluetooth Neckband** — boAt\n   ₹1,499 · 4.1/5\n\n3. **PTron Tangentbeat Bluetooth Neckband Earphones** — pTron\n   ₹599 ·",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 2,
+   "tokens": 1881,
+   "seconds": 0.94
+  },
+  {
+   "id": "q054",
+   "query": "wireless keyboard",
+   "history": [],
+   "tags": [
+    "attribute"
+   ],
+   "shown": [
+    "B0148NPH9I",
+    "B00MUTWLW4",
+    "B01N4EV2TL",
+    "B00CEQEGPI"
+   ],
+   "shown_names": [
+    "Logitech K380 Wireless Multi-Device Keyboard for Windows, Apple iOS, Apple TV An",
+    "Logitech K480 Wireless Multi-Device Keyboard for Windows, macOS, iPadOS, Android",
+    "Logitech MK240 Nano Wireless USB Keyboard and Mouse Set, 12 Function Keys 2.4GHz",
+    "Logitech MK270r USB Wireless Keyboard and Mouse Set for Windows, 2.4 GHz Wireles"
+   ],
+   "preferences": {
+    "product": "keyboard",
+    "features": [
+     "wireless"
+    ],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Logitech K380 Multi-Device Bluetooth Keyboard** — Logitech\n   ₹2,640 · 4.5/5\n\n2. **Logitech K480 Wireless Multi-Device Keyboard** — Logitech\n   ₹2,595 · 4.4/5\n\n3. **Logitech MK240 Nano Wireless Keyboard and Mo",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 4
+   },
+   "llm_calls": 2,
+   "tokens": 1685,
+   "seconds": 0.86
+  },
+  {
+   "id": "q095",
+   "query": "and a keyboard",
+   "history": [
+    "wireless mouse"
+   ],
+   "tags": [
+    "followup"
+   ],
+   "shown": [
+    "B0148NPH9I",
+    "B09BVCVTBC",
+    "B00MUTWLW4",
+    "B00ZYLMQH0",
+    "B01N4EV2TL"
+   ],
+   "shown_names": [
+    "Logitech K380 Wireless Multi-Device Keyboard for Windows, Apple iOS, Apple TV An",
+    "Redragon K617 Fizz 60% Wired RGB Gaming Keyboard, 61 Keys Compact Mechanical Key",
+    "Logitech K480 Wireless Multi-Device Keyboard for Windows, macOS, iPadOS, Android",
+    "Dell KB216 Wired Multimedia USB Keyboard with Super Quite Plunger Keys with Spil",
+    "Logitech MK240 Nano Wireless USB Keyboard and Mouse Set, 12 Function Keys 2.4GHz"
+   ],
+   "preferences": {
+    "product": "keyboard",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Logitech K380 Multi-Device Bluetooth Keyboard** — Logitech\n   ₹2,640 · 4.5/5\n\n2. **K617 Fizz 60% Wired RGB Mechanical Keyboard** — Redragon\n   ₹2,649 · 4.5/5\n\n3. **Logitech K480 Wireless Multi-Device Keyboard*",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 4,
+   "tokens": 3774,
+   "seconds": 0.57
+  }
+ ],
+ "finished": "2026-11-19T05:28:34+00:00",
+ "summary": {
+  "queries": 4,
+  "scored": 4,
+  "errors": 0,
+  "recall@5": 1.0,
+  "precision@3": 1.0,
+  "mrr": 1.0,
+  "empty_rate": 0.0,
+  "correct_refusal_rate": null,
+  "llm_calls_per_query": 2.5,
+  "tokens_per_query": 2309.0,
+  "p50_seconds": 0.86,
+  "p95_seconds": 1.03
+ },
+ "by_tag": {
+  "attribute": {
+   "scored": 3,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "followup": {
+   "scored": 1,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  }
+ }
+}

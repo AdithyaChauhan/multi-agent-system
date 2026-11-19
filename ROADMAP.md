@@ -3,17 +3,18 @@
 **Goal:** take the assistant from about 5.8/10 to 9/10. That means short prompts, a clean LangGraph architecture that shows how agents are built (subgraphs, loops, a human-in-the-loop pause, ticket handoff), measured quality, and escalations that reach a real person. The work is split into phases, and each phase is worth keeping even if work stops after it.
 
 ## Now
-- **Current phase:** Phase 1, Clean product data (not started). Phase 0 is done, except the label review.
-- **Branch:** `phase-0-evals` (off `simplify-agents`). Start `phase-1-catalog` from it.
-- **Next action:** in a **new chat**, `/resume`, then plan Phase 1 in plan mode: the type list and attribute schemas need the user's review before any extraction. The user should also review the Phase 0 labels in `eval/product_queries.json`.
-- **Phase 0 baseline:** recall@5 0.874 and precision@3 0.870 on all 100 queries. Attribute queries 0.75, Hinglish 0.60, plain and typo 1.00. The app says "we don't carry" for products it does stock. Renaming categories drops recall@5 from 0.97 to 0.00.
+- **Current phase:** Phase 2, LangGraph-native architecture (not started; needs plan mode). Phases 0 and 1 are done.
+- **Branch:** `phase-1-catalog` holds all of Phase 1 and is **not committed yet**. Commit it, then branch `phase-2-langgraph` off it.
+- **Next action:** in a new chat, run `/resume` and plan Phase 2. The three remaining search misses are Phase 2 problems: a follow-up loses the product (q087), "washing machine" isn't refused (q084), and the brand gets dropped (q027). Before deciding on Phase 3, run the renamed-catalog sample on v2 (about 70K tokens).
+- **Phase 1 result (v2, 100 queries, `multi_agent_baseline`):** recall@5 0.958 and precision@3 0.926 (v1: 0.874 and 0.870). Empty rate 0%, attribute 1.0, Hinglish 0.80, vague 0.80, follow-up 1.0. The search targets in the definition of done are met.
+- **Still open:** the user's review of the Phase 0 labels; the user skipped the 50-product spot check.
 - **Blocked on:** nothing.
 
 ## Phases
 | # | Phase | Status | Plan | Exit criteria (short) |
 |---|---|---|---|---|
 | 0 | Measuring stick | Done (labels await review) | [plan](docs/plans/phase-0-measuring-stick.md) | 100 labelled product queries; today's recall@5 measured; LLM replay mode |
-| 1 | Clean product data | Not started | [plan](docs/plans/phase-1-clean-product-data.md) | Every product typed, key attributes filled, catalog constants removed |
+| 1 | Clean product data | Done | [plan](docs/plans/phase-1-clean-product-data.md) | Every product typed, key attributes filled, catalog constants removed |
 | 2 | LangGraph-native architecture | Not started | [plan](docs/plans/phase-2-langgraph-architecture.md) | Checkpointer, `interrupt()` for cancel, search loop as graph edges, subgraph schemas, streaming, escalation subgraph, filter chips |
 | 3 | Hybrid search (conditional) | Not started | [plan](docs/plans/phase-3-hybrid-search.md) | Only if Phase 1 leaves a gap; must beat v1 on Phase 0 metrics |
 | 4 | Reliability and safety | Not started | [plan](docs/plans/phase-4-reliability-and-safety.md) | Friendly quota message, fallback model, safety floor, 0 injection failures |
@@ -22,22 +23,22 @@
 Statuses: Not started, In progress, Done, Dropped (say why in the plan). The order changed on 2026-11-18 to match the user's goals (see 0009 and 0010).
 
 ## Scorecard
-Judged on 2026-11-18. "Today" is `simplify-agents` at `262f624`. Change the Today column only with measured evidence.
+Judged on 2026-11-18, and updated 2026-11-19 after Phase 1 (`phase-1-catalog`) for the measured rows. Change the Today column only with measured evidence.
 
 | Aspect | Before (`c8a0fa6`) | Today | Target | Moved by phase |
 |---|---|---|---|---|
 | Architecture clarity | 4 | 7 | 9 | 1, 2 |
-| Product search correctness | 4 | 5.5 | 9 | 0, 1, 3 |
+| Product search correctness | 4 | 8 | 9 | 0, 1, 3 |
 | Follow-up turns | 4 | 6 | 9 | 2 |
 | Robustness to catalog changes | 3 | 3.5 | 9 | 1, 3 |
 | Guardrails and safety | 5 | 7.5 | 9.5 | 2, 4 |
 | State and scaling | 3 | 3 | 9 | 2, 5 |
 | Cost and latency | 4 | 6 | 9 | 1, 4 |
-| Evaluation rigor | 4 | 5.5 | 9 | 0, 4 |
+| Evaluation rigor | 4 | 6.5 | 9 | 0, 4 |
 | Maintainability | 3.5 | 7 | 9 | 1, 2 |
 | Ops and deploy | 5 | 6 | 9 | 5 |
 | Portfolio signal | 5 | 6.5 | 9.5 | 2, 5 |
-| **Overall** | **~4.2** | **~5.8** | **9** | |
+| **Overall** | **~4.2** | **~6.1** | **9** | |
 
 ## Definition of done (the 9 bar)
 - Recall@5 ≥ 0.9 and precision@3 ≥ 0.85 on the labelled product queries, and recall drops by less than 5 points when category names are renamed.

@@ -150,7 +150,14 @@ def _store(agent: str, node: str, messages: list, schema, result, usage: dict) -
     _cassette_file.parent.mkdir(parents=True, exist_ok=True)
     tmp = _cassette_file.with_suffix(".tmp")
     tmp.write_text(json.dumps(data, indent=1, sort_keys=True, ensure_ascii=False), encoding="utf-8")
-    tmp.replace(_cassette_file)
+    for attempt in range(20):  # OneDrive briefly locks a file it is syncing (WinError 5)
+        try:
+            tmp.replace(_cassette_file)
+            return
+        except PermissionError:
+            if attempt == 19:
+                raise
+            time.sleep(0.5)
 
 
 def _replay(messages: list, schema=None):

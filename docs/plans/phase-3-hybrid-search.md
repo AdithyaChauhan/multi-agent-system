@@ -8,7 +8,10 @@
 Product search that understands meaning, doesn't depend on category names, and keeps hard filters (price, brand, attributes) exact.
 
 ## Tasks
-- [ ] Plan mode: check the go/no-go condition above against Phase 1's Results. If it's a go, choose the embedding source (an embeddings API, or a local model through `fastembed`), the model and its dimension, and record the choice as the next ADR.
+- [ ] Plan mode: check the go/no-go condition above against Phase 1's Results. As of 2026-11-19:
+  - attribute recall@5 is 1.0, so no gap;
+  - Hinglish (4 of 5) and vague (8 of 10) are both 0.80: borderline, and the samples are small;
+  - the renamed catalog isn't measured on v2 yet. Run it first: 35 queries, about 70K tokens. If it's a go, choose the embedding source (an embeddings API, or a local model through `fastembed`), the model and its dimension, and record the choice as the next ADR.
 - [ ] Postgres with pgvector:
   - switch docker compose from `postgres:15-alpine` and Helm from `postgres` to `pgvector/pgvector:pg15`;
   - check that Render allows `CREATE EXTENSION vector`;
