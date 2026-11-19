@@ -175,6 +175,8 @@ def test_graph_end_to_end():
         out = pa.product_agent_graph.invoke({"user_message": "wireless mouse", "preferences": {}})
     assert out["final_response"].startswith("Here are my top recommendations")
     assert out["preferences"]["features"] == ["wireless"]
+    # The subgraph hands back only its declared outputs; search internals stay inside it.
+    assert set(out) <= {"preferences", "ranked_products", "relaxed_filters", "final_response"}
 
 
 class TestProductPhrases:

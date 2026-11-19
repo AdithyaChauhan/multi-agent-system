@@ -11,7 +11,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import END, StateGraph
 
 from app.agents.order_agent import order_lines
-from app.agents.state import AgentState
+from app.agents.state import SupportInput, SupportOutput, SupportState
 from app.core.llm import call_llm
 from app.core.logger import get_logger, get_request_id
 from app.core.prompt_loader import load_prompt
@@ -37,11 +37,11 @@ POLICY_RESPONSE = (
 )
 
 
-def _issue(state: AgentState) -> str:
+def _issue(state: SupportState) -> str:
     return (state.get("support_issue") or {}).get("category") or "other"
 
 
-def find_order(state: AgentState) -> dict:
+def find_order(state: SupportState) -> dict:
     """The order the router resolved, fetched for this user only (ownership check)."""
     user_id = state.get("user_id", "")
     order_id = state.get("order_id")
@@ -50,7 +50,7 @@ def find_order(state: AgentState) -> dict:
     return {"support_order": order, "user_orders": None if order else fetch_user_orders(user_id)}
 
 
-def route_support(state: AgentState) -> Literal["policy", "ticket", "ask_order", "cancel", "draft"]:
+def route_support(state: SupportState) -> Literal["policy", "ticket", "ask_order", "cancel", "draft"]:
     issue = _issue(state)
     if issue == "policy_question":
         return "policy"
@@ -63,11 +63,11 @@ def route_support(state: AgentState) -> Literal["policy", "ticket", "ask_order",
     return "ticket" if issue in TICKET_ISSUES else "draft"
 
 
-def answer_policy(state: AgentState) -> dict:
+def answer_policy(state: SupportState) -> dict:
     return {"final_response": POLICY_RESPONSE}
 
 
-def ask_for_order(state: AgentState) -> dict:
+def ask_for_order(state: SupportState) -> dict:
     orders = state.get("user_orders") or []
     order_id = state.get("order_id")
     if not orders:
@@ -87,7 +87,7 @@ def ask_for_order(state: AgentState) -> dict:
     }
 
 
-def handle_cancellation(state: AgentState) -> dict:
+def handle_cancellation(state: SupportState) -> dict:
     """Never cancels by itself: a processing order gets a confirm button in the UI (POST /cancel-order)."""
     order = state.get("support_order") or {}
     order_id = order.get("order_id")
@@ -109,7 +109,7 @@ def handle_cancellation(state: AgentState) -> dict:
     return {"final_response": reply}
 
 
-def create_ticket(state: AgentState) -> dict:
+def create_ticket(state: SupportState) -> dict:
     """Hand the issue to a human. One open ticket per order."""
     user_id = state.get("user_id", "")
     issue = _issue(state)
@@ -144,7 +144,7 @@ def create_ticket(state: AgentState) -> dict:
     }
 
 
-def draft_resolution(state: AgentState) -> dict:
+def draft_resolution(state: SupportState) -> dict:
     """LLM node, low-severity issues only: a short reply grounded in the policy table."""
     order = state.get("support_order") or {}
     issue = _issue(state)
@@ -165,7 +165,7 @@ def draft_resolution(state: AgentState) -> dict:
 
 
 def build_support_agent_graph():
-    graph = StateGraph(AgentState)
+    graph = StateGraph(SupportState, input_schema=SupportInput, output_schema=SupportOutput)
     graph.add_node("find_order", find_order)
     graph.add_node("answer_policy", answer_policy)
     graph.add_node("ask_for_order", ask_for_order)

@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pytest
 
 import app.agents.product_agent as pa
-from app.agents.state import AgentState
+from app.agents.state import ProductState
 
 
 @pytest.fixture(autouse=True)
@@ -14,7 +14,7 @@ def catalog(yaml_catalog):
 
 
 def _state(message, previous=None):
-    return AgentState(user_message=message, user_id="anon-1", session_id="s1", preferences=previous or {})
+    return ProductState(user_message=message, preferences=previous or {})
 
 
 def _extract(message, model_output, previous=None):
@@ -41,7 +41,6 @@ class TestExtractPreferences:
         assert "what about Samsung" in human
         prefs = result["preferences"]
         assert (prefs["product"], prefs["brand"], prefs["max_price"]) == ("tv", "Samsung", 15000)
-        assert result["original_preferences"] == prefs
         assert result["not_carried"] is None
 
     def test_prompt_lists_served_types_from_the_catalog(self):

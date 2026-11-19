@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 from app.agents.order_agent import order_agent_graph
 from app.agents.product_agent import product_agent_graph
-from app.agents.state import AgentState
+from app.agents.state import RouterState
 from app.agents.support_agent import support_agent_graph
 from app.core.llm import call_llm
 from app.core.logger import get_logger, get_request_id
@@ -64,7 +64,7 @@ def _orders_line(user_id: str) -> str:
     return "Their orders: " + "; ".join(f"{o['order_id']} {o['product_name']} ({o['status']})" for o in orders)
 
 
-def classify(state: AgentState) -> dict:
+def classify(state: RouterState) -> dict:
     """LLM node: one structured call decides intent, order, support issue and risk."""
     history = list(state.get("conversation_history") or [])
     message = state.get("user_message", "")
@@ -100,7 +100,7 @@ def classify(state: AgentState) -> dict:
     }
 
 
-def route(state: AgentState) -> str:
+def route(state: RouterState) -> str:
     """Deterministic routing. Sign-in is required for orders and support; safety goes to a human."""
     if state.get("risk") == "safety":
         return "safety"
@@ -112,11 +112,11 @@ def route(state: AgentState) -> str:
     return intent
 
 
-def clarify(state: AgentState) -> dict:
+def clarify(state: RouterState) -> dict:
     return {"route": "clarify", "final_response": state.get("final_response") or CLARIFY_FALLBACK}
 
 
-def respond_sign_in(state: AgentState) -> dict:
+def respond_sign_in(state: RouterState) -> dict:
     if state.get("intent") == "support":
         context = "I'd love to help resolve this for you! To raise a support ticket we need to verify your account and find your order."
     else:
@@ -131,7 +131,7 @@ def respond_sign_in(state: AgentState) -> dict:
     }
 
 
-def safety_escalation(state: AgentState) -> dict:
+def safety_escalation(state: RouterState) -> dict:
     """Someone may be hurt: open a critical ticket for a human and reply with a fixed message."""
     message = state.get("user_message", "")
     logger.warning(f"request_id={get_request_id()} | SAFETY | user_id={state.get('user_id')} | {message[:100]}")
@@ -146,7 +146,7 @@ def safety_escalation(state: AgentState) -> dict:
 
 
 def build_router_graph():
-    graph = StateGraph(AgentState)
+    graph = StateGraph(RouterState)
     graph.add_node("classify", classify)
     graph.add_node("clarify", clarify)
     graph.add_node("sign_in", respond_sign_in)

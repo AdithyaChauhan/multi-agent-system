@@ -102,20 +102,40 @@ class TestTerminalNodes:
         assert kwargs["severity"] == "critical" and kwargs["safety_alert"] is True
 
 
+def _thread(name: str) -> dict:
+    return {"configurable": {"thread_id": f"test-{name}"}}
+
+
 class TestGraph:
     def test_greeting_end_to_end(self):
         with patch.object(router, "call_llm", return_value=RouteDecision(intent="unclear", reply="Hi there!")):
-            out = router.router_graph.invoke({"user_message": "hi", "user_id": "anon-1", "conversation_history": []})
+            out = router.router_graph.invoke(
+                {"user_message": "hi", "user_id": "anon-1", "conversation_history": []}, _thread("greeting")
+            )
         assert out["final_response"] == "Hi there!"
         assert out["route"] == "clarify"
 
     def test_anonymous_order_request_asks_to_sign_in(self):
         with patch.object(router, "call_llm", return_value=RouteDecision(intent="order")):
-            out = router.router_graph.invoke({"user_message": "track my order", "user_id": "anon-1"})
+            out = router.router_graph.invoke(
+                {"user_message": "track my order", "user_id": "anon-1"}, _thread("sign-in")
+            )
         assert out["route"] == "sign_in"
+
+    def test_agent_internals_stay_inside_the_subgraph(self, yaml_catalog):
+        import app.agents.product_agent as pa
+
+        mouse = {"product_id": "P1", "name": "Mouse", "brand": "X", "price": 500, "rating": 4.0, "type": "mouse"}
+        with patch.object(router, "call_llm", return_value=RouteDecision(intent="product")), patch.object(
+            pa, "call_llm", side_effect=[pa.ProductSearch(product="mouse"), pa.Ranking(same_kind=[1])]
+        ), patch.object(pa, "search_products", return_value=[mouse]):
+            out = router.router_graph.invoke({"user_message": "mouse", "user_id": "anon-1"}, _thread("internals"))
+        assert out["ranked_products"][0]["product_id"] == "P1"
+        assert not {"search_results", "search_filters", "not_carried"} & set(out)
 
 
 def test_current_message_is_not_repeated_in_history():
     history = [{"role": "user", "content": "4k monitor"}]
     _, call = _classify(RouteDecision(intent="product"), user_message="4k monitor", conversation_history=history)
     assert "Recent conversation" not in call.call_args.args[2][1].content
+

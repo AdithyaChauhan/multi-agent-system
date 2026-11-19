@@ -433,7 +433,7 @@ def check_turn(expect: dict, *, text, status_code, state, route, api_json, user_
 
     prefs = {}
     if state:
-        prefs = state.get("original_preferences") or state.get("preferences") or {}
+        prefs = state.get("preferences") or {}
 
     if "product" in expect:
         allowed = expect["product"] if isinstance(expect["product"], list) else [expect["product"]]
@@ -605,7 +605,7 @@ def run_conversation(client, conv, router_rec, reroute_rec, phrase_sets, args):
             if order_status(spec["order_id"]) != spec["db_after"]:
                 failures.append(f"after direct cancel {spec['order_id']} is {order_status(spec['order_id'])!r}")
 
-        prefs = (state or {}).get("original_preferences") or (state or {}).get("preferences") or {}
+        prefs = (state or {}).get("preferences") or {}
         turns_out.append(
             {
                 "message": turn["message"],

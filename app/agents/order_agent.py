@@ -5,7 +5,7 @@ from typing import Literal
 
 from langgraph.graph import END, StateGraph
 
-from app.agents.state import AgentState
+from app.agents.state import OrderInput, OrderOutput, OrderState
 from app.core.logger import get_logger, get_request_id
 from app.tools.order_tools import fetch_order_from_db, fetch_user_orders
 from app.tools.shipment_tools import fetch_tracking_info
@@ -13,7 +13,7 @@ from app.tools.shipment_tools import fetch_tracking_info
 logger = get_logger("app.agents.order_agent")
 
 
-def find_order(state: AgentState) -> dict:
+def find_order(state: OrderState) -> dict:
     """Look the order up for this user only. With no order named, a single order is used."""
     user_id = state.get("user_id", "")
     order_id = state.get("order_id")
@@ -25,7 +25,7 @@ def find_order(state: AgentState) -> dict:
     return {"order_id": order_id, "order_data": order, "user_orders": orders}
 
 
-def route_after_find(state: AgentState) -> Literal["status", "not_found", "no_orders", "list"]:
+def route_after_find(state: OrderState) -> Literal["status", "not_found", "no_orders", "list"]:
     if state.get("order_data"):
         return "status"
     if state.get("order_id"):
@@ -46,7 +46,7 @@ def order_lines(orders: list, numbered: bool) -> str:
     return "\n".join(lines) + footer
 
 
-def list_orders(state: AgentState) -> dict:
+def list_orders(state: OrderState) -> dict:
     orders = state.get("user_orders") or []
     return {
         "final_response": "You have multiple orders. Which one would you like to check?\n\n"
@@ -54,11 +54,11 @@ def list_orders(state: AgentState) -> dict:
     }
 
 
-def respond_no_orders(state: AgentState) -> dict:
+def respond_no_orders(state: OrderState) -> dict:
     return {"final_response": "I couldn't find any orders on your account. Have you placed an order with us recently?"}
 
 
-def respond_not_found(state: AgentState) -> dict:
+def respond_not_found(state: OrderState) -> dict:
     order_id = state.get("order_id")
     orders = state.get("user_orders") or []
     if not orders:
@@ -71,7 +71,7 @@ def respond_not_found(state: AgentState) -> dict:
     }
 
 
-def order_status(state: AgentState) -> dict:
+def order_status(state: OrderState) -> dict:
     """Status from the database, plus live carrier data when the tracking API has it."""
     order = state.get("order_data") or {}
     status = (order.get("status") or "").lower().replace(" ", "_")
@@ -103,7 +103,7 @@ def order_status(state: AgentState) -> dict:
 
 
 def build_order_agent_graph():
-    graph = StateGraph(AgentState)
+    graph = StateGraph(OrderState, input_schema=OrderInput, output_schema=OrderOutput)
     graph.add_node("find_order", find_order)
     graph.add_node("order_status", order_status)
     graph.add_node("respond_not_found", respond_not_found)

@@ -6,8 +6,6 @@ and order_agent.py uncovered branches.
 import pytest
 from unittest.mock import MagicMock, patch
 
-from app.agents.state import AgentState
-
 # ── order_agent_subgraph ─────────────────────────────────────────────────────
 
 

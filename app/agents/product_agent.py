@@ -1,4 +1,3 @@
-import copy
 import json
 from typing import List, Literal, Optional
 
@@ -6,7 +5,7 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph import StateGraph, END
 from pydantic import BaseModel, Field, field_validator
 
-from app.agents.state import AgentState
+from app.agents.state import ProductInput, ProductOutput, ProductState, SearchInput, SearchOutput, SearchState
 from app.catalog.features import features_to_filters, match_attributes
 from app.catalog.runtime import catalog_blurb, get_catalog
 from app.tools.product_tools import search_products
@@ -56,7 +55,7 @@ EMPTY_PREFERENCES = {
 }
 
 
-def extract_preferences(state: AgentState) -> dict:
+def extract_preferences(state: ProductState) -> dict:
     """LLM node: previous filters + new message → complete filters for what the shopper wants now."""
     previous = {k: v for k, v in (state.get("preferences") or {}).items() if k in EMPTY_PREFERENCES and v}
     message = state.get("user_message", "")
@@ -91,18 +90,17 @@ def extract_preferences(state: AgentState) -> dict:
     logger.info(f"request_id={get_request_id()} | EXTRACTED: {json.dumps(preferences)} | not_carried={not_carried}")
     return {
         "preferences": preferences,
-        "original_preferences": copy.deepcopy(preferences),
         "not_carried": not_carried,
         "relaxed_filters": [],
     }
 
 
-def ask_for_preferences(state: AgentState) -> dict:
+def ask_for_preferences(state: ProductState) -> dict:
     logger.info(f"request_id={get_request_id()} | Asking for preferences")
     return {"final_response": f"What are you looking for? Here's what we carry:\n\n{CATALOG_BLURB}"}
 
 
-def respond_unavailable(state: AgentState) -> dict:
+def respond_unavailable(state: ProductState) -> dict:
     """Deterministic reply for a kind of product we don't sell."""
     info = state.get("not_carried") or {}
     item = info.get("item") or "that"
@@ -115,7 +113,7 @@ def respond_unavailable(state: AgentState) -> dict:
     return {"final_response": reply}
 
 
-def route_after_extraction(state: AgentState) -> Literal["search", "ask", "unavailable"]:
+def route_after_extraction(state: ProductState) -> Literal["search", "ask", "unavailable"]:
     if state.get("not_carried"):
         return "unavailable"
     prefs = state.get("preferences") or {}
@@ -156,12 +154,12 @@ def search_filters(prefs: dict) -> dict:
 RELAXATION_ORDER = ["price", "brand", "attributes", "keywords"]
 
 
-def plan_search(state: AgentState) -> dict:
+def plan_search(state: SearchState) -> dict:
     """Working filters for this turn. The loop loosens these, never the shopper's preferences."""
     return {"search_filters": search_filters(state.get("preferences") or {}), "relaxed_filters": []}
 
 
-def search(state: AgentState) -> dict:
+def search(state: SearchState) -> dict:
     filters = state["search_filters"]
     results = search_products(**filters, limit=10)
     logger.info(
@@ -180,13 +178,13 @@ def next_relaxation(filters: dict, relaxed: list) -> Optional[str]:
     return None
 
 
-def route_after_search(state: AgentState) -> Literal["loosen", "done"]:
+def route_after_search(state: SearchState) -> Literal["loosen", "done"]:
     if state.get("search_results"):
         return "done"
     return "loosen" if next_relaxation(state["search_filters"], state.get("relaxed_filters") or []) else "done"
 
 
-def loosen(state: AgentState) -> dict:
+def loosen(state: SearchState) -> dict:
     """Price goes up 25%; brand, attributes or keywords are dropped."""
     filters = dict(state["search_filters"])
     relaxed = state.get("relaxed_filters") or []
@@ -200,7 +198,7 @@ def loosen(state: AgentState) -> dict:
 
 def build_search_loop():
     """At most 1 + len(RELAXATION_ORDER) searches: each loosen step moves further down the order."""
-    graph = StateGraph(AgentState)
+    graph = StateGraph(SearchState, input_schema=SearchInput, output_schema=SearchOutput)
     graph.add_node("plan_search", plan_search)
     graph.add_node("search", search)
     graph.add_node("loosen", loosen)
@@ -221,7 +219,7 @@ class Ranking(BaseModel):
     exact: List[int] = Field(default_factory=list, description="of those, also matching brand, features and specs")
 
 
-def rank_products(state: AgentState) -> dict:
+def rank_products(state: ProductState) -> dict:
     """LLM node: drop candidates that aren't what the shopper asked for, then order the rest."""
     candidates = (state.get("search_results") or [])[:10]
     if not candidates:
@@ -269,7 +267,7 @@ def score(product: dict, prefs: dict) -> float:
     return round(0.5 * rating + 0.25 * price_fit + 0.25 * match, 3)
 
 
-def route_after_rank(state: AgentState) -> Literal["recommend", "no_results"]:
+def route_after_rank(state: ProductState) -> Literal["recommend", "no_results"]:
     return "recommend" if state.get("ranked_products") else "no_results"
 
 
@@ -306,7 +304,7 @@ RELAXED_WORDS = {
 }
 
 
-def format_recommendations(state: AgentState) -> dict:
+def format_recommendations(state: ProductState) -> dict:
     prefs = state.get("preferences") or {}
     top3 = (state.get("ranked_products") or [])[:3]
     relaxed = state.get("relaxed_filters") or []
@@ -324,7 +322,7 @@ def format_recommendations(state: AgentState) -> dict:
     return {"final_response": "\n".join(lines)}
 
 
-def respond_no_results(state: AgentState) -> dict:
+def respond_no_results(state: ProductState) -> dict:
     prefs = state.get("preferences") or {}
     label = _label(prefs)
     reply = f"I couldn't find any {label} matching your request."
@@ -334,7 +332,7 @@ def respond_no_results(state: AgentState) -> dict:
 
 
 def build_product_agent_graph():
-    graph = StateGraph(AgentState)
+    graph = StateGraph(ProductState, input_schema=ProductInput, output_schema=ProductOutput)
     graph.add_node("extract_preferences", extract_preferences)
     graph.add_node("ask_for_preferences", ask_for_preferences)
     graph.add_node("respond_unavailable", respond_unavailable)
