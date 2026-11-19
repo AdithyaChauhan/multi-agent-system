@@ -94,12 +94,25 @@ class TestTerminalNodes:
         assert "Sign In" in router.respond_sign_in({"intent": "order"})["final_response"]
         assert "support ticket" in router.respond_sign_in({"intent": "support"})["final_response"]
 
-    def test_safety_opens_a_critical_ticket(self):
-        with patch.object(router, "create_support_ticket") as create:
-            result = router.safety_escalation({"user_id": "u1", "user_message": "the heater caught fire"})
-        assert result["final_response"] == router.SAFETY_RESPONSE
-        kwargs = create.call_args.kwargs
-        assert kwargs["severity"] == "critical" and kwargs["safety_alert"] is True
+    def test_safety_hands_a_critical_ticket_to_a_person(self):
+        result = router.safety_escalation({"user_id": "u1", "user_message": "the heater caught fire"})
+        request = result["escalation"]
+        assert (request["severity"], request["safety_alert"], request["user_id"]) == ("critical", True, "u1")
+        assert router.safety_reply({})["final_response"] == router.SAFETY_RESPONSE
+
+    def test_safety_end_to_end_opens_the_ticket_and_alerts(self):
+        import app.agents.escalation as esc
+
+        decision = RouteDecision(intent="support", risk="safety")
+        with patch.object(router, "call_llm", return_value=decision), patch.object(
+            esc, "create_support_ticket", return_value={"ticket_id": "TKT-S", "severity": "critical"}
+        ) as create, patch.object(esc.logger, "warning") as alert:
+            out = router.router_graph.invoke(
+                router.new_turn("the heater caught fire", "anon-1", "s-safety", []), _thread("safety")
+            )
+        assert out["route"] == "safety" and out["final_response"] == router.SAFETY_RESPONSE
+        assert create.call_args.kwargs["safety_alert"] is True
+        assert "TKT-S" in alert.call_args.args[0]  # no webhook configured: the alert goes to the log
 
 
 def _thread(name: str) -> dict:

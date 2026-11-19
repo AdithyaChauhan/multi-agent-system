@@ -5,6 +5,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import END, StateGraph
 from pydantic import BaseModel, Field
 
+from app.agents.escalation import escalation_graph
 from app.agents.order_agent import order_agent_graph
 from app.agents.product_agent import product_agent_graph
 from app.agents.state import RouterState
@@ -15,7 +16,6 @@ from app.core.logger import get_logger, get_request_id
 from app.core.metrics import agent_requests_total
 from app.core.prompt_loader import load_prompt
 from app.tools.order_tools import fetch_user_orders
-from app.tools.support_tools import create_support_ticket
 
 logger = get_logger("app.agents.router")
 
@@ -133,17 +133,23 @@ def respond_sign_in(state: RouterState) -> dict:
 
 
 def safety_escalation(state: RouterState) -> dict:
-    """Someone may be hurt: open a critical ticket for a human and reply with a fixed message."""
+    """Someone may be hurt: a critical ticket for a person (the escalation subgraph), then a fixed reply."""
     message = state.get("user_message", "")
     logger.warning(f"request_id={get_request_id()} | SAFETY | user_id={state.get('user_id')} | {message[:100]}")
-    create_support_ticket(
-        user_id=state.get("user_id", ""),
-        severity="critical",
-        category="other",
-        description=f"[SAFETY_ALERT] {message[:500]}",
-        safety_alert=True,
-    )
-    return {"route": "safety", "final_response": SAFETY_RESPONSE}
+    return {
+        "route": "safety",
+        "escalation": {
+            "user_id": state.get("user_id", ""),
+            "severity": "critical",
+            "category": "other",
+            "description": f"[SAFETY_ALERT] {message[:500]}",
+            "safety_alert": True,
+        },
+    }
+
+
+def safety_reply(state: RouterState) -> dict:
+    return {"final_response": SAFETY_RESPONSE}
 
 
 def new_turn(user_message: str, user_id: str, session_id: str, conversation_history: list) -> dict:
@@ -163,6 +169,8 @@ def new_turn(user_message: str, user_id: str, session_id: str, conversation_hist
         "relaxed_filters": None,
         "order_data": None,
         "support_order": None,
+        "escalation": None,
+        "ticket": None,
         "final_response": None,
     }
 
@@ -173,6 +181,8 @@ def build_router_graph(checkpointer=None):
     graph.add_node("clarify", clarify)
     graph.add_node("sign_in", respond_sign_in)
     graph.add_node("safety", safety_escalation)
+    graph.add_node("escalate", escalation_graph)
+    graph.add_node("safety_reply", safety_reply)
     graph.add_node("product_agent", product_agent_graph)
     graph.add_node("order_agent", order_agent_graph)
     graph.add_node("support_agent", support_agent_graph)
@@ -190,7 +200,9 @@ def build_router_graph(checkpointer=None):
             "support": "support_agent",
         },
     )
-    for node in ("clarify", "sign_in", "safety", "product_agent", "order_agent", "support_agent"):
+    graph.add_edge("safety", "escalate")
+    graph.add_edge("escalate", "safety_reply")
+    for node in ("clarify", "sign_in", "safety_reply", "product_agent", "order_agent", "support_agent"):
         graph.add_edge(node, END)
     return graph.compile(checkpointer=checkpointer)
 

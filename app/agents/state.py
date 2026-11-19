@@ -25,6 +25,10 @@ class RouterState(TypedDict, total=False):
     order_data: Optional[dict]
     support_order: Optional[dict]
 
+    # Escalation subgraph (safety reports): what to hand to a person, and the ticket it opened
+    escalation: Optional[dict]
+    ticket: Optional[dict]
+
     final_response: Optional[str]
 
 
@@ -98,4 +102,6 @@ class SupportOutput(TypedDict, total=False):
 
 class SupportState(SupportInput, SupportOutput, total=False):
     user_orders: Optional[List[dict]]
+    escalation: Optional[dict]  # the ticket to open, for the escalation subgraph
+    ticket: Optional[dict]
     cancel_answer: Optional[dict]  # what the shopper answered when the graph paused: {confirm, user_id}

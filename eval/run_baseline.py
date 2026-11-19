@@ -612,11 +612,11 @@ def run_conversation(client, conv, router_rec, reroute_rec, phrase_sets, args):
                 "paced_wait_seconds": round(paced, 1),
                 "extracted": {
                     k: prefs.get(k)
-                    for k in ("category", "subcategory", "type", "brand", "max_price", "min_rating", "keywords")
+                    for k in ("product", "features", "brand", "max_price", "min_price", "min_rating")
                     if prefs
                 },
                 "shown": [
-                    {"name": (p.get("name") or "")[:60], "brand": p.get("brand"), "subcategory": p.get("subcategory")}
+                    {"name": (p.get("name") or "")[:60], "brand": p.get("brand"), "type": p.get("type"), "kind": (p.get("attributes") or {}).get("kind")}
                     for p in ((state or {}).get("ranked_products") or [])[:3]
                 ],
                 "response": text[:700],

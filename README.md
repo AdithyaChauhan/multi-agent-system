@@ -167,7 +167,7 @@ docker compose build app && docker compose up -d --no-recreate db && docker comp
 
 | Method | Path | Description |
 |---|---|---|
-| `POST` | `/chat` | Send a message; returns agent response + session ID |
+| `POST` | `/chat` | Send a message; returns agent response + session ID. With `"confirm": true/false` it answers a paused question (the cancel Yes/No buttons). |
 | `GET` | `/messages/{session_id}` | Retrieve conversation history for a session |
 | `GET` | `/health` | Health check |
 | `GET` | `/auth/login` | Initiate Google OAuth flow |
@@ -331,3 +331,4 @@ See [.env.example](.env.example) for the full list. Key variables:
 | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
 | `JWT_SECRET_KEY` | Secret for signing JWT tokens |
 | `SESSION_EXPIRY_MINUTES` | Session inactivity timeout (default: 30) |
+| `ESCALATION_WEBHOOK_URL` | Optional: Slack or Discord incoming-webhook URL for escalation alerts (safety reports, support tickets). Unset: alerts go to the app log. |

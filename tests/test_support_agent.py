@@ -98,28 +98,34 @@ class TestCancellation:
 
 class TestCreateTicket:
     def test_one_open_ticket_per_order(self):
-        with patch.object(sa, "get_open_ticket_for_order", return_value={"ticket_id": "TKT-OLD"}), patch.object(
-            sa, "create_support_ticket"
-        ) as create:
+        with patch.object(sa, "get_open_ticket_for_order", return_value={"ticket_id": "TKT-OLD"}):
             out = sa.create_ticket(_state("damaged_delivery", _order("delivered", "ORD-2004")))
-        create.assert_not_called()
+        assert out["escalation"] is None and sa.route_ticket(out) == "done"
         assert "already have an open ticket **TKT-OLD**" in out["final_response"]
 
-    def test_creates_medium_ticket(self):
-        with patch.object(sa, "get_open_ticket_for_order", return_value=None), patch.object(
-            sa, "create_support_ticket", return_value={"ticket_id": "TKT-NEW"}
-        ) as create:
+    def test_hands_a_medium_ticket_to_the_escalation_subgraph(self):
+        with patch.object(sa, "get_open_ticket_for_order", return_value=None):
             out = sa.create_ticket(_state("wrong_item", _order("delivered", "ORD-2001")))
-        kwargs = create.call_args.kwargs
-        assert (kwargs["severity"], kwargs["category"], kwargs["order_id"]) == ("medium", "wrong_item", "ORD-2001")
-        assert "TKT-NEW" in out["final_response"]
+        request = out["escalation"]
+        assert (request["severity"], request["category"], request["order_id"]) == ("medium", "wrong_item", "ORD-2001")
+        assert sa.route_ticket(out) == "escalate"
 
     def test_legal_threat_without_order_is_tagged(self):
-        with patch.object(sa, "create_support_ticket", return_value={"ticket_id": "TKT-L"}) as create:
-            sa.create_ticket(_state("account_data", risk="legal"))
-        kwargs = create.call_args.kwargs
-        assert kwargs["category"] == "other" and kwargs["order_id"] is None
-        assert kwargs["description"].startswith("[P2] [LEGAL]")
+        request = sa.create_ticket(_state("account_data", risk="legal"))["escalation"]
+        assert request["category"] == "other" and request["order_id"] is None
+        assert request["description"].startswith("[P2] [LEGAL]")
+
+    def test_graph_opens_the_ticket_and_replies_with_its_id(self):
+        import app.agents.escalation as esc
+
+        with patch.object(sa, "fetch_order_from_db", return_value=_order("delivered", "ORD-2001")), patch.object(
+            sa, "get_open_ticket_for_order", return_value=None
+        ), patch.object(esc, "create_support_ticket", return_value={"ticket_id": "TKT-NEW"}) as create:
+            out = sa.support_agent_graph.invoke(
+                {**_state("wrong_item"), "order_id": "ORD-2001", "user_message": "wrong item arrived"}
+            )
+        assert create.call_args.kwargs["category"] == "wrong_item"
+        assert "TKT-NEW" in out["final_response"] and "Wrong Item" in out["final_response"]
 
 
 def test_draft_resolution_sends_policy_and_order():

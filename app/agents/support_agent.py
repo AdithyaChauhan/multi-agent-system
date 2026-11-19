@@ -14,13 +14,14 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import END, StateGraph
 from langgraph.types import interrupt
 
+from app.agents.escalation import escalation_graph
 from app.agents.order_agent import order_lines
 from app.agents.state import SupportInput, SupportOutput, SupportState
 from app.core.llm import call_llm
 from app.core.logger import get_logger, get_request_id
 from app.core.prompt_loader import load_prompt
 from app.tools.order_tools import cancel_order_in_db, fetch_order_from_db, fetch_user_orders
-from app.tools.support_tools import create_support_ticket, get_open_ticket_for_order, lookup_support_policy
+from app.tools.support_tools import get_open_ticket_for_order, lookup_support_policy
 
 logger = get_logger("app.agents.support_agent")
 
@@ -157,34 +158,49 @@ def keep_order(state: SupportState) -> dict:
     return {"final_response": "No problem! Your order is still active."}
 
 
-def create_ticket(state: SupportState) -> dict:
-    """Hand the issue to a human. One open ticket per order."""
-    user_id = state.get("user_id", "")
+def _category(state: SupportState) -> str:
     issue = _issue(state)
+    return issue if issue in DB_CATEGORIES else "other"
+
+
+def _description(state: SupportState) -> str:
+    description = (state.get("support_issue") or {}).get("description") or state.get("user_message", "")
+    return f"[LEGAL] {description}" if state.get("risk") == "legal" else description
+
+
+def create_ticket(state: SupportState) -> dict:
+    """What to hand to a person (the escalation subgraph opens it). One open ticket per order."""
+    user_id = state.get("user_id", "")
     order_id = (state.get("support_order") or {}).get("order_id")
     if order_id:
         existing = get_open_ticket_for_order(user_id, order_id)
         if existing:
             return {
+                "escalation": None,
                 "final_response": f"You already have an open ticket **{existing['ticket_id']}** for this order. "
-                "Our support team will be in touch within the agreed timeframe. Is there anything else I can help you with?"
+                "Our support team will be in touch within the agreed timeframe. Is there anything else I can help you with?",
             }
-    category = issue if issue in DB_CATEGORIES else "other"
-    description = (state.get("support_issue") or {}).get("description") or state.get("user_message", "")
-    if state.get("risk") == "legal":
-        description = f"[LEGAL] {description}"
-    ticket = create_support_ticket(
-        user_id=user_id,
-        severity="medium",
-        category=category,
-        description=f"[P2] {description[:500]}",
-        order_id=order_id,
-    )
-    policy = lookup_support_policy(category, "medium")
-    logger.info(f"request_id={get_request_id()} | ticket created | {ticket['ticket_id']} | category={category}")
     return {
-        "final_response": f"I've created a support ticket: **{ticket['ticket_id']}**\n\n"
-        f"**Issue:** {description[:200]}\n"
+        "escalation": {
+            "user_id": user_id,
+            "severity": "medium",
+            "category": _category(state),
+            "description": f"[P2] {_description(state)[:500]}",
+            "order_id": order_id,
+        }
+    }
+
+
+def route_ticket(state: SupportState) -> Literal["escalate", "done"]:
+    return "escalate" if state.get("escalation") else "done"
+
+
+def ticket_reply(state: SupportState) -> dict:
+    category = _category(state)
+    policy = lookup_support_policy(category, "medium")
+    return {
+        "final_response": f"I've created a support ticket: **{state['ticket']['ticket_id']}**\n\n"
+        f"**Issue:** {_description(state)[:200]}\n"
         f"**Category:** {category.replace('_', ' ').title()}\n"
         "**Priority:** P2\n"
         f"**Response Time:** {policy.get('response_time', '24 hours')}\n\n"
@@ -222,6 +238,8 @@ def build_support_agent_graph():
     graph.add_node("cancel_order", cancel_order)
     graph.add_node("keep_order", keep_order)
     graph.add_node("create_ticket", create_ticket)
+    graph.add_node("escalate", escalation_graph)
+    graph.add_node("ticket_reply", ticket_reply)
     graph.add_node("draft_resolution", draft_resolution)
     graph.set_entry_point("find_order")
     graph.add_conditional_edges(
@@ -237,7 +255,9 @@ def build_support_agent_graph():
     )
     graph.add_conditional_edges("handle_cancellation", route_cancellation, {"confirm": "confirm_cancel", "done": END})
     graph.add_conditional_edges("confirm_cancel", route_answer, {"cancel": "cancel_order", "keep": "keep_order"})
-    for node in ("answer_policy", "ask_for_order", "cancel_order", "keep_order", "create_ticket", "draft_resolution"):
+    graph.add_conditional_edges("create_ticket", route_ticket, {"escalate": "escalate", "done": END})
+    graph.add_edge("escalate", "ticket_reply")
+    for node in ("answer_policy", "ask_for_order", "cancel_order", "keep_order", "ticket_reply", "draft_resolution"):
         graph.add_edge(node, END)
     return graph.compile()
 
