@@ -28,25 +28,25 @@ Replace hand-written control flow with LangGraph's built-in features where they 
 ## Tasks
 Each step is its own commit with tests.
 - [x] Plan mode, approved 2026-11-20. Phase 1 committed; branch `phase-2-architecture` created.
-- [ ] **1. Measuring stick for conversations.**
+- [x] **1. Measuring stick for conversations.**
   - Port the baseline expectations: `subcategory` becomes `product_type`, resolved from `prefs.product` through the catalog; `result_subcategory` becomes `result_type`; `category` is dropped.
   - Add `--mode record|replay` to `run_baseline.py`.
   - Record the "before" run: gpt-oss-20b, 1 run, `multi_agent_baseline`, about 180K tokens.
-- [ ] **2. Search loop as graph edges:** `search → check → loosen → search`, at most 4 passes. Gate: retrieval replay identical to `v2-combined` and baseline replay identical.
-- [ ] **3. Subgraph schemas:** product, order and support each declare input and output schemas. Remove `original_preferences`. Gate: both replays identical.
-- [ ] **4. Checkpointer:**
+- [x] **2. Search loop as graph edges:** `search → check → loosen → search`, at most 4 passes. Gate: retrieval replay identical to `v2-combined` and baseline replay identical.
+- [x] **3. Subgraph schemas:** product, order and support each declare input and output schemas. Remove `original_preferences`. Gate: both replays identical.
+- [x] **4. Checkpointer:**
   - `PostgresSaver` on Postgres, `InMemorySaver` otherwise; thread id = session id;
   - per-turn keys are reset in the turn input;
   - delete `_session_preferences`;
   - restart test;
   - pin the new packages and check the image size.
-- [ ] **5. Cancellation with `interrupt()`:**
+- [x] **5. Cancellation with `interrupt()`:**
   - a `confirm_cancel` node pauses;
   - `/chat` with `confirm` resumes with `Command(resume={"confirm", "user_id"})`;
   - `cancel_order` re-checks owner and status;
   - `/cancel-order` is deleted, and the UI and baseline harness switch to resume;
   - five guardrail tests.
-- [ ] **6. Escalation subgraph:**
+- [x] **6. Escalation subgraph:**
   - create the ticket, then notify (`ESCALATION_WEBHOOK_URL`, or a WARNING log if unset; it never blocks the reply);
   - used by the safety and support tickets;
   - gate: baseline replay identical.
@@ -76,4 +76,13 @@ Each step is its own commit with tests.
 - **Streaming must not bypass guardrails.** Stream only step labels and the final reply, never raw model output.
 
 ## Results
-_Fill in during the phase._
+- **Before** (2026-11-20, code `07a0904` = Phase 1 + ported harness, gpt-oss-20b, 1 run, `multi_agent_baseline`): **45/51 conversations, 84/90 turns**, about 186K tokens (main key capped after 40 conversations; the other 11 ran on the `.env.eval` key from a worktree at the same commit). Recorded to `eval/cassettes/baseline_openai-gpt-oss-20b.json`; summary in `eval/baseline_runs/p2-before-combined_summary.json`.
+  - p03 "table": shows laptop tables (the YAML kind `table` under laptop stand) instead of "we don't carry furniture". A data fix.
+  - p10 "4k monitor": the catalog has one Full HD monitor, so the app says it doesn't carry monitors.
+  - p07 "lojitec mouse" and p22 "bajaj smartwatches": the model dropped the brand.
+  - p19 "usb hub with ethernet": no results with the model's extraction (today's search finds 10 for product "usb hub" with the feature "ethernet").
+  - s16 "resolve support issues": routed to support, not clarify.
+- **The retrieval cassettes are stale:** the Phase 1 catalog fixes made after the v2 run changed the `{types}` list in the extraction prompt, so retrieval replay misses on every query. Step 9's live run re-records them. Step 2 was checked another way: old loop against graph loop on all 100 recorded v2 preferences gives identical results and loosening steps (0 tokens).
+- **Steps 2–6, baseline replay** (0 tokens, 0 cassette misses): 45/51, identical to the before-run on every turn except the cancel question, which now ends "Do you want to cancel it?" (s08, s09).
+- **Postgres checkpointer verified** against `multi_agent_baseline`: filters carry over to a fresh graph and pool (a restart), and a pending cancel question survives a restart and resumes. The saver creates `checkpoints`, `checkpoint_blobs`, `checkpoint_writes` and `checkpoint_migrations` (outside Alembic).
+- **Tests:** 242 pass, coverage 92%. The pinned packages install cleanly (`pip check` clean); `uvloop` is Linux-only, so it's skipped on Windows.
