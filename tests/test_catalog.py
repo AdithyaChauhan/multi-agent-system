@@ -306,3 +306,24 @@ def test_model_codes_and_negations_are_not_facts():
     assert match_attribute(remote.attributes["voice"], "Remote (Without Voice Function)") is None
     assert match_attribute(remote.attributes["voice"], "Remote (Mouse & Voice Non-Support)") is None
     assert match_attribute(remote.attributes["voice"], "Bluetooth Voice Remote") is True
+
+
+def test_product_in_prefers_types_we_sell(yaml_catalog):
+    ptype, kind, word = yaml_catalog.product_in("breville electric kettle")
+    assert (ptype.name, word) == ("electric kettle", "electric kettle")
+    ptype, _, word = yaml_catalog.product_in("iphone 15")
+    assert (ptype.name, ptype.served, word) == ("phone", False, "iphone")
+    assert yaml_catalog.product_in("under 2000") == (None, None, None)
+
+
+def test_an_unreachable_database_is_not_cached(monkeypatch):
+    from tests.conftest import build_test_catalog
+
+    import app.catalog.runtime as rt
+
+    monkeypatch.setattr(rt, "_loaded", None)
+    reads = iter([rt.Catalog(), build_test_catalog()])
+    monkeypatch.setattr(rt, "_read_catalog", lambda: next(reads))
+    assert not rt.get_catalog().types  # database still starting
+    loaded = rt.get_catalog()  # next call reads again
+    assert loaded.types and rt.get_catalog() is loaded  # and keeps it from then on

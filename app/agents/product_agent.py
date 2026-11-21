@@ -1,4 +1,5 @@
 import json
+import re
 from typing import List, Literal, Optional
 
 from langchain_core.messages import SystemMessage, HumanMessage
@@ -37,7 +38,12 @@ class ProductSearch(BaseModel):
     @field_validator("product", "brand", "not_carried", mode="before")
     @classmethod
     def _text_or_none(cls, value):
-        return value.strip() or None if isinstance(value, str) else None
+        if not isinstance(value, str):
+            return None
+        # A malformed tool call can leak markup into a field ('"tablet" </Cat> <parameter=...'):
+        # keep the text before the first line break or tag.
+        text = re.split(r"[\n<]", value.strip(), maxsplit=1)[0]
+        return text.strip().strip("\"'").strip() or None
 
     @field_validator("features", "clear", mode="before")
     @classmethod
@@ -112,6 +118,27 @@ def active_filters(prefs: dict) -> list:
     return chips
 
 
+def ground_product(patch: dict, message: str, previous: dict) -> dict:
+    """Check the model's product against the words the shopper actually used; the catalog decides.
+
+    - A first message whose product the model missed ("breville electric kettle" -> only a brand) gets
+      the product the message names, including one we don't sell ("iphone 15").
+    - A bare type where the message names one of its kinds ("cooking appliance" for "sandwich maker")
+      keeps the kind, so the search is as specific as the shopper was.
+    """
+    catalog = get_catalog()
+    named, kind, word = catalog.product_in(message)
+    if named is None:
+        return patch
+    product = patch.get("product")
+    if not product and not patch.get("not_carried") and not previous.get("product"):
+        return {**patch, "product": word}
+    ptype, pkind = catalog.resolve_product(product)
+    if ptype is not None and ptype.name == named.name and kind and not pkind:
+        return {**patch, "product": kind}
+    return patch
+
+
 def extract_preferences(state: ProductState) -> dict:
     """LLM node: previous filters + new message → what changed; code merges it into the filters."""
     previous = {k: v for k, v in (state.get("preferences") or {}).items() if k in EMPTY_PREFERENCES and v}
@@ -126,7 +153,7 @@ def extract_preferences(state: ProductState) -> dict:
         ],
         schema=ProductSearch,
     )
-    out = parsed.model_dump() if parsed is not None else {}
+    out = ground_product(parsed.model_dump() if parsed is not None else {}, message, previous)
 
     # Whether we sell something is decided by the catalog, not the model: a type we stock but don't
     # sell (phones, laptops, tablets) gets its suggestion, and a "not carried" word that names a type

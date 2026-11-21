@@ -703,6 +703,11 @@ def main() -> int:
     cassette = Path(args.cassette) if args.cassette else cassette_for(model)
     install_cassette(args.mode, cassette)
     app_main, router_rec, reroute_rec = load_app()
+    from app.catalog.runtime import get_catalog
+
+    if not get_catalog().types:  # the prompts would go out without the type list; answers would be wrong
+        print("ABORT: the product catalog didn't load (is the database up?)")
+        return 1
     from fastapi.testclient import TestClient
 
     data = json.loads(CONVERSATIONS_FILE.read_text(encoding="utf-8"))

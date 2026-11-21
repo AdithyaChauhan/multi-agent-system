@@ -113,7 +113,14 @@ def save(path: Path, result: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(".tmp")
     tmp.write_text(json.dumps(result, indent=1, ensure_ascii=False), encoding="utf-8")
-    tmp.replace(path)
+    for attempt in range(20):  # OneDrive briefly locks a file it is syncing (WinError 5)
+        try:
+            tmp.replace(path)
+            return
+        except PermissionError:
+            if attempt == 19:
+                raise
+            time.sleep(0.5)
 
 
 def rescore(path: Path) -> dict:
@@ -170,6 +177,11 @@ def main() -> int:
     os.environ["LLM_CASSETTE_MODE"] = "" if args.mode == "live" else args.mode
     os.environ["LLM_CASSETTE_PATH"] = str(cassette)
     from app.agents.product_agent import product_agent_graph
+    from app.catalog.runtime import get_catalog
+
+    if not get_catalog().types:  # the prompt would go out without the type list; answers would be wrong
+        print("ABORT: the product catalog didn't load (is the database up?)")
+        return 1
 
     quiet_app_loggers()
 

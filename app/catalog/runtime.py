@@ -7,12 +7,14 @@ their brand into a brand id ("redmi" -> Xiaomi). Nothing here calls a model.
 
 import re
 from dataclasses import dataclass, field
-from functools import lru_cache
 from typing import Optional
 
 from rapidfuzz import fuzz, process
 
 from app.catalog.schema import norm, parse_type
+from app.core.logger import get_logger
+
+logger = get_logger("app.catalog.runtime")
 
 
 def fold_brand(name: str) -> str:
@@ -36,19 +38,32 @@ class Catalog:
             if candidate in self.words:
                 type_name, kind = self.words[candidate]
                 return self.types[type_name], kind
-        # A phrase made of known words: "neckband headphones" is headphones, kind neckband. If the
-        # words name different types, the longest word wins ("tv remote cover" -> tv accessory). Only
-        # types we sell: "phone case" must not become "we don't carry phones".
+        # A phrase made of known words: "neckband headphones" is headphones, kind neckband. Only types
+        # we sell: "phone case" must not become "we don't carry phones".
+        ptype, kind, _ = self._phrase(w, served=True)
+        return ptype, kind
+
+    def _phrase(self, text: str, served: bool) -> tuple:
+        """(type, kind, word) named by known words inside the text; the longest word wins when they
+        name different types ("tv remote cover" -> tv accessory)."""
         found = [
             (v, k)
             for k, v in self.words.items()
-            if self.types[v[0]].served and re.search(rf"(?<![a-z0-9]){re.escape(k)}s?(?![a-z0-9])", w)
+            if self.types[v[0]].served is served and re.search(rf"(?<![a-z0-9]){re.escape(k)}s?(?![a-z0-9])", text)
         ]
         if not found:
-            return None, None
-        type_name = max(found, key=lambda f: len(f[1]))[0][0]
+            return None, None, None
+        (type_name, _), word = max(found, key=lambda f: len(f[1]))
         kinds = [kind for (t, kind), _ in found if t == type_name and kind]
-        return self.types[type_name], kinds[0] if len(set(kinds)) == 1 else None
+        kind = kinds[0] if len(set(kinds)) == 1 else None
+        return self.types[type_name], kind, word
+
+    def product_in(self, message: str) -> tuple:
+        """(type, kind, word) for a product the message itself names: a type we sell first, then one we
+        don't ("iphone 15"). Used when the model's answer has no product, so code can still tell."""
+        w = norm(message or "")
+        found = self._phrase(w, served=True)
+        return found if found[0] is not None else self._phrase(w, served=False)
 
     def resolve_brand(self, brand: Optional[str]) -> Optional[tuple]:
         """(id, canonical name) for a brand as the shopper wrote it, typos included, or None."""
@@ -106,9 +121,23 @@ def build_catalog(type_rows: list, brand_rows: list) -> Catalog:
     return Catalog(types=types, type_ids=type_ids, words=words, brands=brands)
 
 
-@lru_cache(maxsize=1)
+_loaded: Optional[Catalog] = None
+
+
 def get_catalog() -> Catalog:
-    """Read once per process. An unreachable or not-yet-migrated database gives an empty catalog."""
+    """Read once per process. Only a catalog that has types is kept: if the database isn't reachable
+    yet (the app starting before Postgres), the next call tries again instead of running without a
+    catalog until a restart."""
+    global _loaded
+    if _loaded is None:
+        catalog = _read_catalog()
+        if not catalog.types:
+            return catalog
+        _loaded = catalog
+    return _loaded
+
+
+def _read_catalog() -> Catalog:
     from app.db.database import SessionLocal
     from app.models.product import Brand, ProductType as ProductTypeRow
 
@@ -125,7 +154,8 @@ def get_catalog() -> Catalog:
         ).order_by(ProductTypeRow.id)
         brand_rows = db.query(Brand.id, Brand.name, Brand.aliases)
         return build_catalog(list(type_rows), list(brand_rows))
-    except Exception:  # pragma: no cover - DB not reachable or not migrated
+    except Exception as exc:  # DB not reachable or not migrated
+        logger.warning(f"catalog not loaded, will retry: {type(exc).__name__}")
         return Catalog()
     finally:
         db.close()

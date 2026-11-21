@@ -159,3 +159,26 @@ class TestFilterChips:
         assert search.call_args.kwargs["brand"] is None
         assert out["ranked_products"][0]["product_id"] == "T1" and "Sony TV" in out["final_response"]
         assert [c["field"] for c in out["active_filters"]] == ["product"]
+
+
+class TestGroundProduct:
+    """The model's product is checked against the words the shopper used; the catalog decides."""
+
+    def test_markup_leaking_into_a_field_is_cut_off(self):
+        s = pa.ProductSearch.model_validate({"product": '"tablet"\n</Cat>\n<parameter=brand>\nSamsung'})
+        assert s.product == "tablet"
+
+    def test_a_first_message_without_a_product_gets_the_one_it_names(self):
+        assert pa.ground_product({"brand": "breville"}, "breville electric kettle", {})["product"] == "electric kettle"
+
+    def test_a_product_we_do_not_sell_is_found_too(self):
+        result, _ = _extract("iphone 15", {})
+        assert result["not_carried"] == {"item": "iphone", "suggestion": "phone holder"}
+
+    def test_the_shoppers_kind_beats_a_bare_type(self):
+        assert pa.ground_product({"product": "cooking appliance"}, "sandwich maker", {})["product"] == "sandwich maker"
+
+    def test_follow_ups_and_unknown_words_are_left_alone(self):
+        assert pa.ground_product({"brand": "Samsung"}, "what about Samsung", {"product": "tv"}) == {"brand": "Samsung"}
+        assert pa.ground_product({}, "remove fuzz balls from my sweaters", {}) == {}
+        assert pa.ground_product({}, "phone case for samsung", {"product": "phone holder"}) == {}
