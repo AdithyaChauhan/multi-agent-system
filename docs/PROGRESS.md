@@ -12,6 +12,23 @@ Newest first. `/handoff` adds an entry at the end of every session. Keep entries
 - **Commits:**
 -->
 
+## 2026-11-21 · Phase 2 · LangGraph-native architecture done
+- **Done:**
+  - Postgres checkpointer (one thread per session); cancel through `interrupt()` with `/cancel-order` removed; search loop as graph edges; per-agent input and output schemas; escalation subgraph (ticket, then webhook or log alert);
+  - `/chat/stream` step labels; patch extraction with filter chips (removing one costs no tokens); product grounding in code; diagram in `docs/architecture/graph.md`;
+  - the baseline ported to Phase 1 types, with record/replay;
+  - bug fixed: an unreachable database at startup left the app without its catalog until a restart.
+- **Measured** (gpt-oss-20b, 1 run, `multi_agent_baseline`):
+  - baseline 45 → 47/51;
+  - retrieval (100 queries, v2 model split): recall@5 0.958 → 0.947, precision@3 0.926 → 0.918, refusals 0.8 → 1.0;
+  - steps 2–6 replay identical at 0 tokens;
+  - prompts 66 → 68 lines; agent code 858 → 1,284 lines (both size criteria missed);
+  - 262 tests, coverage 92%.
+- **Decisions:** [0012](decisions/0012-phase-2-graph-contracts.md).
+- **Open questions:** the Phase 3 gate (renamed-catalog sample, about 70K tokens); the Phase 0 label review.
+- **Next:** new chat, `/resume`, plan Phase 3 starting with its gate.
+- **Commits:** `0e9a8e2` (Phase 1) through this handoff on `phase-2-architecture`.
+
 ## 2026-11-19 · Phase 1 · Typed catalog live; search targets met; phase closed
 - **Done:**
   - 47 product types and brand merges in `data/catalog/*.yaml`, plus migration `a7d4e2c9b1f0`;

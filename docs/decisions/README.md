@@ -12,9 +12,10 @@ One file per decision that would be costly to reverse, or easy to undo by accide
 | [0006](0006-hybrid-search-pgvector.md) | Hybrid search with pgvector in the existing Postgres | Accepted, conditional: Phase 3, only if Phase 1 leaves a gap |
 | [0007](0007-search-state-in-postgres.md) | Search state in Postgres; refinements as patches | Accepted; storage superseded by 0009 |
 | [0008](0008-safety-floor.md) | Safety: model risk flag plus an escalate-only pattern | Accepted |
-| [0009](0009-langgraph-primitives.md) | Use LangGraph's built-in features instead of hand-written control flow | Accepted, planned for Phase 2 |
+| [0009](0009-langgraph-primitives.md) | Use LangGraph's built-in features instead of hand-written control flow | Accepted, implemented in Phase 2 (0012) |
 | [0010](0010-prompt-budget.md) | Fix behaviour in code, data or tests, not with more prompt rules | Accepted |
 | [0011](0011-catalog-words-resolved-in-code.md) | The model names the product; code resolves it against the catalog | Accepted, implemented |
+| [0012](0012-phase-2-graph-contracts.md) | Phase 2 graph contracts: checkpointed state, cancel pause, chips, product grounding | Accepted, implemented |
 
 ## Template
 ```markdown

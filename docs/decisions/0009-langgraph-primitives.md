@@ -1,5 +1,5 @@
 # 0009. Use LangGraph's built-in features instead of hand-written control flow
-- **Status:** Accepted (planned for Phase 2). Supersedes the storage part of 0007.
+- **Status:** Accepted, implemented in Phase 2 (details in 0012). Supersedes the storage part of 0007.
 - **Date:** 2026-11-18
 
 ## Context
