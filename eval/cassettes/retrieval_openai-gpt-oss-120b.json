@@ -1,4 +1,23 @@
 {
+ "008d96990a1326a57542fec52dc86fb7": {
+  "agent": "product",
+  "message": "So far: {} | Message: boil water quickly for tea",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1322,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [
+    "quick boil"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "electric kettle"
+  }
+ },
  "00def2fa042cd440e35eb90adc04dab0": {
   "agent": "product",
   "message": "Previous: {} | Message: something to keep my room warm in winter",
@@ -395,6 +414,47 @@
    ]
   }
  },
+ "24c4fc29d5d685b52d398379c80710f5": {
+  "agent": "product",
+  "message": "So far: {} | Message: sasta mixer grinder",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1354,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "mixer grinder"
+  }
+ },
+ "255977c1f7bb10e4ffeaefc3095871e0": {
+  "agent": "product",
+  "message": "User request: \"something to listen to music while running\"\n\nProducts:\n1. boAt Rockerz 255 Pro+ in-Ear Bluetooth Neckband with Upto 40 | ₹1399 | 4.1★ | boAt\n2. boAt Rockerz 330 in-Ear Bluetooth Neckban",
+  "model": "openai/gpt-oss-120b",
+  "node": "rank_products",
+  "total_tokens": 668,
+  "value": {
+   "exact": [
+    1,
+    2,
+    7
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ]
+  }
+ },
  "285f4a584792f9eac15761fc15f8ce2f": {
   "agent": "product",
   "message": "Previous: {\"category\": \"Electronics\", \"subcategory\": \"smartwatch\"} | Message: with calling",
@@ -443,9 +503,20 @@
   "message": "User request: \"keep my phone charged while travelling\"\n\nProducts:\n1. MI Power Bank 3i 20000mAh Lithium Polymer 18W Fast Power Del | ₹2049 | 4.3★ | Xiaomi\n2. MI 10000mAh 3i Lithium Polymer Power Bank D",
   "model": "openai/gpt-oss-120b",
   "node": "rank_products",
-  "total_tokens": 692,
+  "total_tokens": 707,
   "value": {
-   "exact": [],
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
    "same_kind": [
     1,
     2,
@@ -572,7 +643,7 @@
   "message": "User request: \"chai banane ke liye kettle\"\n\nProducts:\n1. Havells Aqua Plus 1.2 litre Double Wall Kettle / 304 Stainle | ₹1625 | 4.5★ | Havells\n2. Philips HD9306/06 1.5-Litre Electric Kettle (Multicolo",
   "model": "openai/gpt-oss-120b",
   "node": "rank_products",
-  "total_tokens": 707,
+  "total_tokens": 706,
   "value": {
    "exact": [
     1,
@@ -762,6 +833,25 @@
    "type": null
   }
  },
+ "3e6a66cba6a2c8f66129596e25cefcb6": {
+  "agent": "product",
+  "message": "So far: {} | Message: remove fuzz balls from my sweaters",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1340,
+  "value": {
+   "brand": null,
+   "clear": [
+    "product"
+   ],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": "clothing",
+   "product": null
+  }
+ },
  "41f47659f0644fbca1100f8c9369fa7a": {
   "agent": "product",
   "message": "Previous: {\"category\": \"Home & Kitchen\", \"subcategory\": \"mixer grinder\"} | Message: only Bajaj",
@@ -949,7 +1039,7 @@
   "message": "User request: \"miksar grinder\"\n\nProducts:\n1. Sujata Dynamix DX Mixer Grinder, 900W, 3 Jars (White) | ₹6120 | 4.6★ | Sujata\n2. Sujata Dynamix, Mixer Grinder, 900 Watts, 3 Jars (White) | ₹6120 | 4.6★ | ",
   "model": "openai/gpt-oss-120b",
   "node": "rank_products",
-  "total_tokens": 722,
+  "total_tokens": 698,
   "value": {
    "exact": [],
    "same_kind": [
@@ -1138,6 +1228,23 @@
    "type": null
   }
  },
+ "609e84a7b36d1b3f513ea0b87dba4d70": {
+  "agent": "product",
+  "message": "So far: {} | Message: smart wach",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1304,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "smartwatch"
+  }
+ },
  "60daf049a717e32b946bdc3245a832da": {
   "agent": "product",
   "message": "User request: \"samsng tv\"\n\nProducts:\n1. Samsung 80 cm (32 inches) Wondertainment Series HD Ready LED | ₹15490 | 4.3★ | Samsung\n2. Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart  | ₹30990 ",
@@ -1281,6 +1388,40 @@
    "min_rating": null,
    "not_carried": null,
    "product": "fitness band"
+  }
+ },
+ "67747dcb5a2a338a2e42c7eee7b2aea8": {
+  "agent": "product",
+  "message": "So far: {} | Message: something to listen to music while running",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1324,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "neckband"
+  }
+ },
+ "697f559f2f12d27daa1828090f69a396": {
+  "agent": "product",
+  "message": "So far: {} | Message: samsng tv",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1311,
+  "value": {
+   "brand": "samsng",
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "tv"
   }
  },
  "6a4ba0b73fa9533b5e8f060f65ed40b5": {
@@ -1565,6 +1706,23 @@
    "product": "water heater"
   }
  },
+ "772ec04f9f7677f744cf6c67a5709b57": {
+  "agent": "product",
+  "message": "So far: {} | Message: I need hot water for bathing",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1306,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "water heater"
+  }
+ },
  "77adb727eaa3c94284316fba7357c0d9": {
   "agent": "product",
   "message": "Previous: {} | Message: 32 inch smart tv",
@@ -1692,7 +1850,7 @@
   "message": "User request: \"kapde press karne ke liye iron\"\n\nProducts:\n1. Philips GC1920/28 1440-Watt Non-Stick Soleplate Steam Iron | ₹1849 | 4.3★ | Philips\n2. Philips GC1905 1440-Watt Steam Iron with Spray (Blue",
   "model": "openai/gpt-oss-120b",
   "node": "rank_products",
-  "total_tokens": 706,
+  "total_tokens": 707,
   "value": {
    "exact": [
     1,
@@ -2014,6 +2172,40 @@
    "type": null
   }
  },
+ "8f96f545df8ee1b109139596400023b5": {
+  "agent": "product",
+  "message": "So far: {} | Message: something to make smoothies",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1322,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "jar blender"
+  }
+ },
+ "8fb2cb5e7ea8e73bf26f87da7a37459d": {
+  "agent": "product",
+  "message": "So far: {} | Message: garam pani ke liye geyser",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1321,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "water heater"
+  }
+ },
  "903e8d1e97a2c953dd6822511914b026": {
   "agent": "product",
   "message": "User request: \"smartwatch under 2000\"\n\nProducts:\n1. Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",1 | ₹1998 | 4.3★ | Fire-Boltt\n2. Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.",
@@ -2115,7 +2307,7 @@
   "message": "User request: \"garam pani ke liye geyser\"\n\nProducts:\n1. Swiffer Instant Electric Water Heater Faucet Tap Home-Kitche | ₹1439 | 4.8★ | Swiffer\n2. Campfire Spring Chef Prolix Instant Portable Water Heat",
   "model": "openai/gpt-oss-120b",
   "node": "rank_products",
-  "total_tokens": 704,
+  "total_tokens": 699,
   "value": {
    "exact": [
     1,
@@ -2299,8 +2491,22 @@
   "message": "User request: \"smart wach\"\n\nProducts:\n1. Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Spo | ₹2999 | 4.4★ | Fire-Boltt\n2. Fire-Boltt Gladiator 1.96\" Biggest Display Smart Watch with  | ₹399",
   "model": "openai/gpt-oss-120b",
   "node": "rank_products",
-  "total_tokens": 0,
-  "value": null
+  "total_tokens": 678,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
  },
  "9bd9edfacb532dee18a78abaf016b420": {
   "agent": "product",
@@ -2540,7 +2746,7 @@
   "message": "User request: \"somewhere to store my files and photos\"\n\nProducts:\n1. Crucial BX500 240GB 3D NAND SATA 6.35 cm (2.5-inch) SSD (CT2 | ₹1815 | 4.5★ | Crucial\n2. Seagate Expansion 1TB External HDD - USB 3",
   "model": "openai/gpt-oss-120b",
   "node": "rank_products",
-  "total_tokens": 816,
+  "total_tokens": 793,
   "value": {
    "exact": [
     1,
@@ -2585,6 +2791,23 @@
    "subcategory": "speakers",
    "suggestion": null,
    "type": "bluetooth speaker"
+  }
+ },
+ "b077c935d8c7f3c20732fbb8b2504c31": {
+  "agent": "product",
+  "message": "So far: {} | Message: something to keep my room warm in winter",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1308,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "room heater"
   }
  },
  "b21e09500567dda8392c8ce169751783": {
@@ -2688,6 +2911,23 @@
    "subcategory": null,
    "suggestion": "laptop bag",
    "type": null
+  }
+ },
+ "b5d36957bdc608a4f7b611233b97a4a0": {
+  "agent": "product",
+  "message": "So far: {} | Message: kapde press karne ke liye iron",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1341,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "iron"
   }
  },
  "b62696e752befd7fd573a18adbb3dc6d": {
@@ -2835,7 +3075,7 @@
   "message": "User request: \"headfones\"\n\nProducts:\n1. Redgear Cosmo 7,1 Usb Gaming Wired Over Ear Headphones With  | ₹1990 | 4.3★ | Redgear\n2. Samsung Ehs64 Ehs64Avfwecinu Hands-Free Wired In Ear Earphon | ₹499 | 4",
   "model": "openai/gpt-oss-120b",
   "node": "rank_products",
-  "total_tokens": 676,
+  "total_tokens": 672,
   "value": {
    "exact": [],
    "same_kind": [
@@ -2876,7 +3116,7 @@
   "message": "User request: \"something to keep my room warm in winter\"\n\nProducts:\n1. Melbon VM-905 2000-Watt Room Heater (ISI Certified, White Co | ₹998 | 4.6★ | Melbon\n2. !!1000 Watt/2000-Watt Room Heater!! Fan He",
   "model": "openai/gpt-oss-120b",
   "node": "rank_products",
-  "total_tokens": 676,
+  "total_tokens": 684,
   "value": {
    "exact": [],
    "same_kind": [
@@ -2891,6 +3131,23 @@
     9,
     10
    ]
+  }
+ },
+ "caccec17285e4b42bd4bde1e5cfd5dec": {
+  "agent": "product",
+  "message": "So far: {} | Message: lojitech mouse",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1311,
+  "value": {
+   "brand": "lojitech",
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "mouse"
   }
  },
  "cb6dafbfde71fae78d14c14ca135de57": {
@@ -3112,7 +3369,7 @@
   "message": "User request: \"something to track my steps and heart rate\"\n\nProducts:\n1. 10WeRun Id-116 Bluetooth Smartwatch Wireless Fitness Band fo | ₹499 | 4.1★ | 10WeRun",
   "model": "openai/gpt-oss-120b",
   "node": "rank_products",
-  "total_tokens": 390,
+  "total_tokens": 398,
   "value": {
    "exact": [
     1
@@ -3222,6 +3479,23 @@
    "type": null
   }
  },
+ "e1c11b47d2e9bcaba8af65442ad93557": {
+  "agent": "product",
+  "message": "So far: {} | Message: miksar grinder",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1320,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "mixer grinder"
+  }
+ },
  "e2382d22f8739e2216a90d56bf91e4b8": {
   "agent": "product",
   "message": "User request: \"wireless mouse under 500\"\n\nProducts:\n1. Lenovo 300 Wired Plug & Play USB Mouse, High Resolution 1600 | ₹289 | 4.4★ | Lenovo\n2. Zebronics Zeb-Jaguar Wireless Mouse, 2.4GHz with USB Nano ",
@@ -3329,6 +3603,23 @@
    ]
   }
  },
+ "e5f2ce09c0513a765405a10a4a38d2ea": {
+  "agent": "product",
+  "message": "So far: {} | Message: chai banane ke liye kettle",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1306,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "electric kettle"
+  }
+ },
  "e60800be2429be04a54235fbdcc15ce8": {
   "agent": "product",
   "message": "User request: \"show me some TVs\"\n\nProducts:\n1. Sony Bravia 164 cm (65 inches) 4K Ultra HD Smart LED Google  | ₹77990 | 4.7★ | Sony\n2. Cotbolt Silicone Protective Case Cover for LG an MR21GA Magi | ₹39",
@@ -3397,6 +3688,23 @@
    "product": "room heater"
   }
  },
+ "e72b39af9a5cb01fe64f1e6eacd00282": {
+  "agent": "product",
+  "message": "So far: {} | Message: keep my phone charged while travelling",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1321,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "power bank"
+  }
+ },
  "e77575c92bf8d01c230475d88087a36a": {
   "agent": "product",
   "message": "Previous: {} | Message: smart wach",
@@ -3414,6 +3722,23 @@
    "subcategory": "smartwatch",
    "suggestion": null,
    "type": null
+  }
+ },
+ "e950f2fbbea5cd3e54797c39f54b0ed6": {
+  "agent": "product",
+  "message": "So far: {} | Message: something to track my steps and heart rate",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1323,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "fitness band"
   }
  },
  "e9d58098f66d7ada17b4e21f050e4291": {
@@ -3452,6 +3777,23 @@
    "subcategory": "tv",
    "suggestion": null,
    "type": null
+  }
+ },
+ "ec60d481bd13efd6598460523d72e233": {
+  "agent": "product",
+  "message": "So far: {} | Message: my laptop sits too low and my neck hurts",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1339,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "laptop stand"
   }
  },
  "ee3f68fe6a763f7ede733e07d8746acb": {
@@ -3530,6 +3872,23 @@
    "type": null
   }
  },
+ "f6161fcef82c5b24c740ac4b1be99b94": {
+  "agent": "product",
+  "message": "So far: {} | Message: somewhere to store my files and photos",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1307,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "storage"
+  }
+ },
  "f6f349d3175d1642c799a132d5748f9f": {
   "agent": "product",
   "message": "Previous: {} | Message: lint remover",
@@ -3573,7 +3932,7 @@
   "message": "User request: \"I need hot water for bathing\"\n\nProducts:\n1. Swiffer Instant Electric Water Heater Faucet Tap Home-Kitche | ₹1439 | 4.8★ | Swiffer\n2. Campfire Spring Chef Prolix Instant Portable Water H",
   "model": "openai/gpt-oss-120b",
   "node": "rank_products",
-  "total_tokens": 700,
+  "total_tokens": 697,
   "value": {
    "exact": [],
    "same_kind": [
@@ -3590,14 +3949,38 @@
    ]
   }
  },
+ "fcab4e8cd83f704c2651e36aff457e8c": {
+  "agent": "product",
+  "message": "So far: {} | Message: headfones",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1301,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "headphones"
+  }
+ },
  "fcb4b7f36f625e86af267fb0cfa814c9": {
   "agent": "product",
   "message": "User request: \"my laptop sits too low and my neck hurts\"\n\nProducts:\n1. SupCares Laptop Stand 7 Height Adjustable, Aluminium, Ventil | ₹499 | 4.5★ | SupCares\n2. Dyazo 6 Angles Adjustable Aluminum Ergon",
   "model": "openai/gpt-oss-120b",
   "node": "rank_products",
-  "total_tokens": 513,
+  "total_tokens": 540,
   "value": {
-   "exact": [],
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
    "same_kind": [
     1,
     2,
@@ -3699,6 +4082,21 @@
     8,
     9,
     10
+   ]
+  }
+ },
+ "fe52fe9a2907e4d53e4754cbfd057b46": {
+  "agent": "product",
+  "message": "User request: \"boil water quickly for tea\"\n\nProducts:\n1. Cello Quick Boil Popular Electric Kettle 1 Litre 1200 Watts  | ₹1199 | 4.2★ | Cello",
+  "model": "openai/gpt-oss-120b",
+  "node": "rank_products",
+  "total_tokens": 386,
+  "value": {
+   "exact": [
+    1
+   ],
+   "same_kind": [
+    1
    ]
   }
  }

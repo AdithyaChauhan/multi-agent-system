@@ -1,0 +1,856 @@
+{
+ "label": "v3b-gptoss120b-rest",
+ "model": "openai/gpt-oss-120b",
+ "mode": "replay",
+ "database": "multi_agent_baseline",
+ "cassette": "eval\\cassettes\\retrieval_openai-gpt-oss-120b.json",
+ "started": "2026-11-21T07:55:25+00:00",
+ "queries": [
+  {
+   "id": "q056",
+   "query": "something to keep my room warm in winter",
+   "history": [],
+   "tags": [
+    "vague"
+   ],
+   "shown": [
+    "B09P1MFKG1",
+    "B0BMTZ4T1D",
+    "B0BPBG712X",
+    "B01M265AAK",
+    "B0BPBXNQQT"
+   ],
+   "shown_names": [
+    "Melbon VM-905 2000-Watt Room Heater (ISI Certified, White Color) Ideal Electric ",
+    "!!1000 Watt/2000-Watt Room Heater!! Fan Heater!!Pure White!!HN-2500!!Made in Ind",
+    "Portable, Handy Compact Plug-in Portable Digital Electric Heater Fan Wall-Outlet",
+    "Morphy Richards Aristo 2000 Watts PTC Room Heater (White)",
+    "Room Heater Warmer Wall-Outlet 400 Watts Electric Handy Room Heater (Room Heater"
+   ],
+   "preferences": {
+    "product": "room heater",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Melbon VM-905 2000W Room Heater** — Melbon\n   ₹998 · 4.6/5\n\n2. **1000W/2000W Room Heater Fan Heater** — !!1000\n   ₹784 · 4.5/5\n\n3. **Plug-in Portable Digital Electric Heater Fan 400W** — Portable,\n   ₹799 · 4.",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.09
+  },
+  {
+   "id": "q057",
+   "query": "I need hot water for bathing",
+   "history": [],
+   "tags": [
+    "vague"
+   ],
+   "shown": [
+    "B0BR4F878Q",
+    "B0BP89YBC1",
+    "B08QW937WV",
+    "B078JBK4GX",
+    "B08GM5S4CQ"
+   ],
+   "shown_names": [
+    "Swiffer Instant Electric Water Heater Faucet Tap Home-Kitchen Instantaneous Wate",
+    "Campfire Spring Chef Prolix Instant Portable Water Heater Geyser 1Ltr. for Use H",
+    "Homeistic Applience™ Instant Electric Water Heater Faucet Tap For Kitchen And Ba",
+    "Havells Instanio 1-Litre 3KW Instant Water Heater (Geyser), White Blue",
+    "Havells Instanio 10 Litre Storage Water Heater with Flexi Pipe and Free installa"
+   ],
+   "preferences": {
+    "product": "water heater",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Instant Electric Water Heater for Faucet Tap 3000W** — Swiffer\n   ₹1,439 · 4.8/5\n\n2. **Campfire Spring Chef Prolix 1L Instant Portable Water Heater** — Campfire\n   ₹1,499 · 4.7/5\n\n3. **Homeistic Instant Electr",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.02
+  },
+  {
+   "id": "q058",
+   "query": "something to make smoothies",
+   "history": [],
+   "tags": [
+    "vague"
+   ],
+   "shown": [
+    "B0B3G5XZN5",
+    "B08S6RKT4L",
+    "B09NTHQRW3",
+    "B07NRTCDS5",
+    "B0BFBNXS94"
+   ],
+   "shown_names": [
+    "InstaCuppa Portable Blender for Smoothie, Milk Shakes, Crushing Ice and Juices, ",
+    "Balzano High Speed Nutri Blender/Mixer/Smoothie Maker - 500 Watt - Silver, 2 Jar",
+    "InstaCuppa Portable Blender for Smoothie, Milk Shakes, Crushing Ice and Juices, ",
+    "Brayden Fito Atom Rechargeable Smoothie Blender with 2000 mAh Battery and 3.7V M",
+    "Personal Size Blender, Portable Blender, Battery Powered USB Blender, with Four "
+   ],
+   "preferences": {
+    "product": "jar blender",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **InstaCuppa Portable USB Rechargeable Hand Blender** — InstaCuppa\n   ₹2,799 · 4.5/5\n\n2. **Balzano 500W High Speed Nutri Blender with 2 Jars** — Balzano\n   ₹2,599 · 4.4/5\n\n3. **InstaCuppa Portable USB Rechargeable Hand Blender** — InstaCuppa\n   ₹1,999 · 4",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.03
+  },
+  {
+   "id": "q059",
+   "query": "something to listen to music while running",
+   "history": [],
+   "tags": [
+    "vague"
+   ],
+   "shown": [
+    "B08TV2P1N8",
+    "B092X94QNQ",
+    "B09GFWJDY1",
+    "B08D77XZX5",
+    "B07LG59NPV"
+   ],
+   "shown_names": [
+    "boAt Rockerz 255 Pro+ in-Ear Bluetooth Neckband with Upto 40 Hours Playback, ASA",
+    "boAt Rockerz 330 in-Ear Bluetooth Neckband with Upto 30 Hours Playtime, ASAP  Ch",
+    "ZEBRONICS Zeb-Evolve Wireless in Ear Neckband Earphone with Supporting Bluetooth",
+    "PTron Tangentbeat in-Ear Bluetooth 5.0 Wireless Headphones with Mic, Enhanced Ba",
+    "Boult Audio Probass Curve Bluetooth Wireless in Ear Earphones with Mic with Ipx5"
+   ],
+   "preferences": {
+    "product": "neckband",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **boAt Rockerz 255 Pro+ Bluetooth Neckband** — boAt\n   ₹1,399 · 4.1/5\n\n2. **boAt Rockerz 330 Bluetooth Neckband** — boAt\n   ₹1,499 · 4.1/5\n\n3. **Zeb-Evolve Wireless Neckband Earphones** — Zebronics\n   ₹499 · 3.6/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.03
+  },
+  {
+   "id": "q060",
+   "query": "my laptop sits too low and my neck hurts",
+   "history": [],
+   "tags": [
+    "vague"
+   ],
+   "shown": [
+    "B0BCVJ3PVP",
+    "B08LHTJTBB",
+    "B08WKCTFF3",
+    "B08PFSZ7FH",
+    "B09B9SPC7F"
+   ],
+   "shown_names": [
+    "SupCares Laptop Stand 7 Height Adjustable, Aluminium, Ventilated, Foldable, Port",
+    "Dyazo 6 Angles Adjustable Aluminum Ergonomic Foldable Portable Tabletop Laptop/D",
+    "ZEBRONICS Aluminium Alloy Laptop Stand, Compatible with 9-15.6 inch Laptops, 7 A",
+    "STRIFF Laptop Stand Adjustable Laptop Computer Stand Multi-Angle Stand Phone Sta",
+    "PC SQUARE Laptop Tabletop Stand/ Computer Tablet Stand 6 Angles Adjustable Alumi"
+   ],
+   "preferences": {
+    "product": "laptop stand",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **SupCares Adjustable Aluminium Laptop Stand** — SupCares\n   ₹499 · 4.5/5\n\n2. **Dyazo Adjustable Aluminum Ergonomic Laptop Riser Stand** — Dyazo\n   ₹599 · 4.4/5\n\n3. **ZEBRONICS Aluminium Laptop Stand 9-15.6 inch** — Zebronics\n   ₹899 · 4.4/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 0.667,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.02
+  },
+  {
+   "id": "q061",
+   "query": "remove fuzz balls from my sweaters",
+   "history": [],
+   "tags": [
+    "vague"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "product": null,
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Sorry, we don't carry clothing. Here's what we do carry:\n\n• Home & Kitchen (441 products) — cooking appliance, blender, room heater\n• Electronics (402 products) — tv, headphones, smartwatch\n• Computers & Accessories (391 products) — cable, mouse, storage\n• Office Products (36 products) — stationery,",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.01
+  },
+  {
+   "id": "q062",
+   "query": "something to track my steps and heart rate",
+   "history": [],
+   "tags": [
+    "vague"
+   ],
+   "shown": [
+    "B09RFB2SJQ"
+   ],
+   "shown_names": [
+    "10WeRun Id-116 Bluetooth Smartwatch Wireless Fitness Band for Boys, Girls, Men, "
+   ],
+   "preferences": {
+    "product": "fitness band",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **10WeRun Id-116 Bluetooth Smartwatch Fitness Band** — 10WeRun\n   ₹499 · 4.1/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": false,
+    "shown": 1
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.03
+  },
+  {
+   "id": "q063",
+   "query": "boil water quickly for tea",
+   "history": [],
+   "tags": [
+    "vague"
+   ],
+   "shown": [
+    "B07GLS2563"
+   ],
+   "shown_names": [
+    "Cello Quick Boil Popular Electric Kettle 1 Litre 1200 Watts | Stainless Steel bo"
+   ],
+   "preferences": {
+    "product": "electric kettle",
+    "features": [
+     "quick boil"
+    ],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Cello 1 L Stainless Steel Electric Kettle** — Cello\n   ₹1,199 · 4.2/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 1
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.03
+  },
+  {
+   "id": "q064",
+   "query": "keep my phone charged while travelling",
+   "history": [],
+   "tags": [
+    "vague"
+   ],
+   "shown": [
+    "B08HV83HL3",
+    "B08HVJCW95",
+    "B08HVL8QN3",
+    "B08MC57J31",
+    "B07RD611Z8"
+   ],
+   "shown_names": [
+    "MI Power Bank 3i 20000mAh Lithium Polymer 18W Fast Power Delivery Charging | Inp",
+    "MI 10000mAh 3i Lithium Polymer Power Bank Dual Input(Micro-USB and Type C) and O",
+    "Mi 10000mAH Li-Polymer, Micro-USB and Type C Input Port, Power Bank 3i with 18W ",
+    "MI 10000mAh Lithium Ion, Lithium Polymer Power Bank Pocket Pro with 22.5 Watt Fa",
+    "Ambrane 20000mAh Power Bank with 20W Fast Charging, Triple Output, Power Deliver"
+   ],
+   "preferences": {
+    "product": "power bank",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **MI Power Bank 3i 20000 mAh 18W PD** — Xiaomi\n   ₹2,049 · 4.3/5\n\n2. **MI 10000mAh Power Bank Dual Input 18W Fast Charging** — Xiaomi\n   ₹1,149 · 4.3/5\n\n3. **Mi 10000mAh Power Bank 18W Fast Charging** — Xiaomi\n   ₹1,149 · 4.3/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.02
+  },
+  {
+   "id": "q065",
+   "query": "somewhere to store my files and photos",
+   "history": [],
+   "tags": [
+    "vague"
+   ],
+   "shown": [
+    "B07G3YNLJB",
+    "B08ZJDWTJ1",
+    "B094QZLJQ6",
+    "B09X7DY7Q4",
+    "B0B2DD66GS"
+   ],
+   "shown_names": [
+    "Crucial BX500 240GB 3D NAND SATA 6.35 cm (2.5-inch) SSD (CT240BX500SSD1)",
+    "Seagate Expansion 1TB External HDD - USB 3.0 for Windows and Mac with 3 yr Data ",
+    "Seagate One Touch 2TB External HDD with Password Protection – Black, for Windows",
+    "SanDisk Extreme SD UHS I 64GB Card for 4K Video for DSLR and Mirrorless Cameras ",
+    "SanDisk Extreme microSD UHS I Card 128GB for 4K Video on Smartphones,Action Cams"
+   ],
+   "preferences": {
+    "product": "storage",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Crucial BX500 240 GB 2.5‑inch SSD** — Crucial\n   ₹1,815 · 4.5/5\n\n2. **Seagate Expansion 1TB External HDD** — Seagate\n   ₹4,098 · 4.5/5\n\n3. **Seagate One Touch 2TB External HDD** — Seagate\n   ₹5,799 · 4.5/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.03
+  },
+  {
+   "id": "q066",
+   "query": "lojitech mouse",
+   "history": [],
+   "tags": [
+    "typo",
+    "brand"
+   ],
+   "shown": [
+    "B00NFD0ETQ",
+    "B01MQ2A86A",
+    "B07X2L5Z8C",
+    "B004IO5BMQ",
+    "B08LT9BMPP"
+   ],
+   "shown_names": [
+    "Logitech G402 Hyperion Fury USB Wired Gaming Mouse, 4,000 DPI, Lightweight, 8 Pr",
+    "Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Nano Receiver, 1000 DP",
+    "Logitech Pebble M350 Wireless Mouse with Bluetooth or USB - Silent, Slim Compute",
+    "Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, 12 Month Life Battery, ",
+    "Logitech G102 USB Light Sync Gaming Mouse with Customizable RGB Lighting, 6 Prog"
+   ],
+   "preferences": {
+    "product": "mouse",
+    "features": [],
+    "brand": "lojitech",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Logitech G402 Hyperion Fury USB Gaming Mouse** — Logitech\n   ₹1,995 · 4.6/5\n\n2. **Logitech M331 Silent Plus Wireless Mouse** — Logitech\n   ₹1,295 · 4.6/5\n\n3. **Logitech Pebble M350 Wireless Mouse** — Logitech\n   ₹1,490 · 4.6/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.03
+  },
+  {
+   "id": "q067",
+   "query": "samsng tv",
+   "history": [],
+   "tags": [
+    "typo",
+    "brand"
+   ],
+   "shown": [
+    "B08PV1X771",
+    "B092BJMT8Q",
+    "B092BL5DCX",
+    "B09F6S8BT6",
+    "B0B15CPR37"
+   ],
+   "shown_names": [
+    "Samsung 80 cm (32 inches) Wondertainment Series HD Ready LED Smart TV UA32TE40AA",
+    "Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart LED TV UA43AUE60AKLX",
+    "Samsung 138 cm (55 inches) Crystal 4K Series Ultra HD Smart LED TV UA55AUE60AKLX",
+    "Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED Smart TV UA32T4340B",
+    "Samsung 108 cm (43 inches) Crystal 4K Neo Series Ultra HD Smart LED TV UA43AUE65"
+   ],
+   "preferences": {
+    "product": "tv",
+    "features": [],
+    "brand": "samsng",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Samsung 32\" Wondertainment Series HD Ready Smart TV** — Samsung\n   ₹15,490 · 4.3/5\n\n2. **Samsung 43\" Crystal 4K Smart LED TV** — Samsung\n   ₹30,990 · 4.3/5\n\n3. **Samsung 55\" Crystal 4K Smart LED TV** — Samsung\n   ₹45,999 · 4.3/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.02
+  },
+  {
+   "id": "q068",
+   "query": "headfones",
+   "history": [],
+   "tags": [
+    "typo"
+   ],
+   "shown": [
+    "B079S811J3",
+    "B01F25X6RQ",
+    "B01F262EUU",
+    "B078W65FJ7",
+    "B07QZ3CZ48"
+   ],
+   "shown_names": [
+    "Redgear Cosmo 7,1 Usb Gaming Wired Over Ear Headphones With Mic With Virtual Sur",
+    "Samsung Ehs64 Ehs64Avfwecinu Hands-Free Wired In Ear Earphones With Mic With Rem",
+    "Samsung Original EHS64 Wired in Ear Earphones with Mic, Black",
+    "boAt BassHeads 900 On-Ear Wired Headphones with Mic (White)",
+    "boAt BassHeads 122 Wired Earphones with Heavy Bass, Integrated Controls and Mic "
+   ],
+   "preferences": {
+    "product": "headphones",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Redgear Cosmo 7.1 Wired Over Ear Gaming Headphones** — Redgear\n   ₹1,990 · 4.3/5\n\n2. **Samsung EHS64 Hands-Free Wired In-Ear Earphones with Mic** — Samsung\n   ₹499 · 4.2/5\n\n3. **Samsung Original EHS64 Wired In",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.02
+  },
+  {
+   "id": "q069",
+   "query": "miksar grinder",
+   "history": [],
+   "tags": [
+    "typo"
+   ],
+   "shown": [
+    "B00K57MR22",
+    "B078JT7LTD",
+    "B071113J7M",
+    "B075S9FVRY",
+    "B07Y9PY6Y1"
+   ],
+   "shown_names": [
+    "Sujata Dynamix DX Mixer Grinder, 900W, 3 Jars (White)",
+    "Sujata Dynamix, Mixer Grinder, 900 Watts, 3 Jars (White)",
+    "Sujata Powermatic Plus 900 Watts Juicer Mixer Grinder",
+    "Sujata Supermix, Mixer Grinder, 900 Watts, 3 Jars (White)",
+    "Sujata Powermatic Plus, Juicer Mixer Grinder with Chutney Jar, 900 Watts, 3 Jars"
+   ],
+   "preferences": {
+    "product": "mixer grinder",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Sujata Dynamix DX Mixer Grinder 900W with 3 Jars** — Sujata\n   ₹6,120 · 4.6/5\n\n2. **Sujata Dynamix Mixer Grinder 900W 3 Jars** — Sujata\n   ₹6,120 · 4.6/5\n\n3. **Sujata Powermatic Plus 900W Juicer Mixer Grinder*",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.02
+  },
+  {
+   "id": "q070",
+   "query": "smart wach",
+   "history": [],
+   "tags": [
+    "typo"
+   ],
+   "shown": [
+    "B0BNXFDTZ2",
+    "B0BP18W8TM",
+    "B09DG9VNWB",
+    "B0B3N7LR6K",
+    "B0B3NDPCS9"
+   ],
+   "shown_names": [
+    "Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Sports Mode, 8 UI Inter",
+    "Fire-Boltt Gladiator 1.96\" Biggest Display Smart Watch with Bluetooth Calling, V",
+    "Samsung Galaxy Watch4 Bluetooth(4.4 cm, Black, Compatible with Android only)",
+    "Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwatch with 368*448 Pixe",
+    "Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwatch with 368*448 Pixe"
+   ],
+   "preferences": {
+    "product": "smartwatch",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Fire-Boltt Tank 1.85\" Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹2,999 · 4.4/5\n\n2. **Fire-Boltt Gladiator 1.96\" Bluetooth Smartwatch** — Fire-Boltt\n   ₹3,999 · 4.4/5\n\n3. **Samsung Galaxy Watch4 Bluetooth*",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 0.667,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.02
+  },
+  {
+   "id": "q071",
+   "query": "sasta mixer grinder",
+   "history": [],
+   "tags": [
+    "hinglish",
+    "price"
+   ],
+   "shown": [
+    "B00HVXS7WC",
+    "B08H673XKN",
+    "B00K57MR22",
+    "B078JT7LTD",
+    "B071113J7M"
+   ],
+   "shown_names": [
+    "Bajaj Rex 500W Mixer Grinder with Nutri-Pro Feature, 3 Jars, White",
+    "Morphy Richards Icon Superb 750W Mixer Grinder, 4 Jars, Silver and Black",
+    "Sujata Dynamix DX Mixer Grinder, 900W, 3 Jars (White)",
+    "Sujata Dynamix, Mixer Grinder, 900 Watts, 3 Jars (White)",
+    "Sujata Powermatic Plus 900 Watts Juicer Mixer Grinder"
+   ],
+   "preferences": {
+    "product": "mixer grinder",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Bajaj Rex 500W Mixer Grinder with 3 Jars** — Bajaj\n   ₹1,999 · 4.2/5\n\n2. **Morphy Richards Icon Superb 750W Mixer Grinder** — Morphy Richards\n   ₹3,249 · 4.2/5\n\n3. **Sujata Dynamix DX Mixer Grinder 900W with 3 Jars** — Sujata\n   ₹6,120 · 4.6/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.02
+  },
+  {
+   "id": "q072",
+   "query": "garam pani ke liye geyser",
+   "history": [],
+   "tags": [
+    "hinglish"
+   ],
+   "shown": [
+    "B0BR4F878Q",
+    "B0BP89YBC1",
+    "B08QW937WV",
+    "B078JBK4GX",
+    "B08GM5S4CQ"
+   ],
+   "shown_names": [
+    "Swiffer Instant Electric Water Heater Faucet Tap Home-Kitchen Instantaneous Wate",
+    "Campfire Spring Chef Prolix Instant Portable Water Heater Geyser 1Ltr. for Use H",
+    "Homeistic Applience™ Instant Electric Water Heater Faucet Tap For Kitchen And Ba",
+    "Havells Instanio 1-Litre 3KW Instant Water Heater (Geyser), White Blue",
+    "Havells Instanio 10 Litre Storage Water Heater with Flexi Pipe and Free installa"
+   ],
+   "preferences": {
+    "product": "water heater",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Instant Electric Water Heater for Faucet Tap 3000W** — Swiffer\n   ₹1,439 · 4.8/5\n\n2. **Campfire Spring Chef Prolix 1L Instant Portable Water Heater** — Campfire\n   ₹1,499 · 4.7/5\n\n3. **Homeistic Instant Electric Water Heater Faucet Tap** — Homeistic\n   ",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.03
+  },
+  {
+   "id": "q073",
+   "query": "kapde press karne ke liye iron",
+   "history": [],
+   "tags": [
+    "hinglish"
+   ],
+   "shown": [
+    "B008LN8KDM",
+    "B008QTK47Q",
+    "B009UORDX4",
+    "B01EY310UM",
+    "B076VQS87V"
+   ],
+   "shown_names": [
+    "Philips GC1920/28 1440-Watt Non-Stick Soleplate Steam Iron",
+    "Philips GC1905 1440-Watt Steam Iron with Spray (Blue)",
+    "Philips Hi113 1000-Watt Plastic Body Ptfe Coating Dry Iron, Pack of 1",
+    "Philips GC181 Heavy Weight 1000-Watt Dry Iron, Pack of 1",
+    "Syska SDI-07 1000 W Stellar with Golden American Heritage Soleplate Dry Iron (Bl"
+   ],
+   "preferences": {
+    "product": "iron",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Philips GC1920/28 1440W Steam Iron** — Philips\n   ₹1,849 · 4.3/5\n\n2. **Philips GC1905 1440W Steam Iron with Spray** — Philips\n   ₹1,614 · 4.3/5\n\n3. **Philips Hi113 1000W dry iron** — Philips\n   ₹949 · 4.3/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.02
+  },
+  {
+   "id": "q074",
+   "query": "chai banane ke liye kettle",
+   "history": [],
+   "tags": [
+    "hinglish"
+   ],
+   "shown": [
+    "B083GKDRKR",
+    "B00TI8E7BI",
+    "B09VGS66FV",
+    "B0B3TBY2YX",
+    "B078V8R9BS"
+   ],
+   "shown_names": [
+    "Havells Aqua Plus 1.2 litre Double Wall Kettle / 304 Stainless Steel Inner Body ",
+    "Philips HD9306/06 1.5-Litre Electric Kettle (Multicolor)",
+    "Tesora - Inspired by you Large Premium Electric Kettle 1.8L, Stainless Steel Inn",
+    "AGARO Royal Double Layered Kettle, 1.5 Litres, Double Layered Cool Touch , Dry B",
+    "Butterfly EKN 1.5-Litre Electric Kettle (Silver with Black)"
+   ],
+   "preferences": {
+    "product": "electric kettle",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Havells Aqua Plus 1.2 L Double‑Wall Electric Kettle 1500 W** — Havells\n   ₹1,625 · 4.5/5\n\n2. **Philips 1.5L Electric Kettle** — Philips\n   ₹2,695 · 4.4/5\n\n3. **Tesora 1.8L Stainless Steel Electric Kettle** — Tesora\n   ₹1,349 · 4.4/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.02
+  }
+ ],
+ "finished": "2026-11-21T07:55:26+00:00",
+ "summary": {
+  "queries": 19,
+  "scored": 19,
+  "errors": 0,
+  "recall@5": 0.789,
+  "precision@3": 0.807,
+  "mrr": 0.789,
+  "empty_rate": 0.053,
+  "correct_refusal_rate": null,
+  "llm_calls_per_query": 0.0,
+  "tokens_per_query": 0.0,
+  "p50_seconds": 0.02,
+  "p95_seconds": 0.09
+ },
+ "by_tag": {
+  "brand": {
+   "scored": 2,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "hinglish": {
+   "scored": 4,
+   "recall@5": 0.75,
+   "precision@3": 1.0,
+   "mrr": 0.75,
+   "empty_rate": 0.0
+  },
+  "price": {
+   "scored": 1,
+   "recall@5": 0.0,
+   "precision@3": 1.0,
+   "mrr": 0.0,
+   "empty_rate": 0.0
+  },
+  "typo": {
+   "scored": 5,
+   "recall@5": 1.0,
+   "precision@3": 0.933,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "vague": {
+   "scored": 10,
+   "recall@5": 0.7,
+   "precision@3": 0.667,
+   "mrr": 0.7,
+   "empty_rate": 0.1
+  }
+ }
+}
