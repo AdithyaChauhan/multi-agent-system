@@ -89,7 +89,4 @@ def get_tracking(tracking_id: str):
     if tracking_id not in TRACKING_DATA:
         raise HTTPException(status_code=404, detail="Tracking ID not found")
 
-    return {
-        "tracking_id": tracking_id,
-        **TRACKING_DATA[tracking_id]
-    }
+    return {"tracking_id": tracking_id, **TRACKING_DATA[tracking_id]}

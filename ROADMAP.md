@@ -3,8 +3,14 @@
 **Goal:** take the assistant from about 5.8/10 to 9/10. That means short prompts, a clean LangGraph architecture that shows how agents are built (subgraphs, loops, a human-in-the-loop pause, ticket handoff), measured quality, and escalations that reach a real person. The work is split into phases, and each phase is worth keeping even if work stops after it.
 
 ## Now
-- **Current phase:** Phase 5, Ship and showcase (not started). Phases 0–4 are done.
-- **Branch:** `phase-4-reliability` (off `phase-3-hybrid-search`) holds Phases 3–4 (committed, not pushed). Phase 5 branches off it.
+- **Current phase:** Phase 5, Ship and showcase: in progress. Phases 0–4 are done.
+- **Branch:** `phase-5-ship` (off `phase-4-reliability`); committed, not pushed.
+- **Phase 5 so far:**
+  - one-click demo shoppers;
+  - product Q&A through a read-only ToolNode loop;
+  - free single-service deploy files (Render + Neon, keep-warm);
+  - showcase README and `docs/SETUP.md`; root cleanup;
+  - final run 1 **48/51**; Q&A 6/6; adversarial safety cases 14/14.
 - **Phase 4 result** ([0015](docs/decisions/0015-demo-never-breaks.md)):
   - a model fallback chain (a retired model still answers, live-checked); a "busy" reply instead of a 500;
   - an answer cache and per-user limits;
@@ -19,11 +25,11 @@
   - app memory about 315 MB, search about 90 ms;
   - product replies show cards with photos.
 - **Roadmap reset (2026-11-23, [0013](docs/decisions/0013-judge-facing-priorities.md)):** the remaining phases are ordered by what a judge sees: a demo that never breaks (4), then a live link that stays up with a one-click demo and a showcase README (5).
-- **Next action:** new chat, `/resume`, plan Phase 5:
-  - a host that stays up (the app uses about 315 MB);
-  - a one-click demo shopper with a daily reset;
-  - the showcase README, case study, visual explainer, final 3-run scorecard and root cleanup.
-  - Pushing (which runs the new CI job on GitHub) is the user's call.
+- **Next action:** new chat, `/resume`, then finish Phase 5 (see its plan):
+  - final runs 2 and 3 (about 196K tokens each, one per key per day);
+  - the 20-user load test;
+  - the case study, the visual explainer and Grafana panels;
+  - then go live with the user: push after asking, and the user creates the Neon, Discord and Render accounts.
 - **Still open:** the user's review of the Phase 0 labels; the user skipped the 50-product spot check.
 - **Blocked on:** nothing.
 
@@ -35,7 +41,7 @@
 | 2 | LangGraph-native architecture | Done (2 size criteria missed) | [plan](docs/plans/phase-2-langgraph-architecture.md) | Checkpointer, `interrupt()` for cancel, search loop as graph edges, subgraph schemas, streaming, escalation subgraph, filter chips |
 | 3 | Hybrid search and product cards | Done | [plan](docs/plans/phase-3-hybrid-search.md) | Renamed-catalog drop < 5 points, no metric drops, refusals 1.0, cards with images |
 | 4 | Demo never breaks | Done | [plan](docs/plans/phase-4-reliability-and-safety.md) | Model fallback chain, busy message, search cache, 0 adversarial failures, replay evals in CI |
-| 5 | Ship and showcase | Not started | [plan](docs/plans/phase-5-ship-and-showcase.md) | Live link that stays up, one-click demo shopper, showcase README, case study, final scorecard |
+| 5 | Ship and showcase | In progress | [plan](docs/plans/phase-5-ship-and-showcase.md) | Live link that stays up, one-click demo shopper, showcase README, case study, final scorecard |
 
 Statuses: Not started, In progress, Done, Dropped (say why in the plan). The order changed on 2026-11-18 to match the user's goals (see 0009 and 0010), and again on 2026-11-23 to put what a judge sees first (0013).
 

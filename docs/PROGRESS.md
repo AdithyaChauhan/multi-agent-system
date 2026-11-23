@@ -12,6 +12,26 @@ Newest first. `/handoff` adds an entry at the end of every session. Keep entries
 - **Commits:**
 -->
 
+## 2026-11-23 · Phase 5 · Demo shoppers, product Q&A tool loop, deploy setup, showcase README
+- **Done:**
+  - one-click demo shoppers (own orders, per-IP limit, purge after 2 days);
+  - product Q&A as a read-only ToolNode loop (ADR 0016), with `names_a_search` so brand, budget or product words still search;
+  - Groq `output_parse_failed` is retried (it had caused a 500);
+  - Render + Neon single-service deploy files, keep-warm workflow, live-database load script;
+  - the Kubernetes CI job moved to GitHub-hosted runners;
+  - README rewritten as a showcase, `docs/SETUP.md`, regenerated graph diagram;
+  - root cleanup.
+- **Measured** (gpt-oss-20b, 1 run, `multi_agent_baseline`):
+  - final run 1: 48/51 (it first showed 45/51 and caught the Q&A routing regression; fixed);
+  - Q&A 6/6; adversarial 14/15 (all safety cases pass; a12 routing reported);
+  - product turn median 2.5 s; Q&A turn 2.4 s;
+  - 350 tests;
+  - about 257K tokens across two keys.
+- **Decisions:** [0016](decisions/0016-product-qa-and-demo-shoppers.md).
+- **Open questions:** none for the user until go-live (Neon, Discord, Render accounts; permission to push).
+- **Next:** final runs 2 and 3, the load test, the case study, the visual explainer, Grafana, then go live together.
+- **Commits:** `e864886`, `0478da0` and the handoff on `phase-5-ship`.
+
 ## 2026-11-23 · Phase 4 · Demo never breaks: fallback, limits, safety floor, CI eval gate
 - **Done:**
   - model fallback chain with cooldowns, and a "busy" reply instead of a 500;

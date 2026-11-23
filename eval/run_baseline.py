@@ -254,9 +254,9 @@ def install_cassette(mode: str, path: Path) -> None:
         return
     original = llm._replay
 
-    def counted(messages, schema=None):
+    def counted(messages, schema=None, tools=None):
         try:
-            return original(messages, schema)
+            return original(messages, schema, tools)
         except llm.CassetteMiss:
             MISSES["count"] += 1
             raise

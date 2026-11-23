@@ -1,6 +1,6 @@
 # Agent graph
 
-Generated from the code with `router_graph.get_graph(xray=True).draw_mermaid()` (Phase 2, 2026-11-20). Regenerate it after changing a graph:
+Generated from the code with `router_graph.get_graph(xray=True).draw_mermaid()` (regenerated in Phase 5, 2026-11-23). Regenerate it after changing a graph:
 
 ```bash
 DATABASE_URL=sqlite:///./test.db GROQ_API_KEY=x venv/Scripts/python -c "from app.agents.router import router_graph; print(router_graph.get_graph(xray=True).draw_mermaid())"
@@ -9,6 +9,7 @@ DATABASE_URL=sqlite:///./test.db GROQ_API_KEY=x venv/Scripts/python -c "from app
 What to look for:
 - **Subgraphs:** `product_agent`, `order_agent` and `support_agent` each declare their own input and output state (`app/agents/state.py`). `safety_handoff` and `ticket_handoff` are the same escalation subgraph: open a ticket, then alert a person.
 - **The loop:** inside `product_agent`, `find_products` runs `plan_search → search → loosen → search …` until something matches, at most 1 + 4 searches.
+- **The tool loop (Phase 5, ADR 0016):** inside `product_agent`, `answer_question` runs `qa_think → qa_tools → qa_think …`: the model calls read-only product tools through a `ToolNode`, at most 3 rounds, then `qa_answer`.
 - **The pause:** `support_agent:confirm_cancel` calls `interrupt()`. The graph stops there, and the thread is saved by the Postgres checkpointer, until the shopper presses Yes or No. Only `cancel_order` (plain Python, owner and status re-checked) changes the order.
 - **No model on the chip path:** a removed filter chip enters at `__start__ → product_agent → apply_filter_edit` and is ranked by `order_by_score`, skipping `classify`, `extract_preferences` and `rank_products`.
 - Model calls happen only in `classify`, `extract_preferences`, `rank_products` and `draft_resolution`.
@@ -59,6 +60,7 @@ graph TD;
 	product_agent\3aformat_recommendations(format_recommendations)
 	product_agent\3arespond_no_results(respond_no_results)
 	product_agent\3a__end__(<p>__end__</p>)
+	product_agent\3a__start__ -. &nbsp;qa&nbsp; .-> product_agent\3aanswer_question\3a__start__;
 	product_agent\3a__start__ -. &nbsp;edit&nbsp; .-> product_agent\3aapply_filter_edit;
 	product_agent\3a__start__ -. &nbsp;extract&nbsp; .-> product_agent\3aextract_preferences;
 	product_agent\3aapply_filter_edit -. &nbsp;ask&nbsp; .-> product_agent\3aask_for_preferences;
@@ -73,6 +75,7 @@ graph TD;
 	product_agent\3aorder_by_score -. &nbsp;no_results&nbsp; .-> product_agent\3arespond_no_results;
 	product_agent\3arank_products -. &nbsp;recommend&nbsp; .-> product_agent\3aformat_recommendations;
 	product_agent\3arank_products -. &nbsp;no_results&nbsp; .-> product_agent\3arespond_no_results;
+	product_agent\3aanswer_question\3aqa_answer --> product_agent\3a__end__;
 	product_agent\3aask_for_preferences --> product_agent\3a__end__;
 	product_agent\3aformat_recommendations --> product_agent\3a__end__;
 	product_agent\3arespond_no_results --> product_agent\3a__end__;
@@ -86,6 +89,16 @@ graph TD;
 	product_agent\3afind_products\3aplan_search --> product_agent\3afind_products\3asearch;
 	product_agent\3afind_products\3asearch -. &nbsp;done&nbsp; .-> product_agent\3afind_products\3a__end__;
 	product_agent\3afind_products\3asearch -.-> product_agent\3afind_products\3aloosen;
+	end
+	subgraph answer_question
+	product_agent\3aanswer_question\3a__start__(<p>__start__</p>)
+	product_agent\3aanswer_question\3aqa_think(qa_think)
+	product_agent\3aanswer_question\3aqa_tools(qa_tools)
+	product_agent\3aanswer_question\3aqa_answer(qa_answer)
+	product_agent\3aanswer_question\3a__start__ --> product_agent\3aanswer_question\3aqa_think;
+	product_agent\3aanswer_question\3aqa_think -.-> product_agent\3aanswer_question\3aqa_answer;
+	product_agent\3aanswer_question\3aqa_think -.-> product_agent\3aanswer_question\3aqa_tools;
+	product_agent\3aanswer_question\3aqa_tools --> product_agent\3aanswer_question\3aqa_think;
 	end
 	end
 	subgraph order_agent
