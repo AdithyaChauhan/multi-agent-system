@@ -93,6 +93,13 @@ def configure_environment(args) -> None:
         os.environ["LANGCHAIN_TRACING_V2"] = "false"
         os.environ["LANGSMITH_TRACING"] = "false"
     os.environ.pop("CI", None)
+    # A measurement uses one model and sees every call: no fallback chain, no answer cache, and no
+    # chat rate limits (the harness sends turns far faster than a person would).
+    os.environ["ALLOW_X_USER_ID"] = "true"  # the harness names each conversation's user with X-User-ID
+    os.environ["LLM_FALLBACK"] = "off"
+    os.environ["LLM_CACHE_SECONDS"] = "0"
+    os.environ["CHAT_RATE_PER_MINUTE"] = "1000000"
+    os.environ["CHAT_TURNS_PER_DAY"] = "1000000"
 
     # Keep app logs out of the (OneDrive-synced) repo and off stdout.
     import app.core.logger as app_logger
@@ -590,7 +597,7 @@ def run_conversation(client, conv, router_rec, reroute_rec, phrase_sets, args):
             r = client.post(
                 "/chat",
                 json={"message": "Yes, cancel it", "confirm": True, "session_id": session_id or ""},
-                headers={"X-User-ID": user_id},
+                headers={"X-User-ID": spec.get("as_user", user_id)},  # as_user: someone else presses Yes
             )
             ok = r.status_code == 200 and order_status(spec["order_id"]) == "cancelled"
             if ok != spec["expect_success"]:
@@ -696,6 +703,9 @@ def main() -> int:
     parser.add_argument("--exclude", default="", help="comma-separated conversation ids to skip")
     parser.add_argument("--mode", choices=["record", "replay", "fill", "live"], default="record")
     parser.add_argument("--cassette", default="", help="cassette file (default eval/cassettes/baseline_<model>.json)")
+    parser.add_argument(
+        "--conversations", default="", help="conversation file (default eval/baseline_conversations.json)"
+    )
     args = parser.parse_args()
 
     configure_environment(args)
@@ -712,7 +722,8 @@ def main() -> int:
         return 1
     from fastapi.testclient import TestClient
 
-    data = json.loads(CONVERSATIONS_FILE.read_text(encoding="utf-8"))
+    conversations_file = Path(args.conversations) if args.conversations else CONVERSATIONS_FILE
+    data = json.loads(conversations_file.read_text(encoding="utf-8"))
     phrase_sets = data.get("phrase_sets", {})
     convs = data["conversations"]
     if args.only:

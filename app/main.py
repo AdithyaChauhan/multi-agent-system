@@ -28,6 +28,9 @@ from app.agents.router import new_turn, router_graph
 from app.schemas.chat import ChatRequest, SessionMessagesResponse, ChatResponse
 from app.core.logger import get_logger, set_request_id, get_request_id
 from app.core.config import SESSION_EXPIRY_MINUTES
+from app.core import limits
+from app.core.llm import ModelsUnavailable
+from app.core.redact import install_trace_anonymizer
 from app.core.jwt_utils import verify_access_token
 
 # Import auth router
@@ -140,6 +143,8 @@ async def lifespan(app: FastAPI):
     logger.info("Application shutdown")
 
 
+install_trace_anonymizer()  # before the first traced run
+
 app = FastAPI(title="Multi-Agent E-commerce System", version="1.0.0", lifespan=lifespan)
 
 
@@ -211,8 +216,8 @@ def get_current_user_id(request: Request) -> str:
 
     Priority:
     1. JWT token (Authorization: Bearer <token>)
-    2. X-User-ID header (for testing/development)
-    3. Anonymous user (if neither provided)
+    2. X-User-ID header, only when ALLOW_X_USER_ID=true (tests and eval harnesses)
+    3. Anonymous user
     """
     # Try JWT token first
     auth_header = request.headers.get("Authorization")
@@ -225,8 +230,9 @@ def get_current_user_id(request: Request) -> str:
         else:
             raise HTTPException(status_code=401, detail="Invalid or expired token")
 
-    # Fallback to X-User-ID for testing
-    user_id = request.headers.get("x-user-id")
+    # X-User-ID names the caller without proof, so it's honoured only in tests and eval harnesses
+    # (ALLOW_X_USER_ID=true). Anywhere else it would let anyone act as any user.
+    user_id = request.headers.get("x-user-id") if os.getenv("ALLOW_X_USER_ID", "").lower() == "true" else None
     if user_id:
         logger.warning(f"request_id={get_request_id()} | Using X-User-ID header (development mode) | user_id={user_id}")
         return user_id
@@ -362,6 +368,10 @@ def start_turn(db, request_obj: Request, chat_request: ChatRequest, x_session_id
         "run_name": f"chat_request_{get_request_id()[:8]}",
     }
     turn = Turn(user_id=user_id, session=session, config=config)
+    client_ip = request_obj.client.host if request_obj.client else None
+    turn.refusal = limits.check_turn(limits.caller_key(user_id, client_ip))
+    if turn.refusal:
+        return turn
     if chat_request.confirm is None:
         history = load_conversation_history(db, session.session_id)
         turn.graph_input = new_turn(
@@ -408,6 +418,17 @@ def _refused(db, turn: Turn) -> ChatResponse:
     return ChatResponse(session_id=turn.session.session_id, user_id=turn.user_id, response=turn.refusal)
 
 
+BUSY_REPLY = "I'm getting a lot of questions right now and couldn't answer this one. " "Please try again in a minute."
+
+
+def _busy(db, turn: Turn, error: Exception) -> ChatResponse:
+    """Every model in the fallback chain failed: a normal reply saying so, never an error page."""
+    logger.error(f"request_id={get_request_id()} | MODELS_UNAVAILABLE | {error} | cause={error.__cause__!r}"[:500])
+    db.rollback()
+    turn.refusal = BUSY_REPLY
+    return _refused(db, turn)
+
+
 @app.post("/chat", response_model=ChatResponse)
 def chat(
     request_obj: Request,
@@ -422,8 +443,11 @@ def chat(
         response.headers["X-User-ID"] = turn.user_id
         if turn.refusal:
             return _refused(db, turn)
-        with collect_runs() as cb:
-            graph_result = router_graph.invoke(turn.graph_input, config=turn.config)
+        try:
+            with collect_runs() as cb:
+                graph_result = router_graph.invoke(turn.graph_input, config=turn.config)
+        except ModelsUnavailable as e:
+            return _busy(db, turn, e)
         run_id = str(cb.traced_runs[0].id) if cb.traced_runs else None
         logger.info(f"request_id={get_request_id()} | langsmith_run_id={run_id}")
         return finish_turn(db, turn, chat_request, graph_result, run_id)
@@ -505,6 +529,8 @@ def chat_stream(
             state = router_graph.get_state(turn.config)
             result = {**state.values, "__interrupt__": list(state.interrupts)}
             yield _event("reply", finish_turn(db, turn, chat_request, result, run_id).model_dump())
+        except ModelsUnavailable as e:
+            yield _event("reply", _busy(db, turn, e).model_dump())
         except Exception as e:
             logger.error(f"request_id={get_request_id()} | STREAM_ERROR | {str(e)}")
             db.rollback()

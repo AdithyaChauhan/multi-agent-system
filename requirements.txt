@@ -115,3 +115,5 @@ deepeval>=4.0
 prometheus-client==0.21.1
 # Hybrid search (ADR 0014): local embeddings, ONNX on CPU
 fastembed==0.9.1
+# Database migrations (migrations/): the app image and CI run `alembic upgrade head`
+alembic==1.19.1

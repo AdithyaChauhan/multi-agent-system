@@ -1,6 +1,7 @@
 """OAuth authentication endpoints"""
 
 import os
+import re
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import RedirectResponse
 from authlib.integrations.starlette_client import OAuth
@@ -125,23 +126,27 @@ async def logout():
     return {"message": "Logged out successfully. Please delete your token."}
 
 
+DEMO_USER_ID = re.compile(r"demo-user-\d{1,3}")
+
+
 @router.post("/demo-login")
 async def demo_login(request: Request):
-    """Login with just a user_id — no password, for demo/testing"""
-    body = await request.json()
-    user_id = body.get("user_id", "").strip()
+    """Sign in as one of the seeded demo shoppers (demo-user-1, demo-user-2, ...), no password.
 
-    if not user_id:
-        raise HTTPException(status_code=400, detail="user_id is required")
+    Only those accounts: they own only seeded demo orders. Any other id is refused, so this can't be
+    used to sign in as a real (Google) account or to create new ones.
+    """
+    body = await request.json()
+    user_id = str(body.get("user_id", "")).strip()
+
+    if not DEMO_USER_ID.fullmatch(user_id):
+        raise HTTPException(status_code=403, detail="Demo sign-in is only for the demo accounts (demo-user-1 ...)")
 
     db = SessionLocal()
     try:
         user = db.query(User).filter(User.user_id == user_id).first()
         if not user:
-            user = User(user_id=user_id, auth_provider="demo")
-            db.add(user)
-            db.commit()
-            db.refresh(user)
+            raise HTTPException(status_code=403, detail="Unknown demo account")
 
         token = create_access_token(
             user_id=user.user_id,

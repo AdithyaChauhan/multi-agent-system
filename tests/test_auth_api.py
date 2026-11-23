@@ -44,29 +44,30 @@ class TestAuthLogout:
 
 
 class TestDemoLogin:
+    """Only the seeded demo shoppers (demo-user-N) can sign in without a password."""
 
-    def test_demo_login_returns_token(self, client):
-        response = client.post("/auth/demo-login", json={"user_id": "demo-user-123"})
+    @pytest.fixture
+    def demo_user(self):
+        from app.db.database import SessionLocal
+        from app.models.user import User
+
+        db = SessionLocal()
+        if not db.query(User).filter(User.user_id == "demo-user-7").first():
+            db.add(User(user_id="demo-user-7", auth_provider="demo"))
+            db.commit()
+        db.close()
+        return "demo-user-7"
+
+    def test_demo_account_gets_a_token(self, client, demo_user):
+        response = client.post("/auth/demo-login", json={"user_id": demo_user})
         assert response.status_code == 200
         assert "access_token" in response.json()
 
-    def test_demo_login_missing_user_id(self, client):
-        response = client.post("/auth/demo-login", json={})
-        assert response.status_code == 400
+    def test_missing_or_empty_id_is_refused(self, client):
+        assert client.post("/auth/demo-login", json={}).status_code == 403
+        assert client.post("/auth/demo-login", json={"user_id": "   "}).status_code == 403
 
-    def test_demo_login_empty_user_id(self, client):
-        response = client.post("/auth/demo-login", json={"user_id": "   "})
-        assert response.status_code == 400
-
-    def test_demo_login_existing_user(self, client):
-        client.post("/auth/demo-login", json={"user_id": "existing-user"})
-        response = client.post("/auth/demo-login", json={"user_id": "existing-user"})
-        assert response.status_code == 200
-        assert "access_token" in response.json()
-
-    def test_demo_login_creates_new_user(self, client):
-        # Use a guaranteed-fresh user_id so the new-user creation path always executes
+    def test_other_ids_are_refused_and_not_created(self, client):
         fresh_id = f"fresh-{uuid.uuid4()}"
-        response = client.post("/auth/demo-login", json={"user_id": fresh_id})
-        assert response.status_code == 200
-        assert "access_token" in response.json()
+        assert client.post("/auth/demo-login", json={"user_id": fresh_id}).status_code == 403
+        assert client.post("/auth/demo-login", json={"user_id": "existing-user"}).status_code == 403

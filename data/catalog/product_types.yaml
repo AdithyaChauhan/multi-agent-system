@@ -103,7 +103,7 @@ types:
         required: true
         values:
           laptop stand: [stand, riser, holder]
-          laptop table: [table, desk, lap desk, bed table]
+          laptop table: [lap desk, bed table]
           cooling pad: [cooling pad, cooler, cooling stand]
       adjustable: {type: bool, aliases: [adjustable, foldable, height adjustable]}
 

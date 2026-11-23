@@ -81,42 +81,76 @@ jobs:
           path: coverage.xml
 
   # ─────────────────────────────────────────────────────────────────
-  # Stage 3 — LLM Evaluation (live, gates deploy)
-  # Runs on self-hosted runner, hits docker-compose app at localhost:8000.
-  # Deploy only proceeds if this passes.
+  # Stage 3 — Replay evals (0 tokens, gates the image build)
+  # Product search (100 labelled queries), the 51 baseline conversations and the adversarial set,
+  # replayed from recorded model answers against a scrubbed copy of the catalog. A drop below the
+  # measured bars in eval/ci_gate.py fails the build. The live DeepEval run is eval.yml (manual).
   # ─────────────────────────────────────────────────────────────────
-  evaluate:
-    name: LLM Evaluation
-    runs-on: [self-hosted, minikube]
+  replay-evals:
+    name: Replay Evals
+    runs-on: ubuntu-latest
     needs: test
 
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.0-pg15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: multi_agent_baseline
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     env:
-      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-      LANGCHAIN_API_KEY: ${{ secrets.LANGCHAIN_API_KEY }}
-      DEEPEVAL_TELEMETRY_OPT_OUT: "YES"
-      RUN_LIVE_EVAL: "true"
-      EVAL_API_URL: "http://localhost:8000"
+      CI_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/multi_agent_baseline
+      MOCK_CARRIER_API_URL: http://localhost:9000
+      FASTEMBED_CACHE_PATH: ${{ github.workspace }}/.fastembed
+      JWT_SECRET_KEY: ci-test-secret
 
     steps:
       - uses: actions/checkout@v4.2.2
 
-      - name: Verify app is reachable
-        run: |
-          curl -sf http://localhost:8000/health || (echo "docker-compose app not running at localhost:8000"; exit 1)
+      - name: Set up Python
+        uses: actions/setup-python@v5.6.0
+        with:
+          python-version: "3.12"
+          cache: pip
 
-      - name: Run DeepEval evaluation
+      - name: Install dependencies
         run: |
-          source /home/admin1/project/multi-agent-system/venv/bin/activate
-          python eval/run_deepeval.py
+          pip install -r requirements.txt
+          sudo apt-get install -y --no-install-recommends postgresql-client
 
-      - name: Upload evaluation reports
+      - name: Cache the embedding model
+        uses: actions/cache@v4.2.3
+        with:
+          path: .fastembed
+          key: fastembed-bge-small-en-v1.5
+
+      - name: Restore the scrubbed fixture
+        run: pg_restore --no-owner -d "$CI_DATABASE_URL" eval/fixtures/ci_baseline.dump
+
+      - name: Start the mock carrier API
+        run: |
+          uvicorn mock_services.carrier_api:app --port 9000 &
+          sleep 3
+
+      - name: Replay evals and apply the gate
+        run: bash eval/ci_replay.sh
+
+      - name: Upload eval results
         uses: actions/upload-artifact@v4.6.2
         if: always()
         with:
-          name: eval-reports
+          name: replay-evals
           path: |
-            eval/reports/eval_report.json
-            eval/reports/eval_report.html
+            eval/retrieval_runs/ci-*.json
+            eval/baseline_runs/ci-*.json
 
   # ─────────────────────────────────────────────────────────────────
   # Stage 4 — Docker Build
@@ -124,7 +158,7 @@ jobs:
   docker-build:
     name: Docker Build
     runs-on: ubuntu-latest
-    needs: evaluate
+    needs: replay-evals
 
     steps:
       - uses: actions/checkout@v4.2.2

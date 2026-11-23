@@ -171,6 +171,11 @@ def extract_preferences(state: ProductState) -> dict:
         not_carried = {"item": out["not_carried"], "suggestion": None}
     if claimed is not None and claimed.served and not out.get("product"):
         out["product"] = out["not_carried"]
+    nothing_asked = not any(out.get(k) for k in ("product", "features", "brand")) and not previous.get("product")
+    if not_carried is None and nothing_asked and not out.get("not_carried"):
+        match = _closest_in_catalog(None, message)  # a need with no product word: "fuzz balls on sweaters"
+        if match is not None:
+            out["product"] = match["word"]
     if not_carried is not None and not_carried["suggestion"] is None:
         match = _closest_in_catalog(out.get("not_carried"), message)
         if match is not None:  # "lint remover" under a renamed type, "fuzz balls" -> lint remover
@@ -395,6 +400,12 @@ def rank_products(state: ProductState) -> dict:
                 seen.add(i)
                 picked.append({**candidates[i - 1], "llm_tier": tier, "score": score(candidates[i - 1], prefs)})
     picked.sort(key=lambda p: (p["llm_tier"], -p["score"]))
+    if not picked and state.get("relaxed_filters"):
+        # The loop already widened the filters and says so in the reply; products of the requested
+        # type are what the shopper asked for, minus a spec ("usb hub with ethernet" -> usb hubs).
+        wanted = search_filters(prefs)["product_type"]
+        same_type = [p for p in candidates if wanted and p.get("type") == wanted]
+        picked = [{**p, "llm_tier": 1, "score": score(p, prefs)} for p in same_type]
     return {"ranked_products": picked[:5]}
 
 

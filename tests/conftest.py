@@ -1,11 +1,15 @@
+import os
+
 import pytest
 from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.db.database import Base
-from app.main import app
+os.environ.setdefault("ALLOW_X_USER_ID", "true")  # tests name the caller with X-User-ID
+
+from app.db.database import Base  # noqa: E402
+from app.main import app  # noqa: E402
 
 # Use in-memory SQLite for tests
 TEST_DATABASE_URL = "sqlite:///./test.db"
@@ -72,3 +76,16 @@ def mock_groq():
     """Patch ChatGroq to avoid real LLM calls"""
     with patch("langchain_groq.ChatGroq") as mock:
         yield mock
+
+
+@pytest.fixture(autouse=True)
+def _fresh_limits_and_cache():
+    """Rate limits and the answer cache are process-wide: start every test from zero."""
+    from app.core import limits
+    from app.core.llm import clear_cache
+
+    limits.reset()
+    clear_cache()
+    yield
+    limits.reset()
+    clear_cache()

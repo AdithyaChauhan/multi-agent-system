@@ -206,3 +206,35 @@ def test_hybrid_search_on_postgres():
         results = hybrid.hybrid_search(query="remove fuzz balls from my sweaters", limit=5)
         assert results and all(r["type"] == "lint remover" for r in results[:3])
         assert hybrid.catalog_match("lint remover")["similarity"] > 0.75
+
+
+class TestRankerAfterWidening:
+    def _rank(self, ranking, relaxed):
+        candidates = [
+            {"product_id": "H1", "name": "4-Port USB Hub", "type": "adapter", "price": 500, "rating": 4.2},
+            {"product_id": "C1", "name": "USB Cable", "type": "cable", "price": 200, "rating": 4.5},
+        ]
+        state = ProductState(
+            search_results=candidates, preferences={"product": "usb hub"}, relaxed_filters=relaxed, user_message="x"
+        )
+        with patch.object(pa, "call_llm", return_value=ranking):
+            return pa.rank_products(state)["ranked_products"]
+
+    def test_requested_type_is_shown_when_the_ranker_rejects_a_widened_search(self):
+        shown = self._rank(pa.Ranking(same_kind=[], exact=[]), ["attributes"])
+        assert [p["product_id"] for p in shown] == ["H1"] and shown[0]["llm_tier"] == 1
+
+    def test_ranker_rejection_stands_when_nothing_was_widened(self):
+        assert self._rank(pa.Ranking(same_kind=[], exact=[]), []) == []
+
+
+def test_a_need_with_no_product_word_is_searched_when_the_catalog_has_it(hybrid_on):
+    close = {"type": "lint remover", "word": "lint remover", "similarity": 0.76}
+    result = _extract("remove fuzz balls from my sweaters", {}, [None, close])
+    assert result["preferences"]["product"] == "lint remover" and result["not_carried"] is None
+
+
+def test_greeting_with_no_close_product_still_asks(hybrid_on):
+    far = {"type": "tv", "word": "tv", "similarity": 0.55}
+    result = _extract("hello there", {}, [None, far])
+    assert not result["preferences"].get("product")

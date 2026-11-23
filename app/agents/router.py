@@ -10,11 +10,13 @@ from app.agents.order_agent import order_agent_graph
 from app.agents.product_agent import product_agent_graph
 from app.agents.state import RouterState
 from app.agents.support_agent import support_agent_graph
+from app.core import config
 from app.core.checkpoint import make_checkpointer
 from app.core.llm import call_llm
 from app.core.logger import get_logger, get_request_id
 from app.core.metrics import agent_requests_total
 from app.core.prompt_loader import load_prompt
+from app.search import hybrid
 from app.tools.order_tools import fetch_user_orders
 
 logger = get_logger("app.agents.router")
@@ -50,6 +52,18 @@ SAFETY_RESPONSE = (
 )
 
 
+# The safety floor (ADR 0008): phrases that only describe something dangerous happening. It can only
+# escalate, never route a message anywhere else, so a rare false match costs one extra ticket.
+# Product names never match: "fire tv stick", "Fire-Boltt", "fire sale" have no harm word after them.
+SAFETY_PATTERN = re.compile(
+    r"\b(caught fire|catch(?:es|ing)? fire|burst into flames|(?:is|was|went|set) on fire(?! sale)"
+    r"|burn(?:ed|t) (?:my|me|him|her|his|our|the)\b|electric(?:al)? shock|(?:gave|giving) (?:me|him|her) (?:a )?shock"
+    r"|sparks? (?:from|came|coming|flying)|sparking|smok(?:e|ing) (?:from|came|coming)|exploded|explosion"
+    r"|melted|injur(?:ed|y|ies))",
+    re.IGNORECASE,
+)
+
+
 def normalize_order_id(value) -> Optional[str]:
     """'2002', 'ord 2002', 'ORD-2002' → 'ORD-2002'. Anything without digits → None."""
     digits = re.findall(r"\d+", str(value or ""))
@@ -63,6 +77,18 @@ def _orders_line(user_id: str) -> str:
     if not orders:
         return "Their orders: none."
     return "Their orders: " + "; ".join(f"{o['order_id']} {o['product_name']} ({o['status']})" for o in orders)
+
+
+def _sells_what_this_describes(message: str) -> bool:
+    """The router found the message unclear, but the catalog has a product that means the same
+    ("remove fuzz balls from my sweaters" -> lint remover): search instead of asking."""
+    if config.PRODUCT_SEARCH != "hybrid":
+        return False
+    match = hybrid.catalog_match(message)
+    if match and match["similarity"] >= config.NOT_CARRIED_MIN_SIM:
+        logger.info(f"request_id={get_request_id()} | unclear -> product | closest={match}")
+        return True
+    return False
 
 
 def classify(state: RouterState) -> dict:
@@ -85,6 +111,12 @@ def classify(state: RouterState) -> dict:
     )
     if decision is None:
         decision = RouteDecision(intent="unclear")
+
+    if decision.risk != "safety" and SAFETY_PATTERN.search(message):
+        logger.warning(f"request_id={get_request_id()} | safety floor matched | model risk={decision.risk}")
+        decision.risk = "safety"
+    if decision.intent == "unclear" and _sells_what_this_describes(message):
+        decision.intent, decision.reply = "product", None
 
     if decision.intent in ("order", "product", "support"):
         agent_requests_total.labels(agent=decision.intent).inc()

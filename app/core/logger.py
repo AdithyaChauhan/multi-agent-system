@@ -5,6 +5,8 @@ from logging.handlers import RotatingFileHandler
 from contextvars import ContextVar
 from pathlib import Path
 
+from app.core.redact import RedactingFilter
+
 LOG_FORMAT = "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
 LOG_FILE = "logs/app.log"
 
@@ -16,6 +18,7 @@ def get_logger(name: str) -> logging.Logger:
         return logger
 
     logger.setLevel(logging.DEBUG)
+    logger.addFilter(RedactingFilter())  # no emails or phone numbers in any log line
 
     formatter = logging.Formatter(LOG_FORMAT)
 

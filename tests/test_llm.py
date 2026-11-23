@@ -23,7 +23,8 @@ def test_text_call_returns_stripped_content():
     fake.invoke.return_value = _message("  hello  ")
     with patch.object(llm_module, "llm", fake):
         assert llm_module.call_llm("router", "classify", ["msg"]) == "hello"
-    assert fake.invoke.call_args.kwargs["config"]["metadata"] == {"agent": "router", "node": "classify"}
+    metadata = fake.invoke.call_args.kwargs["config"]["metadata"]
+    assert (metadata["agent"], metadata["node"]) == ("router", "classify")
 
 
 def test_structured_call_returns_parsed_object():

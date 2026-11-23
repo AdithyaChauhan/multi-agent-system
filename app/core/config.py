@@ -36,3 +36,18 @@ NOT_CARRIED_MIN_SIM = float(os.getenv("NOT_CARRIED_MIN_SIM", "0.75"))
 # Query text for hybrid search: the extracted product and features ("prefs"), or those plus the
 # shopper's message ("prefs+message"). Tuned on the dev queries.
 HYBRID_QUERY = os.getenv("HYBRID_QUERY", "prefs+message").strip().lower()
+
+# Fallback chain (ADR 0015): when GROQ_MODEL is rate-limited, down or retired, the next model in
+# this list answers. Each Groq model has its own daily quota; same account only (ADR 0013).
+GROQ_FALLBACK_MODELS = [
+    m.strip()
+    for m in os.getenv("GROQ_FALLBACK_MODELS", "openai/gpt-oss-20b,openai/gpt-oss-120b,qwen/qwen3.8-27b").split(",")
+    if m.strip() and m.strip() != GROQ_MODEL
+]
+# "off" pins every call to GROQ_MODEL (the eval harnesses set this, so a measurement is one model).
+LLM_FALLBACK = os.getenv("LLM_FALLBACK", "on").strip().lower() != "off"
+# Identical calls (same model, messages and schema) within this many seconds reuse the answer.
+LLM_CACHE_SECONDS = int(os.getenv("LLM_CACHE_SECONDS", "1800"))
+# Abuse limits on /chat and /chat/stream, per signed-in user (or per IP when anonymous).
+CHAT_RATE_PER_MINUTE = int(os.getenv("CHAT_RATE_PER_MINUTE", "20"))
+CHAT_TURNS_PER_DAY = int(os.getenv("CHAT_TURNS_PER_DAY", "150"))

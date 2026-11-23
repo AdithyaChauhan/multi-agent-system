@@ -1,4 +1,8 @@
-"""The one chat model every agent uses, plus a call wrapper that records usage.
+"""The chat model every agent uses, plus a call wrapper that records usage.
+
+Calls go to GROQ_MODEL first; if it's rate-limited, down or retired, the next model in
+GROQ_FALLBACK_MODELS answers (ADR 0015). If none can, ModelsUnavailable is raised and the API turns
+it into a friendly "busy" reply. Identical calls within LLM_CACHE_SECONDS reuse the answer.
 
 Evals can record and replay model calls (see "Record / replay" below), so a rerun costs no tokens
 and gets the same answers as long as prompts, schemas and the model are unchanged.
@@ -7,23 +11,93 @@ and gets the same answers as long as prompts, schemas and the model are unchange
 import hashlib
 import json
 import os
+import threading
 import time
+from collections import OrderedDict
 from pathlib import Path
 from typing import Optional
 
 from dotenv import load_dotenv
-from groq import BadRequestError
+from groq import (
+    APIConnectionError,
+    APIStatusError,
+    APITimeoutError,
+    BadRequestError,
+    InternalServerError,
+    NotFoundError,
+    RateLimitError,
+)
 from langchain_groq import ChatGroq
 
+from app.core import config
 from app.core.config import GROQ_MODEL
 from app.core.logger import get_logger, get_request_id
-from app.core.metrics import llm_duration_seconds, llm_requests_total, llm_tokens_total
+from app.core.metrics import (
+    llm_cache_hits_total,
+    llm_duration_seconds,
+    llm_fallback_total,
+    llm_requests_total,
+    llm_tokens_total,
+    llm_unavailable_total,
+)
 
 load_dotenv()
 
 logger = get_logger("app.core.llm")
 
-llm = ChatGroq(model=GROQ_MODEL, temperature=0, api_key=os.getenv("GROQ_API_KEY"))
+
+def _new_client(model: str) -> ChatGroq:
+    # One quick retry, then move down the chain: a demo shouldn't wait on a busy model.
+    return ChatGroq(model=model, temperature=0, api_key=os.getenv("GROQ_API_KEY"), max_retries=1, timeout=20)
+
+
+llm = _new_client(GROQ_MODEL)
+_fallback_clients: dict = {}
+_cooling: dict = {}  # model name -> monotonic time before which it is skipped (it returned 429)
+
+
+class ModelsUnavailable(RuntimeError):
+    """No model in the chain could answer (all rate-limited, down or retired)."""
+
+
+def _why_fall_back(exc: Exception) -> Optional[str]:
+    """The reason to try the next model, or None if this error isn't about the model's availability."""
+    if isinstance(exc, RateLimitError):
+        return "rate_limit"
+    if isinstance(exc, (APITimeoutError, APIConnectionError)):
+        return "unreachable"
+    if isinstance(exc, InternalServerError) or (isinstance(exc, APIStatusError) and exc.status_code >= 500):
+        return "server_error"
+    if isinstance(exc, NotFoundError) and "model" in str(exc).lower():
+        return "model_retired"
+    return None
+
+
+def _cooldown_seconds(exc: Exception) -> float:
+    """How long to skip a model that returned 429: 10 minutes for a daily cap, else its retry-after."""
+    text = str(exc).lower()
+    if "per day" in text or "tpd" in text or "rpd" in text:
+        return 600.0
+    headers = getattr(getattr(exc, "response", None), "headers", None) or {}
+    try:
+        return min(float(headers.get("retry-after", 30)), 600.0)
+    except (TypeError, ValueError):
+        return 30.0
+
+
+def _chain() -> list:
+    """The clients to try, in order. Evals pin one model (a cassette mode, or LLM_FALLBACK=off)."""
+    if not config.LLM_FALLBACK or cassette_mode():
+        return [llm]
+    clients = [llm]
+    for model in config.GROQ_FALLBACK_MODELS:
+        if model != llm.model_name:
+            if model not in _fallback_clients:
+                _fallback_clients[model] = _new_client(model)
+            clients.append(_fallback_clients[model])
+    now = time.monotonic()
+    ready = [c for c in clients if _cooling.get(c.model_name, 0) <= now]
+    return ready or clients[-1:]  # everything is cooling down: still try the last one
 
 
 def _usage(message) -> dict:
@@ -51,18 +125,44 @@ def _record(agent: str, node: str, message, seconds: float) -> dict:
 
 
 def _invoke(agent: str, node: str, messages: list, schema=None):
-    """One real model call. Returns (result, token usage)."""
-    config = {"metadata": {"agent": agent, "node": node}}
+    """One real model call, down the fallback chain. Returns (result, token usage)."""
+    chain = _chain()
+    last_error = None
+    for i, client in enumerate(chain):
+        try:
+            return _invoke_one(client, agent, node, messages, schema)
+        except Exception as exc:
+            reason = _why_fall_back(exc)
+            if reason is None:
+                raise
+            last_error = exc
+            if reason == "rate_limit":
+                _cooling[client.model_name] = time.monotonic() + _cooldown_seconds(exc)
+            elif reason == "model_retired":  # it won't come back: don't spend a round trip on it each call
+                _cooling[client.model_name] = time.monotonic() + 3600
+            following = chain[i + 1].model_name if i + 1 < len(chain) else None
+            logger.warning(
+                f"request_id={get_request_id()} | LLM_FALLBACK | {agent}.{node} | {client.model_name} failed"
+                f" ({reason}: {type(exc).__name__}) | next={following}"
+            )
+            if following:
+                llm_fallback_total.labels(from_model=client.model_name, to_model=following, reason=reason).inc()
+    llm_unavailable_total.inc()
+    raise ModelsUnavailable(f"no model could answer {agent}.{node}") from last_error
+
+
+def _invoke_one(client, agent: str, node: str, messages: list, schema=None):
+    run_config = {"metadata": {"agent": agent, "node": node, "model": client.model_name}}
     start = time.perf_counter()
     if schema is None:
-        message = llm.invoke(messages, config=config)
+        message = client.invoke(messages, config=run_config)
         usage = _record(agent, node, message, time.perf_counter() - start)
         return (message.content or "").strip(), usage
 
-    structured = llm.with_structured_output(schema, include_raw=True)
+    structured = client.with_structured_output(schema, include_raw=True)
     for attempt in (1, 2):
         try:
-            out = structured.invoke(messages, config=config)
+            out = structured.invoke(messages, config=run_config)
             break
         except BadRequestError as exc:
             # Groq checks tool-call arguments against the schema and rejects malformed calls
@@ -92,10 +192,55 @@ def call_llm(agent: str, node: str, messages: list, schema=None):
             return _replay(messages, schema)
         except CassetteMiss:
             pass
+    key = None if mode else cassette_key(messages, schema)
+    if key is not None:
+        cached = _cache_get(key)
+        if cached is not None:
+            llm_cache_hits_total.inc()
+            logger.info(f"request_id={get_request_id()} | LLM_CACHE_HIT | agent={agent} | node={node}")
+            return cached
     result, usage = _invoke(agent, node, messages, schema)
     if mode in ("record", "fill"):
         _store(agent, node, messages, schema, result, usage)
+    if key is not None and result is not None:
+        _cache_put(key, result)
     return result
+
+
+# ── Answer cache ───────────────────────────────────────────────────────────────
+# temperature=0, so the same call gets the same answer: a demo question asked again costs nothing.
+# The key holds the whole prompt (including any order details), so it only matches the same input.
+_CACHE_MAX = 512
+_cache: OrderedDict = OrderedDict()
+_cache_lock = threading.Lock()
+
+
+def _cache_get(key: str):
+    with _cache_lock:
+        entry = _cache.get(key)
+        if entry is None:
+            return None
+        stored, value = entry
+        if time.monotonic() - stored > config.LLM_CACHE_SECONDS:
+            del _cache[key]
+            return None
+        _cache.move_to_end(key)
+        return value
+
+
+def _cache_put(key: str, value) -> None:
+    if config.LLM_CACHE_SECONDS <= 0:
+        return
+    with _cache_lock:
+        _cache[key] = (time.monotonic(), value)
+        _cache.move_to_end(key)
+        while len(_cache) > _CACHE_MAX:
+            _cache.popitem(last=False)
+
+
+def clear_cache() -> None:
+    with _cache_lock:
+        _cache.clear()
 
 
 # ── Record / replay ────────────────────────────────────────────────────────────
