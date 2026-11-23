@@ -1,5 +1,5 @@
 # Phase 3: Hybrid search (conditional)
-- **Status:** Not started. **Start only if** the Phase 1 results leave a gap: attribute recall@5 below 0.85, a recall@5 drop of more than 5 points on the renamed catalog, or vague and Hinglish queries below 0.85. If not, mark this phase Dropped and say why.
+- **Status:** In progress. The gate said go on 2026-11-23 (see Results). **Start only if** the Phase 1 results leave a gap: attribute recall@5 below 0.85, a recall@5 drop of more than 5 points on the renamed catalog, or vague and Hinglish queries below 0.85. If not, mark this phase Dropped and say why.
 - **Branch:** `phase-3-hybrid-search`
 - **Depends on:** Phase 0 (measurement) and Phase 1 (clean data and attributes)
 - **Decisions:** [0006](../decisions/0006-hybrid-search-pgvector.md); the embedding-source ADR is written at the start of this phase
@@ -8,10 +8,11 @@
 Product search that understands meaning, doesn't depend on category names, and keeps hard filters (price, brand, attributes) exact.
 
 ## Tasks
-- [ ] Plan mode: check the go/no-go condition above against Phase 1's Results. As of 2026-11-19:
+- [x] Go/no-go gate (2026-11-23). Result: **go**, because the renamed catalog drops recall@5 by 11.8 points. Details are in Results.
   - attribute recall@5 is 1.0, so no gap;
-  - Hinglish (4 of 5) and vague (8 of 10) are both 0.80: borderline, and the samples are small;
-  - the renamed catalog isn't measured on v2 yet. Run it first: 35 queries, about 70K tokens. If it's a go, choose the embedding source (an embeddings API, or a local model through `fastembed`), the model and its dimension, and record the choice as the next ADR.
+  - Hinglish (0.80) and vague (0.70) are below the bar, but only 1 of their 4 misses is a meaning problem (see Results);
+  - `scripts/make_renamed_catalog_db.py` had to be fixed first. It renamed the old text columns on `products`, but since Phase 1 search reads `product_types`, so it now renames those type names and categories too.
+- [ ] Choose the embedding source (an embeddings API, or a local model through `fastembed`), the model and its dimension, and record the choice as the next ADR. Also consider a full-text-only first step (see Results).
 - [ ] Postgres with pgvector:
   - switch docker compose from `postgres:15-alpine` and Helm from `postgres` to `pgvector/pgvector:pg15`;
   - check that Render allows `CREATE EXTENSION vector`;
@@ -43,4 +44,26 @@ Product search that understands meaning, doesn't depend on category names, and k
 - **Don't tune on the full query set**, or the numbers will look better than real use.
 
 ## Results
-_Fill in during the phase._
+
+### Go/no-go gate (2026-11-23)
+**Renamed catalog.** These are the 35 Phase 0 robustness queries, run on the same model per query as v3b: 25 on gpt-oss-20b, 6 on gpt-oss-120b and 4 on qwen3.8-27b. Each was run once, live, at about 83K tokens. The renamed copy changes 41 of the 47 `product_types` names and all four categories. Synonyms, kinds, attributes and brands are kept. Types we don't sell and the "other …" types keep their names.
+
+| Database | recall@5 | precision@3 | MRR | empty rate | refusals |
+|---|---|---|---|---|---|
+| `multi_agent_baseline` (the v3b runs, same queries) | 0.971 | 0.941 | 0.951 | 0% | 1.0 |
+| `multi_agent_renamed` | **0.853** | 0.833 | 0.829 | 2.9% | 1.0 |
+
+- The drop is **11.8 points**, against a bar of 5. In Phase 0 it was 97 points (0.971 → 0.000), so Phase 1 recovered most of it.
+- Every new miss has the same cause: the shopper's word was our type name, and nothing else in the data carries it.
+  - q016 "lint remover" was refused as "we don't carry lint remover", although the type still has its products under its new name, "Fabric Care".
+  - q002 "mixer grinder" and q089 "only Bajaj" fell back to the `hand mixer` kind.
+  - q086 "what about Logitech", after "mouse", became "pointing device" and returned 1 result.
+- The product titles still say "lint remover", "mixer grinder" and "mouse". Search that also reads titles (full text or embeddings) would find them. That is what this phase adds.
+- Files: `eval/retrieval_runs/robust-v3b-renamed-{20b,120b,qwen}.json`, `robust-v3b-renamed-combined-summary.json` and `robust-v3b-baseline-summary.json`.
+
+**Hinglish and vague** (v3b, 0 tokens). Of the 4 misses, only q061 ("fuzz balls from my sweaters", refused as clothing) is a meaning problem. The others:
+- q071 "sasta": nothing ranks cheap items first;
+- q065: a label or ambiguity question;
+- q062: fitness-band data.
+
+These go to Phase 4's list rather than driving this phase.

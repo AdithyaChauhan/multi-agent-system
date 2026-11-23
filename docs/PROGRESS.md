@@ -12,6 +12,19 @@ Newest first. `/handoff` adds an entry at the end of every session. Keep entries
 - **Commits:**
 -->
 
+## 2026-11-23 · Phase 3 · Gate says go: renamed catalog drops recall@5 by 11.8 points
+- **Done:**
+  - fixed `scripts/make_renamed_catalog_db.py`, which now also renames `product_types` (search reads those since Phase 1), and added a unit test;
+  - created `multi_agent_renamed`;
+  - ran the 35-query robustness sample on it.
+- **Measured** (35 queries, v3b model split: 25 on 20b, 6 on 120b, 4 on qwen; 1 live run, about 83K tokens): recall@5 0.971 → 0.853 renamed, precision@3 0.941 → 0.833, refusals 1.0 on both.
+  - The misses are shopper words that existed only as our type names.
+  - Hinglish and vague misses trace to ranking, labels and data, not meaning (except q061).
+- **Decisions:** none yet. The embedding-source ADR comes with the build plan.
+- **Open questions:** whether full text alone, without embeddings, closes the gap (measure it first, because it's cheaper).
+- **Next:** plan the Phase 3 build and get approval.
+- **Commits:** the gate commit on `phase-3-hybrid-search`.
+
 ## 2026-11-21 · Phase 2 · LangGraph-native architecture done
 - **Done:**
   - Postgres checkpointer (one thread per session); cancel through `interrupt()` with `/cancel-order` removed; search loop as graph edges; per-agent input and output schemas; escalation subgraph (ticket, then webhook or log alert);

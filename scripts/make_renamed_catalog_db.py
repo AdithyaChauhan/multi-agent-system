@@ -7,6 +7,11 @@ every category, subcategory and type, so eval/run_retrieval.py can measure how m
 Product ids, names, prices and ratings stay the same, so the labels in eval/product_queries.json
 still apply.
 
+Since Phase 1, search reads types from the product_types table, so that table's names and
+categories are renamed too (the old text columns on products are renamed as before). Synonyms,
+kinds, attributes and brands stay: they are shopping words and product facts that survive a
+reorganisation. Types we don't sell and the hidden "other ..." types keep their names.
+
     python scripts/make_renamed_catalog_db.py            # multi_agent_baseline -> multi_agent_renamed
 
 Copying needs no other open connections to the source database: stop evals and baseline runs
@@ -82,6 +87,50 @@ TYPE = {
     "soundbar": "Bar Audio",
     "home theatre": "Surround System",
 }
+# product_types.name (Phase 1 types): what another shop might call the same section.
+TYPE_NAME = {
+    "cable": "Charging & Data Leads",
+    "mouse": "Pointing Devices",
+    "keyboard": "Input Devices",
+    "adapter": "Connectivity Dongles",
+    "laptop stand": "Desk Ergonomics",
+    "networking": "Wi-Fi & Routers",
+    "storage": "Data Storage Devices",
+    "drawing tablet": "Digital Sketch Pads",
+    "printer": "Print & Scan",
+    "laptop bag": "Computer Carry Cases",
+    "webcam": "Video Calling Cameras",
+    "tv": "Televisions",
+    "headphones": "Personal Audio",
+    "smartwatch": "Wearables",
+    "speaker": "Home Audio",
+    "tv remote": "Remote Controls",
+    "tv accessory": "Television Add-ons",
+    "set top box": "TV Receivers",
+    "power bank": "Portable Power",
+    "charger": "Wall Chargers",
+    "battery": "Cells & Power",
+    "phone holder": "Device Mounts",
+    "screen protector": "Display Guards",
+    "camera": "Imaging",
+    "stylus": "Touch Pens",
+    "room heater": "Space Heating",
+    "water heater": "Geysers & Boilers",
+    "mixer grinder": "Food Processors",
+    "electric kettle": "Hot Beverage Appliances",
+    "iron": "Garment Care",
+    "lint remover": "Fabric Care",
+    "vacuum cleaner": "Floor Care",
+    "blender": "Blending",
+    "water purifier": "Drinking Water Systems",
+    "fan": "Air Circulation",
+    "kitchen scale": "Kitchen Measuring",
+    "cooking appliance": "Countertop Cooking",
+    "home appliance": "Household Gadgets",
+    "laundry basket": "Laundry Storage",
+    "stationery": "Writing Supplies",
+    "art supplies": "Craft & Drawing",
+}
 NOT_SOLD = {"smartphone", "laptop", "laptops", "tablet", "tablets"}  # keep these: the app must still exclude them
 
 
@@ -89,6 +138,15 @@ def renamed(value, mapping: dict, generic: str):
     if value is None or value.lower() in NOT_SOLD:
         return value
     return mapping.get(value) or mapping.get(value.lower()) or generic.format(value.title())
+
+
+def renamed_type(name: str, category: str, served: bool) -> tuple:
+    """(new name, new category) for a product_types row. Types we don't sell keep their name, so
+    refusals are still tested; "other ..." types keep theirs because the model never sees them."""
+    new_category = CATEGORY.get(category, category)
+    if not served or name.startswith("other "):
+        return name, new_category
+    return TYPE_NAME.get(name) or f"{name.title()} Range", new_category
 
 
 def main() -> int:
@@ -122,11 +180,21 @@ def main() -> int:
                     conn.execute(
                         text(f"UPDATE products SET {column} = :new WHERE {column} = :old"), {"new": new, "old": value}
                     )
+        type_rows = conn.execute(text("SELECT id, name, category, served FROM product_types")).all()
+        renamed_types = 0
+        for tid, name, category, served in type_rows:
+            new_name, new_category = renamed_type(name, category, served)
+            renamed_types += new_name != name
+            conn.execute(
+                text("UPDATE product_types SET name = :n, category = :c WHERE id = :id"),
+                {"n": new_name, "c": new_category, "id": tid},
+            )
         counts = conn.execute(
             text("SELECT count(DISTINCT category), count(DISTINCT subcategory), count(*) FROM products")
         ).one()
     print(
-        f"created {args.target} from {source}: {counts[2]} products, {counts[0]} categories, {counts[1]} subcategories renamed"
+        f"created {args.target} from {source}: {counts[2]} products, {counts[0]} categories, "
+        f"{counts[1]} subcategories, {renamed_types} of {len(type_rows)} product types renamed"
     )
     return 0
 

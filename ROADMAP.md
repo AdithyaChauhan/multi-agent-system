@@ -3,12 +3,13 @@
 **Goal:** take the assistant from about 5.8/10 to 9/10. That means short prompts, a clean LangGraph architecture that shows how agents are built (subgraphs, loops, a human-in-the-loop pause, ticket handoff), measured quality, and escalations that reach a real person. The work is split into phases, and each phase is worth keeping even if work stops after it.
 
 ## Now
-- **Current phase:** Phase 3, Hybrid search (conditional; not started). Phases 0, 1 and 2 are done.
-- **Branch:** `phase-2-architecture` holds Phase 2 (committed, not pushed). Phase 3 branches off it if the gate says go.
-- **Next action:** in a new chat, run `/resume` and plan Phase 3, starting with its go/no-go gate.
-  - The gate needs the renamed-catalog sample on v3b (about 70K tokens).
-  - Hinglish (0.80) and vague (0.70) are already below the 0.85 bar, on small samples.
-  - Also open: the p03 "table" data fix, p19 "usb hub with ethernet", and s16 routing.
+- **Current phase:** Phase 3, Hybrid search: in progress. Its gate said **go** on 2026-11-23. Phases 0, 1 and 2 are done.
+- **Branch:** `phase-3-hybrid-search`, off `phase-2-architecture`. Nothing is pushed.
+- **Gate result:** renaming the catalog's type names drops recall@5 from 0.971 to **0.853** (35 queries, v3b model split, 1 run). The bar is a drop of less than 5 points.
+  - Every new miss is a shopper word that was only our type name ("lint remover", "mixer grinder", "mouse").
+  - The product titles still contain those words.
+- **Next action:** plan the build part of Phase 3 (search that reads product titles; embedding source ADR) and get approval.
+  - Also open: the p03 "table" data fix, p19 "usb hub with ethernet", s16 routing, "sasta" → sort by price (q071), and the fitness-band data (q062).
 - **Phase 2 result:**
   - 51-conversation baseline: 45 → **47/51** (gpt-oss-20b, 1 run, `multi_agent_baseline`).
   - Product search (100 queries, v2 model split): recall@5 **0.947**, precision@3 0.918 (v2: 0.958, 0.926), out-of-scope refusals 0.8 → **1.0**.
@@ -22,21 +23,21 @@
 | 0 | Measuring stick | Done (labels await review) | [plan](docs/plans/phase-0-measuring-stick.md) | 100 labelled product queries; today's recall@5 measured; LLM replay mode |
 | 1 | Clean product data | Done | [plan](docs/plans/phase-1-clean-product-data.md) | Every product typed, key attributes filled, catalog constants removed |
 | 2 | LangGraph-native architecture | Done (2 size criteria missed) | [plan](docs/plans/phase-2-langgraph-architecture.md) | Checkpointer, `interrupt()` for cancel, search loop as graph edges, subgraph schemas, streaming, escalation subgraph, filter chips |
-| 3 | Hybrid search (conditional) | Not started | [plan](docs/plans/phase-3-hybrid-search.md) | Only if Phase 1 leaves a gap; must beat v1 on Phase 0 metrics |
+| 3 | Hybrid search (conditional) | In progress (gate: go) | [plan](docs/plans/phase-3-hybrid-search.md) | Only if Phase 1 leaves a gap; must beat v1 on Phase 0 metrics |
 | 4 | Reliability and safety | Not started | [plan](docs/plans/phase-4-reliability-and-safety.md) | Friendly quota message, fallback model, safety floor, 0 injection failures |
 | 5 | Ship and showcase | Not started | [plan](docs/plans/phase-5-ship-and-showcase.md) | Admin tickets, auth review, dashboards, load test, case study, updated visual |
 
 Statuses: Not started, In progress, Done, Dropped (say why in the plan). The order changed on 2026-11-18 to match the user's goals (see 0009 and 0010).
 
 ## Scorecard
-Judged on 2026-11-18; updated 2026-11-19 after Phase 1 and 2026-11-21 after Phase 2 (`phase-2-architecture`) for the measured rows. Change the Today column only with measured evidence.
+Judged on 2026-11-18; updated 2026-11-19 after Phase 1, 2026-11-21 after Phase 2 (`phase-2-architecture`) and 2026-11-23 after the Phase 3 gate (robustness: renamed drop measured at 11.8 points, against 97 in Phase 0) for the measured rows. Change the Today column only with measured evidence.
 
 | Aspect | Before (`c8a0fa6`) | Today | Target | Moved by phase |
 |---|---|---|---|---|
 | Architecture clarity | 4 | 8.5 | 9 | 1, 2 |
 | Product search correctness | 4 | 8 | 9 | 0, 1, 3 |
 | Follow-up turns | 4 | 7.5 | 9 | 2 |
-| Robustness to catalog changes | 3 | 3.5 | 9 | 1, 3 |
+| Robustness to catalog changes | 3 | 5 | 9 | 1, 3 |
 | Guardrails and safety | 5 | 8 | 9.5 | 2, 4 |
 | State and scaling | 3 | 6 | 9 | 2, 5 |
 | Cost and latency | 4 | 6 | 9 | 1, 4 |
