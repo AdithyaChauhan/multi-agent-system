@@ -547,6 +547,16 @@
 
         function showWelcome() {
             addMessage("Hi! I'm your AI shopping assistant. Ask me about your orders, products, or support issues.", 'assistant');
+            let demoOrders = [];
+            try { demoOrders = JSON.parse(localStorage.getItem('demo_orders') || '[]'); } catch (e) { demoOrders = []; }
+            if (demoOrders.length) {
+                addMessage(
+                    `You're a demo shopper with your own orders: ${demoOrders.join(', ')}.\n\n` +
+                    'Things to try:\n• "something to keep my room warm under 2000"\n• "tell me more about the second one"\n' +
+                    '• "where is my TV order?"\n• "cancel my mouse order"\n• "my steam iron arrived damaged"',
+                    'assistant'
+                );
+            }
         }
 
         function addConfirmButtons(msgRow) {
@@ -788,6 +798,7 @@
                     }
                 } else if (response.status === 401) {
                     localStorage.removeItem('access_token');
+            localStorage.removeItem('demo_orders');
                     addMessage('Your session expired. Please sign in again.', 'assistant');
                     setTimeout(() => window.location.href = '/static/login.html', 2000);
                 } else {
@@ -831,6 +842,7 @@
 
         function logout() {
             localStorage.removeItem('access_token');
+            localStorage.removeItem('demo_orders');
             localStorage.removeItem('pending_session');
             localStorage.removeItem('chat_session_id');
             window.location.href = '/static/chat.html';

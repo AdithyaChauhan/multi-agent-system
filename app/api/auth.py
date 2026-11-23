@@ -9,6 +9,7 @@ from starlette.config import Config
 from dotenv import load_dotenv
 
 from app.core.jwt_utils import create_access_token, verify_access_token
+from app.db import demo_shoppers
 from app.db.database import SessionLocal
 from app.models.user import User
 from app.core.logger import get_logger
@@ -124,6 +125,22 @@ async def get_current_user(request: Request):
 async def logout():
     """Logout (client should delete token)"""
     return {"message": "Logged out successfully. Please delete your token."}
+
+
+@router.post("/demo-shopper")
+async def demo_shopper(request: Request):
+    """One click, no input: a fresh demo shopper with five orders of their own (ADR 0016)."""
+    client_ip = request.client.host if request.client else None
+    if not demo_shoppers.allow_new_shopper(client_ip):
+        raise HTTPException(status_code=429, detail="Too many demo shoppers from this address. Try again later.")
+    db = SessionLocal()
+    try:
+        demo_shoppers.purge_old_demo_shoppers(db)
+        user_id, order_ids = demo_shoppers.create_demo_shopper(db)
+        token = create_access_token(user_id=user_id, email=f"{user_id}@demo.example", name="Demo shopper")
+        return {"access_token": token, "user_id": user_id, "orders": order_ids}
+    finally:
+        db.close()
 
 
 DEMO_USER_ID = re.compile(r"demo-user-\d{1,3}")

@@ -27,6 +27,7 @@ from groq import (
     NotFoundError,
     RateLimitError,
 )
+from langchain_core.messages import AIMessage
 from langchain_groq import ChatGroq
 
 from app.core import config
@@ -124,13 +125,13 @@ def _record(agent: str, node: str, message, seconds: float) -> dict:
     return usage
 
 
-def _invoke(agent: str, node: str, messages: list, schema=None):
+def _invoke(agent: str, node: str, messages: list, schema=None, tools=None):
     """One real model call, down the fallback chain. Returns (result, token usage)."""
     chain = _chain()
     last_error = None
     for i, client in enumerate(chain):
         try:
-            return _invoke_one(client, agent, node, messages, schema)
+            return _invoke_one(client, agent, node, messages, schema, tools)
         except Exception as exc:
             reason = _why_fall_back(exc)
             if reason is None:
@@ -151,9 +152,13 @@ def _invoke(agent: str, node: str, messages: list, schema=None):
     raise ModelsUnavailable(f"no model could answer {agent}.{node}") from last_error
 
 
-def _invoke_one(client, agent: str, node: str, messages: list, schema=None):
+def _invoke_one(client, agent: str, node: str, messages: list, schema=None, tools=None):
     run_config = {"metadata": {"agent": agent, "node": node, "model": client.model_name}}
     start = time.perf_counter()
+    if tools:
+        message = client.bind_tools(tools).invoke(messages, config=run_config)
+        usage = _record(agent, node, message, time.perf_counter() - start)
+        return AIMessage(content=message.content or "", tool_calls=message.tool_calls or []), usage
     if schema is None:
         message = client.invoke(messages, config=run_config)
         usage = _record(agent, node, message, time.perf_counter() - start)
@@ -178,30 +183,31 @@ def _invoke_one(client, agent: str, node: str, messages: list, schema=None):
     return out.get("parsed"), usage
 
 
-def call_llm(agent: str, node: str, messages: list, schema=None):
+def call_llm(agent: str, node: str, messages: list, schema=None, tools=None):
     """Invoke the model once.
 
     With `schema` (a Pydantic model) the reply is parsed through tool calling and the parsed
-    object is returned, or None if the model returned nothing usable. Without it, the reply text.
+    object is returned, or None if the model returned nothing usable. With `tools`, the model may
+    call them: an AIMessage comes back (its tool_calls run in a ToolNode). Otherwise, the reply text.
     """
     mode = cassette_mode()
     if mode == "replay":
-        return _replay(messages, schema)
+        return _replay(messages, schema, tools)
     if mode == "fill":
         try:
-            return _replay(messages, schema)
+            return _replay(messages, schema, tools)
         except CassetteMiss:
             pass
-    key = None if mode else cassette_key(messages, schema)
+    key = None if mode else cassette_key(messages, schema, tools)
     if key is not None:
         cached = _cache_get(key)
         if cached is not None:
             llm_cache_hits_total.inc()
             logger.info(f"request_id={get_request_id()} | LLM_CACHE_HIT | agent={agent} | node={node}")
             return cached
-    result, usage = _invoke(agent, node, messages, schema)
+    result, usage = _invoke(agent, node, messages, schema, tools)
     if mode in ("record", "fill"):
-        _store(agent, node, messages, schema, result, usage)
+        _store(agent, node, messages, schema, result, usage, tools)
     if key is not None and result is not None:
         _cache_put(key, result)
     return result
@@ -275,23 +281,35 @@ def _cassette_data() -> dict:
     return _cassette
 
 
-def cassette_key(messages: list, schema=None) -> str:
+def _message_key(m) -> list:
+    entry = [getattr(m, "type", type(m).__name__), getattr(m, "content", str(m))]
+    calls = getattr(m, "tool_calls", None)
+    if calls:  # an assistant turn that called tools: which tools, with what arguments
+        entry.append([[c.get("name"), c.get("args")] for c in calls])
+    return entry
+
+
+def cassette_key(messages: list, schema=None, tools=None) -> str:
     payload = {
         "model": llm.model_name,
-        "messages": [[getattr(m, "type", type(m).__name__), getattr(m, "content", str(m))] for m in messages],
+        "messages": [_message_key(m) for m in messages],
         "schema": None if schema is None else [schema.__name__, schema.model_json_schema()],
     }
+    if tools:  # absent for plain and structured calls, so their recorded keys don't change
+        payload["tools"] = sorted(getattr(t, "name", str(t)) for t in tools)
     blob = json.dumps(payload, sort_keys=True, ensure_ascii=False, default=str)
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:32]
 
 
-def _store(agent: str, node: str, messages: list, schema, result, usage: dict) -> None:
-    if schema is not None and result is not None and hasattr(result, "model_dump"):
+def _store(agent: str, node: str, messages: list, schema, result, usage: dict, tools=None) -> None:
+    if tools and isinstance(result, AIMessage):
+        value = {"content": result.content, "tool_calls": result.tool_calls}
+    elif schema is not None and result is not None and hasattr(result, "model_dump"):
         value = result.model_dump(mode="json")
     else:
         value = result
     data = _cassette_data()
-    data[cassette_key(messages, schema)] = {
+    data[cassette_key(messages, schema, tools)] = {
         "agent": agent,
         "node": node,
         "model": llm.model_name,
@@ -312,12 +330,14 @@ def _store(agent: str, node: str, messages: list, schema, result, usage: dict) -
             time.sleep(0.5)
 
 
-def _replay(messages: list, schema=None):
-    entry = _cassette_data().get(cassette_key(messages, schema))
+def _replay(messages: list, schema=None, tools=None):
+    entry = _cassette_data().get(cassette_key(messages, schema, tools))
     if entry is None:
         kind = schema.__name__ if schema is not None else "text"
         raise CassetteMiss(f"no recorded answer for this {kind} call in {_cassette_file}; record it again")
     value = entry["value"]
+    if tools:
+        return AIMessage(content=value.get("content") or "", tool_calls=value.get("tool_calls") or [])
     if schema is None or value is None:
         return value
     return schema.model_validate(value)

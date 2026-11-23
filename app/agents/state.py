@@ -17,6 +17,7 @@ class RouterState(TypedDict, total=False):
     risk: Optional[str]  # "none" | "legal" | "safety"
     support_issue: Optional[dict]
     route: Optional[str]  # set by terminal router nodes: clarify / sign_in / safety
+    about_shown: Optional[bool]  # a question about the products already shown, not a new search
 
     filter_edit: Optional[dict]  # a removed filter chip: {field, value}; skips the router's model call
 
@@ -24,6 +25,7 @@ class RouterState(TypedDict, total=False):
     preferences: Optional[dict]  # the shopper's current search filters, kept for the next turn
     active_filters: Optional[List[dict]]  # those filters as chips
     ranked_products: Optional[List[dict]]
+    shown_products: Optional[List[dict]]  # the cards of the last product reply, kept for questions about them
     relaxed_filters: Optional[List[str]]
     order_data: Optional[dict]
     support_order: Optional[dict]
@@ -42,12 +44,15 @@ class ProductInput(TypedDict, total=False):
     user_message: str
     preferences: Optional[dict]
     filter_edit: Optional[dict]
+    about_shown: Optional[bool]
+    shown_products: Optional[List[dict]]
 
 
 class ProductOutput(TypedDict, total=False):
     preferences: Optional[dict]
     active_filters: Optional[List[dict]]
     ranked_products: Optional[List[dict]]
+    shown_products: Optional[List[dict]]
     relaxed_filters: Optional[List[str]]
     final_response: Optional[str]
 

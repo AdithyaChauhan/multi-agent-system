@@ -487,6 +487,8 @@ STEP_LABELS = {
     "open_ticket": "Creating a support ticket…",
     "notify": "Letting our support team know…",
     "cancel_order": "Cancelling your order…",
+    "qa_think": "Reading the product details…",
+    "qa_tools": "Looking up product facts…",
 }
 
 

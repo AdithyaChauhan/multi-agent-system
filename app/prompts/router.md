@@ -7,6 +7,7 @@ Read the recent conversation for follow-ups, then fill in:
   - "support": they want something done about an order (cancel, return, refund), report a problem with one, ask about our policies, or make an account or data request. Also their answer when the assistant asked which order a support request is about.
   - "unclear": greetings, "help me" or "what can you do" style messages, and anything off-topic.
 - order_id: the order they mean, as ORD-1234. If they type an order number, return it even if it isn't in their orders. Match "the tv one", "2002" or "my boAt headphones" against their orders. Null if they haven't said which order.
+- about_shown (product only): true when they ask about the products just listed ("tell me more about the second one", "which of these is quieter?"), false for a new or refined search.
 - issue (support only): what the request is about. For a follow-up, take it from the conversation.
 - risk: "safety" if a product injured someone, caught fire, smoked, sparked or gave a shock; "legal" if they threaten legal action; otherwise "none". Product names like "Fire TV" or "Fire-Boltt" are not risks.
 - reply (unclear only): one or two friendly sentences. Greet them, or say you only help with shopping, orders and support, and ask what they need. Never state facts about orders or products here.

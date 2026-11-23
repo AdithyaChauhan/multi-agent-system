@@ -13,6 +13,7 @@ from app.catalog.schema import norm
 from app.tools.product_tools import search_products
 from app.core import config
 from app.search import hybrid
+from app.agents.product_qa import product_qa_graph
 from app.core.llm import call_llm
 from app.core.logger import get_logger, get_request_id
 from app.core.prompt_loader import load_prompt
@@ -219,8 +220,12 @@ def apply_filter_edit(state: ProductState) -> dict:
     return {"preferences": prefs, "not_carried": None, "relaxed_filters": [], "active_filters": active_filters(prefs)}
 
 
-def route_entry(state: ProductState) -> Literal["edit", "extract"]:
-    return "edit" if state.get("filter_edit") else "extract"
+def route_entry(state: ProductState) -> Literal["edit", "qa", "extract"]:
+    if state.get("filter_edit"):
+        return "edit"
+    if state.get("about_shown") and state.get("shown_products"):
+        return "qa"  # a question about the cards on screen: the tool-using Q&A loop (ADR 0016)
+    return "extract"
 
 
 def ask_for_preferences(state: ProductState) -> dict:
@@ -488,7 +493,8 @@ def format_recommendations(state: ProductState) -> dict:
         lines.append(f"{i}. **{p.get('title') or p['name']}** — {p.get('brand') or 'Unknown brand'}")
         lines.append(f"   ₹{p['price']:,} · {rating}")
         lines.append("")
-    return {"final_response": "\n".join(lines)}
+    shown = [{k: p.get(k) for k in ("product_id", "title", "brand", "price")} for p in top3]
+    return {"final_response": "\n".join(lines), "shown_products": shown}
 
 
 def respond_no_results(state: ProductState) -> dict:
@@ -511,8 +517,11 @@ def build_product_agent_graph():
     graph.add_node("rank_products", rank_products)
     graph.add_node("format_recommendations", format_recommendations)
     graph.add_node("respond_no_results", respond_no_results)
+    graph.add_node("answer_question", product_qa_graph)
 
-    graph.add_conditional_edges(START, route_entry, {"edit": "apply_filter_edit", "extract": "extract_preferences"})
+    graph.add_conditional_edges(
+        START, route_entry, {"edit": "apply_filter_edit", "qa": "answer_question", "extract": "extract_preferences"}
+    )
     after_filters = {"search": "find_products", "ask": "ask_for_preferences", "unavailable": "respond_unavailable"}
     graph.add_conditional_edges("extract_preferences", route_after_extraction, after_filters)
     graph.add_conditional_edges("apply_filter_edit", route_after_extraction, after_filters)
@@ -522,7 +531,8 @@ def build_product_agent_graph():
     after_rank = {"recommend": "format_recommendations", "no_results": "respond_no_results"}
     graph.add_conditional_edges("rank_products", route_after_rank, after_rank)
     graph.add_conditional_edges("order_by_score", route_after_rank, after_rank)
-    for node in ("ask_for_preferences", "respond_unavailable", "format_recommendations", "respond_no_results"):
+    terminal = ("ask_for_preferences", "respond_unavailable", "format_recommendations", "respond_no_results")
+    for node in (*terminal, "answer_question"):
         graph.add_edge(node, END)
     return graph.compile()
 

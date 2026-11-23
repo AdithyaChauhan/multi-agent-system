@@ -41,6 +41,7 @@ class RouteDecision(BaseModel):
     order_id: Optional[str] = Field(None, description="ORD-1234, matched against the user's orders")
     issue: Optional[Literal[ISSUES]] = Field(None, description="support only")
     risk: Literal["none", "legal", "safety"] = "none"
+    about_shown: bool = Field(False, description="product only: a question about the products just shown")
     reply: Optional[str] = Field(None, description="unclear only: the reply to send")
 
 
@@ -129,6 +130,7 @@ def classify(state: RouterState) -> dict:
         "order_id": normalize_order_id(decision.order_id),
         "support_issue": {"category": decision.issue or "other", "description": state.get("user_message", "")},
         "risk": decision.risk,
+        "about_shown": decision.intent == "product" and decision.about_shown,
         "final_response": decision.reply if decision.intent == "unclear" else None,
     }
 
@@ -198,6 +200,7 @@ def new_turn(user_message: str, user_id: str, session_id: str, conversation_hist
         "risk": None,
         "support_issue": None,
         "route": None,
+        "about_shown": None,
         "ranked_products": None,
         "active_filters": None,
         "relaxed_filters": None,

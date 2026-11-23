@@ -176,7 +176,14 @@ def test_graph_end_to_end():
     assert out["final_response"].startswith("Here are my top recommendations")
     assert out["preferences"]["features"] == ["wireless"]
     # The subgraph hands back only its declared outputs; search internals stay inside it.
-    assert set(out) <= {"preferences", "active_filters", "ranked_products", "relaxed_filters", "final_response"}
+    assert set(out) <= {
+        "preferences",
+        "active_filters",
+        "ranked_products",
+        "shown_products",
+        "relaxed_filters",
+        "final_response",
+    }
 
 
 class TestProductPhrases:
