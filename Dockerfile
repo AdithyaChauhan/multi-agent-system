@@ -11,6 +11,10 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# The embedding model for hybrid search, baked in so the app never downloads it at runtime.
+ENV FASTEMBED_CACHE_PATH=/app/.fastembed
+RUN python -c "from fastembed import TextEmbedding; TextEmbedding('BAAI/bge-small-en-v1.5', cache_dir='/app/.fastembed')"
+
 COPY . .
 
 RUN mkdir -p logs

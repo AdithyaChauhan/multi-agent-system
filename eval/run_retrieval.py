@@ -13,6 +13,7 @@ shopper would see. Metric definitions are in eval/retrieval_metrics.py.
 Modes:
     record (default)  call Groq and save every answer to the cassette
     replay            answer from the cassette, never call Groq; a missing answer is an error
+    fill              answer from the cassette where it can, call Groq (and save) only for the rest
     live              call Groq without saving
 
 Results go to eval/retrieval_runs/<label>.json. --resume skips queries already scored in that
@@ -149,7 +150,7 @@ def line(rec: dict) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--label", required=True)
-    parser.add_argument("--mode", choices=("record", "replay", "live"), default="record")
+    parser.add_argument("--mode", choices=("record", "replay", "fill", "live"), default="record")
     parser.add_argument("--model", default="", help="Groq model (default: the app's GROQ_MODEL)")
     parser.add_argument("--cassette", default="", help="cassette file (default: eval/cassettes/retrieval_<model>.json)")
     parser.add_argument("--database-url", default=os.getenv("BASELINE_DATABASE_URL", DEFAULT_DB))

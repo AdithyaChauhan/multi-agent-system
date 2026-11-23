@@ -11,6 +11,8 @@ from app.catalog.features import features_to_filters, match_attributes
 from app.catalog.runtime import catalog_blurb, get_catalog
 from app.catalog.schema import norm
 from app.tools.product_tools import search_products
+from app.core import config
+from app.search import hybrid
 from app.core.llm import call_llm
 from app.core.logger import get_logger, get_request_id
 from app.core.prompt_loader import load_prompt
@@ -169,6 +171,11 @@ def extract_preferences(state: ProductState) -> dict:
         not_carried = {"item": out["not_carried"], "suggestion": None}
     if claimed is not None and claimed.served and not out.get("product"):
         out["product"] = out["not_carried"]
+    if not_carried is not None and not_carried["suggestion"] is None:
+        match = _closest_in_catalog(out.get("not_carried"), message)
+        if match is not None:  # "lint remover" under a renamed type, "fuzz balls" -> lint remover
+            not_carried = None
+            out["product"], out["not_carried"] = match["word"], None
     preferences = merge_preferences(state.get("preferences") or {}, out)
     logger.info(
         f"request_id={get_request_id()} | EXTRACTED: {json.dumps(out)} | MERGED: {json.dumps(preferences)}"
@@ -180,6 +187,17 @@ def extract_preferences(state: ProductState) -> dict:
         "relaxed_filters": [],
         "active_filters": [] if not_carried else active_filters(preferences),
     }
+
+
+def _closest_in_catalog(word: Optional[str], message: str) -> Optional[dict]:
+    """Before "we don't carry X" for something the catalog has no word for: is there a product that
+    means the same? Only with hybrid search on; the threshold is tuned on the dev queries."""
+    if config.PRODUCT_SEARCH != "hybrid":
+        return None
+    matches = [m for m in (hybrid.catalog_match(word), hybrid.catalog_match(message)) if m]
+    best = max(matches, key=lambda m: m["similarity"], default=None)
+    logger.info(f"request_id={get_request_id()} | not_carried check | {word!r} | closest={best}")
+    return best if best and best["similarity"] >= config.NOT_CARRIED_MIN_SIM else None
 
 
 def apply_filter_edit(state: ProductState) -> dict:
@@ -226,7 +244,11 @@ def route_after_extraction(state: ProductState) -> Literal["search", "ask", "una
     return "search" if has_signal else "ask"
 
 
-def search_filters(prefs: dict) -> dict:
+def _use_hybrid() -> bool:
+    return config.PRODUCT_SEARCH == "hybrid" and hybrid.hybrid_available()
+
+
+def search_filters(prefs: dict, message: str = "") -> dict:
     """Shopper preferences → search_products arguments, using the catalog (no model call).
 
     The product word picks the type (and kind); feature words that name an attribute value become
@@ -240,9 +262,13 @@ def search_filters(prefs: dict) -> dict:
         attributes = {**match_attributes(ptype, prefs["product"]), **attributes}
         if kind:
             attributes["kind"] = kind
-    elif prefs.get("product"):
+    elif prefs.get("product") and not _use_hybrid():
         keywords = [prefs["product"], *keywords]
+    words = [prefs.get("product") or "", *(prefs.get("features") or [])]
+    if config.HYBRID_QUERY == "prefs+message":
+        words.append(message)
     return {
+        "query": " ".join(w for w in words if w).strip(),
         "product_type": ptype.name if ptype else None,
         "attributes": attributes,
         "brand": prefs.get("brand"),
@@ -261,12 +287,16 @@ RELAXATION_ORDER = ["price", "brand", "attributes", "keywords"]
 
 def plan_search(state: SearchState) -> dict:
     """Working filters for this turn. The loop loosens these, never the shopper's preferences."""
-    return {"search_filters": search_filters(state.get("preferences") or {}), "relaxed_filters": []}
+    filters = search_filters(state.get("preferences") or {}, state.get("user_message") or "")
+    return {"search_filters": filters, "relaxed_filters": []}
 
 
 def search(state: SearchState) -> dict:
     filters = state["search_filters"]
-    results = search_products(**filters, limit=10)
+    if _use_hybrid():
+        results = hybrid.hybrid_search(**filters, limit=10)
+    else:
+        results = search_products(**{k: v for k, v in filters.items() if k != "query"}, limit=10)
     logger.info(
         f"request_id={get_request_id()} | search | {filters} | found={len(results)}"
         f" | relaxed={state.get('relaxed_filters')}"
@@ -283,8 +313,16 @@ def next_relaxation(filters: dict, relaxed: list) -> Optional[str]:
     return None
 
 
+def found_what_was_asked(results: list, filters: dict) -> bool:
+    """A search succeeded if it found the requested type. Hybrid search also returns other types
+    (the type is a vote, not a gate), and those alone must not stop the loop from loosening the
+    brand or price: "sony headphones under 500" would otherwise end on a Sony cable."""
+    wanted = filters.get("product_type")
+    return any(r.get("type") == wanted for r in results) if wanted else bool(results)
+
+
 def route_after_loosen_check(state: SearchState) -> Literal["loosen", "done"]:
-    if state.get("search_results"):
+    if found_what_was_asked(state.get("search_results") or [], state["search_filters"]):
         return "done"
     return "loosen" if next_relaxation(state["search_filters"], state.get("relaxed_filters") or []) else "done"
 
@@ -329,6 +367,9 @@ def rank_products(state: ProductState) -> dict:
     candidates = (state.get("search_results") or [])[:10]
     if not candidates:
         return {"ranked_products": []}
+    if config.PRODUCT_RANKER == "off":  # the search order as it is (evals measure retrieval this way)
+        prefs = state.get("preferences") or {}
+        return {"ranked_products": [{**p, "llm_tier": 0, "score": score(p, prefs)} for p in candidates[:5]]}
     listing = "\n".join(
         f"{i}. {p['name'][:60]} | ₹{p['price']} | {p['rating']}★ | {p.get('brand') or 'N/A'}"
         for i, p in enumerate(candidates, 1)

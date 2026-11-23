@@ -238,6 +238,25 @@
         }
         .chip-remove:hover { color: #dc2626; }
 
+        /* ── Product cards ── */
+        .product-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 10px; }
+        .product-card {
+            display: flex; flex-direction: column; background: #fff; border: 1px solid #e5e7eb;
+            border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .product-card .pc-img { height: 120px; display: flex; align-items: center; justify-content: center; background: #f9fafb; }
+        .product-card img { max-width: 100%; max-height: 120px; object-fit: contain; }
+        .product-card .pc-placeholder { font-size: 2rem; color: #9ca3af; }
+        .product-card .pc-body { padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 3px; flex: 1; }
+        .product-card .pc-title { font-size: 0.82rem; font-weight: 600; color: #111827; line-height: 1.25;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .product-card .pc-brand { font-size: 0.75rem; color: #6b7280; }
+        .product-card .pc-meta { display: flex; justify-content: space-between; align-items: baseline; margin-top: auto; }
+        .product-card .pc-price { font-weight: 700; color: #111827; font-size: 0.9rem; }
+        .product-card .pc-rating { font-size: 0.75rem; color: #b45309; }
+        .product-card .pc-link { font-size: 0.78rem; color: #4f46e5; text-decoration: none; margin-top: 4px; }
+        .product-card .pc-link:hover { text-decoration: underline; }
+
         /* ── Cancel confirm buttons ── */
         .confirm-actions {
             display: flex; gap: 8px; margin-top: 10px;
@@ -666,6 +685,67 @@
             msgRow.querySelector('.msg-col').appendChild(row);
         }
 
+        // The products a reply lists, as cards: photo, price, rating and a link. Text only, never HTML.
+        function addProductCards(msgRow, products) {
+            const grid = document.createElement('div');
+            grid.className = 'product-cards';
+            for (const p of products) {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                const imgBox = document.createElement('div');
+                imgBox.className = 'pc-img';
+                const placeholder = () => {
+                    imgBox.textContent = '';
+                    const ph = document.createElement('span');
+                    ph.className = 'pc-placeholder';
+                    ph.textContent = '🛍️';
+                    imgBox.appendChild(ph);
+                };
+                if (p.image && /^https:\/\//.test(p.image)) {
+                    const img = document.createElement('img');
+                    img.src = p.image;
+                    img.alt = p.title || 'Product photo';
+                    img.loading = 'lazy';
+                    img.referrerPolicy = 'no-referrer';
+                    img.addEventListener('error', placeholder);
+                    imgBox.appendChild(img);
+                } else {
+                    placeholder();
+                }
+                const body = document.createElement('div');
+                body.className = 'pc-body';
+                const title = document.createElement('div');
+                title.className = 'pc-title';
+                title.textContent = p.title || '';
+                title.title = p.title || '';
+                const brand = document.createElement('div');
+                brand.className = 'pc-brand';
+                brand.textContent = p.brand || '';
+                const meta = document.createElement('div');
+                meta.className = 'pc-meta';
+                const price = document.createElement('span');
+                price.className = 'pc-price';
+                price.textContent = typeof p.price === 'number' ? `₹${p.price.toLocaleString('en-IN')}` : '';
+                const rating = document.createElement('span');
+                rating.className = 'pc-rating';
+                rating.textContent = typeof p.rating === 'number' ? `★ ${p.rating.toFixed(1)}` : '';
+                meta.append(price, rating);
+                body.append(title, brand, meta);
+                if (p.link && /^https:\/\//.test(p.link)) {
+                    const a = document.createElement('a');
+                    a.className = 'pc-link';
+                    a.href = p.link;
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                    a.textContent = 'View product →';
+                    body.appendChild(a);
+                }
+                card.append(imgBox, body);
+                grid.appendChild(card);
+            }
+            msgRow.querySelector('.msg-col').appendChild(grid);
+        }
+
         async function sendMessage(text, extra) {
             const message = (typeof text === 'string' ? text : messageInput.value).trim();
             if (!message) return;
@@ -702,8 +782,9 @@
                     const msgRow = addMessage(data.response, 'assistant', data.run_id || null);
                     if (data.action && data.action.type === 'confirm_cancel') {
                         addConfirmButtons(msgRow);
-                    } else if (data.active_filters && data.active_filters.length) {
-                        addFilterChips(msgRow, data.active_filters);
+                    } else {
+                        if (data.products && data.products.length) addProductCards(msgRow, data.products);
+                        if (data.active_filters && data.active_filters.length) addFilterChips(msgRow, data.active_filters);
                     }
                 } else if (response.status === 401) {
                     localStorage.removeItem('access_token');

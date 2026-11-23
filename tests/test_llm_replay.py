@@ -110,3 +110,19 @@ def test_no_mode_calls_the_model_and_writes_nothing(cassette, monkeypatch):
     with patch.object(llm_module, "llm", _fake_model(text="live")):
         assert llm_module.call_llm("router", "classify", MESSAGES) == "live"
     assert not cassette.exists()
+
+
+def test_fill_replays_what_it_has_and_records_only_the_rest(cassette, monkeypatch):
+    monkeypatch.setenv("LLM_CASSETTE_MODE", "record")
+    with patch.object(llm_module, "llm", _fake_model(parsed=Answer(value=3))):
+        llm_module.call_llm("product", "extract", MESSAGES, schema=Answer)
+
+    monkeypatch.setenv("LLM_CASSETTE_MODE", "fill")
+    monkeypatch.setattr(llm_module, "_cassette", None)
+    with patch.object(llm_module, "llm", _offline_model()):  # recorded: no model call
+        assert llm_module.call_llm("product", "extract", MESSAGES, schema=Answer) == Answer(value=3)
+    other = [SystemMessage(content="You answer with a number."), HumanMessage(content="one plus one")]
+    with patch.object(llm_module, "llm", _fake_model(parsed=Answer(value=2))) as fake:
+        assert llm_module.call_llm("product", "extract", other, schema=Answer) == Answer(value=2)
+    assert fake.with_structured_output.called
+    assert len(json.loads(cassette.read_text(encoding="utf-8"))) == 2

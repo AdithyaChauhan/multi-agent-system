@@ -243,6 +243,8 @@ def install_cassette(mode: str, path: Path) -> None:
     import app.tools.support_tools as support_tools
 
     support_tools.uuid = TICKET_IDS
+    if mode != "replay":  # fill records its misses instead of counting them
+        return
     original = llm._replay
 
     def counted(messages, schema=None):
@@ -692,7 +694,7 @@ def main() -> int:
     parser.add_argument("--env-file", default="", help="load environment variables from this .env file")
     parser.add_argument("--model", default="", help="Groq model for this measurement (default: the app's GROQ_MODEL)")
     parser.add_argument("--exclude", default="", help="comma-separated conversation ids to skip")
-    parser.add_argument("--mode", choices=["record", "replay", "live"], default="record")
+    parser.add_argument("--mode", choices=["record", "replay", "fill", "live"], default="record")
     parser.add_argument("--cassette", default="", help="cassette file (default eval/cassettes/baseline_<model>.json)")
     args = parser.parse_args()
 

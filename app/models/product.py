@@ -57,6 +57,8 @@ class Product(Base):
     in_stock = Column(Boolean, default=True)
     rating = Column(Float, default=0.0)
     attributes = Column(_JSONB, nullable=True)  # type-specific fields, validated against the type's schema
+    img_link = Column(String, nullable=True)  # product photo, shown on the chat's product cards
+    product_link = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Typed catalog (ADR 0005), filled by scripts/enrich_catalog.py apply. The raw columns above stay.

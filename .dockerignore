@@ -16,3 +16,18 @@ products_dump.txt
 taxonomy_audit.txt
 taxonomy_audit_v2.txt
 zech.txt
+
+# Secrets and local-only files never go into the image (any .env variant: .env.eval holds a key)
+.env.*
+.claude/
+# Data dumps, local databases and dev leftovers: not needed at runtime
+dump.sql
+ecommerce.db
+test.db
+pytest-cache-files-*/
+.coverage
+.deepeval/
+docs/
+eval/cassettes/
+eval/baseline_runs/
+eval/retrieval_runs/

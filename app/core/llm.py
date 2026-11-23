@@ -87,16 +87,23 @@ def call_llm(agent: str, node: str, messages: list, schema=None):
     mode = cassette_mode()
     if mode == "replay":
         return _replay(messages, schema)
+    if mode == "fill":
+        try:
+            return _replay(messages, schema)
+        except CassetteMiss:
+            pass
     result, usage = _invoke(agent, node, messages, schema)
-    if mode == "record":
+    if mode in ("record", "fill"):
         _store(agent, node, messages, schema, result, usage)
     return result
 
 
 # ── Record / replay ────────────────────────────────────────────────────────────
-# LLM_CASSETTE_MODE=record|replay and LLM_CASSETTE_PATH=<json file>. Record calls the model and
+# LLM_CASSETTE_MODE=record|replay|fill and LLM_CASSETTE_PATH=<json file>. Record calls the model and
 # saves each answer under a hash of (model, messages, schema). Replay never calls the network and
 # raises CassetteMiss for a call it has no answer for, so a changed prompt can't pass silently.
+# Fill replays what it has and records only the missing calls (a search change that alters only
+# the ranker's input then costs only the ranker calls).
 
 
 class CassetteMiss(RuntimeError):
@@ -109,8 +116,8 @@ _cassette_file: Optional[Path] = None
 
 def cassette_mode() -> str:
     mode = os.getenv("LLM_CASSETTE_MODE", "").strip().lower()
-    if mode not in ("", "record", "replay"):
-        raise ValueError(f"LLM_CASSETTE_MODE must be record or replay, not {mode!r}")
+    if mode not in ("", "record", "replay", "fill"):
+        raise ValueError(f"LLM_CASSETTE_MODE must be record, replay or fill, not {mode!r}")
     return mode
 
 

@@ -119,9 +119,23 @@ seed_demo_data()
 # seed_reviews_and_specs()
 
 
+def _warm_search() -> None:
+    """Load the embedding model in the background, so the first shopper doesn't wait for it."""
+    from app.core.config import PRODUCT_SEARCH
+    from app.search import hybrid
+
+    if PRODUCT_SEARCH == "hybrid" and hybrid.hybrid_available():
+        try:
+            hybrid._query_vector("warm up")
+            logger.info("hybrid search ready")
+        except Exception as exc:  # the type search still works without it
+            logger.warning(f"hybrid search warm-up failed: {type(exc).__name__}")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Application startup")
+    threading.Thread(target=_warm_search, daemon=True).start()
     yield
     logger.info("Application shutdown")
 
@@ -376,7 +390,17 @@ def finish_turn(db, turn: Turn, chat_request: ChatRequest, graph_result: dict, r
         action=action,
         run_id=run_id,
         active_filters=graph_result.get("active_filters"),
+        products=product_cards(graph_result) if not action else None,
     )
+
+
+CARD_FIELDS = ("product_id", "title", "brand", "price", "rating", "image", "link")
+
+
+def product_cards(graph_result: dict) -> Optional[list]:
+    """The products the reply lists (its top 3), with what a card needs: photo, price, rating, link."""
+    shown = (graph_result.get("ranked_products") or [])[:3]
+    return [{k: p.get(k) for k in CARD_FIELDS} for p in shown] or None
 
 
 def _refused(db, turn: Turn) -> ChatResponse:

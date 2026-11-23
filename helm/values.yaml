@@ -77,9 +77,11 @@ config:
 postgres:
   enabled: true
 
+  # pgvector for hybrid search (ADR 0006). A new cluster has no old volume, so the Debian-based
+  # image is fine here; docker compose builds an Alpine one to keep the local volume compatible.
   image:
-    repository: postgres
-    tag: "15-alpine"
+    repository: pgvector/pgvector
+    tag: "0.8.0-pg15"
 
   auth:
     username: postgres

@@ -18,6 +18,23 @@ from app.models.product import Brand, Product, ProductType
 logger = get_logger("app.tools.product_tools")
 
 
+def product_dict(p: Product, type_name: Optional[str], brand_name: Optional[str]) -> dict:
+    """One search result, as every node after search sees it (and the chat UI's product cards)."""
+    return {
+        "product_id": p.product_id,
+        "name": p.name,
+        "title": p.title or p.name,
+        "type": type_name,
+        "brand": brand_name or p.brand,
+        "price": p.price,
+        "rating": float(p.rating) if p.rating else None,
+        "description": p.description,
+        "attributes": p.attributes or {},
+        "image": p.img_link,
+        "link": p.product_link,
+    }
+
+
 def search_products(
     product_type: Optional[str] = None,
     attributes: Optional[dict] = None,
@@ -73,19 +90,7 @@ def search_products(
         for p, type_name, brand_name in rows:
             if attributes and not attributes_match(p.attributes, attributes):
                 continue
-            results.append(
-                {
-                    "product_id": p.product_id,
-                    "name": p.name,
-                    "title": p.title or p.name,
-                    "type": type_name,
-                    "brand": brand_name or p.brand,
-                    "price": p.price,
-                    "rating": float(p.rating) if p.rating else None,
-                    "description": p.description,
-                    "attributes": p.attributes or {},
-                }
-            )
+            results.append(product_dict(p, type_name, brand_name))
             if len(results) >= limit:
                 break
         return results

@@ -113,3 +113,5 @@ pytest-asyncio==1.3.0
 pytest-cov==7.1.0
 deepeval>=4.0
 prometheus-client==0.21.1
+# Hybrid search (ADR 0014): local embeddings, ONNX on CPU
+fastembed==0.9.1

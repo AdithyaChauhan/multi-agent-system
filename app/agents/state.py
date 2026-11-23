@@ -54,6 +54,7 @@ class ProductOutput(TypedDict, total=False):
 
 class SearchInput(TypedDict, total=False):
     preferences: Optional[dict]
+    user_message: Optional[str]  # hybrid search can add the shopper's own words to the query
 
 
 class SearchOutput(TypedDict, total=False):
