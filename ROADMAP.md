@@ -3,8 +3,15 @@
 **Goal:** take the assistant from about 5.8/10 to 9/10. That means short prompts, a clean LangGraph architecture that shows how agents are built (subgraphs, loops, a human-in-the-loop pause, ticket handoff), measured quality, and escalations that reach a real person. The work is split into phases, and each phase is worth keeping even if work stops after it.
 
 ## Now
-- **Current phase:** Phase 4, Demo never breaks (not started). Phases 0–3 are done.
-- **Branch:** `phase-3-hybrid-search` holds Phases 3 and the roadmap reset (committed, not pushed). Phase 4 branches off it.
+- **Current phase:** Phase 5, Ship and showcase (not started). Phases 0–4 are done.
+- **Branch:** `phase-4-reliability` (off `phase-3-hybrid-search`) holds Phases 3–4 (committed, not pushed). Phase 5 branches off it.
+- **Phase 4 result** ([0015](docs/decisions/0015-demo-never-breaks.md)):
+  - a model fallback chain (a retired model still answers, live-checked); a "busy" reply instead of a 500;
+  - an answer cache and per-user limits;
+  - the safety floor;
+  - adversarial set **15/15**; baseline **48/51**;
+  - CI now replays every eval at 0 tokens and gates the build (simulated in a Linux container);
+  - fixed two identity holes (`X-User-ID` impersonation, open demo login).
 - **Phase 3 result** (hybrid search and product cards, [0014](docs/decisions/0014-hybrid-search-design.md)):
   - test half (47 queries, v3b split, 1 run): recall@5 0.933 → **1.0**, precision@3 0.900 → 0.930, vague 0.6 → 1.0, refusals 1.0;
   - renamed catalog: recall drop 11.8 → **0** points (precision@3 is still 10 points lower);
@@ -12,10 +19,11 @@
   - app memory about 315 MB, search about 90 ms;
   - product replies show cards with photos.
 - **Roadmap reset (2026-11-23, [0013](docs/decisions/0013-judge-facing-priorities.md)):** the remaining phases are ordered by what a judge sees: a demo that never breaks (4), then a live link that stays up with a one-click demo and a showcase README (5).
-- **Next action:** new chat, `/resume`, plan Phase 4. Add to it:
-  - the Groq HTTP 500 burst seen in the Phase 3 baseline;
-  - the router sending "remove fuzz balls from my sweaters" to clarify;
-  - "sasta" → sort by price; the fitness-band data; the p03 "table" kind; p19 and s16.
+- **Next action:** new chat, `/resume`, plan Phase 5:
+  - a host that stays up (the app uses about 315 MB);
+  - a one-click demo shopper with a daily reset;
+  - the showcase README, case study, visual explainer, final 3-run scorecard and root cleanup.
+  - Pushing (which runs the new CI job on GitHub) is the user's call.
 - **Still open:** the user's review of the Phase 0 labels; the user skipped the 50-product spot check.
 - **Blocked on:** nothing.
 
@@ -26,13 +34,13 @@
 | 1 | Clean product data | Done | [plan](docs/plans/phase-1-clean-product-data.md) | Every product typed, key attributes filled, catalog constants removed |
 | 2 | LangGraph-native architecture | Done (2 size criteria missed) | [plan](docs/plans/phase-2-langgraph-architecture.md) | Checkpointer, `interrupt()` for cancel, search loop as graph edges, subgraph schemas, streaming, escalation subgraph, filter chips |
 | 3 | Hybrid search and product cards | Done | [plan](docs/plans/phase-3-hybrid-search.md) | Renamed-catalog drop < 5 points, no metric drops, refusals 1.0, cards with images |
-| 4 | Demo never breaks | Not started | [plan](docs/plans/phase-4-reliability-and-safety.md) | Model fallback chain, busy message, search cache, 0 adversarial failures, replay evals in CI |
+| 4 | Demo never breaks | Done | [plan](docs/plans/phase-4-reliability-and-safety.md) | Model fallback chain, busy message, search cache, 0 adversarial failures, replay evals in CI |
 | 5 | Ship and showcase | Not started | [plan](docs/plans/phase-5-ship-and-showcase.md) | Live link that stays up, one-click demo shopper, showcase README, case study, final scorecard |
 
 Statuses: Not started, In progress, Done, Dropped (say why in the plan). The order changed on 2026-11-18 to match the user's goals (see 0009 and 0010), and again on 2026-11-23 to put what a judge sees first (0013).
 
 ## Scorecard
-Judged on 2026-11-18; updated 2026-11-19 after Phase 1, 2026-11-21 after Phase 2 (`phase-2-architecture`) and 2026-11-23 after Phase 3 (hybrid search: test-half recall@5 1.0; renamed recall drop 0 points, precision@3 still 10 points lower) for the measured rows. Change the Today column only with measured evidence.
+Judged on 2026-11-18; updated 2026-11-19 after Phase 1, 2026-11-21 after Phase 2 (`phase-2-architecture`) and 2026-11-23 after Phases 3 and 4 (hybrid search; renamed recall drop 0 points; adversarial 15/15; CI eval gate; fallback chain) for the measured rows. Change the Today column only with measured evidence.
 
 | Aspect | Before (`c8a0fa6`) | Today | Target | Moved by phase |
 |---|---|---|---|---|
@@ -40,14 +48,14 @@ Judged on 2026-11-18; updated 2026-11-19 after Phase 1, 2026-11-21 after Phase 2
 | Product search correctness | 4 | 9 | 9 | 0, 1, 3 |
 | Follow-up turns | 4 | 7.5 | 9 | 2 |
 | Robustness to catalog changes | 3 | 8 | 9 | 1, 3 |
-| Guardrails and safety | 5 | 8 | 9.5 | 2, 4 |
+| Guardrails and safety | 5 | 9 | 9.5 | 2, 4 |
 | State and scaling | 3 | 6 | 9 | 2, 5 |
-| Cost and latency | 4 | 6 | 9 | 1, 4 |
-| Evaluation rigor | 4 | 7.5 | 9 | 0, 3, 4 |
+| Cost and latency | 4 | 7 | 9 | 1, 4 |
+| Evaluation rigor | 4 | 8.5 | 9 | 0, 3, 4 |
 | Maintainability | 3.5 | 7 | 9 | 1, 2 |
-| Ops and deploy | 5 | 6 | 9 | 5 |
+| Ops and deploy | 5 | 6.5 | 9 | 4, 5 |
 | Portfolio signal | 5 | 8 | 9.5 | 2, 3, 5 |
-| **Overall** | **~4.2** | **~7.4** | **9** | |
+| **Overall** | **~4.2** | **~7.9** | **9** | |
 
 ## Definition of done (the 9 bar)
 - Recall@5 ≥ 0.9 and precision@3 ≥ 0.85 on the labelled product queries, and recall drops by less than 5 points when category names are renamed.

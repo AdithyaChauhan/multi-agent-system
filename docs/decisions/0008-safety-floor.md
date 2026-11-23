@@ -1,5 +1,5 @@
 # 0008. Safety: model risk flag plus an escalate-only pattern
-- **Status:** Accepted
+- **Status:** Accepted, implemented in Phase 4 (`router.SAFETY_PATTERN`, 0015)
 - **Date:** 2026-11-18
 
 ## Context

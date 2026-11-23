@@ -342,4 +342,7 @@ See [.env.example](.env.example) for the full list. Key variables:
 | `JWT_SECRET_KEY` | Secret for signing JWT tokens |
 | `SESSION_EXPIRY_MINUTES` | Session inactivity timeout (default: 30) |
 | `ESCALATION_WEBHOOK_URL` | Optional: Slack or Discord incoming-webhook URL for escalation alerts (safety reports, support tickets). Unset: alerts go to the app log. |
+| `GROQ_FALLBACK_MODELS` | Models tried in order when `GROQ_MODEL` is rate-limited, down or retired (default: gpt-oss-20b, gpt-oss-120b, qwen3.8-27b, minus `GROQ_MODEL`). If none answers, the chat says it's busy instead of failing. |
+| `CHAT_RATE_PER_MINUTE`, `CHAT_TURNS_PER_DAY` | Per-user (or per-IP when anonymous) limits that keep the shared free-tier quota available (defaults 20 and 150). |
+| `ALLOW_X_USER_ID` | Tests and eval harnesses only: lets the `X-User-ID` header name the caller. Never set it on a deployed app. |
 | `PRODUCT_SEARCH` | `hybrid` (default): pgvector + full text + the product type, fused by rank; needs `scripts/embed_catalog.py`. `type`: the typed-catalog search. Falls back to `type` until embeddings exist. |

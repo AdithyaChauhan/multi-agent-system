@@ -12,6 +12,34 @@ Newest first. `/handoff` adds an entry at the end of every session. Keep entries
 - **Commits:**
 -->
 
+## 2026-11-23 · Phase 4 · Demo never breaks: fallback, limits, safety floor, CI eval gate
+- **Done:**
+  - model fallback chain with cooldowns, and a "busy" reply instead of a 500;
+  - answer cache; 20 turns a minute and 150 a day per user;
+  - the safety floor pattern (0008);
+  - the catalog checks unclear and empty extractions;
+  - the requested type is shown after widening (p19); the "table" alias migration;
+  - PII redaction in logs and traces;
+  - fixed `X-User-ID` impersonation and the open demo login;
+  - 15 adversarial conversations;
+  - CI `replay-evals` job (scrubbed 668 KB fixture, `ci_replay.sh`, `ci_gate.py`) replacing the dead self-hosted job;
+  - `alembic` added to the requirements.
+- **Measured** (gpt-oss-20b, 1 run, `multi_agent_baseline`):
+  - adversarial 15/15;
+  - baseline 48/51 (from 47);
+  - retrieval, all 100 queries, ranker off: recall@5 0.979, precision@3 0.933, refusals 1.0;
+  - CI simulated in `python:3.12-slim`: identical numbers, 0 cassette misses;
+  - a live retired-model check answered through gpt-oss-20b;
+  - 338 tests, coverage 89%;
+  - about 25K tokens.
+- **Decisions:** [0015](decisions/0015-demo-never-breaks.md).
+- **Open questions:**
+  - p03 "table" (left, see 0015);
+  - limits and cache are per process;
+  - the CI job runs on GitHub after the next push.
+- **Next:** new chat, `/resume`, plan Phase 5.
+- **Commits:** this phase's commits on `phase-4-reliability`.
+
 ## 2026-11-23 · Phase 3 · Hybrid search and product cards done; roadmap reset for judges
 - **Done:**
   - roadmap reset around what a judge sees (0013);

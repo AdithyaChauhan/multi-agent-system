@@ -34,6 +34,8 @@ DATABASE_URL=sqlite:///./test.db GROQ_API_KEY=ci-mock-key LANGCHAIN_TRACING_V2=f
 venv/Scripts/python eval/run_retrieval.py --label <name> --model openai/gpt-oss-20b --mode replay            # product-search metrics, 0 tokens
 PRODUCT_SEARCH=hybrid PRODUCT_RANKER=off venv/Scripts/python eval/run_retrieval.py --label <name> --model openai/gpt-oss-20b --mode replay   # retrieval alone, 0 tokens
 venv/Scripts/python scripts/embed_catalog.py --database-url <postgres url>   # after the catalog changes (hybrid search)
+venv/Scripts/python eval/run_baseline.py --conversations eval/adversarial_conversations.json --label <name> --model openai/gpt-oss-20b --mode replay --cassette eval/cassettes/adversarial_openai-gpt-oss-20b.json   # 15 attack conversations, 0 tokens
+CI_DATABASE_URL=<restored fixture> bash eval/ci_replay.sh   # what CI's replay-evals job runs; fixture from scripts/make_ci_fixture.py
 black --check app/ tests/ eval/ && flake8 app/ tests/ eval/                         # CI pins black 26.5.1, flake8 7.3.0
 venv/Scripts/python eval/run_baseline.py --label <name> --runs 1 --model openai/gpt-oss-20b   # costs tokens, see below
 docker compose up -d --build              # full stack; UI at http://localhost:8000/static/login.html
@@ -50,6 +52,7 @@ docker exec multiagent-db psql -U postgres -d multi_agent_baseline -c "<read-onl
 - Don't modify `dump.sql`, `backups/` or `ecommerce.db`. Change data only through Alembic migrations and scripts.
 - Use the `multi_agent_baseline` database (README-migrated catalog) for tests and evals. `multi_agent_db` is the user's own volume with the old taxonomy: read-only unless asked.
 - OneDrive syncs this folder. Keep large or temporary files (over a few MB) in `%TEMP%` or the scratchpad, not the repo.
+- `X-User-ID` names the caller only when `ALLOW_X_USER_ID=true` (tests and eval harnesses set it). Never enable it in a deployed app: it lets anyone act as any user. `/auth/demo-login` accepts only the seeded `demo-user-N` accounts.
 - Guardrails stay in Python: sign-in, order ownership, cancel only after the user presses Yes (resuming the graph's `interrupt()`; a Python node re-checks owner and status), and escalation to tickets. Never give the model a tool that acts on orders or takes a user id (ADR 0002).
 - Groq free tier: 200K tokens a day and 8K a minute, per model. Estimate tokens before any live run; a full baseline costs about 180K. Use `openai/gpt-oss-20b` / `-120b` (separate quotas), spread runs across days, or use replay mode (from Phase 0).
 - Measure before and after any change to prompts, search, data or models (ADR 0004). Say how a number was measured (model, runs, database).
