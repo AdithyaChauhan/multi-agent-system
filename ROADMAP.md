@@ -8,7 +8,8 @@
 - **Gate result:** renaming the catalog's type names drops recall@5 from 0.971 to **0.853** (35 queries, v3b model split, 1 run). The bar is a drop of less than 5 points.
   - Every new miss is a shopper word that was only our type name ("lint remover", "mixer grinder", "mouse").
   - The product titles still contain those words.
-- **Next action:** plan the build part of Phase 3 (search that reads product titles; embedding source ADR) and get approval.
+- **Roadmap reset (2026-11-23, [0013](docs/decisions/0013-judge-facing-priorities.md)):** the remaining phases are now ordered by what a judge sees: search and product cards (3), a demo that never breaks (4), then a live link that stays up with a one-click demo and a showcase README (5).
+- **Next action:** build Phase 3 (pgvector + full-text + rank fusion, local embeddings, product cards), as in its plan.
   - Also open: the p03 "table" data fix, p19 "usb hub with ethernet", s16 routing, "sasta" → sort by price (q071), and the fitness-band data (q062).
 - **Phase 2 result:**
   - 51-conversation baseline: 45 → **47/51** (gpt-oss-20b, 1 run, `multi_agent_baseline`).
@@ -23,11 +24,11 @@
 | 0 | Measuring stick | Done (labels await review) | [plan](docs/plans/phase-0-measuring-stick.md) | 100 labelled product queries; today's recall@5 measured; LLM replay mode |
 | 1 | Clean product data | Done | [plan](docs/plans/phase-1-clean-product-data.md) | Every product typed, key attributes filled, catalog constants removed |
 | 2 | LangGraph-native architecture | Done (2 size criteria missed) | [plan](docs/plans/phase-2-langgraph-architecture.md) | Checkpointer, `interrupt()` for cancel, search loop as graph edges, subgraph schemas, streaming, escalation subgraph, filter chips |
-| 3 | Hybrid search (conditional) | In progress (gate: go) | [plan](docs/plans/phase-3-hybrid-search.md) | Only if Phase 1 leaves a gap; must beat v1 on Phase 0 metrics |
-| 4 | Reliability and safety | Not started | [plan](docs/plans/phase-4-reliability-and-safety.md) | Friendly quota message, fallback model, safety floor, 0 injection failures |
-| 5 | Ship and showcase | Not started | [plan](docs/plans/phase-5-ship-and-showcase.md) | Admin tickets, auth review, dashboards, load test, case study, updated visual |
+| 3 | Hybrid search and product cards | In progress (gate: go) | [plan](docs/plans/phase-3-hybrid-search.md) | Renamed-catalog drop < 5 points, no metric drops, refusals 1.0, cards with images |
+| 4 | Demo never breaks | Not started | [plan](docs/plans/phase-4-reliability-and-safety.md) | Model fallback chain, busy message, search cache, 0 adversarial failures, replay evals in CI |
+| 5 | Ship and showcase | Not started | [plan](docs/plans/phase-5-ship-and-showcase.md) | Live link that stays up, one-click demo shopper, showcase README, case study, final scorecard |
 
-Statuses: Not started, In progress, Done, Dropped (say why in the plan). The order changed on 2026-11-18 to match the user's goals (see 0009 and 0010).
+Statuses: Not started, In progress, Done, Dropped (say why in the plan). The order changed on 2026-11-18 to match the user's goals (see 0009 and 0010), and again on 2026-11-23 to put what a judge sees first (0013).
 
 ## Scorecard
 Judged on 2026-11-18; updated 2026-11-19 after Phase 1, 2026-11-21 after Phase 2 (`phase-2-architecture`) and 2026-11-23 after the Phase 3 gate (robustness: renamed drop measured at 11.8 points, against 97 in Phase 0) for the measured rows. Change the Today column only with measured evidence.
@@ -55,6 +56,8 @@ Judged on 2026-11-18; updated 2026-11-19 after Phase 1, 2026-11-21 after Phase 2
 - A safety report reaches a human channel within one minute.
 - Every prompt is under 40 lines (0010), and the graph diagram shows the subgraphs, the loop and the pause (0009).
 - The case study and the visual explainer show measured numbers.
+- A judge can try a search, an order lookup and a cancel from the README's live link within 2 minutes, without creating an account (0013).
+- Product replies show cards with image, price and rating.
 
 A 10 would need real users: today the data is synthetic and there's no production traffic or A/B evidence.
 
@@ -68,7 +71,8 @@ Details and the reasoning are in [docs/decisions/](docs/decisions/README.md).
 - Facts about products live in the database as typed attributes, not in prompt lists or Python constants. (0005)
 - Use LangGraph's built-in features (checkpointer, `interrupt()`, graph loops, subgraph schemas, streaming) only where they replace hand-written code. (0009)
 - The model returns only what changed in a search; code merges it, and active filters appear as chips. (0007, stored via 0009)
-- Hybrid search (pgvector + full-text) only if Phase 1 leaves a gap, and behind a flag until it wins. (0006)
+- Hybrid search (pgvector + full-text, fused) behind a flag until it wins; the Phase 3 gate showed the gap. (0006)
+- Order the work by what a judge sees: a live demo that never breaks and needs no sign-up comes before internal polish. (0013)
 - Safety escalates if the model flags it or a narrow pattern matches. (0008)
 
 ## Out of scope

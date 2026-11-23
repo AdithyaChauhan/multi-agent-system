@@ -1,47 +1,56 @@
-# Phase 3: Hybrid search (conditional)
-- **Status:** In progress. The gate said go on 2026-11-23 (see Results). **Start only if** the Phase 1 results leave a gap: attribute recall@5 below 0.85, a recall@5 drop of more than 5 points on the renamed catalog, or vague and Hinglish queries below 0.85. If not, mark this phase Dropped and say why.
+# Phase 3: Hybrid search and product cards
+- **Status:** In progress. The gate said go on 2026-11-23 (see Results).
 - **Branch:** `phase-3-hybrid-search`
 - **Depends on:** Phase 0 (measurement) and Phase 1 (clean data and attributes)
-- **Decisions:** [0006](../decisions/0006-hybrid-search-pgvector.md); the embedding-source ADR is written at the start of this phase
+- **Decisions:** [0006](../decisions/0006-hybrid-search-pgvector.md), [0013](../decisions/0013-judge-facing-priorities.md); 0014 records the embedding choice and the fusion design
 
 ## Goal
-Product search that understands meaning, doesn't depend on category names, and keeps hard filters (price, brand, attributes) exact.
+Search that understands meaning and doesn't depend on our type names, while price, brand, rating and attribute filters stay exact. Product replies show cards a judge can see.
+
+## Design
+- The flow stays the same: extract (LLM) → plan → search loop → rank (LLM) → reply. Only the `search` node changes, behind `PRODUCT_SEARCH=hybrid` until it wins.
+- **Three ranked candidate lists, fused** with weighted reciprocal rank fusion:
+  - vector similarity on the query;
+  - full text;
+  - products of the resolved type.
+
+  The model's type becomes one vote, not a gate.
+- **Embeddings:** local `fastembed` with `BAAI/bge-small-en-v1.5` (384 dimensions). No API key, deterministic. They're built from the title, kind and attribute values, never from type or category names.
+- **"We don't carry":** before the model's "not carried" becomes a refusal, the catalog checks the best vector match. Unserved types are still refused.
 
 ## Tasks
-- [x] Go/no-go gate (2026-11-23). Result: **go**, because the renamed catalog drops recall@5 by 11.8 points. Details are in Results.
-  - attribute recall@5 is 1.0, so no gap;
-  - Hinglish (0.80) and vague (0.70) are below the bar, but only 1 of their 4 misses is a meaning problem (see Results);
-  - `scripts/make_renamed_catalog_db.py` had to be fixed first. It renamed the old text columns on `products`, but since Phase 1 search reads `product_types`, so it now renames those type names and categories too.
-- [ ] Choose the embedding source (an embeddings API, or a local model through `fastembed`), the model and its dimension, and record the choice as the next ADR. Also consider a full-text-only first step (see Results).
+- [x] Go/no-go gate (2026-11-23): **go**, because the renamed catalog drops recall@5 by 11.8 points. See Results.
+- [x] Roadmap reset around what a judge sees ([0013](../decisions/0013-judge-facing-priorities.md)).
 - [ ] Postgres with pgvector:
-  - switch docker compose from `postgres:15-alpine` and Helm from `postgres` to `pgvector/pgvector:pg15`;
-  - check that Render allows `CREATE EXTENSION vector`;
-  - migration: the extension, `products.embedding vector(N)` with an HNSW index, and a generated `tsv` column with a GIN index.
-- [ ] `scripts/embed_catalog.py`: embeds the clean title, type and attributes. It can be re-run safely and stores the model name and version.
-- [ ] `app/prompts/query_rewrite.md`, under 40 lines with no catalog list. It returns a standalone query, hard constraints (price, brand, rating) and attribute filters. Attribute filters are validated against the type schema when the type is clear.
-- [ ] Hybrid search in `app/tools/product_tools.py`:
-  - vector top 50 and full-text top 50, with the constraints as WHERE clauses;
-  - merged with reciprocal rank fusion;
-  - top 20 returned.
-- [ ] Product graph v2 behind `PRODUCT_SEARCH=v2`; v1 stays untouched.
-- [ ] Measure v1 against v2 with the Phase 0 harness, on the same model and database:
-  - on the baseline database and on the renamed copy;
-  - with and without the LLM ranker;
-  - tune k and the fusion constant on half the queries, and report on the other half.
-- [ ] Run the 51-conversation baseline on v2.
-- [ ] Make v2 the default only if the acceptance criteria are met. Otherwise record why, and keep v1 on the clean data.
-- [ ] Fill in Results, update the ROADMAP and run `/handoff`.
+  - `docker/postgres/Dockerfile` (`postgres:15-alpine` plus pgvector built from source, so the existing volumes stay compatible), used by compose and Helm;
+  - back up both databases first;
+  - migration: the extension, `products.embedding vector(384)` with an HNSW index, and a generated `search_tsv` with a GIN index (no-op on SQLite).
+- [ ] `app/search/embeddings.py` and `scripts/embed_catalog.py` (re-runnable, records the model name). The model is baked into the app image.
+- [ ] `app/search/hybrid.py`: hard filters in SQL, three candidate lists, weighted RRF, top 20 to the ranker.
+- [ ] Catalog check before "we don't carry" (threshold tuned on the dev half).
+- [ ] Product cards: `ChatResponse.products`, cards in `chat.html`, also in the stream's `reply` event.
+- [ ] Eval harness:
+  - `run_retrieval.py --rank score` (no LLM ranker, so tuning is free);
+  - `eval/query_split.json` (a fixed dev/test split).
+- [ ] Tests: fusion, query text, the not-carried check, cards; an integration test for pgvector.
+- [ ] Measure:
+  - tune on dev (replay, 0 tokens);
+  - final live run on the test half, the renamed sample (re-embedded) and the 51-conversation baseline;
+  - image size, container memory and added p95 latency.
+- [ ] Make hybrid the default if the acceptance criteria are met. Otherwise record why.
+- [ ] ADR 0014; fill in Results; update the ROADMAP; run `/handoff`.
 
 ## Acceptance criteria
-- v2 recall@5 is at least 10 points above v1 (aim for 0.85 now, 0.9 by Phase 5), and precision@3 is no lower than v1.
-- On the renamed-taxonomy copy, recall@5 drops by less than 5 points.
-- No new baseline failures compared with v1, on the same model and number of runs.
-- Tokens per product turn are no higher than v1, excluding the embedding call. Report p95 latency.
+- On the test half, recall@5 and precision@3 are no lower than v3b on the same queries.
+- On the renamed catalog, recall@5 drops by less than 5 points (from 0.971 on the 35-query sample).
+- Vague and Hinglish improve, and out-of-scope refusals stay at 1.0.
+- No new failures in the 51-conversation baseline (47/51).
+- Search adds less than 150 ms at p95, and the app container stays under 450 MB of memory (to fit a small free host).
 
 ## Risks and notes
-- **Brand filtering:** a hard brand filter can hide good results when the user typed the brand wrong. Measure a hard filter against a ranking boost.
-- **The local-model option adds to the Docker image size.** Check the image size before choosing it.
-- **Don't tune on the full query set**, or the numbers will look better than real use.
+- **Don't tune on the test half.**
+- **The local model adds to the image and to memory.** If the app goes over 450 MB, Phase 5 embeds queries through an API instead.
+- **Amazon image links can expire.** Cards fall back to a placeholder.
 
 ## Results
 
