@@ -444,6 +444,8 @@ def check_turn(expect: dict, *, text, status_code, state, route, api_json, user_
     if state:
         prefs = state.get("preferences") or {}
 
+    if "about_shown" in expect and bool((state or {}).get("about_shown")) != expect["about_shown"]:
+        failures.append(f"about_shown {bool((state or {}).get('about_shown'))} != {expect['about_shown']}")
     if "product" in expect:
         allowed = expect["product"] if isinstance(expect["product"], list) else [expect["product"]]
         if not any(same_product(prefs.get("product"), a) for a in allowed):

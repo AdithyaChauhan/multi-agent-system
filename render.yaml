@@ -1,3 +1,9 @@
+# Render blueprint for the public demo (ADR 0016): one free web service.
+# - The database is Neon's free Postgres (pgvector, never expires): paste its URL as DATABASE_URL.
+#   Load it once from your machine with scripts/load_live_db.sh (see docs/SETUP.md).
+# - The mock carrier API runs inside the app at /carrier, so one service is enough (750 free hours a month).
+# - .github/workflows/keep-warm.yml pings /health every 10 minutes so the free service doesn't sleep.
+# Secrets marked sync: false are entered in the Render dashboard, never committed.
 services:
   - type: web
     name: multi-agent-chatbot
@@ -7,26 +13,23 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /health
+    autoDeploy: true
+    branch: main
     envVars:
       - key: DATABASE_URL
-        fromDatabase:
-          name: multi-agent-db
-          property: connectionString
-      - key: MOCK_CARRIER_API_HOSTPORT
-        fromService:
-          type: web
-          name: multi-agent-carrier
-          property: hostport
+        sync: false
       - key: GROQ_API_KEY
         sync: false
-      - key: LANGCHAIN_API_KEY
+      - key: ESCALATION_WEBHOOK_URL
         sync: false
-      - key: LANGCHAIN_TRACING_V2
-        value: "true"
-      - key: LANGCHAIN_ENDPOINT
-        value: https://api.smith.langchain.com
-      - key: LANGCHAIN_PROJECT
-        value: multi-agent-ecommerce
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-20b
+      - key: GROQ_FALLBACK_MODELS
+        value: openai/gpt-oss-120b,qwen/qwen3.8-27b
+      - key: PRODUCT_SEARCH
+        value: hybrid
+      - key: MOCK_CARRIER_API_URL
+        value: http://localhost:10000/carrier
       - key: JWT_SECRET_KEY
         generateValue: true
       - key: JWT_ALGORITHM
@@ -35,25 +38,12 @@ services:
         value: "24"
       - key: SESSION_EXPIRY_MINUTES
         value: "60"
+      - key: LANGCHAIN_TRACING_V2
+        value: "false"
+      # Optional: Google sign-in. Leave unset and the demo-shopper button still works.
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET
         sync: false
       - key: GOOGLE_REDIRECT_URI
         sync: false
-
-  - type: web
-    name: multi-agent-carrier
-    runtime: docker
-    plan: free
-    region: singapore
-    dockerfilePath: ./mock_services/Dockerfile
-    dockerContext: .
-    healthCheckPath: /tracking/TRK-9001
-
-databases:
-  - name: multi-agent-db
-    plan: free
-    region: singapore
-    databaseName: multi_agent_db
-    user: multiagent

@@ -14,15 +14,18 @@ Multi-agent e-commerce chat assistant: FastAPI, a LangGraph router with product,
 | Path | What |
 |---|---|
 | `ROADMAP.md` | Phases, status, scorecard, definition of done |
+| `docs/SETUP.md`, `docs/CASE_STUDY.md` | Local setup, every eval command, deploy steps; the project story with measured numbers |
 | `docs/plans/` | One plan per phase: tasks, acceptance criteria, results |
 | `docs/decisions/` | ADRs. Read the relevant one before reversing a design choice |
 | `docs/PROGRESS.md` | Session log, newest first |
 | `docs/visual/` | Scroll-driven 3D explainer (claude.ai artifact). Update it in Phase 5 |
-| `DIAGNOSIS.md`, `SIMPLIFY_REPORT.md` | What was broken, and what the `simplify-agents` branch changed |
+| `docs/history/` (`DIAGNOSIS.md`, `SIMPLIFY_REPORT.md`) | What was broken, and what the `simplify-agents` branch changed |
 | `app/main.py` | FastAPI: `/chat` (also resumes a paused cancel), sessions |
 | `app/agents/router.py` | One structured LLM decision, then deterministic `route()` |
 | `app/agents/product_agent.py`, `app/tools/product_tools.py`, `app/search/` | Product search: extraction, the search loop, hybrid retrieval (pgvector + full text + type, fused) |
 | `app/agents/order_agent.py`, `app/agents/support_agent.py` | Deterministic, template replies |
+| `app/agents/product_qa.py` | Questions about shown products: the one read-only ToolNode loop (ADR 0016) |
+| `app/db/demo_shoppers.py` | One-click demo shoppers with their own orders |
 | `app/prompts/*.md` | Every prompt. The file in git is the prompt that runs |
 | `app/core/llm.py`, `app/core/config.py` | One shared ChatGroq client; `GROQ_MODEL` is the only model setting |
 | `eval/` | 51-conversation behavioural baseline, DeepEval, run logs |

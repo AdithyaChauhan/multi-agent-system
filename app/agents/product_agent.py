@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from app.agents.state import ProductInput, ProductOutput, ProductState, SearchInput, SearchOutput, SearchState
 from app.catalog.features import features_to_filters, match_attributes
-from app.catalog.runtime import catalog_blurb, get_catalog
+from app.catalog.runtime import catalog_blurb, fold_brand, get_catalog
 from app.catalog.schema import norm
 from app.tools.product_tools import search_products
 from app.core import config
@@ -220,10 +220,39 @@ def apply_filter_edit(state: ProductState) -> dict:
     return {"preferences": prefs, "not_carried": None, "relaxed_filters": [], "active_filters": active_filters(prefs)}
 
 
+# A budget ("under 2000", "₹1500"); order ids like ORD-2005 are not prices.
+PRICE_WORDS = re.compile(
+    r"\b(?:under|below|above|over|less than|more than|budget|rs\.?)\b|₹|(?<![\w-])\d{3,}\b", re.IGNORECASE
+)
+# Pointing at the list on screen: "the first one", "which of these", "is it waterproof".
+LIST_REFERENCE = re.compile(
+    r"\b(?:first|second|third|1st|2nd|3rd|these|those|them|it|its|this one|that one|which one|which of)\b",
+    re.IGNORECASE,
+)
+
+
+def names_a_search(message: str) -> bool:
+    """Is this a new or refined search rather than a question about the cards on screen?
+
+    A brand or a budget always means a search ("what about Bajaj" shows Bajaj products, not the
+    Bajaj card). Otherwise a reference to the list means a question ("battery life of the third
+    one"), and a product word without one means a search ("philips air purifier").
+    """
+    message = message or ""
+    catalog = get_catalog()
+    words = re.findall(r"[a-z0-9+-]+", norm(message))
+    phrases = words + [f"{a} {b}" for a, b in zip(words, words[1:])]
+    if PRICE_WORDS.search(message) or any(fold_brand(p) in catalog.brands for p in phrases if len(fold_brand(p)) >= 2):
+        return True
+    if LIST_REFERENCE.search(message):
+        return False
+    return catalog.product_in(message)[0] is not None
+
+
 def route_entry(state: ProductState) -> Literal["edit", "qa", "extract"]:
     if state.get("filter_edit"):
         return "edit"
-    if state.get("about_shown") and state.get("shown_products"):
+    if state.get("about_shown") and state.get("shown_products") and not names_a_search(state.get("user_message", "")):
         return "qa"  # a question about the cards on screen: the tool-using Q&A loop (ADR 0016)
     return "extract"
 

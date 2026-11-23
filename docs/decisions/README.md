@@ -19,6 +19,7 @@ One file per decision that would be costly to reverse, or easy to undo by accide
 | [0013](0013-judge-facing-priorities.md) | Order the remaining work by what a judge sees | Accepted |
 | [0014](0014-hybrid-search-design.md) | Hybrid search: local embeddings, three fused lists, the catalog decides "we don't carry" | Accepted, implemented |
 | [0015](0015-demo-never-breaks.md) | The demo never breaks: model fallback, answer cache, limits, identity, CI eval gate | Accepted, implemented |
+| [0016](0016-product-qa-and-demo-shoppers.md) | Product questions through a read-only ToolNode loop; one-click demo shoppers; free single-service deploy | Accepted, implemented |
 
 ## Template
 ```markdown

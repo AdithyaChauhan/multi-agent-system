@@ -3,7 +3,7 @@
 - **Date:** 2026-11-18
 
 ## Context
-Before `simplify-agents`, prompts had grown to 224 lines, with 38 one-off rules that each overrode the model for one past conversation. They conflicted, and several broke other conversations (`SIMPLIFY_REPORT.md`). The user's first goal for the project is not to over-engineer the system prompts.
+Before `simplify-agents`, prompts had grown to 224 lines, with 38 one-off rules that each overrode the model for one past conversation. They conflicted, and several broke other conversations (`docs/history/SIMPLIFY_REPORT.md`). The user's first goal for the project is not to over-engineer the system prompts.
 
 ## Decision
 - Each prompt in `app/prompts/` stays under 40 lines and contains no product facts. Facts come from the database (0005).

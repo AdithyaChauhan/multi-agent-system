@@ -21,5 +21,5 @@ Keep FastAPI, sessions, the router's single decision, the order and support agen
 
 ## Alternatives considered
 - **Full rewrite.** Rejected: high risk, rebuilds parts that work, and the app stops working before the replacement is proven.
-- **One autonomous tool-calling agent.** Rejected: more tokens per turn, less predictable, and qwen's first-try tool calls come back malformed 30–50% of the time (`DIAGNOSIS.md`).
+- **One autonomous tool-calling agent.** Rejected: more tokens per turn, less predictable, and qwen's first-try tool calls come back malformed 30–50% of the time (`docs/history/DIAGNOSIS.md`).
 - **Leaving LangGraph, or adding more agents.** Rejected: the framework never caused a failure.

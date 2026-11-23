@@ -156,7 +156,13 @@ def _invoke_one(client, agent: str, node: str, messages: list, schema=None, tool
     run_config = {"metadata": {"agent": agent, "node": node, "model": client.model_name}}
     start = time.perf_counter()
     if tools:
-        message = client.bind_tools(tools).invoke(messages, config=run_config)
+        try:
+            message = client.bind_tools(tools).invoke(messages, config=run_config)
+        except BadRequestError as exc:  # a malformed tool call: answer without tools instead of failing
+            if "tool_use_failed" not in str(exc) and "output_parse_failed" not in str(exc):
+                raise
+            logger.error(f"request_id={get_request_id()} | {agent}.{node} bad tool call | {type(exc).__name__}")
+            return AIMessage(content=""), {}
         usage = _record(agent, node, message, time.perf_counter() - start)
         return AIMessage(content=message.content or "", tool_calls=message.tool_calls or []), usage
     if schema is None:
@@ -171,8 +177,9 @@ def _invoke_one(client, agent: str, node: str, messages: list, schema=None, tool
             break
         except BadRequestError as exc:
             # Groq checks tool-call arguments against the schema and rejects malformed calls
-            # (code tool_use_failed). Retry once, then let the caller fall back.
-            if "tool_use_failed" not in str(exc):
+            # (code tool_use_failed), or answers in prose (output_parse_failed). Retry once, then let
+            # the caller fall back.
+            if "tool_use_failed" not in str(exc) and "output_parse_failed" not in str(exc):
                 raise
             logger.error(f"request_id={get_request_id()} | {agent}.{node} tool_use_failed (attempt {attempt})")
             if attempt == 2:

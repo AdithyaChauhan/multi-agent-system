@@ -147,6 +147,12 @@ install_trace_anonymizer()  # before the first traced run
 
 app = FastAPI(title="Multi-Agent E-commerce System", version="1.0.0", lifespan=lifespan)
 
+# The mock carrier API (order tracking) runs inside the app at /carrier on single-service hosts
+# (Render free tier); docker compose still runs it as its own container. Demo data only.
+from mock_services.carrier_api import app as carrier_app  # noqa: E402
+
+app.mount("/carrier", carrier_app)
+
 
 # Session middleware (required for OAuth)
 app.add_middleware(SessionMiddleware, secret_key=os.getenv("JWT_SECRET_KEY", secrets.token_urlsafe(32)))
