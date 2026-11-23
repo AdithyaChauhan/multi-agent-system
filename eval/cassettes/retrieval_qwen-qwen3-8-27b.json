@@ -177,6 +177,17 @@
    "type": null
   }
  },
+ "31ab0bc33a40c3081b2a1680d9576c69": {
+  "agent": "product",
+  "message": "User request: \"apple airpods\"\n\nProducts:\n1. Oraimo 18W USB & Type-C Dual Output Super Fast Charger Wall  | ₹699 | 4.0★ | Oraimo",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 511,
+  "value": {
+   "exact": [],
+   "same_kind": []
+  }
+ },
  "3d98e827af75a16c74e52153f3b2079f": {
   "agent": "product",
   "message": "So far: {} | Message: breville electric kettle",
@@ -593,6 +604,28 @@
    ]
   }
  },
+ "72d59c0e5bcb78aa0fdd8926badacd0a": {
+  "agent": "product",
+  "message": "User request: \"apple airpods\"\n\nProducts:\n1. boAt Airdopes 141 Bluetooth Truly Wireless in Ear Earbuds wi | ₹1499 | 3.9★ | boAt\n2. Wecool Moonwalk M1 ENC True Wireless in Ear Earbuds with Mic | ₹889 | ",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 872,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
  "72e91addc22ba8a3b18777926b4458a1": {
   "agent": "product",
   "message": "So far: {\"product\": \"tv\"} | Message: Samsung",
@@ -696,6 +729,28 @@
    "min_rating": null,
    "not_carried": "running shoes",
    "product": null
+  }
+ },
+ "885fb94d3c56d4c2b944d35c4a023dff": {
+  "agent": "product",
+  "message": "User request: \"garmin smartwatch\"\n\nProducts:\n1. Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwat | ₹3999 | 4.3★ | Fire-Boltt\n2. Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwat",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 871,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
   }
  },
  "8946ecb4cfceeef65c23046629e9ff4e": {
@@ -999,6 +1054,33 @@
     7,
     8,
     9,
+    10
+   ]
+  }
+ },
+ "b1a3c4d1009c6ae853a715f8085ba5bb": {
+  "agent": "product",
+  "message": "User request: \"Samsung\"\n\nProducts:\n1. Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart  | ₹30990 | 4.3★ | Samsung\n2. Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED | ₹13490 | ",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 879,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
     10
    ]
   }
@@ -1391,6 +1473,39 @@
    "same_kind": [
     1,
     2,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "ecae2a4b5c7fe91e1c20f74a2c054d7a": {
+  "agent": "product",
+  "message": "User request: \"show me some TVs\"\n\nProducts:\n1. Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart  | ₹30990 | 4.3★ | Samsung\n2. Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED | ",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 931,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
     4,
     5,
     6,

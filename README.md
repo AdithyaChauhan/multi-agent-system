@@ -16,7 +16,7 @@ Router — one structured LLM call: intent, order_id, support issue, risk
     ├── safety risk ──► critical ticket for a human (any user)
     ├── unclear     ──► the router's own short reply
     ├── order/support while anonymous ──► sign-in prompt
-    ├── product_agent  extract filters (LLM) → search with one relaxation loop → rank (LLM) → reply
+    ├── product_agent  extract filters (LLM) → hybrid search (pgvector + full text + type, fused) in a relaxation loop → rank (LLM) → reply with product cards
     ├── order_agent    owner-only DB lookup + carrier API → templated status (no LLM)
     └── support_agent  policy / ask which order / UI-confirmed cancel / ticket / drafted reply (LLM, low severity only)
 ```
@@ -43,6 +43,7 @@ support resolution) and are read from disk. The file in git is the prompt that r
 | Agents | LangGraph (StateGraph) |
 | LLM | Groq `qwen/qwen3.8-27b` (one setting: `GROQ_MODEL` in `app/core/config.py`) |
 | Database | PostgreSQL (SQLAlchemy 2.0) |
+| Search | pgvector (HNSW) + Postgres full text, fused by reciprocal rank; local `fastembed` embeddings (ADR 0014) |
 | Auth | Google OAuth 2.0 + JWT |
 | Observability | LangSmith (tracing + eval) |
 | Monitoring | Grafana + Loki + Promtail |
@@ -132,6 +133,14 @@ search needs this step. It reads `data/catalog/` and makes no model calls:
 ```bash
 docker compose exec app alembic upgrade head
 docker compose exec app sh -c 'python scripts/enrich_catalog.py apply --database-url "$DATABASE_URL"'
+docker compose restart app
+```
+
+Then embed the products for hybrid search (ADR 0014). It runs a small local model (no API key) and
+takes about two minutes on a laptop CPU:
+
+```bash
+docker compose exec app sh -c 'python scripts/embed_catalog.py --database-url "$DATABASE_URL"'
 docker compose restart app
 ```
 
@@ -333,3 +342,4 @@ See [.env.example](.env.example) for the full list. Key variables:
 | `JWT_SECRET_KEY` | Secret for signing JWT tokens |
 | `SESSION_EXPIRY_MINUTES` | Session inactivity timeout (default: 30) |
 | `ESCALATION_WEBHOOK_URL` | Optional: Slack or Discord incoming-webhook URL for escalation alerts (safety reports, support tickets). Unset: alerts go to the app log. |
+| `PRODUCT_SEARCH` | `hybrid` (default): pgvector + full text + the product type, fused by rank; needs `scripts/embed_catalog.py`. `type`: the typed-catalog search. Falls back to `type` until embeddings exist. |

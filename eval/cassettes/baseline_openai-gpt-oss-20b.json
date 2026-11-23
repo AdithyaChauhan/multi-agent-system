@@ -168,6 +168,20 @@
    "product": null
   }
  },
+ "0889181f45f15cdd731f7ed812818f37": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: best rated air fryer\nAssistant: These don't match everything you asked for, but they're the closest options we have:\n\n1. **Instant Pot Vortex 2Q",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1163,
+  "value": {
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "097ceaebd23f3b1cb648d209bab5acc4": {
   "agent": "router",
   "message": "Their orders: not signed in.\nMessage: sony headphones under 500",
@@ -180,6 +194,22 @@
    "order_id": null,
    "reply": null,
    "risk": "none"
+  }
+ },
+ "0b1d21bb16b5843698fe3336cf92c3c9": {
+  "agent": "product",
+  "message": "User request: \"table\"\n\nProducts:\n1. SupCares Laptop Stand 7 Height Adjustable, Aluminium, Ventil | ₹499 | 4.5★ | SupCares\n2. STRIFF Laptop Stand Adjustable Laptop Computer Stand Multi-A | ₹299 | 4.2★ ",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 640,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    7,
+    8,
+    9,
+    10
+   ]
   }
  },
  "0ca1382d4ff83a2c93811fa88391bf37": {
@@ -244,6 +274,28 @@
    "product": null
   }
  },
+ "0dbeef8f7df171e0ce4b8a97a57ea4be": {
+  "agent": "product",
+  "message": "User request: \"show me a mouse\"\n\nProducts:\n1. Dell MS116 1000Dpi USB Wired Optical Mouse, Led Tracking, Sc | ₹299 | 4.5★ | Dell\n2. Lenovo 300 Wired Plug & Play USB Mouse, High Resolution 1600 | ₹289 |",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 621,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
  "0e06d495af81a9eea7d4d3e0aadce47b": {
   "agent": "product",
   "message": "User request: \"best rated air fryer\"\n\nProducts:\n1. Instant Pot Air Fryer, Vortex 2QT, Touch Control Panel, 360° | ₹4995 | 4.8★ | Instant Pot\n2. INALSA Air Fryer Digital 4L Nutri Fry - 1400W with Smart",
@@ -253,6 +305,94 @@
   "value": {
    "exact": [
     1
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  }
+ },
+ "0e9edf7a9ddb84f874c0e39e6c2506b2": {
+  "agent": "product",
+  "message": "User request: \"I want to buy headphones under 2000\"\n\nProducts:\n1. Redgear Cosmo 7,1 Usb Gaming Wired Over Ear Headphones With  | ₹1990 | 4.3★ | Redgear\n2. boAt BassHeads 900 On-Ear Wired Headphones wi",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 669,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "0fc09364d0afdec86d521d03a60e1371": {
+  "agent": "product",
+  "message": "User request: \"samsng tv\"\n\nProducts:\n1. Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart  | ₹30990 | 4.3★ | Samsung\n2. Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED | ₹13490 ",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 699,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ]
+  }
+ },
+ "137bc7164d04babb59308dd382ce8be3": {
+  "agent": "product",
+  "message": "User request: \"sony headphones under 500\"\n\nProducts:\n1. boAt BassHeads 100 in-Ear Wired Headphones with Mic (Black) | ₹365 | 4.1★ | boAt\n2. JBL C100SI Wired In Ear Headphones with Mic, JBL Pure Bass S",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 656,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "15060783e0a988c4362eaa4ba73c0577": {
+  "agent": "product",
+  "message": "User request: \"noise cancelling headphones\"\n\nProducts:\n1. PTron Boom Ultima 4D Dual Driver, in-Ear Gaming Wired Headph | ₹299 | 3.6★ | pTron\n2. Hp Wired On Ear Headphones With Mic With 3.5 Mm Drivers,",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 653,
+  "value": {
+   "exact": [
+    5
    ],
    "same_kind": [
     1,
@@ -340,6 +480,20 @@
     9,
     10
    ]
+  }
+ },
+ "18e9cccc48986d2bde153546cd154263": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: smartwatches under 3000\nAssistant: These don't match everything you asked for, but they're the closest options we have:\n\n1. **Boult Dive+ 1.85\" ",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1134,
+  "value": {
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
   }
  },
  "193766b85e97e7eaf8b722b69bcac72a": {
@@ -514,6 +668,20 @@
    "risk": "none"
   }
  },
+ "27fb31b344078ca754890f702a00b837": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: sony headphones under 500\nAssistant: I couldn't find any headphones matching your request. Try a different budget, brand or product.\nMessage: un",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1066,
+  "value": {
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "2934fa9ca9b606a8eff01d13580b1534": {
   "agent": "product",
   "message": "User request: \"I need an air purifier\"\n\nProducts:\n1. Coway Professional Air Purifier for Home, Longest Filter Lif | ₹14400 | 4.4★ | Coway\n2. Philips Air Purifier Ac2887/20,Vitashield Intelligent Purif",
@@ -616,6 +784,31 @@
    "risk": "none"
   }
  },
+ "2db54aa772dbc3c07c50fb517c547c41": {
+  "agent": "product",
+  "message": "User request: \"bajaj smartwatches\"\n\nProducts:\n1. Bajaj ATX 4 750-Watt Pop-up Toaster (White) | ₹1499 | 4.3★ | Bajaj\n2. Bajaj DX-6 1000W Dry Iron with Advance Soleplate and Anti-ba | ₹625 | 4.2★ | Baja",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 630,
+  "value": {
+   "exact": [],
+   "same_kind": []
+  }
+ },
+ "2e2ad3d96cd908299c3de1afcd8cf5b0": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: show me some TVs\nAssistant: These don't match everything you asked for, but they're the closest options we have:\n\n1. **Samsung 43\" Crystal 4K Sm",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1150,
+  "value": {
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "2eb4e3441c03855cdfec585e176a715b": {
   "agent": "product",
   "message": "Previous: {} | Message: under 500",
@@ -630,6 +823,39 @@
    "min_rating": null,
    "not_carried": null,
    "product": null
+  }
+ },
+ "2f196efc7b9af5b15cef3c82783d2467": {
+  "agent": "product",
+  "message": "User request: \"what about Fire-Boltt\"\n\nProducts:\n1. Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Spo | ₹2999 | 4.4★ | Fire-Boltt\n2. Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 714,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
   }
  },
  "2f79a87db2377f31939186c27dc5efb3": {
@@ -678,6 +904,20 @@
    "risk": "none"
   }
  },
+ "309087ba82b86fb5fd28f13184b8aa63": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: I need a wireless mouse\nAssistant: These don't match everything you asked for, but they're the closest options we have:\n\n1. **Amazon Basics Wire",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1220,
+  "value": {
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "30eb7cdf903ef718584eafb1548bff0d": {
   "agent": "product",
   "message": "So far: {\"product\": \"headphones\", \"features\": [\"noise cancelling\"]} | Message: smart tv",
@@ -723,6 +963,65 @@
    "min_rating": null,
    "not_carried": null,
    "product": "laptop table"
+  }
+ },
+ "32dda48354a7abb03631716c20811517": {
+  "agent": "product",
+  "message": "User request: \"something to make my chai\"\n\nProducts:\n1. Tesora - Inspired by you Large Premium Electric Kettle 1.8L, | ₹1349 | 4.4★ | Tesora\n2. Pigeon by Stovekraft Amaze Plus Electric Kettle (14289) ",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 660,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "3317b25dada1d11aab2de4856863015b": {
+  "agent": "product",
+  "message": "User request: \"smartwatches under 3000\"\n\nProducts:\n1. Fire-Boltt Ninja 3 Smartwatch Full Touch 1.69 & 60 Sports Mo | ₹1499 | 4.2★ | Fire-Boltt\n2. boAt Xtend Smartwatch with Alexa Built-in, 1.69” HD Di",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 712,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "33e782d0018a44f22d0e39f0cced850f": {
+  "agent": "product",
+  "message": "User request: \"sonny headphones\"\n\nProducts:\n1. Sony WI-C100 Wireless Headphones with Customizable Equalizer | ₹1599 | 3.6★ | Sony\n2. Sony TV - Remote Compatible for Sony LED Remote Control Work | ₹205",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 401,
+  "value": {
+   "exact": [
+    1
+   ],
+   "same_kind": [
+    1
+   ]
   }
  },
  "345f61ab7c58120d4935cd866cd2e40c": {
@@ -891,6 +1190,20 @@
    "risk": "none"
   }
  },
+ "3a9e2ef61b5c2ecea7fa5cae89c93d15": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: I need a wireless mouse\nAssistant: These don't match everything you asked for, but they're the closest options we have:\n\n1. **Amazon Basics Wire",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1148,
+  "value": {
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "3af98f127c65ef9377f0d442942ed698": {
   "agent": "product",
   "message": "So far: {} | Message: something to keep me warm this winter",
@@ -970,6 +1283,28 @@
    ]
   }
  },
+ "3e322d888a1bd875dc0d52dba10605a0": {
+  "agent": "product",
+  "message": "User request: \"show me some TVs\"\n\nProducts:\n1. Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart  | ₹30990 | 4.3★ | Samsung\n2. Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED | ",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 678,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
  "3f015850ac4b2a6262d1f07c419d7252": {
   "agent": "product",
   "message": "So far: {} | Message: smartwatches under 3000",
@@ -999,6 +1334,28 @@
    "order_id": "ORD-2003",
    "reply": null,
    "risk": "none"
+  }
+ },
+ "41fbedfda0de2a4bc6df9e692eb5cb71": {
+  "agent": "product",
+  "message": "User request: \"under 1000\"\n\nProducts:\n1. Logitech M221 Wireless Mouse, Silent Buttons, 2.4 GHz with U | ₹799 | 4.4★ | Logitech\n2. Lenovo 400 Wireless Mouse, 1200DPI Optical Sensor, 2.4GHz Wi | ₹629 | ",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 647,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
   }
  },
  "4200d3f09b53a910d991bc0f11f18ad4": {
@@ -1094,6 +1451,28 @@
    "min_rating": null,
    "not_carried": null,
    "product": "headphones"
+  }
+ },
+ "45e45b8b2cccf56ab2fceb580475765b": {
+  "agent": "product",
+  "message": "User request: \"under 6000\"\n\nProducts:\n1. Instant Pot Air Fryer, Vortex 2QT, Touch Control Panel, 360° | ₹4995 | 4.8★ | Instant Pot\n2. Pigeon Healthifry Digital Air Fryer, 360° High Speed Air Cir | ₹35",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 697,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
   }
  },
  "46f9945f39c765e677fccaa91d1ca770": {
@@ -1207,6 +1586,20 @@
    "product": "headphones"
   }
  },
+ "4ededbff95b6ca5f3f6042e92443f447": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: geyser under 5000\nAssistant: These don't match everything you asked for, but they're the closest options we have:\n\n1. **Havells Instanio 1L 3KW ",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1139,
+  "value": {
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "4ee038ab2aaf64b4854c9994ad6b0936": {
   "agent": "router",
   "message": "Their orders: not signed in.\nRecent conversation:\nUser: geyser under 5000\nAssistant: These don't match everything you asked for, but they're the closest options we have:\n\n1. **Havells Instanio 1L 3KW ",
@@ -1219,6 +1612,20 @@
    "order_id": null,
    "reply": null,
    "risk": "none"
+  }
+ },
+ "4f113a8012ce97aaa1de5f4240bd7dd2": {
+  "agent": "product",
+  "message": "User request: \"under 3000\"\n\nProducts:\n1. Sony WI-C100 Wireless Headphones with Customizable Equalizer | ₹1599 | 3.6★ | Sony\n2. Sony TV - Remote Compatible for Sony LED Remote Control Work | ₹205 | 3.8",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 491,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2
+   ]
   }
  },
  "4f1b17792cad8b36ad7cf231b894b834": {
@@ -1263,6 +1670,28 @@
    "order_id": null,
    "reply": null,
    "risk": "none"
+  }
+ },
+ "54a4c90d4aaf6f6f53292b315be85e80": {
+  "agent": "product",
+  "message": "User request: \"smart tv\"\n\nProducts:\n1. Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED | ₹13490 | 4.3★ | Samsung\n2. Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart  | ₹30990 |",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 659,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
   }
  },
  "560fa041c42763fab7b162028897aab0": {
@@ -1486,6 +1915,20 @@
    ]
   }
  },
+ "602323ffb81682370e5c3f9c57c6eb2f": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: show me headphones\nAssistant: These don't match everything you asked for, but they're the closest options we have:\n\n1. **Redgear Cosmo 7.1 Wired",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1163,
+  "value": {
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "60c122235d5aa0a1c03ebdd739dca2f6": {
   "agent": "router",
   "message": "Their orders: not signed in.\nMessage: show me headphones",
@@ -1629,6 +2072,17 @@
    "product": null
   }
  },
+ "67f1a8b0933e959d189086c1539dc94b": {
+  "agent": "product",
+  "message": "User request: \"usb hub with ethernet\"\n\nProducts:\n1. Portronics MPORT 31 4 Ports USB Hub (USB A to 4 USB-A Ports  | ₹499 | 4.3★ | Portronics\n2. Portronics MPORT 31C 4-in-1 USB Hub (Type C to 4 USB-A Po",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 695,
+  "value": {
+   "exact": [],
+   "same_kind": []
+  }
+ },
  "68210ac39ebcb8a39136c4784e14cb9a": {
   "agent": "product",
   "message": "User request: \"amazon fire tv stick\"\n\nProducts:\n1. Realme Smart TV Stick 4K | ₹4699 | 4.5★ | realme",
@@ -1701,6 +2155,20 @@
    "risk": "none"
   }
  },
+ "6be37620808ea90515f5a90bf2f94f50": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: show me a mouse\nAssistant: These don't match everything you asked for, but they're the closest options we have:\n\n1. **Amazon Basics Wireless Mou",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1130,
+  "value": {
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "6c1dba6688ad8ec916567aa4d74ea5c7": {
   "agent": "product",
   "message": "Previous: {\"product\": \"mouse\"} | Message: gaming ones under 2000",
@@ -1733,6 +2201,39 @@
    "min_rating": null,
    "not_carried": null,
    "product": "speaker"
+  }
+ },
+ "6cf3dc017dcf15d4e14e6b9b6247a1c5": {
+  "agent": "product",
+  "message": "User request: \"mixer grinder under 2000\"\n\nProducts:\n1. Bajaj Rex 500W Mixer Grinder with Nutri-Pro Feature, 3 Jars, | ₹1999 | 4.2★ | Bajaj\n2. Croma 500W Mixer Grinder with 3 Stainless Steel Leak-proof",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 699,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
   }
  },
  "6d1e94393df7784c3c30386baabc3c29": {
@@ -1892,6 +2393,34 @@
    "risk": "none"
   }
  },
+ "78fff5f45b8f85d5159bf437de5feb1d": {
+  "agent": "product",
+  "message": "User request: \"show me something cheaper\"\n\nProducts:\n1. boAt BassHeads 900 On-Ear Wired Headphones with Mic (White) | ₹849 | 4.2★ | boAt\n2. JBL C100SI Wired In Ear Headphones with Mic, JBL Pure Bass S",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 729,
+  "value": {
+   "exact": [
+    2,
+    3,
+    9,
+    10,
+    1
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
  "7b59715583acff6c87bd00e72c60fa4a": {
   "agent": "router",
   "message": "Their orders: not signed in.\nRecent conversation:\nUser: show me some TVs\nAssistant: These don't match everything you asked for, but they're the closest options we have:\n\n1. **Sony Bravia 65\" 4K Smart ",
@@ -1922,6 +2451,33 @@
    "min_rating": null,
    "not_carried": null,
    "product": "mouse"
+  }
+ },
+ "7b77b42f148af47094ab598eaa8468e2": {
+  "agent": "product",
+  "message": "User request: \"what about Samsung\"\n\nProducts:\n1. Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart  | ₹30990 | 4.3★ | Samsung\n2. Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED ",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 712,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    10
+   ]
   }
  },
  "7bc831db8d402c9060f1d4ecf4e61528": {
@@ -1965,6 +2521,45 @@
    ]
   }
  },
+ "7d501838750a6587a14b93fc635d3bc1": {
+  "agent": "product",
+  "message": "User request: \"gaming ones under 2000\"\n\nProducts:\n1. Logitech G102 USB Light Sync Gaming Mouse with Customizable  | ₹1495 | 4.5★ | Logitech\n2. Logitech G402 Hyperion Fury USB Wired Gaming Mouse, 4,000",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 647,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ]
+  }
+ },
+ "7dfb2d0637430491f5947d00485d71fd": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: mixer grinder under 2000\nAssistant: Here are my top recommendations for you:\n\n1. **Bajaj Rex 500W Mixer Grinder with 3 Jars** — Bajaj\n   ₹1,999 ",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1157,
+  "value": {
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "7e4fd4d1b1caf214e90be3d25a83a515": {
   "agent": "product",
   "message": "So far: {} | Message: calculator",
@@ -1980,6 +2575,39 @@
    "min_rating": null,
    "not_carried": null,
    "product": "calculator"
+  }
+ },
+ "7f51a4a05b9add70259f09f81e5b43ad": {
+  "agent": "product",
+  "message": "User request: \"smartwatch with calling feature\"\n\nProducts:\n1. Fire-Boltt India's No 1 Smartwatch Brand Talk 2 Bluetooth Ca | ₹2199 | 4.2★ | Fire-Boltt\n2. Fire-Boltt India's No 1 Smartwatch Brand Talk ",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 698,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
   }
  },
  "7f6bf05d3c6902700430195eb540bd1a": {
@@ -2047,6 +2675,34 @@
     9,
     10
    ]
+  }
+ },
+ "812f793ea2963226200e233e04b6c445": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: sonny headphones\nAssistant: Here are my top recommendations for you:\n\n1. **Sony WI-C100 Wireless Over-Ear Headphones with Mic** — Sony\n   ₹1,599",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1172,
+  "value": {
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "82796ed39802b2bf79a3b6846d7054fe": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: hi\nAssistant: Hi! I can help you find products, check an order, or sort out a problem with one. What do you need?\nUser: bose speakers\nAssistant:",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1151,
+  "value": {
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
   }
  },
  "83cee34c3aba5a47b1e53f36145f840b": {
@@ -2125,6 +2781,42 @@
    "min_rating": null,
    "not_carried": null,
    "product": "mixer grinder"
+  }
+ },
+ "8870f40ab47df42ee3bfe27a68896a46": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: geyser under 5000\nAssistant: These don't match everything you asked for, but they're the closest options we have:\n\n1. **Havells Instanio 1L 3KW ",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1259,
+  "value": {
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "88e7c5a9a13030fab605756e65c6431b": {
+  "agent": "product",
+  "message": "User request: \"bajaj smartwatches\"\n\nProducts:\n1. Fire-Boltt India's No 1 Smartwatch Brand Talk 2 Bluetooth Ca | ₹2199 | 4.2★ | Fire-Boltt\n2. Fire-Boltt India's No 1 Smartwatch Brand Talk 2 Bluetooth C",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 685,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
   }
  },
  "8947c29f9b459fb671d4e02c651557bc": {
@@ -2225,6 +2917,28 @@
    "risk": "none"
   }
  },
+ "91269e8b73542d4ebdb94e76be09ac53": {
+  "agent": "product",
+  "message": "User request: \"blutooth speaker\"\n\nProducts:\n1. JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL  | ₹1999 | 4.3★ | JBL\n2. boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playb | ₹1799",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 649,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
  "91754d2dfe45ce74ee8fc42d2df3df39": {
   "agent": "product",
   "message": "Previous: {\"product\": \"chair\"} | Message: book",
@@ -2304,6 +3018,50 @@
    "product": "electronics"
   }
  },
+ "957d607107cfe5b32ef54dfe46b2128b": {
+  "agent": "product",
+  "message": "User request: \"under 2000\"\n\nProducts:\n1. Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",1 | ₹1998 | 4.3★ | Fire-Boltt\n2. Fire-Boltt Ninja Calling 1.69\" Bluetooth Calling Smart Watch | ₹199",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 683,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "9655c7ae4075ae364fddb18f8659b6f2": {
+  "agent": "product",
+  "message": "User request: \"what about Bajaj\"\n\nProducts:\n1. Bajaj Rex 500W Mixer Grinder with Nutri-Pro Feature, 3 Jars, | ₹1999 | 4.2★ | Bajaj\n2. Bajaj HM-01 Powerful 250W Hand Mixer, Black | ₹1499 | 4.4★ | Bajaj",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 671,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
  "9730ad8e39f32eb4e3f4f51418e5cd07": {
   "agent": "product",
   "message": "User request: \"calculator\"\n\nProducts:\n1. Casio MJ-12D 150 Steps Check and Correct Desktop Calculator | ₹440 | 4.5★ | Casio\n2. Casio FX-991ES Plus-2nd Edition Scientific Calculator, Black | ₹1295 | 4.5",
@@ -2334,6 +3092,41 @@
    ]
   }
  },
+ "99092ca5819da99135f6e6c783f35146": {
+  "agent": "product",
+  "message": "User request: \"amazon fire tv stick\"\n\nProducts:\n1. Realme Smart TV Stick 4K | ₹4699 | 4.5★ | realme\n2. Electvision Remote Control Compatible with Amazon Fire tv St | ₹1299 | 3.6★ | Electvision\n3. Remo",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 615,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1
+   ]
+  }
+ },
+ "9b8552900bd57e770162c6677ffe9e72": {
+  "agent": "product",
+  "message": "User request: \"I need a wireless mouse\"\n\nProducts:\n1. Logitech Pebble M350 Wireless Mouse with Bluetooth or USB -  | ₹1490 | 4.6★ | Logitech\n2. Lenovo 400 Wireless Mouse, 1200DPI Optical Sensor, 2.4GH",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 634,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
  "9c245fd144aaa346a4e300452f60fa6f": {
   "agent": "router",
   "message": "Their orders: not signed in.\nMessage: 4k monitor",
@@ -2346,6 +3139,21 @@
    "order_id": null,
    "reply": null,
    "risk": "none"
+  }
+ },
+ "9c27d3f47d1115c8d4cddad10b47146e": {
+  "agent": "product",
+  "message": "User request: \"redmi charger\"\n\nProducts:\n1. MI Xiaomi 22.5W Fast USB Type C Charger Combo for Tablets -  | ₹649 | 4.2★ | Xiaomi\n2. MI 33W SonicCharge 2.0 USB Charger for Cellular Phones - Whi | ₹999 |",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 661,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3
+   ]
   }
  },
  "9c844a6bedf439ceb04438990f40c2e5": {
@@ -2542,6 +3350,28 @@
    ]
   }
  },
+ "a4daca83972c4adad7bdeeb9e16deabb": {
+  "agent": "product",
+  "message": "User request: \"something to keep me warm this winter\"\n\nProducts:\n1. Room Heater Warmer Wall-Outlet 400 Watts Electric Handy Room | ₹799 | 4.3★ | Room\n2. Melbon VM-905 2000-Watt Room Heater (ISI Certif",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 651,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
  "a4ef6350f43b4dd0790d1b37ad39c645": {
   "agent": "router",
   "message": "Their orders: not signed in.\nRecent conversation:\nUser: sony headphones\nAssistant: Here are my top recommendations for you:\n\n1. **Sony WI-C100 Wireless Over-Ear Headphones with Mic** — Sony\n   ₹1,599 ",
@@ -2588,6 +3418,28 @@
     7,
     8,
     9
+   ]
+  }
+ },
+ "a56ef15fdace1923e3f271a6d60e75dd": {
+  "agent": "product",
+  "message": "User request: \"lojitec mouse\"\n\nProducts:\n1. Logitech G402 Hyperion Fury USB Wired Gaming Mouse, 4,000 DP | ₹1995 | 4.6★ | Logitech\n2. Logitech Pebble M350 Wireless Mouse with Bluetooth or USB -  | ₹14",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 626,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
    ]
   }
  },
@@ -2643,6 +3495,20 @@
     9,
     10
    ]
+  }
+ },
+ "a926005193735e6dd61c5602a73641e7": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: I want to buy headphones under 2000\nAssistant: These don't match everything you asked for, but they're the closest options we have:\n\n1. **Redgea",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1156,
+  "value": {
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
   }
  },
  "a9a7bbc7e3c6b945002e33540d576f83": {
@@ -2703,6 +3569,20 @@
    "risk": "none"
   }
  },
+ "ae9f944a6fdbca72b3e5ccc24e462d2e": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: smartwatch with calling feature\nAssistant: Here are my top recommendations for you:\n\n1. **Fire-Boltt Visionary Bluetooth Calling Smartwatch** — ",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1152,
+  "value": {
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "af51cbd0c9018979b220199db1f83e1a": {
   "agent": "product",
   "message": "User request: \"table\"\n\nProducts:\n1. SupCares Laptop Stand 7 Height Adjustable, Aluminium, Ventil | ₹499 | 4.5★ | SupCares\n2. Dyazo 6 Angles Adjustable Aluminum Ergonomic Foldable Portab | ₹599 | 4.4★ ",
@@ -2728,6 +3608,68 @@
    "order_id": "ORD-2002",
    "reply": null,
    "risk": "none"
+  }
+ },
+ "b0a9c8d73c10ec961bd153b56f152ec0": {
+  "agent": "product",
+  "message": "User request: \"show me laptop bags\"\n\nProducts:\n1. Gizga Essentials Laptop Bag Sleeve Case Cover Pouch with Han | ₹269 | 4.1★ | Gizga\n2. AirCase Protective Laptop Bag Sleeve fits Upto 14.1\" Laptop/ | ₹",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 644,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ]
+  }
+ },
+ "b16a786bac9d32ee156f874e6f81d7fc": {
+  "agent": "product",
+  "message": "User request: \"wireless mouse\"\n\nProducts:\n1. Lenovo 400 Wireless Mouse, 1200DPI Optical Sensor, 2.4GHz Wi | ₹629 | 4.4★ | Lenovo\n2. Logitech Pebble M350 Wireless Mouse with Bluetooth or USB -  | ₹1490",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 645,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "b1edf88ddb7a3c3886852e8d6d497358": {
+  "agent": "product",
+  "message": "User request: \"show me all electronics\"\n\nProducts:\n1. CARDEX Digital Kitchen Weighing Machine Multipurpose Electro | ₹379 | 4.2★ | CARDEX\n2. Zodo 8. 5 inch LCD E-Writer Electronic Writing Pad/Tablet D",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 627,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
   }
  },
  "b28017642d08210cc4d6b5fc7e02c337": {
@@ -2835,6 +3777,21 @@
    "risk": "none"
   }
  },
+ "b873855ad841027557c76bc90d72f895": {
+  "agent": "product",
+  "message": "User request: \"sony headphones\"\n\nProducts:\n1. Sony WI-C100 Wireless Headphones with Customizable Equalizer | ₹1599 | 3.6★ | Sony\n2. Sony TV - Remote Compatible for Sony LED Remote Control Work | ₹205 ",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 396,
+  "value": {
+   "exact": [
+    1
+   ],
+   "same_kind": [
+    1
+   ]
+  }
+ },
  "b8f6434425d575ff9ec0d1c950a1feb9": {
   "agent": "router",
   "message": "Their orders: not signed in.\nMessage: amazon fire tv stick",
@@ -2865,6 +3822,49 @@
     3,
     4,
     5
+   ]
+  }
+ },
+ "b90307969a00443b867b59b8c02da3cc": {
+  "agent": "product",
+  "message": "User request: \"geyser under 5000\"\n\nProducts:\n1. Havells Instanio 1-Litre 3KW Instant Water Heater (Geyser),  | ₹2599 | 4.4★ | Havells\n2. Havells Instanio 3-Litre 4.5KW Instant Water Heater (Geyser) | ",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 695,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "b9698e5d820e8270bce4fa01c985b281": {
+  "agent": "product",
+  "message": "User request: \"telly\"\n\nProducts:\n1. Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart  | ₹30990 | 4.3★ | Samsung\n2. Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED | ₹13490 | 4.",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 644,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
    ]
   }
  },
@@ -2984,6 +3984,20 @@
    ]
   }
  },
+ "c3416fcf028e3f3e467e78cf4e8c945a": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: sony headphones under 500\nAssistant: I couldn't find Sony headphones within your filters, so here are the closest options from other brands:\n\n1.",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1161,
+  "value": {
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "c3805ddbf9f51ad6fbd24e0fcf4acedc": {
   "agent": "router",
   "message": "Their orders: ORD-2002 Mi 108cm Full HD Android LED TV (shipped); ORD-2004 Croma 500W Mixer Grinder (delivered); ORD-2005 Logitech M221 Wireless Mouse (processing); ORD-2001 boAt Rockerz 255 Pro+ (del",
@@ -3074,6 +4088,23 @@
    "risk": "none"
   }
  },
+ "c8a65bacb719835bac7dc5da13352bd4": {
+  "agent": "product",
+  "message": "User request: \"best rated air fryer\"\n\nProducts:\n1. Instant Pot Air Fryer, Vortex 2QT, Touch Control Panel, 360° | ₹4995 | 4.8★ | Instant Pot\n2. PHILIPS Digital Air Fryer HD9252/90 with Touch Panel, us",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 675,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  }
+ },
  "c8b1a7abfb5575d67909d19635c02ab1": {
   "agent": "router",
   "message": "Their orders: not signed in.\nRecent conversation:\nUser: show me headphones\nAssistant: These don't match everything you asked for, but they're the closest options we have:\n\n1. **Redgear Cosmo 7.1 Wired",
@@ -3102,6 +4133,28 @@
    "risk": "none"
   }
  },
+ "c8efe22a42d870b9c5fefea18298ca42": {
+  "agent": "product",
+  "message": "User request: \"show me headphones\"\n\nProducts:\n1. Redgear Cosmo 7,1 Usb Gaming Wired Over Ear Headphones With  | ₹1990 | 4.3★ | Redgear\n2. boAt BassHeads 900 On-Ear Wired Headphones with Mic (White) | ",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 642,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
  "c932b69cf9ecf072f5c1e0fb04ae51cf": {
   "agent": "router",
   "message": "Their orders: not signed in.\nRecent conversation:\nUser: sonny headphones\nAssistant: Here are my top recommendations for you:\n\n1. **Sony WI-C100 Wireless Over-Ear Headphones with Mic** — Sony\n   ₹1,599",
@@ -3114,6 +4167,17 @@
    "order_id": null,
    "reply": null,
    "risk": "none"
+  }
+ },
+ "c964f8eceecf556e953f2b002e96438b": {
+  "agent": "product",
+  "message": "User request: \"usb hub with ethernet\"\n\nProducts:\n1. TP-Link UE300C USB Type-C to RJ45 Gigabit Ethernet Network A | ₹1199 | 4.5★ | TP-Link\n2. Amazon Basics USB Type-C to USB-A 2.0 Male Fast Charging Ca",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 654,
+  "value": {
+   "exact": [],
+   "same_kind": []
   }
  },
  "c9f7586a681e31811cf9cf11a0255d34": {
@@ -3161,6 +4225,37 @@
   "model": "openai/gpt-oss-20b",
   "node": "classify",
   "total_tokens": 997,
+  "value": {
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "cbb7aca8d2f9e96f685d1a3e975de725": {
+  "agent": "product",
+  "message": "User request: \"philps air purifier\"\n\nProducts:\n1. Philips Air Purifier Ac2887/20,Vitashield Intelligent Purifi | ₹14499 | 4.3★ | Philips\n2. Philips AC1215/20 Air purifier, removes 99.97% airborne poll",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 669,
+  "value": {
+   "exact": [
+    1,
+    2
+   ],
+   "same_kind": [
+    1,
+    2
+   ]
+  }
+ },
+ "cdc9c7e81ecd6c5ae17c621e716d2d2f": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: telly\nAssistant: These don't match everything you asked for, but they're the closest options we have:\n\n1. **Samsung 43\" Crystal 4K Smart LED TV*",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1151,
   "value": {
    "intent": "product",
    "issue": null,
@@ -3488,6 +4583,17 @@
    "product": null
   }
  },
+ "e31f402447e206a8151198f5f484208d": {
+  "agent": "product",
+  "message": "User request: \"amazon fire tv stick\"\n\nProducts:\n1. AmazonBasics 108 cm (43 inches) 4K Ultra HD Smart LED Fire T | ₹24499 | 3.9★ | Amazon\n2. Amazon Basics HDMI Coupler,Black | ₹209 | 4.4★ | Amazon\n3. A",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 596,
+  "value": {
+   "exact": [],
+   "same_kind": []
+  }
+ },
  "e55517739470d60b292cd3a15f2e9212": {
   "agent": "router",
   "message": "Their orders: ORD-2002 Mi 108cm Full HD Android LED TV (shipped); ORD-2004 Croma 500W Mixer Grinder (delivered); ORD-2005 Logitech M221 Wireless Mouse (processing); ORD-2001 boAt Rockerz 255 Pro+ (del",
@@ -3565,6 +4671,31 @@
    "product": "headphones"
   }
  },
+ "e99fa1d90752ebcb7498f8fa636b06f6": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: something to keep me warm this winter\nAssistant: These don't match everything you asked for, but they're the closest options we have:\n\n1. **Melb",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1123,
+  "value": {
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "e9ab159593397ea74254283bb17211b1": {
+  "agent": "product",
+  "message": "User request: \"sony headphones under 500\"\n\nProducts:\n1. Sony TV - Remote Compatible for Sony LED Remote Control Work | ₹205 | 3.8★ | Sony",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 346,
+  "value": {
+   "exact": [],
+   "same_kind": []
+  }
+ },
  "ead08a0ce05c2a97e7ce4ccf5292a973": {
   "agent": "product",
   "message": "Previous: {\"product\": \"headphones\", \"brand\": \"sonny\"} | Message: lojitec mouse",
@@ -3579,6 +4710,28 @@
    "min_rating": null,
    "not_carried": null,
    "product": "mouse"
+  }
+ },
+ "eaf5c890f926a2d783d87428cd49db1c": {
+  "agent": "product",
+  "message": "User request: \"bose speakers\"\n\nProducts:\n1. boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playb | ₹1799 | 4.2★ | boAt\n2. Infinity (JBL Fuze Pint, Wireless Ultra Portable Mini Speake | ₹899 | ",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 658,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
   }
  },
  "eb0553c488e9636da786133f941606a3": {
@@ -3716,6 +4869,20 @@
    "risk": "none"
   }
  },
+ "f16c48a636a566b392c6489a4d326fc2": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: I need an air purifier\nAssistant: These don't match everything you asked for, but they're the closest options we have:\n\n1. **Coway AirMega 150 A",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1130,
+  "value": {
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "f35ae88aaade125097168105d749f8e3": {
   "agent": "router",
   "message": "Their orders: ORD-2002 Mi 108cm Full HD Android LED TV (shipped); ORD-2004 Croma 500W Mixer Grinder (delivered); ORD-2005 Logitech M221 Wireless Mouse (processing); ORD-2001 boAt Rockerz 255 Pro+ (del",
@@ -3844,6 +5011,23 @@
    "product": "streaming device"
   }
  },
+ "faff9e148ff59d526c66c446cdf6eeec": {
+  "agent": "product",
+  "message": "User request: \"I need an air purifier\"\n\nProducts:\n1. Mi Air Purifier 3 with True HEPA Filter, removes air polluta | ₹9970 | 4.3★ | Xiaomi\n2. Coway Professional Air Purifier for Home, Longest Filter Li",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 659,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  }
+ },
  "fb9fda2437779f254da2ae55cb8500e0": {
   "agent": "router",
   "message": "Their orders: not signed in.\nRecent conversation:\nUser: I need an air purifier\nAssistant: These don't match everything you asked for, but they're the closest options we have:\n\n1. **Coway AirMega 150 A",
@@ -3889,6 +5073,41 @@
    "min_rating": null,
    "not_carried": null,
    "product": null
+  }
+ },
+ "fdb3e32fae25072688bdc727b8bffe88": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: show me headphones\nAssistant: These don't match everything you asked for, but they're the closest options we have:\n\n1. **Redgear Cosmo 7.1 Wired",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1156,
+  "value": {
+   "intent": "unclear",
+   "issue": null,
+   "order_id": null,
+   "reply": "Hi! I can help you find products, check an order, or sort out a problem with one. What do you need?",
+   "risk": "none"
+  }
+ },
+ "fdfff7847b227633939c45c546ff62e6": {
+  "agent": "product",
+  "message": "User request: \"calculator\"\n\nProducts:\n1. Casio FX-991ES Plus-2nd Edition Scientific Calculator, Black | ₹1295 | 4.5★ | Casio\n2. Casio MJ-12D 150 Steps Check and Correct Desktop Calculator | ₹440 | 4.5",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 657,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4
+   ]
   }
  },
  "ff2c23a5e7fedd243bbd49fca852d235": {

@@ -1,0 +1,215 @@
+{
+ "label": "robust-v4-renamed-qwen3.8-27b",
+ "model": "qwen/qwen3.8-27b",
+ "mode": "fill",
+ "database": "multi_agent_renamed",
+ "cassette": "eval\\cassettes\\renamed_qwen3.8-27b.json",
+ "started": "2026-11-23T13:12:16+00:00",
+ "queries": [
+  {
+   "id": "q076",
+   "query": "bose speakers",
+   "history": [],
+   "tags": [
+    "brand_missing"
+   ],
+   "shown": [
+    "B07B88KQZ8",
+    "B07NC12T2R",
+    "B08SMJT55F",
+    "B08JMC1988",
+    "B07W7Z6DVL"
+   ],
+   "shown_names": [
+    "JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL Signature Sound, Vib",
+    "boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playback, IPX5 and Integr",
+    "boAt Stone 250 Portable Wireless Speaker with 5W RMS Immersive Audio, RGB LEDs, ",
+    "boAt Stone 180 5W Bluetooth Speaker with Upto 10 Hours Playback, 1.75\" Driver, I",
+    "Infinity (JBL Fuze 100, Wireless Portable Bluetooth Speaker with Mic, Deep Bass,"
+   ],
+   "preferences": {
+    "product": "bluetooth speaker",
+    "features": [],
+    "brand": "bose",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [
+    "brand"
+   ],
+   "reply": "We don't carry bose bluetooth speaker, so here are the closest options from other brands:\n\n1. **JBL Go 2 Portable Bluetooth Speaker** — JBL\n   ₹1,999 · 4.3/5\n\n2. **boAt Stone 650 Bluetooth Speaker** — boAt\n   ₹1,799 · 4.2/5\n\n3. **boAt Stone 250 Portable Wireless Bluetooth Speaker** — boAt\n   ₹1,199 ",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 2,
+   "tokens": 2606,
+   "seconds": 3.37
+  },
+  {
+   "id": "q081",
+   "query": "iphone 15",
+   "history": [],
+   "tags": [
+    "out_of_scope"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "product": null,
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Sorry, we don't carry iphone 15. Here's what we do carry:\n\n• Household Appliances (441 products) — Countertop Cooking, Blending, Space Heating\n• Consumer Tech (402 products) — Televisions, Personal Audio, Wearables\n• PC & Peripherals (391 products) — Charging & Data Leads, Pointing Devices, Data Sto",
+   "score": {
+    "kind": "none",
+    "correct_refusal": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1727,
+   "seconds": 0.58
+  },
+  {
+   "id": "q086",
+   "query": "what about Logitech",
+   "history": [
+    "wireless mouse under 1000"
+   ],
+   "tags": [
+    "followup",
+    "brand"
+   ],
+   "shown": [
+    "B004IO5BMQ",
+    "B01J0XWYKQ",
+    "B01M72LILF"
+   ],
+   "shown_names": [
+    "Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, 12 Month Life Battery, ",
+    "Logitech B170 Wireless Mouse, 2.4 GHz with USB Nano Receiver, Optical Tracking, ",
+    "Logitech M221 Wireless Mouse, Silent Buttons, 2.4 GHz with USB Mini Receiver, 10"
+   ],
+   "preferences": {
+    "product": "pointing device",
+    "features": [
+     "wireless"
+    ],
+    "brand": "Logitech",
+    "max_price": 1000,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Logitech M235 Wireless Mouse** — Logitech\n   ₹699 · 4.5/5\n\n2. **Logitech B170 Wireless Optical Mouse** — Logitech\n   ₹599 · 4.4/5\n\n3. **Logitech M221 Wireless Mouse** — Logitech\n   ₹799 · 4.4/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 3
+   },
+   "llm_calls": 4,
+   "tokens": 5013,
+   "seconds": 0.99
+  },
+  {
+   "id": "q087",
+   "query": "Samsung",
+   "history": [
+    "show me some TVs"
+   ],
+   "tags": [
+    "followup",
+    "brand"
+   ],
+   "shown": [
+    "B08VF8V79P",
+    "B08VFF6JQ8",
+    "B09F6S8BT6",
+    "B092BJMT8Q",
+    "B0B15CPR37"
+   ],
+   "shown_names": [
+    "Samsung Original 25W USB Travel Lightning Adapter for Cellular Phones, Black",
+    "Samsung 25W USB Travel Adapter for Cellular Phones - White",
+    "Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED Smart TV UA32T4340B",
+    "Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart LED TV UA43AUE60AKLX",
+    "Samsung 108 cm (43 inches) Crystal 4K Neo Series Ultra HD Smart LED TV UA43AUE65"
+   ],
+   "preferences": {
+    "product": "tv",
+    "features": [],
+    "brand": "Samsung",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Samsung Original 25W USB Travel Lightning Adapter** — Samsung\n   ₹1,075 · 4.4/5\n\n2. **Samsung 25W USB Travel Adapter** — Samsung\n   ₹1,219 · 4.4/5\n\n3. **Samsung 32\" Wondertainment HD Ready Smart LED TV** — Samsung\n   ₹13,490 · 4.3/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 0.333,
+    "precision3": 0.333,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 4,
+   "tokens": 5139,
+   "seconds": 0.82
+  }
+ ],
+ "finished": "2026-11-23T13:14:06+00:00",
+ "summary": {
+  "queries": 4,
+  "scored": 4,
+  "errors": 0,
+  "recall@5": 1.0,
+  "precision@3": 0.778,
+  "mrr": 0.778,
+  "empty_rate": 0.0,
+  "correct_refusal_rate": 1.0,
+  "llm_calls_per_query": 2.75,
+  "tokens_per_query": 3621.25,
+  "p50_seconds": 0.82,
+  "p95_seconds": 3.37
+ },
+ "by_tag": {
+  "brand": {
+   "scored": 2,
+   "recall@5": 1.0,
+   "precision@3": 0.666,
+   "mrr": 0.666,
+   "empty_rate": 0.0
+  },
+  "brand_missing": {
+   "scored": 1,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "followup": {
+   "scored": 2,
+   "recall@5": 1.0,
+   "precision@3": 0.666,
+   "mrr": 0.666,
+   "empty_rate": 0.0
+  },
+  "out_of_scope": {
+   "scored": 1,
+   "correct_refusal_rate": 1.0
+  }
+ }
+}

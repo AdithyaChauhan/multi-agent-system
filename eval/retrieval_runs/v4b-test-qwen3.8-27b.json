@@ -1,0 +1,250 @@
+{
+ "label": "v4b-test-qwen3.8-27b",
+ "model": "qwen/qwen3.8-27b",
+ "mode": "fill",
+ "database": "multi_agent_baseline",
+ "cassette": "eval\\cassettes\\retrieval_qwen-qwen3-8-27b.json",
+ "started": "2026-11-23T13:29:06+00:00",
+ "queries": [
+  {
+   "id": "q077",
+   "query": "apple airpods",
+   "history": [],
+   "tags": [
+    "brand_missing"
+   ],
+   "shown": [
+    "B0B5GJRTHB",
+    "B07XJWTYM2",
+    "B09N3ZNHTY",
+    "B086WMSCN3",
+    "B0B217Z5VK"
+   ],
+   "shown_names": [
+    "Wecool Moonwalk M1 ENC True Wireless in Ear Earbuds with Mic, Titanium Drivers f",
+    "realme Buds Wireless in Ear Bluetooth Earphones with mic, 11.2mm Bass Boost Driv",
+    "boAt Airdopes 141 Bluetooth Truly Wireless in Ear Earbuds with mic, 42H Playtime",
+    "boAt Airdopes 171 in Ear Bluetooth True Wireless Earbuds with Upto 13 Hours Batt",
+    "Noise Buds VS402 Truly Wireless in Ear Earbuds, 35-Hours of Playtime, Instacharg"
+   ],
+   "preferences": {
+    "product": "tws earbuds",
+    "features": [
+     "airpods"
+    ],
+    "brand": "Apple",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [
+    "brand",
+    "attributes",
+    "keywords"
+   ],
+   "reply": "We don't carry Apple tws earbuds, so here are the closest options from other brands:\n\n1. **Wecool Moonwalk M1 True Wireless Earbuds** — WeCool\n   ₹889 · 4.2/5\n\n2. **realme Buds Wireless TWS Earbuds** — realme\n   ₹1,679 · 4.1/5\n\n3. **boAt Airdopes 141 Bluetooth TWS Earbuds** — boAt\n   ₹1,499 · 3.9/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 0.667,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 872,
+   "seconds": 2.52
+  },
+  {
+   "id": "q079",
+   "query": "garmin smartwatch",
+   "history": [],
+   "tags": [
+    "brand_missing"
+   ],
+   "shown": [
+    "B0BP18W8TM",
+    "B0B3N7LR6K",
+    "B0B3NDPCS9",
+    "B0B3RRWSF6",
+    "B0BMVWKZ8G"
+   ],
+   "shown_names": [
+    "Fire-Boltt Gladiator 1.96\" Biggest Display Smart Watch with Bluetooth Calling, V",
+    "Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwatch with 368*448 Pixe",
+    "Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwatch with 368*448 Pixe",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24",
+    "Newly Launched Boult Dive+ with 1.85\" HD Display, Bluetooth Calling Smartwatch, "
+   ],
+   "preferences": {
+    "product": "smartwatch",
+    "features": [],
+    "brand": "Garmin",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [
+    "brand"
+   ],
+   "reply": "We don't carry Garmin smartwatch, so here are the closest options from other brands:\n\n1. **Fire-Boltt Gladiator 1.96\" Bluetooth Smartwatch** — Fire-Boltt\n   ₹3,999 · 4.4/5\n\n2. **Fire-Boltt Visionary Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹3,999 · 4.3/5\n\n3. **Fire-Boltt Visionary AMOLED Bluet",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.14
+  },
+  {
+   "id": "q082",
+   "query": "gaming laptop",
+   "history": [],
+   "tags": [
+    "out_of_scope"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "product": "laptop",
+    "features": [
+     "gaming"
+    ],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Sorry, we don't carry laptop. Would you like to see our laptop bag range instead?",
+   "score": {
+    "kind": "none",
+    "correct_refusal": true,
+    "shown": 0
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.01
+  },
+  {
+   "id": "q084",
+   "query": "washing machine",
+   "history": [],
+   "tags": [
+    "out_of_scope"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "product": null,
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Sorry, we don't carry washing machine. Here's what we do carry:\n\n• Home & Kitchen (441 products) — cooking appliance, blender, room heater\n• Electronics (402 products) — tv, headphones, smartwatch\n• Computers & Accessories (391 products) — cable, mouse, storage\n• Office Products (36 products) — stat",
+   "score": {
+    "kind": "none",
+    "correct_refusal": true,
+    "shown": 0
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.06
+  },
+  {
+   "id": "q087",
+   "query": "Samsung",
+   "history": [
+    "show me some TVs"
+   ],
+   "tags": [
+    "followup",
+    "brand"
+   ],
+   "shown": [
+    "B092BJMT8Q",
+    "B09F6S8BT6",
+    "B08PV1X771",
+    "B0B15CPR37",
+    "B092BL5DCX"
+   ],
+   "shown_names": [
+    "Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart LED TV UA43AUE60AKLX",
+    "Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED Smart TV UA32T4340B",
+    "Samsung 80 cm (32 inches) Wondertainment Series HD Ready LED Smart TV UA32TE40AA",
+    "Samsung 108 cm (43 inches) Crystal 4K Neo Series Ultra HD Smart LED TV UA43AUE65",
+    "Samsung 138 cm (55 inches) Crystal 4K Series Ultra HD Smart LED TV UA55AUE60AKLX"
+   ],
+   "preferences": {
+    "product": "tv",
+    "features": [],
+    "brand": "Samsung",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Samsung 43\" Crystal 4K Smart LED TV** — Samsung\n   ₹30,990 · 4.3/5\n\n2. **Samsung 32\" Wondertainment HD Ready Smart LED TV** — Samsung\n   ₹13,490 · 4.3/5\n\n3. **Samsung 32\" Wondertainment Series HD Ready Smart TV** — Samsung\n   ₹15,490 · 4.3/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.05
+  }
+ ],
+ "finished": "2026-11-23T13:29:28+00:00",
+ "summary": {
+  "queries": 5,
+  "scored": 5,
+  "errors": 0,
+  "recall@5": 1.0,
+  "precision@3": 0.889,
+  "mrr": 1.0,
+  "empty_rate": 0.0,
+  "correct_refusal_rate": 1.0,
+  "llm_calls_per_query": 0.2,
+  "tokens_per_query": 174.4,
+  "p50_seconds": 0.06,
+  "p95_seconds": 2.52
+ },
+ "by_tag": {
+  "brand": {
+   "scored": 1,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "brand_missing": {
+   "scored": 2,
+   "recall@5": 1.0,
+   "precision@3": 0.834,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "followup": {
+   "scored": 1,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "out_of_scope": {
+   "scored": 2,
+   "correct_refusal_rate": 1.0
+  }
+ }
+}

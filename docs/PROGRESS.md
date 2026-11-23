@@ -12,6 +12,33 @@ Newest first. `/handoff` adds an entry at the end of every session. Keep entries
 - **Commits:**
 -->
 
+## 2026-11-23 · Phase 3 · Hybrid search and product cards done; roadmap reset for judges
+- **Done:**
+  - roadmap reset around what a judge sees (0013);
+  - pgvector on an Alpine Postgres image (the volume was kept; both databases backed up to `%TEMP%`);
+  - migration `b5e1f0a3c2d4`;
+  - local embeddings (`fastembed`, bge-small) from the products' own words;
+  - `app/search/hybrid.py` (vector + full text + type, weighted RRF);
+  - the catalog checks meaning before "we don't carry";
+  - the relax loop waits for the requested type;
+  - product cards with photos;
+  - `PRODUCT_RANKER=off`, a cassette `fill` mode, `eval/query_split.json` and `eval/run_split.py`;
+  - `.dockerignore` no longer lets `.env.eval` into local images.
+- **Measured** (v3b split, 1 run):
+  - test half 47 queries: recall@5 0.933 → 1.0, precision@3 0.900 → 0.930, vague 0.6 → 1.0, refusals 1.0;
+  - renamed 35 queries: recall drop 11.8 → 0 points, precision@3 0.843 against 0.941;
+  - baseline 47/51 (gpt-oss-20b, same 4 failures);
+  - about 120K tokens in total;
+  - app memory about 315 MB, image 1.18 → 1.49 GB, search about 90 ms;
+  - 286 tests, coverage 89%.
+- **Decisions:** [0013](decisions/0013-judge-facing-priorities.md), [0014](decisions/0014-hybrid-search-design.md).
+- **Open questions:**
+  - the router routes "fuzz balls on sweaters" to clarify;
+  - renamed-catalog precision;
+  - a burst of Groq 500s during the baseline (Phase 4's fallback chain).
+- **Next:** new chat, `/resume`, plan Phase 4.
+- **Commits:** `3da0290` (gate), `99f8b3f` (roadmap reset), and this phase's code and eval commits on `phase-3-hybrid-search`.
+
 ## 2026-11-23 · Phase 3 · Gate says go: renamed catalog drops recall@5 by 11.8 points
 - **Done:**
   - fixed `scripts/make_renamed_catalog_db.py`, which now also renames `product_types` (search reads those since Phase 1), and added a unit test;

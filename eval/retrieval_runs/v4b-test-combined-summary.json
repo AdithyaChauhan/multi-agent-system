@@ -1,0 +1,95 @@
+{
+ "label": "v4b-test",
+ "half": "test",
+ "env": {
+  "PRODUCT_SEARCH": "hybrid"
+ },
+ "summary": {
+  "queries": 47,
+  "scored": 47,
+  "errors": 0,
+  "recall@5": 1.0,
+  "precision@3": 0.93,
+  "mrr": 0.957,
+  "empty_rate": 0.0,
+  "correct_refusal_rate": 1.0,
+  "llm_calls_per_query": 0.021,
+  "tokens_per_query": 18.553,
+  "p50_seconds": 0.15,
+  "p95_seconds": 1.94
+ },
+ "by_tag": {
+  "attribute": {
+   "scored": 10,
+   "recall@5": 1.0,
+   "precision@3": 0.95,
+   "mrr": 0.95,
+   "empty_rate": 0.0
+  },
+  "brand": {
+   "scored": 8,
+   "recall@5": 1.0,
+   "precision@3": 0.875,
+   "mrr": 0.917,
+   "empty_rate": 0.0
+  },
+  "brand_missing": {
+   "scored": 2,
+   "recall@5": 1.0,
+   "precision@3": 0.834,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "followup": {
+   "scored": 7,
+   "recall@5": 1.0,
+   "precision@3": 0.905,
+   "mrr": 0.833,
+   "empty_rate": 0.0
+  },
+  "hinglish": {
+   "scored": 2,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "out_of_scope": {
+   "scored": 2,
+   "correct_refusal_rate": 1.0
+  },
+  "plain": {
+   "scored": 10,
+   "recall@5": 1.0,
+   "precision@3": 0.967,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "price": {
+   "scored": 6,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "typo": {
+   "scored": 2,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "vague": {
+   "scored": 5,
+   "recall@5": 1.0,
+   "precision@3": 0.8,
+   "mrr": 0.85,
+   "empty_rate": 0.0
+  }
+ },
+ "runs": [
+  "v4b-test-gpt-oss-20b",
+  "v4b-test-gpt-oss-120b",
+  "v4b-test-qwen3.8-27b"
+ ]
+}

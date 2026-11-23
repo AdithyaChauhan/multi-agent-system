@@ -21,7 +21,7 @@ Multi-agent e-commerce chat assistant: FastAPI, a LangGraph router with product,
 | `DIAGNOSIS.md`, `SIMPLIFY_REPORT.md` | What was broken, and what the `simplify-agents` branch changed |
 | `app/main.py` | FastAPI: `/chat` (also resumes a paused cancel), sessions |
 | `app/agents/router.py` | One structured LLM decision, then deterministic `route()` |
-| `app/agents/product_agent.py`, `app/tools/product_tools.py` | Product search: the part being rebuilt |
+| `app/agents/product_agent.py`, `app/tools/product_tools.py`, `app/search/` | Product search: extraction, the search loop, hybrid retrieval (pgvector + full text + type, fused) |
 | `app/agents/order_agent.py`, `app/agents/support_agent.py` | Deterministic, template replies |
 | `app/prompts/*.md` | Every prompt. The file in git is the prompt that runs |
 | `app/core/llm.py`, `app/core/config.py` | One shared ChatGroq client; `GROQ_MODEL` is the only model setting |
@@ -32,6 +32,8 @@ Multi-agent e-commerce chat assistant: FastAPI, a LangGraph router with product,
 DATABASE_URL=sqlite:///./test.db GROQ_API_KEY=ci-mock-key LANGCHAIN_TRACING_V2=false \
   venv/Scripts/python -m pytest -m "not integration" --cov=app -p no:cacheprovider; git checkout -q test.db   # unit tests, CI env; >= 80% coverage
 venv/Scripts/python eval/run_retrieval.py --label <name> --model openai/gpt-oss-20b --mode replay            # product-search metrics, 0 tokens
+PRODUCT_SEARCH=hybrid PRODUCT_RANKER=off venv/Scripts/python eval/run_retrieval.py --label <name> --model openai/gpt-oss-20b --mode replay   # retrieval alone, 0 tokens
+venv/Scripts/python scripts/embed_catalog.py --database-url <postgres url>   # after the catalog changes (hybrid search)
 black --check app/ tests/ eval/ && flake8 app/ tests/ eval/                         # CI pins black 26.5.1, flake8 7.3.0
 venv/Scripts/python eval/run_baseline.py --label <name> --runs 1 --model openai/gpt-oss-20b   # costs tokens, see below
 docker compose up -d --build              # full stack; UI at http://localhost:8000/static/login.html
@@ -40,7 +42,7 @@ docker exec multiagent-db psql -U postgres -d multi_agent_baseline -c "<read-onl
 - Black and flake8 aren't in `venv/`. Use `%TEMP%/mas-lint-venv` if it still exists, or pip install the pinned versions into a temp venv.
 - `-p no:cacheprovider` stops pytest from leaving `pytest-cache-files-*` folders in the repo (OneDrive blocks its cache rename).
 - Without the CI env vars, `tests/conftest.py` imports `app.main`, which tries to reach the Docker host `db` and fails. Tests also rewrite the tracked `test.db`; restore it with `git checkout -q test.db`.
-- Retrieval eval: `--mode record` (default) calls Groq and saves answers in `eval/cassettes/`; `--mode replay` reuses them for free and fails loudly if a prompt changed. Labels: `eval/label_queries.py` (see `eval/product_queries.json`).
+- Retrieval eval: `--mode record` (default) calls Groq and saves answers in `eval/cassettes/`; `--mode replay` reuses them for free and fails loudly if a prompt changed. `--mode fill` replays what it has and records only the missing calls. Tune search on the dev half of `eval/query_split.json` only. Labels: `eval/label_queries.py` (see `eval/product_queries.json`).
 
 ## Ground rules
 - Never print, log, copy or commit secrets: `.env`, `helm/templates/secret.yaml`, API keys. Read keys only from the environment.

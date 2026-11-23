@@ -113,6 +113,39 @@
    "type": null
   }
  },
+ "15b1433d386b62f610f8095bf9297028": {
+  "agent": "product",
+  "message": "User request: \"chai banane ke liye kettle\"\n\nProducts:\n1. Tesora - Inspired by you Large Premium Electric Kettle 1.8L, | ₹1349 | 4.4★ | Tesora\n2. Butterfly EKN 1.5-Litre Electric Kettle (Silver with Bl",
+  "model": "openai/gpt-oss-120b",
+  "node": "rank_products",
+  "total_tokens": 701,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
  "16af4da169d6ee4a15616afbbd71228e": {
   "agent": "product",
   "message": "User request: \"bluetooth speaker\"\n\nProducts:\n1. JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL  | ₹1999 | 4.3★ | JBL\n2. boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playb | ₹179",
@@ -168,6 +201,33 @@
    "min_rating": null,
    "not_carried": null,
    "product": "tws earbuds"
+  }
+ },
+ "19cec24ac869fa61bd2209ec5ce40112": {
+  "agent": "product",
+  "message": "User request: \"somewhere to store my files and photos\"\n\nProducts:\n1. SaleOn™ Portable Storage Organizer Bag for Earphone USB Cabl | ₹397 | 4.0★ | SaleOn\n2. Western Digital WD 2TB My Passport Portable ",
+  "model": "openai/gpt-oss-120b",
+  "node": "rank_products",
+  "total_tokens": 772,
+  "value": {
+   "exact": [
+    2,
+    3,
+    4,
+    6,
+    7,
+    8,
+    10
+   ],
+   "same_kind": [
+    2,
+    3,
+    4,
+    6,
+    7,
+    8,
+    10
+   ]
   }
  },
  "1b6f42a55788e66bee476c269244122d": {
@@ -1326,6 +1386,31 @@
    "type": "bluetooth speaker"
   }
  },
+ "6593fd0eaf71c611a849bd552bf4e115": {
+  "agent": "product",
+  "message": "User request: \"remove fuzz balls from my sweaters\"\n\nProducts:\n1. Lint Remover Woolen Clothes Lint Extractor Battery Lint Remo | ₹319 | 4.6★ | Lint\n2. Philips GC026/30 Fabric Shaver, Lint Remover for W",
+  "model": "openai/gpt-oss-120b",
+  "node": "rank_products",
+  "total_tokens": 684,
+  "value": {
+   "exact": [
+    2,
+    3
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
  "66000be193151d483bc4374c96c457e2": {
   "agent": "product",
   "message": "User request: \"remove fuzz balls from my sweaters\"\n\nProducts:\n1. Lint Remover Woolen Clothes Lint Extractor Battery Lint Remo | ₹319 | 4.6★ | Lint\n2. Philips GC026/30 Fabric Shaver, Lint Remover for W",
@@ -1657,6 +1742,61 @@
    ]
   }
  },
+ "722fce6c4bf9d25edba56bf016ee26d1": {
+  "agent": "product",
+  "message": "User request: \"miksar grinder\"\n\nProducts:\n1. Sujata Dynamix DX Mixer Grinder, 900W, 3 Jars (White) | ₹6120 | 4.6★ | Sujata\n2. Sujata Supermix, Mixer Grinder, 900 Watts, 3 Jars (White) | ₹5490 | 4.5★ |",
+  "model": "openai/gpt-oss-120b",
+  "node": "rank_products",
+  "total_tokens": 705,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "73589363b5a48479e7f5b479e5496ebf": {
+  "agent": "product",
+  "message": "User request: \"garam pani ke liye geyser\"\n\nProducts:\n1. Bajaj New Shakti Neo 15L Vertical Storage Water Heater (Geys | ₹5499 | 4.2★ | Bajaj\n2. Bajaj New Shakti Neo 10L Vertical Storage Water Heater (G",
+  "model": "openai/gpt-oss-120b",
+  "node": "rank_products",
+  "total_tokens": 693,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
  "74011fbffb17558a634973635fd81a61": {
   "agent": "product",
   "message": "User request: \"ceiling fan\"\n\nProducts:\n1. Havells Ambrose 1200mm Ceiling Fan (Gold Mist Wood) | ₹2199 | 4.3★ | Havells\n2. atomberg Renesa 1200mm BLDC Motor with Remote 3 Blade Energy | ₹3569 | 4.3★ | ",
@@ -1761,6 +1901,28 @@
    "subcategory": "mouse",
    "suggestion": null,
    "type": null
+  }
+ },
+ "7956254dafdab5be48f4a44d3579273d": {
+  "agent": "product",
+  "message": "User request: \"I need hot water for bathing\"\n\nProducts:\n1. Swiffer Instant Electric Water Heater Faucet Tap Home-Kitche | ₹1439 | 4.8★ | Swiffer\n2. Homeistic Applience™ Instant Electric Water Heater F",
+  "model": "openai/gpt-oss-120b",
+  "node": "rank_products",
+  "total_tokens": 649,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
   }
  },
  "7a31e2f6ef7f74134806cb946d527f72": {
@@ -2810,6 +2972,35 @@
    "product": "room heater"
   }
  },
+ "b0b21c92ac911ffb0418674874dee336": {
+  "agent": "product",
+  "message": "User request: \"something to listen to music while running\"\n\nProducts:\n1. boAt Rockerz 255 Pro+ in-Ear Bluetooth Neckband with Upto 40 | ₹1399 | 4.1★ | boAt\n2. boAt Rockerz 330 in-Ear Bluetooth Neckban",
+  "model": "openai/gpt-oss-120b",
+  "node": "rank_products",
+  "total_tokens": 720,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ]
+  }
+ },
  "b21e09500567dda8392c8ce169751783": {
   "agent": "product",
   "message": "User request: \"mixer grinder\"\n\nProducts:\n1. Sujata Dynamix DX Mixer Grinder, 900W, 3 Jars (White) | ₹6120 | 4.6★ | Sujata\n2. Sujata Dynamix, Mixer Grinder, 900 Watts, 3 Jars (White) | ₹6120 | 4.6★ | S",
@@ -3130,6 +3321,31 @@
     8,
     9,
     10
+   ]
+  }
+ },
+ "c79626e40baffa31237f8fe59d798027": {
+  "agent": "product",
+  "message": "User request: \"samsng tv\"\n\nProducts:\n1. Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart  | ₹30990 | 4.3★ | Samsung\n2. Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED | ₹13490 ",
+  "model": "openai/gpt-oss-120b",
+  "node": "rank_products",
+  "total_tokens": 701,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
    ]
   }
  },

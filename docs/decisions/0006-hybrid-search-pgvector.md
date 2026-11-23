@@ -1,5 +1,5 @@
 # 0006. Hybrid search with pgvector in the existing Postgres
-- **Status:** Accepted. The Phase 3 gate said go on 2026-11-23 (an 11.8-point recall drop on the renamed catalog). The build details are in 0014 (the phase numbers in the text below are from the original plan).
+- **Status:** Accepted. The Phase 3 gate said go on 2026-11-23 (an 11.8-point recall drop on the renamed catalog). Implemented in Phase 3; the build details and measurements are in 0014 (the phase numbers in the text below are from the original plan).
 - **Date:** 2026-11-18
 
 ## Context

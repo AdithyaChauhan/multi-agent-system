@@ -1,0 +1,236 @@
+{
+ "label": "v4-test-qwen3.8-27b",
+ "model": "qwen/qwen3.8-27b",
+ "mode": "fill",
+ "database": "multi_agent_baseline",
+ "cassette": "eval\\cassettes\\retrieval_qwen-qwen3-8-27b.json",
+ "started": "2026-11-23T13:01:42+00:00",
+ "queries": [
+  {
+   "id": "q077",
+   "query": "apple airpods",
+   "history": [],
+   "tags": [
+    "brand_missing"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "product": "tws earbuds",
+    "features": [
+     "airpods"
+    ],
+    "brand": "Apple",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [
+    "brand"
+   ],
+   "reply": "We don't carry Apple tws earbuds. I couldn't find any tws earbuds matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 511,
+   "seconds": 2.55
+  },
+  {
+   "id": "q079",
+   "query": "garmin smartwatch",
+   "history": [],
+   "tags": [
+    "brand_missing"
+   ],
+   "shown": [
+    "B0BP18W8TM",
+    "B0B3N7LR6K",
+    "B0B3NDPCS9",
+    "B0B3RRWSF6",
+    "B0BMVWKZ8G"
+   ],
+   "shown_names": [
+    "Fire-Boltt Gladiator 1.96\" Biggest Display Smart Watch with Bluetooth Calling, V",
+    "Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwatch with 368*448 Pixe",
+    "Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwatch with 368*448 Pixe",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24",
+    "Newly Launched Boult Dive+ with 1.85\" HD Display, Bluetooth Calling Smartwatch, "
+   ],
+   "preferences": {
+    "product": "smartwatch",
+    "features": [],
+    "brand": "Garmin",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [
+    "brand"
+   ],
+   "reply": "We don't carry Garmin smartwatch, so here are the closest options from other brands:\n\n1. **Fire-Boltt Gladiator 1.96\" Bluetooth Smartwatch** — Fire-Boltt\n   ₹3,999 · 4.4/5\n\n2. **Fire-Boltt Visionary Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹3,999 · 4.3/5\n\n3. **Fire-Boltt Visionary AMOLED Bluet",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 871,
+   "seconds": 0.69
+  },
+  {
+   "id": "q082",
+   "query": "gaming laptop",
+   "history": [],
+   "tags": [
+    "out_of_scope"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "product": "laptop",
+    "features": [
+     "gaming"
+    ],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Sorry, we don't carry laptop. Would you like to see our laptop bag range instead?",
+   "score": {
+    "kind": "none",
+    "correct_refusal": true,
+    "shown": 0
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.01
+  },
+  {
+   "id": "q084",
+   "query": "washing machine",
+   "history": [],
+   "tags": [
+    "out_of_scope"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "product": null,
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Sorry, we don't carry washing machine. Here's what we do carry:\n\n• Home & Kitchen (441 products) — cooking appliance, blender, room heater\n• Electronics (402 products) — tv, headphones, smartwatch\n• Computers & Accessories (391 products) — cable, mouse, storage\n• Office Products (36 products) — stat",
+   "score": {
+    "kind": "none",
+    "correct_refusal": true,
+    "shown": 0
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.06
+  },
+  {
+   "id": "q087",
+   "query": "Samsung",
+   "history": [
+    "show me some TVs"
+   ],
+   "tags": [
+    "followup",
+    "brand"
+   ],
+   "shown": [
+    "B092BJMT8Q",
+    "B09F6S8BT6",
+    "B08PV1X771",
+    "B0B15CPR37",
+    "B092BL5DCX"
+   ],
+   "shown_names": [
+    "Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart LED TV UA43AUE60AKLX",
+    "Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED Smart TV UA32T4340B",
+    "Samsung 80 cm (32 inches) Wondertainment Series HD Ready LED Smart TV UA32TE40AA",
+    "Samsung 108 cm (43 inches) Crystal 4K Neo Series Ultra HD Smart LED TV UA43AUE65",
+    "Samsung 138 cm (55 inches) Crystal 4K Series Ultra HD Smart LED TV UA55AUE60AKLX"
+   ],
+   "preferences": {
+    "product": "tv",
+    "features": [],
+    "brand": "Samsung",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Samsung 43\" Crystal 4K Smart LED TV** — Samsung\n   ₹30,990 · 4.3/5\n\n2. **Samsung 32\" Wondertainment HD Ready Smart LED TV** — Samsung\n   ₹13,490 · 4.3/5\n\n3. **Samsung 32\" Wondertainment Series HD Ready Smart TV** — Samsung\n   ₹15,490 · 4.3/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 2,
+   "tokens": 1810,
+   "seconds": 0.44
+  }
+ ],
+ "finished": "2026-11-23T13:02:13+00:00",
+ "summary": {
+  "queries": 5,
+  "scored": 5,
+  "errors": 0,
+  "recall@5": 0.667,
+  "precision@3": 0.667,
+  "mrr": 0.667,
+  "empty_rate": 0.333,
+  "correct_refusal_rate": 1.0,
+  "llm_calls_per_query": 0.8,
+  "tokens_per_query": 638.4,
+  "p50_seconds": 0.44,
+  "p95_seconds": 2.55
+ },
+ "by_tag": {
+  "brand": {
+   "scored": 1,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "brand_missing": {
+   "scored": 2,
+   "recall@5": 0.5,
+   "precision@3": 0.5,
+   "mrr": 0.5,
+   "empty_rate": 0.5
+  },
+  "followup": {
+   "scored": 1,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "out_of_scope": {
+   "scored": 2,
+   "correct_refusal_rate": 1.0
+  }
+ }
+}
