@@ -1,0 +1,308 @@
+{
+ "label": "robust-v4-renamed-gpt-oss-120b",
+ "model": "openai/gpt-oss-120b",
+ "mode": "fill",
+ "database": "multi_agent_renamed",
+ "cassette": "eval\\cassettes\\renamed_gpt-oss-120b.json",
+ "started": "2026-11-23T13:10:22+00:00",
+ "queries": [
+  {
+   "id": "q056",
+   "query": "something to keep my room warm in winter",
+   "history": [],
+   "tags": [
+    "vague"
+   ],
+   "shown": [
+    "B09P1MFKG1",
+    "B0BPBXNQQT",
+    "B01M265AAK",
+    "B099FDW2ZF",
+    "B01N1XVVLC"
+   ],
+   "shown_names": [
+    "Melbon VM-905 2000-Watt Room Heater (ISI Certified, White Color) Ideal Electric ",
+    "Room Heater Warmer Wall-Outlet 400 Watts Electric Handy Room Heater (Room Heater",
+    "Morphy Richards Aristo 2000 Watts PTC Room Heater (White)",
+    "Maharaja Whiteline Nano Carbon Neo, 500 Watts Room Heater (Black, White), Standa",
+    "Bajaj OFR Room Heater, 13 Fin 2900 Watts Oil Filled Room Heater with 400W PTC Ce"
+   ],
+   "preferences": {
+    "product": "space heating",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Melbon VM-905 2000W Room Heater** — Melbon\n   ₹998 · 4.6/5\n\n2. **Wall-Outlet 400W Electric Room Heater** — Room\n   ₹799 · 4.3/5\n\n3. **Morphy Richards Aristo 2000W PTC Room Heater** — Morphy Richards\n   ₹3,711 ",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 0.667,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 2,
+   "tokens": 2024,
+   "seconds": 2.95
+  },
+  {
+   "id": "q059",
+   "query": "something to listen to music while running",
+   "history": [],
+   "tags": [
+    "vague"
+   ],
+   "shown": [
+    "B0B5GJRTHB",
+    "B07XJWTYM2",
+    "B08FN6WGDQ",
+    "B09N3ZNHTY",
+    "B0B217Z5VK"
+   ],
+   "shown_names": [
+    "Wecool Moonwalk M1 ENC True Wireless in Ear Earbuds with Mic, Titanium Drivers f",
+    "realme Buds Wireless in Ear Bluetooth Earphones with mic, 11.2mm Bass Boost Driv",
+    "Samsung Galaxy Buds Live Bluetooth Truly Wireless in Ear Earbuds with Mic, Upto ",
+    "boAt Airdopes 141 Bluetooth Truly Wireless in Ear Earbuds with mic, 42H Playtime",
+    "Noise Buds VS402 Truly Wireless in Ear Earbuds, 35-Hours of Playtime, Instacharg"
+   ],
+   "preferences": {
+    "product": "tws earbuds",
+    "features": [
+     "wireless"
+    ],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Wecool Moonwalk M1 True Wireless Earbuds** — WeCool\n   ₹889 · 4.2/5\n\n2. **realme Buds Wireless TWS Earbuds** — realme\n   ₹1,679 · 4.1/5\n\n3. **Samsung Galaxy Buds Live Wireless Earbuds** — Samsung\n   ₹4,790 · 4",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 0.667,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 2,
+   "tokens": 2066,
+   "seconds": 1.22
+  },
+  {
+   "id": "q062",
+   "query": "something to track my steps and heart rate",
+   "history": [],
+   "tags": [
+    "vague"
+   ],
+   "shown": [
+    "B09RFB2SJQ"
+   ],
+   "shown_names": [
+    "10WeRun Id-116 Bluetooth Smartwatch Wireless Fitness Band for Boys, Girls, Men, "
+   ],
+   "preferences": {
+    "product": "fitness band",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **10WeRun Id-116 Bluetooth Smartwatch Fitness Band** — 10WeRun\n   ₹499 · 4.1/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": false,
+    "shown": 1
+   },
+   "llm_calls": 2,
+   "tokens": 2039,
+   "seconds": 1.28
+  },
+  {
+   "id": "q066",
+   "query": "lojitech mouse",
+   "history": [],
+   "tags": [
+    "typo",
+    "brand"
+   ],
+   "shown": [
+    "B00NFD0ETQ",
+    "B07X2L5Z8C",
+    "B01HJI0FS2",
+    "B073BRXPZX",
+    "B0819HZPXL"
+   ],
+   "shown_names": [
+    "Logitech G402 Hyperion Fury USB Wired Gaming Mouse, 4,000 DPI, Lightweight, 8 Pr",
+    "Logitech Pebble M350 Wireless Mouse with Bluetooth or USB - Silent, Slim Compute",
+    "Dell MS116 1000Dpi USB Wired Optical Mouse, Led Tracking, Scrolling Wheel, Plug ",
+    "Lenovo 300 Wired Plug & Play USB Mouse, High Resolution 1600 DPI Optical Sensor,",
+    "Zebronics Zeb-Transformer-M Optical USB Gaming Mouse with LED Effect(Black)"
+   ],
+   "preferences": {
+    "product": "mouse",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Logitech G402 Hyperion Fury USB Gaming Mouse** — Logitech\n   ₹1,995 · 4.6/5\n\n2. **Logitech Pebble M350 Wireless Mouse** — Logitech\n   ₹1,490 · 4.6/5\n\n3. **Dell MS116 USB Optical Mouse 1000DPI** — Dell\n   ₹299 ",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 2,
+   "tokens": 3368,
+   "seconds": 1.44
+  },
+  {
+   "id": "q068",
+   "query": "headfones",
+   "history": [],
+   "tags": [
+    "typo"
+   ],
+   "shown": [
+    "B079S811J3",
+    "B078W65FJ7",
+    "B0873L7J6X",
+    "B07PR1CL3S",
+    "B01FSYQ2A4"
+   ],
+   "shown_names": [
+    "Redgear Cosmo 7,1 Usb Gaming Wired Over Ear Headphones With Mic With Virtual Sur",
+    "boAt BassHeads 900 On-Ear Wired Headphones with Mic (White)",
+    "Infinity (JBL Glide 510, 72 Hrs Playtime with Quick Charge, Wireless On Ear Head",
+    "boAt Rockerz 450 Bluetooth On Ear Headphones with Mic, Upto 15 Hours Playback, 4",
+    "boAt Rockerz 400 Bluetooth On Ear Headphones With Mic With Upto 8 Hours Playback"
+   ],
+   "preferences": {
+    "product": "headphones",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Redgear Cosmo 7.1 Wired Over Ear Gaming Headphones** — Redgear\n   ₹1,990 · 4.3/5\n\n2. **boAt BassHeads 900 On-Ear Wired Headphones with Mic** — boAt\n   ₹849 · 4.2/5\n\n3. **Infinity JBL Glide 510 Wireless On‑Ear ",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 2,
+   "tokens": 2037,
+   "seconds": 1.52
+  },
+  {
+   "id": "q072",
+   "query": "garam pani ke liye geyser",
+   "history": [],
+   "tags": [
+    "hinglish"
+   ],
+   "shown": [
+    "B0BP89YBC1",
+    "B08WRKSF9D",
+    "B078JBK4GX",
+    "B078JDNZJ8",
+    "B097R45BH8"
+   ],
+   "shown_names": [
+    "Campfire Spring Chef Prolix Instant Portable Water Heater Geyser 1Ltr. for Use H",
+    "V-Guard Divino 5 Star Rated 15 Litre Storage Water Heater (Geyser) with Advanced",
+    "Havells Instanio 1-Litre 3KW Instant Water Heater (Geyser), White Blue",
+    "Havells Instanio 3-Litre Instant Geyser (White/Blue)",
+    "Bajaj New Shakti Neo 15L Vertical Storage Water Heater (Geyser 15 litres) 4 Star"
+   ],
+   "preferences": {
+    "product": "geyser",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Campfire Spring Chef Prolix 1L Instant Portable Water Heater** — Campfire\n   ₹1,499 · 4.7/5\n\n2. **V-Guard Divino 15 Litre Storage Water Heater** — V-Guard\n   ₹6,499 · 4.4/5\n\n3. **Havells Instanio 1L 3KW Instant Water Heater** — Havells\n   ₹2,599 · 4.4/5",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 2,
+   "tokens": 2084,
+   "seconds": 1.57
+  }
+ ],
+ "finished": "2026-11-23T13:12:10+00:00",
+ "summary": {
+  "queries": 6,
+  "scored": 6,
+  "errors": 0,
+  "recall@5": 0.833,
+  "precision@3": 0.722,
+  "mrr": 0.833,
+  "empty_rate": 0.0,
+  "correct_refusal_rate": null,
+  "llm_calls_per_query": 2.0,
+  "tokens_per_query": 2269.667,
+  "p50_seconds": 1.44,
+  "p95_seconds": 2.95
+ },
+ "by_tag": {
+  "brand": {
+   "scored": 1,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "hinglish": {
+   "scored": 1,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "typo": {
+   "scored": 2,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "vague": {
+   "scored": 3,
+   "recall@5": 0.667,
+   "precision@3": 0.445,
+   "mrr": 0.667,
+   "empty_rate": 0.0
+  }
+ }
+}

@@ -223,6 +223,39 @@
         .typing span:nth-child(1) { animation-delay: -0.32s; }
         .typing span:nth-child(2) { animation-delay: -0.16s; }
         @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        .typing .step-label { margin-left: 8px; font-size: 0.85rem; color: #6b7280; }
+
+        /* ── Active search filters ── */
+        .filter-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .filter-chip {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 10px; border-radius: 999px; font-size: 0.8rem;
+            background: #eef2ff; color: #3730a3; border: 1px solid #c7d2fe;
+        }
+        .chip-remove {
+            border: none; background: none; cursor: pointer; padding: 0 0 0 2px;
+            color: #6366f1; font-size: 0.75rem; line-height: 1;
+        }
+        .chip-remove:hover { color: #dc2626; }
+
+        /* ── Product cards ── */
+        .product-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 10px; }
+        .product-card {
+            display: flex; flex-direction: column; background: #fff; border: 1px solid #e5e7eb;
+            border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .product-card .pc-img { height: 120px; display: flex; align-items: center; justify-content: center; background: #f9fafb; }
+        .product-card img { max-width: 100%; max-height: 120px; object-fit: contain; }
+        .product-card .pc-placeholder { font-size: 2rem; color: #9ca3af; }
+        .product-card .pc-body { padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 3px; flex: 1; }
+        .product-card .pc-title { font-size: 0.82rem; font-weight: 600; color: #111827; line-height: 1.25;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .product-card .pc-brand { font-size: 0.75rem; color: #6b7280; }
+        .product-card .pc-meta { display: flex; justify-content: space-between; align-items: baseline; margin-top: auto; }
+        .product-card .pc-price { font-weight: 700; color: #111827; font-size: 0.9rem; }
+        .product-card .pc-rating { font-size: 0.75rem; color: #b45309; }
+        .product-card .pc-link { font-size: 0.78rem; color: #4f46e5; text-decoration: none; margin-top: 4px; }
+        .product-card .pc-link:hover { text-decoration: underline; }
 
         /* ── Cancel confirm buttons ── */
         .confirm-actions {
@@ -514,9 +547,19 @@
 
         function showWelcome() {
             addMessage("Hi! I'm your AI shopping assistant. Ask me about your orders, products, or support issues.", 'assistant');
+            let demoOrders = [];
+            try { demoOrders = JSON.parse(localStorage.getItem('demo_orders') || '[]'); } catch (e) { demoOrders = []; }
+            if (demoOrders.length) {
+                addMessage(
+                    `You're a demo shopper with your own orders: ${demoOrders.join(', ')}.\n\n` +
+                    'Things to try:\n• "something to keep my room warm under 2000"\n• "tell me more about the second one"\n' +
+                    '• "where is my TV order?"\n• "cancel my mouse order"\n• "my steam iron arrived damaged"',
+                    'assistant'
+                );
+            }
         }
 
-        function addConfirmButtons(msgRow, orderId, productName) {
+        function addConfirmButtons(msgRow) {
             const col = msgRow.querySelector('.msg-col');
             const actions = document.createElement('div');
             actions.className = 'confirm-actions';
@@ -545,10 +588,11 @@
                 messageInput.focus();
             }
 
-            yesBtn.addEventListener('click', async () => {
+            // The assistant's graph is paused on this question; the answer resumes it.
+            async function answer(confirm, label) {
                 actions.remove();
                 unlockInput();
-                addMessage('Yes, cancel it', 'user');
+                addMessage(label, 'user');
                 const typingRow = document.createElement('div');
                 typingRow.className = 'typing-row';
                 const ta = document.createElement('div'); ta.className = 'bot-avatar'; ta.textContent = '🤖';
@@ -559,31 +603,165 @@
 
                 const headers = { 'Content-Type': 'application/json' };
                 if (token && !isGuest) headers['Authorization'] = `Bearer ${token}`;
+                if (sessionId) headers['X-Session-ID'] = sessionId;
                 try {
-                    const res = await fetch('/cancel-order', { method: 'POST', headers, body: JSON.stringify({ order_id: orderId, session_id: sessionId }) });
-                    const data = await res.json();
+                    const res = await postChat({ message: label, confirm }, headers, (step) => showStep(tb, step));
+                    const data = res.data;
                     typingRow.remove();
-                    addMessage(data.message, 'assistant');
+                    addMessage(res.ok ? data.response : `Error: ${data.detail || 'Something went wrong'}`, 'assistant');
                 } catch(e) {
                     typingRow.remove();
                     addMessage('Something went wrong. Please try again.', 'assistant');
                 }
-            });
+            }
 
-            noBtn.addEventListener('click', () => {
-                actions.remove();
-                unlockInput();
-                addMessage('No, keep it', 'user');
-                addMessage('No problem! Your order is still active.', 'assistant');
-            });
+            yesBtn.addEventListener('click', () => answer(true, 'Yes, cancel it'));
+            noBtn.addEventListener('click', () => answer(false, 'No, keep it'));
         }
 
-        async function sendMessage() {
-            const message = messageInput.value.trim();
+        // Sends a turn to /chat/stream and shows each step ("Searching products…") through onStep.
+        // Resolves to { ok, status, data } with data shaped like /chat's reply. Falls back to /chat only
+        // when streaming never started, so a turn is never sent twice.
+        async function postChat(body, headers, onStep) {
+            let started = false;
+            try {
+                const res = await fetch('/chat/stream', { method: 'POST', headers, body: JSON.stringify(body) });
+                if (!res.ok) return { ok: false, status: res.status, data: await res.json().catch(() => ({})) };
+                if (res.body && (res.headers.get('content-type') || '').startsWith('text/event-stream')) {
+                    started = true;
+                    const reader = res.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = '';
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+                        buffer += decoder.decode(value, { stream: true });
+                        let end;
+                        while ((end = buffer.indexOf('\n\n')) >= 0) {
+                            const block = buffer.slice(0, end);
+                            buffer = buffer.slice(end + 2);
+                            const name = (/^event: (.*)$/m.exec(block) || [])[1];
+                            const raw = (/^data: (.*)$/m.exec(block) || [])[1];
+                            if (!name || !raw) continue;
+                            const data = JSON.parse(raw);
+                            if (name === 'step') onStep(data.label);
+                            else if (name === 'reply') return { ok: true, status: 200, data };
+                            else if (name === 'error') return { ok: false, status: 500, data };
+                        }
+                    }
+                    return { ok: false, status: 500, data: { detail: 'The connection closed early. Please try again.' } };
+                }
+            } catch (e) {
+                if (started) return { ok: false, status: 500, data: { detail: 'The connection closed early. Please try again.' } };
+            }
+            const res = await fetch('/chat', { method: 'POST', headers, body: JSON.stringify(body) });
+            return { ok: res.ok, status: res.status, data: await res.json().catch(() => ({})) };
+        }
+
+        function showStep(typingBubble, label) {
+            let el = typingBubble.querySelector('.step-label');
+            if (!el) {
+                el = document.createElement('em');
+                el.className = 'step-label';
+                typingBubble.appendChild(el);
+            }
+            el.textContent = label;
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Active search filters as chips under a product reply; removing one searches again.
+        function addFilterChips(msgRow, chips) {
+            const row = document.createElement('div');
+            row.className = 'filter-chips';
+            for (const chip of chips) {
+                const el = document.createElement('span');
+                el.className = 'filter-chip';
+                el.textContent = chip.label;
+                if (chip.removable) {
+                    const x = document.createElement('button');
+                    x.className = 'chip-remove';
+                    x.title = `Remove ${chip.label}`;
+                    x.textContent = '✕';
+                    x.addEventListener('click', () => {
+                        row.remove();
+                        const edit = { field: chip.field };
+                        if (chip.value !== undefined) edit.value = chip.value;
+                        sendMessage(`Remove ${chip.label}`, { remove_filter: edit });
+                    });
+                    el.appendChild(x);
+                }
+                row.appendChild(el);
+            }
+            msgRow.querySelector('.msg-col').appendChild(row);
+        }
+
+        // The products a reply lists, as cards: photo, price, rating and a link. Text only, never HTML.
+        function addProductCards(msgRow, products) {
+            const grid = document.createElement('div');
+            grid.className = 'product-cards';
+            for (const p of products) {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                const imgBox = document.createElement('div');
+                imgBox.className = 'pc-img';
+                const placeholder = () => {
+                    imgBox.textContent = '';
+                    const ph = document.createElement('span');
+                    ph.className = 'pc-placeholder';
+                    ph.textContent = '🛍️';
+                    imgBox.appendChild(ph);
+                };
+                if (p.image && /^https:\/\//.test(p.image)) {
+                    const img = document.createElement('img');
+                    img.src = p.image;
+                    img.alt = p.title || 'Product photo';
+                    img.loading = 'lazy';
+                    img.referrerPolicy = 'no-referrer';
+                    img.addEventListener('error', placeholder);
+                    imgBox.appendChild(img);
+                } else {
+                    placeholder();
+                }
+                const body = document.createElement('div');
+                body.className = 'pc-body';
+                const title = document.createElement('div');
+                title.className = 'pc-title';
+                title.textContent = p.title || '';
+                title.title = p.title || '';
+                const brand = document.createElement('div');
+                brand.className = 'pc-brand';
+                brand.textContent = p.brand || '';
+                const meta = document.createElement('div');
+                meta.className = 'pc-meta';
+                const price = document.createElement('span');
+                price.className = 'pc-price';
+                price.textContent = typeof p.price === 'number' ? `₹${p.price.toLocaleString('en-IN')}` : '';
+                const rating = document.createElement('span');
+                rating.className = 'pc-rating';
+                rating.textContent = typeof p.rating === 'number' ? `★ ${p.rating.toFixed(1)}` : '';
+                meta.append(price, rating);
+                body.append(title, brand, meta);
+                if (p.link && /^https:\/\//.test(p.link)) {
+                    const a = document.createElement('a');
+                    a.className = 'pc-link';
+                    a.href = p.link;
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                    a.textContent = 'View product →';
+                    body.appendChild(a);
+                }
+                card.append(imgBox, body);
+                grid.appendChild(card);
+            }
+            msgRow.querySelector('.msg-col').appendChild(grid);
+        }
+
+        async function sendMessage(text, extra) {
+            const message = (typeof text === 'string' ? text : messageInput.value).trim();
             if (!message) return;
 
             addMessage(message, 'user');
-            messageInput.value = '';
+            if (typeof text !== 'string') messageInput.value = '';
             sendButton.disabled = true;
 
             const typingRow = document.createElement('div');
@@ -604,8 +782,8 @@
                 if (token && !isGuest) headers['Authorization'] = `Bearer ${token}`;
                 if (sessionId) headers['X-Session-ID'] = sessionId;
 
-                const response = await fetch('/chat', { method: 'POST', headers, body: JSON.stringify({ message }) });
-                const data = await response.json();
+                const response = await postChat({ message, ...(extra || {}) }, headers, (label) => showStep(typingBubble, label));
+                const data = response.data;
                 typingRow.remove();
 
                 if (response.ok) {
@@ -613,10 +791,14 @@
                     localStorage.setItem('chat_session_id', sessionId);
                     const msgRow = addMessage(data.response, 'assistant', data.run_id || null);
                     if (data.action && data.action.type === 'confirm_cancel') {
-                        addConfirmButtons(msgRow, data.action.order_id, data.action.product_name);
+                        addConfirmButtons(msgRow);
+                    } else {
+                        if (data.products && data.products.length) addProductCards(msgRow, data.products);
+                        if (data.active_filters && data.active_filters.length) addFilterChips(msgRow, data.active_filters);
                     }
                 } else if (response.status === 401) {
                     localStorage.removeItem('access_token');
+            localStorage.removeItem('demo_orders');
                     addMessage('Your session expired. Please sign in again.', 'assistant');
                     setTimeout(() => window.location.href = '/static/login.html', 2000);
                 } else {
@@ -660,6 +842,7 @@
 
         function logout() {
             localStorage.removeItem('access_token');
+            localStorage.removeItem('demo_orders');
             localStorage.removeItem('pending_session');
             localStorage.removeItem('chat_session_id');
             window.location.href = '/static/chat.html';

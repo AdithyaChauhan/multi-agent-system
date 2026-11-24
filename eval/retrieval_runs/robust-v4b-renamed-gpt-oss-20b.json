@@ -1,0 +1,1154 @@
+{
+ "label": "robust-v4b-renamed-gpt-oss-20b",
+ "model": "openai/gpt-oss-20b",
+ "mode": "fill",
+ "database": "multi_agent_renamed",
+ "cassette": "eval\\cassettes\\renamed_gpt-oss-20b.json",
+ "started": "2026-11-23T13:29:35+00:00",
+ "queries": [
+  {
+   "id": "q001",
+   "query": "electric kettle",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [
+    "B09VGS66FV",
+    "B00TI8E7BI",
+    "B078V8R9BS",
+    "B07GLS2563",
+    "B07QDSN9V6"
+   ],
+   "shown_names": [
+    "Tesora - Inspired by you Large Premium Electric Kettle 1.8L, Stainless Steel Inn",
+    "Philips HD9306/06 1.5-Litre Electric Kettle (Multicolor)",
+    "Butterfly EKN 1.5-Litre Electric Kettle (Silver with Black)",
+    "Cello Quick Boil Popular Electric Kettle 1 Litre 1200 Watts | Stainless Steel bo",
+    "INALSA Electric Kettle 1.5 Litre with Stainless Steel Body - Absa|Auto Shut Off "
+   ],
+   "preferences": {
+    "product": "electric kettle",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Tesora 1.8L Stainless Steel Electric Kettle** — Tesora\n   ₹1,349 · 4.4/5\n\n2. **Philips 1.5L Electric Kettle** — Philips\n   ₹2,695 · 4.4/5\n\n3. **Butterfly EKN 1.5L Electric Kettle** — Butterfly\n   ₹749 · 4.2/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 1.88
+  },
+  {
+   "id": "q002",
+   "query": "mixer grinder",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [
+    "B07Y9PY6Y1",
+    "B07MKMFKPG",
+    "B00HVXS7WC",
+    "B08MXJYB2V",
+    "B085LPT5F4"
+   ],
+   "shown_names": [
+    "Sujata Powermatic Plus, Juicer Mixer Grinder with Chutney Jar, 900 Watts, 3 Jars",
+    "Bosch Pro 1000W Mixer Grinder MGM8842MIN - Black",
+    "Bajaj Rex 500W Mixer Grinder with Nutri-Pro Feature, 3 Jars, White",
+    "USHA RapidMix 500-Watt Copper Motor Mixer Grinder with 3 Jars and 5 Years Warran",
+    "Solidaire 550-Watt Mixer Grinder with 3 Jars (Black) (SLD-550-B)"
+   ],
+   "preferences": {
+    "product": "hand mixer",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Sujata Powermatic Plus Juicer Mixer Grinder** — Sujata\n   ₹6,525 · 4.5/5\n\n2. **Bosch Pro 1000W Mixer Grinder MGM8842MIN** — Bosch\n   ₹6,999 · 4.4/5\n\n3. **Bajaj Rex 500W Mixer Grinder with 3 Jars** — Bajaj\n   ₹",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.16
+  },
+  {
+   "id": "q003",
+   "query": "room heater",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [
+    "B09P1MFKG1",
+    "B0BMTZ4T1D",
+    "B0BPBXNQQT",
+    "B01M265AAK",
+    "B099FDW2ZF"
+   ],
+   "shown_names": [
+    "Melbon VM-905 2000-Watt Room Heater (ISI Certified, White Color) Ideal Electric ",
+    "!!1000 Watt/2000-Watt Room Heater!! Fan Heater!!Pure White!!HN-2500!!Made in Ind",
+    "Room Heater Warmer Wall-Outlet 400 Watts Electric Handy Room Heater (Room Heater",
+    "Morphy Richards Aristo 2000 Watts PTC Room Heater (White)",
+    "Maharaja Whiteline Nano Carbon Neo, 500 Watts Room Heater (Black, White), Standa"
+   ],
+   "preferences": {
+    "product": "room heater",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Melbon VM-905 2000W Room Heater** — Melbon\n   ₹998 · 4.6/5\n\n2. **1000W/2000W Room Heater Fan Heater** — !!1000\n   ₹784 · 4.5/5\n\n3. **Wall-Outlet 400W Electric Room Heater** — Room\n   ₹799 · 4.3/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 0.667,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.19
+  },
+  {
+   "id": "q005",
+   "query": "smartwatch",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [
+    "B0B3N7LR6K",
+    "B0B3RRWSF6",
+    "B0B3RSDSZ3",
+    "B09YV3K34W",
+    "B09YV4MW2T"
+   ],
+   "shown_names": [
+    "Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwatch with 368*448 Pixe",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24",
+    "Fire-Boltt India's No 1 Smartwatch Brand Talk 2 Bluetooth Calling Smartwatch wit",
+    "Fire-Boltt India's No 1 Smartwatch Brand Talk 2 Bluetooth Calling Smartwatch wit"
+   ],
+   "preferences": {
+    "product": "smartwatch",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Fire-Boltt Visionary Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹3,999 · 4.3/5\n\n2. **Fire-Boltt Phoenix Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹1,998 · 4.3/5\n\n3. **Fire-Boltt Phoenix Bluetooth Call",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.14
+  },
+  {
+   "id": "q006",
+   "query": "headphones",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [
+    "B079S811J3",
+    "B078W65FJ7",
+    "B07PR1CL3S",
+    "B01FSYQ2A4",
+    "B01DEWVZ2C"
+   ],
+   "shown_names": [
+    "Redgear Cosmo 7,1 Usb Gaming Wired Over Ear Headphones With Mic With Virtual Sur",
+    "boAt BassHeads 900 On-Ear Wired Headphones with Mic (White)",
+    "boAt Rockerz 450 Bluetooth On Ear Headphones with Mic, Upto 15 Hours Playback, 4",
+    "boAt Rockerz 400 Bluetooth On Ear Headphones With Mic With Upto 8 Hours Playback",
+    "JBL C100SI Wired In Ear Headphones with Mic, JBL Pure Bass Sound, One Button Mul"
+   ],
+   "preferences": {
+    "product": "headphones",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Redgear Cosmo 7.1 Wired Over Ear Gaming Headphones** — Redgear\n   ₹1,990 · 4.3/5\n\n2. **boAt BassHeads 900 On-Ear Wired Headphones with Mic** — boAt\n   ₹849 · 4.2/5\n\n3. **boAt Rockerz 450 Bluetooth On-Ear Headp",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 0.667,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.13
+  },
+  {
+   "id": "q008",
+   "query": "ceiling fan",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [
+    "B08Y5QJXSR",
+    "B08ZHYNTM1",
+    "B01LYU3BZF",
+    "B01L7C4IU2",
+    "B09MT94QLL"
+   ],
+   "shown_names": [
+    "atomberg Renesa 1200mm BLDC Motor with Remote 3 Blade Energy Saving Ceiling Fan ",
+    "Havells Festiva 1200mm Dust Resistant Ceiling Fan (Gold Mist)",
+    "Havells Ambrose 1200mm Ceiling Fan (Gold Mist Wood)",
+    "Havells Ambrose 1200mm Ceiling Fan (Pearl White Wood)",
+    "Havells Glaze 74W Pearl Ivory Gold Ceiling Fan, Sweep: 1200 Mm"
+   ],
+   "preferences": {
+    "product": "ceiling fan",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **atomberg Renesa Ceiling Fan** — atomberg\n   ₹3,569 · 4.3/5\n\n2. **Havells Festiva Dust Resistant Ceiling Fan** — Havells\n   ₹2,899 · 4.3/5\n\n3. **Havells Ambrose 1200mm Ceiling Fan Gold Mist** — Havells\n   ₹2,19",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.18
+  },
+  {
+   "id": "q009",
+   "query": "pen drive",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [
+    "B01EZ0X3L8",
+    "B07JJFSG2B",
+    "B07SLMR1K6",
+    "B01N6LU1VF",
+    "B0819ZZK5K"
+   ],
+   "shown_names": [
+    "SanDisk Ultra 64 GB USB Pen Drives (SDDDC2-064G-I35, Black, Silver)",
+    "SanDisk Ultra 128 GB USB 3.0 Pen Drive (Black)",
+    "SanDisk Ultra Flair 64GB USB 3.0 Pen Drive, Multicolor",
+    "SanDisk Ultra Dual 64 GB USB 3.0 OTG Pen Drive (Black)",
+    "SanDisk Ultra Dual Drive Go USB Type C Pendrive for Mobile (Black, 128 GB, 5Y - "
+   ],
+   "preferences": {
+    "product": "pen drive",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **SanDisk Ultra 64GB USB Pen Drive** — SanDisk\n   ₹729 · 4.3/5\n\n2. **SanDisk Ultra 128GB USB Pen Drive** — SanDisk\n   ₹889 · 4.3/5\n\n3. **SanDisk Ultra Flair 64GB USB 3.0 Pen Drive** — SanDisk\n   ₹519 · 4.3/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.18
+  },
+  {
+   "id": "q013",
+   "query": "keyboard",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [
+    "B0148NPH9I",
+    "B09BVCVTBC",
+    "B00MUTWLW4",
+    "B00ZYLMQH0",
+    "B08498H13H"
+   ],
+   "shown_names": [
+    "Logitech K380 Wireless Multi-Device Keyboard for Windows, Apple iOS, Apple TV An",
+    "Redragon K617 Fizz 60% Wired RGB Gaming Keyboard, 61 Keys Compact Mechanical Key",
+    "Logitech K480 Wireless Multi-Device Keyboard for Windows, macOS, iPadOS, Android",
+    "Dell KB216 Wired Multimedia USB Keyboard with Super Quite Plunger Keys with Spil",
+    "HP GK320 Wired Full Size RGB Backlight Mechanical Gaming Keyboard, 4 LED Indicat"
+   ],
+   "preferences": {
+    "product": "keyboard",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Logitech K380 Multi-Device Bluetooth Keyboard** — Logitech\n   ₹2,640 · 4.5/5\n\n2. **K617 Fizz 60% Wired RGB Mechanical Keyboard** — Redragon\n   ₹2,649 · 4.5/5\n\n3. **Logitech K480 Wireless Multi-Device Keyboard*",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.16
+  },
+  {
+   "id": "q014",
+   "query": "speakers",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [
+    "B08SBH499M",
+    "B08K9PX15C",
+    "B07L3NDN24"
+   ],
+   "shown_names": [
+    "ZEBRONICS Zeb-Warrior II 10 watts 2.0 Multimedia Speaker with RGB Lights, USB Po",
+    "Zebronics Zeb Wonderbar 10 USB Powered 2.0 Computer Speaker with RGB Lights",
+    "ZEBRONICS Zeb-Fame 5watts 2.0 Multi Media Speakers with AUX, USB and Volume Cont"
+   ],
+   "preferences": {
+    "product": "computer speaker",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **ZEBRONICS Zeb-Warrior II 10W Multimedia PC Speaker** — Zebronics\n   ₹649 · 4.1/5\n\n2. **Zebronics Zeb Wonderbar 10 USB Powered Computer Speaker** — Zebronics\n   ₹849 · 4.0/5\n\n3. **Zebronics Zeb-Fame 5W 2.0 Mult",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 3
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.22
+  },
+  {
+   "id": "q016",
+   "query": "lint remover",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [
+    "B09JN37WBX",
+    "B00TDD0YM4",
+    "B09SFRNKSR",
+    "B09NNZ1GF7",
+    "B09MTLG4TP"
+   ],
+   "shown_names": [
+    "Lint Remover Woolen Clothes Lint Extractor Battery Lint Removing Machine Bhur Re",
+    "Philips GC026/30 Fabric Shaver, Lint Remover for Woolen Sweaters, Blankets, Jack",
+    "FABWARE Lint Remover for Clothes - Sticky Lint Roller for Clothes, Furniture, Wo",
+    "Lint Remover For Clothes With 1 Year Warranty Fabric Shaver Lint Shaver for Wool",
+    "SAIELLIN Electric Lint Remover for Clothes Fabric Shaver Lint Shaver for Woolen "
+   ],
+   "preferences": {
+    "product": "Fabric Care",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Battery Powered Lint Remover for Woolen Clothes** — Lint\n   ₹319 · 4.6/5\n\n2. **Philips Fabric Shaver Lint Remover** — Philips\n   ₹1,490 · 4.4/5\n\n3. **FABWARE Sticky Lint Roller for Clothes** — FABWARE\n   ₹298 ",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.23
+  },
+  {
+   "id": "q021",
+   "query": "logitech mouse",
+   "history": [],
+   "tags": [
+    "brand"
+   ],
+   "shown": [
+    "B00NFD0ETQ",
+    "B07X2L5Z8C",
+    "B01MQ2A86A",
+    "B08LT9BMPP",
+    "B004IO5BMQ"
+   ],
+   "shown_names": [
+    "Logitech G402 Hyperion Fury USB Wired Gaming Mouse, 4,000 DPI, Lightweight, 8 Pr",
+    "Logitech Pebble M350 Wireless Mouse with Bluetooth or USB - Silent, Slim Compute",
+    "Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Nano Receiver, 1000 DP",
+    "Logitech G102 USB Light Sync Gaming Mouse with Customizable RGB Lighting, 6 Prog",
+    "Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, 12 Month Life Battery, "
+   ],
+   "preferences": {
+    "product": "mouse",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Logitech G402 Hyperion Fury USB Gaming Mouse** — Logitech\n   ₹1,995 · 4.6/5\n\n2. **Logitech Pebble M350 Wireless Mouse** — Logitech\n   ₹1,490 · 4.6/5\n\n3. **Logitech M331 Silent Plus Wireless Mouse** — Logitech\n   ₹1,295 · 4.6/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.13
+  },
+  {
+   "id": "q022",
+   "query": "samsung tv",
+   "history": [],
+   "tags": [
+    "brand"
+   ],
+   "shown": [
+    "B09F6S8BT6",
+    "B092BJMT8Q",
+    "B0B15CPR37",
+    "B092BL5DCX",
+    "B08PV1X771"
+   ],
+   "shown_names": [
+    "Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED Smart TV UA32T4340B",
+    "Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart LED TV UA43AUE60AKLX",
+    "Samsung 108 cm (43 inches) Crystal 4K Neo Series Ultra HD Smart LED TV UA43AUE65",
+    "Samsung 138 cm (55 inches) Crystal 4K Series Ultra HD Smart LED TV UA55AUE60AKLX",
+    "Samsung 80 cm (32 inches) Wondertainment Series HD Ready LED Smart TV UA32TE40AA"
+   ],
+   "preferences": {
+    "product": "tv",
+    "features": [],
+    "brand": "samsung",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Samsung 32\" Wondertainment HD Ready Smart LED TV** — Samsung\n   ₹13,490 · 4.3/5\n\n2. **Samsung 43\" Crystal 4K Smart LED TV** — Samsung\n   ₹30,990 · 4.3/5\n\n3. **Samsung 43\" Crystal 4K Neo Smart LED TV** — Samsung\n   ₹32,990 · 4.3/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.06
+  },
+  {
+   "id": "q024",
+   "query": "bajaj room heater",
+   "history": [],
+   "tags": [
+    "brand"
+   ],
+   "shown": [
+    "B0BPBXNQQT",
+    "B01N1XVVLC",
+    "B009P2LITG",
+    "B009P2LK08",
+    "B00LUGTJGO"
+   ],
+   "shown_names": [
+    "Room Heater Warmer Wall-Outlet 400 Watts Electric Handy Room Heater (Room Heater",
+    "Bajaj OFR Room Heater, 13 Fin 2900 Watts Oil Filled Room Heater with 400W PTC Ce",
+    "Bajaj Majesty RX11 2000 Watts Heat Convector Room Heater (White, ISI Approved)",
+    "Bajaj Minor 1000 Watts Radiant Room Heater (Steel, ISI Approved)",
+    "Bajaj RHX-2 800-Watt Room Heater (White)"
+   ],
+   "preferences": {
+    "product": "Space Heating",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Wall-Outlet 400W Electric Room Heater** — Room\n   ₹799 · 4.3/5\n\n2. **Bajaj OFR Oil Filled Room Heater with Fan** — Bajaj\n   ₹9,590 · 4.1/5\n\n3. **Bajaj Majesty RX11 2000W convector heater** — Bajaj\n   ₹2,169 · 4.1/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 0.5,
+    "precision3": 0.667,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.2
+  },
+  {
+   "id": "q026",
+   "query": "fire-boltt smartwatch",
+   "history": [],
+   "tags": [
+    "brand"
+   ],
+   "shown": [
+    "B0BNXFDTZ2",
+    "B0BP18W8TM",
+    "B0B3RRWSF6",
+    "B0B3N7LR6K",
+    "B0B3RSDSZ3"
+   ],
+   "shown_names": [
+    "Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Sports Mode, 8 UI Inter",
+    "Fire-Boltt Gladiator 1.96\" Biggest Display Smart Watch with Bluetooth Calling, V",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24",
+    "Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwatch with 368*448 Pixe",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24"
+   ],
+   "preferences": {
+    "product": "smartwatch",
+    "features": [],
+    "brand": "fire-boltt",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Fire-Boltt Tank 1.85\" Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹2,999 · 4.4/5\n\n2. **Fire-Boltt Gladiator 1.96\" Bluetooth Smartwatch** — Fire-Boltt\n   ₹3,999 · 4.4/5\n\n3. **Fire-Boltt Phoenix Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹1,998 · 4",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.08
+  },
+  {
+   "id": "q031",
+   "query": "mixer grinder under 3000",
+   "history": [],
+   "tags": [
+    "price"
+   ],
+   "shown": [
+    "B00HVXS7WC",
+    "B08MXJYB2V",
+    "B085LPT5F4",
+    "B08CNLYKW5",
+    "B0187F2IOK"
+   ],
+   "shown_names": [
+    "Bajaj Rex 500W Mixer Grinder with Nutri-Pro Feature, 3 Jars, White",
+    "USHA RapidMix 500-Watt Copper Motor Mixer Grinder with 3 Jars and 5 Years Warran",
+    "Solidaire 550-Watt Mixer Grinder with 3 Jars (Black) (SLD-550-B)",
+    "Lifelong Power - Pro 500 Watt 3 Jar Mixer Grinder with 3 Speed Control and 1100 ",
+    "Bajaj HM-01 Powerful 250W Hand Mixer, Black"
+   ],
+   "preferences": {
+    "product": "hand mixer",
+    "features": [],
+    "brand": null,
+    "max_price": 3000,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Bajaj Rex 500W Mixer Grinder with 3 Jars** — Bajaj\n   ₹1,999 · 4.2/5\n\n2. **USHA RapidMix 500W Copper Motor Mixer Grinder with 3 Jars** — Usha\n   ₹2,449 · 4.0/5\n\n3. **Solidaire 550W Mixer Grinder with 3 Jars** ",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.16
+  },
+  {
+   "id": "q033",
+   "query": "smart tv under 15000",
+   "history": [],
+   "tags": [
+    "price"
+   ],
+   "shown": [
+    "B084872DQY",
+    "B09F6S8BT6",
+    "B0B16KD737",
+    "B08DPLCM6T",
+    "B0B1YVCJ2Y"
+   ],
+   "shown_names": [
+    "Mi 80 cm (32 inches) HD Ready Android Smart LED TV 4A PRO | L32M5-AL (Black)",
+    "Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED Smart TV UA32T4340B",
+    "VW 80 cm (32 inches) Playwall Frameless Series HD Ready Android Smart LED TV VW3",
+    "LG 80 cm (32 inches) HD Ready Smart LED TV 32LM563BPTC (Dark Iron Gray)",
+    "Acer 80 cm (32 inches) I Series HD Ready Android Smart LED TV AR32AR2841HDFL (Bl"
+   ],
+   "preferences": {
+    "product": "tv",
+    "features": [],
+    "brand": null,
+    "max_price": 15000,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Mi 32\" HD Ready Smart LED TV** — Xiaomi\n   ₹14,999 · 4.3/5\n\n2. **Samsung 32\" Wondertainment HD Ready Smart LED TV** — Samsung\n   ₹13,490 · 4.3/5\n\n3. **VW 32\" Playwall Frameless HD Ready Android Smart TV** — VW",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 0.667,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.13
+  },
+  {
+   "id": "q035",
+   "query": "wireless mouse under 500",
+   "history": [],
+   "tags": [
+    "price",
+    "attribute"
+   ],
+   "shown": [
+    "B09ZHCJDP1",
+    "B098JYT4SY",
+    "B0B296NTFV",
+    "B08YDFX7Y1"
+   ],
+   "shown_names": [
+    "Amazon Basics Wireless Mouse | 2.4 GHz Connection, 1600 DPI | Type - C Adapter |",
+    "Zebronics Zeb-Jaguar Wireless Mouse, 2.4GHz with USB Nano Receiver, High Precisi",
+    "Portronics Toad 23 Wireless Optical Mouse with 2.4GHz, USB Nano Dongle, Optical ",
+    "ZEBRONICS Zeb-Dash Plus 2.4GHz High Precision Wireless Mouse with up to 1600 DPI"
+   ],
+   "preferences": {
+    "product": "mouse",
+    "features": [
+     "wireless"
+    ],
+    "brand": null,
+    "max_price": 500,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Amazon Basics Wireless Mouse 2.4 GHz** — Amazon\n   ₹499 · 5.0/5\n\n2. **Zebronics Zeb-Jaguar Wireless Mouse** — Zebronics\n   ₹399 · 4.1/5\n\n3. **Portronics Toad 23 Wireless Optical Mouse** — Portronics\n   ₹299 · 4.1/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 4
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.06
+  },
+  {
+   "id": "q038",
+   "query": "smartwatch under 2000",
+   "history": [],
+   "tags": [
+    "price"
+   ],
+   "shown": [
+    "B0BMVWKZ8G",
+    "B0B3RRWSF6",
+    "B0B3RSDSZ3",
+    "B0B3RS9DNF",
+    "B09YV463SW"
+   ],
+   "shown_names": [
+    "Newly Launched Boult Dive+ with 1.85\" HD Display, Bluetooth Calling Smartwatch, ",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24",
+    "Fire-Boltt Ninja 3 Smartwatch Full Touch 1.69 \" & 60 Sports Modes with IP68, Sp0"
+   ],
+   "preferences": {
+    "product": "smartwatch",
+    "features": [],
+    "brand": null,
+    "max_price": 2000,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Boult Dive+ 1.85\" HD Smartwatch** — Boult\n   ₹1,999 · 4.3/5\n\n2. **Fire-Boltt Phoenix Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹1,998 · 4.3/5\n\n3. **Fire-Boltt Phoenix Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹1,999 · 4.3/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.11
+  },
+  {
+   "id": "q041",
+   "query": "wireless mouse",
+   "history": [],
+   "tags": [
+    "attribute"
+   ],
+   "shown": [
+    "B07X2L5Z8C",
+    "B01MQ2A86A",
+    "B07J2NGB69",
+    "B099SD8PRP",
+    "B01M72LILF"
+   ],
+   "shown_names": [
+    "Logitech Pebble M350 Wireless Mouse with Bluetooth or USB - Silent, Slim Compute",
+    "Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Nano Receiver, 1000 DP",
+    "Lenovo 400 Wireless Mouse, 1200DPI Optical Sensor, 2.4GHz Wireless Nano USB, 3-B",
+    "Lenovo 130 Wireless Compact Mouse, 1K DPI Optical sensor, 2.4GHz Wireless NanoUS",
+    "Logitech M221 Wireless Mouse, Silent Buttons, 2.4 GHz with USB Mini Receiver, 10"
+   ],
+   "preferences": {
+    "product": "mouse",
+    "features": [
+     "wireless"
+    ],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Logitech Pebble M350 Wireless Mouse** — Logitech\n   ₹1,490 · 4.6/5\n\n2. **Logitech M331 Silent Plus Wireless Mouse** — Logitech\n   ₹1,295 · 4.6/5\n\n3. **Lenovo Wireless Nano Mouse** — Lenovo\n   ₹629 · 4.4/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.09
+  },
+  {
+   "id": "q043",
+   "query": "32 inch smart tv",
+   "history": [],
+   "tags": [
+    "attribute"
+   ],
+   "shown": [
+    "B08DPLCM6T",
+    "B09YL9SN9B",
+    "B09F6S8BT6",
+    "B08PV1X771",
+    "B0B1YVCJ2Y"
+   ],
+   "shown_names": [
+    "LG 80 cm (32 inches) HD Ready Smart LED TV 32LM563BPTC (Dark Iron Gray)",
+    "LG 80 cm (32 inches) HD Ready Smart LED TV 32LQ576BPSA (Ceramic Black)",
+    "Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED Smart TV UA32T4340B",
+    "Samsung 80 cm (32 inches) Wondertainment Series HD Ready LED Smart TV UA32TE40AA",
+    "Acer 80 cm (32 inches) I Series HD Ready Android Smart LED TV AR32AR2841HDFL (Bl"
+   ],
+   "preferences": {
+    "product": "tv",
+    "features": [
+     "32 inch",
+     "smart"
+    ],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **LG 32-inch HD Ready Smart LED TV** — LG\n   ₹13,490 · 4.3/5\n\n2. **LG 32-inch HD Ready Smart LED TV** — LG\n   ₹15,990 · 4.3/5\n\n3. **Samsung 32\" Wondertainment HD Ready Smart LED TV** — Samsung\n   ₹13,490 · 4.3/5",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 1.62
+  },
+  {
+   "id": "q047",
+   "query": "bluetooth speaker",
+   "history": [],
+   "tags": [
+    "attribute"
+   ],
+   "shown": [
+    "B07B88KQZ8",
+    "B07NC12T2R",
+    "B08SMJT55F",
+    "B07W6VWZ8C",
+    "B08JMC1988"
+   ],
+   "shown_names": [
+    "JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL Signature Sound, Vib",
+    "boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playback, IPX5 and Integr",
+    "boAt Stone 250 Portable Wireless Speaker with 5W RMS Immersive Audio, RGB LEDs, ",
+    "Infinity (JBL Fuze Pint, Wireless Ultra Portable Mini Speaker with Mic, Deep Bas",
+    "boAt Stone 180 5W Bluetooth Speaker with Upto 10 Hours Playback, 1.75\" Driver, I"
+   ],
+   "preferences": {
+    "product": "bluetooth speaker",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **JBL Go 2 Portable Bluetooth Speaker** — JBL\n   ₹1,999 · 4.3/5\n\n2. **boAt Stone 650 Bluetooth Speaker** — boAt\n   ₹1,799 · 4.2/5\n\n3. **boAt Stone 250 Portable Wireless Bluetooth Speaker** — boAt\n   ₹1,199 · 4.2",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 3.32
+  },
+  {
+   "id": "q089",
+   "query": "only Bajaj",
+   "history": [
+    "mixer grinder"
+   ],
+   "tags": [
+    "followup",
+    "brand"
+   ],
+   "shown": [
+    "B0187F2IOK",
+    "B0073QGKAS",
+    "B00HVXS7WC",
+    "B01C8P29N0",
+    "B008YW8M0G"
+   ],
+   "shown_names": [
+    "Bajaj HM-01 Powerful 250W Hand Mixer, Black",
+    "Bajaj ATX 4 750-Watt Pop-up Toaster (White)",
+    "Bajaj Rex 500W Mixer Grinder with Nutri-Pro Feature, 3 Jars, White",
+    "Bajaj DX-6 1000W Dry Iron with Advance Soleplate and Anti-bacterial German Coati",
+    "Bajaj DX-7 1000W Dry Iron with Advance Soleplate and Anti-bacterial German Coati"
+   ],
+   "preferences": {
+    "product": "hand mixer",
+    "features": [],
+    "brand": "Bajaj",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Bajaj HM-01 Hand Mixer** — Bajaj\n   ₹1,499 · 4.4/5\n\n2. **Bajaj ATX 4 750W Pop-up Toaster** — Bajaj\n   ₹1,499 · 4.3/5\n\n3. **Bajaj Rex 500W Mixer Grinder with 3 Jars** — Bajaj\n   ₹1,999 · 4.2/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 0.333,
+    "precision3": 0.333,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.09
+  },
+  {
+   "id": "q091",
+   "query": "with calling",
+   "history": [
+    "smartwatch"
+   ],
+   "tags": [
+    "followup",
+    "attribute"
+   ],
+   "shown": [
+    "B0B3N7LR6K",
+    "B0B3NDPCS9",
+    "B0B3RRWSF6",
+    "B0B3RSDSZ3",
+    "B0B3RS9DNF"
+   ],
+   "shown_names": [
+    "Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwatch with 368*448 Pixe",
+    "Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwatch with 368*448 Pixe",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24"
+   ],
+   "preferences": {
+    "product": "smartwatch",
+    "features": [
+     "calling"
+    ],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Fire-Boltt Visionary Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹3,999 · 4.3/5\n\n2. **Fire-Boltt Visionary AMOLED Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹3,999 · 4.3/5\n\n3. **Fire-Boltt Phoenix Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹1",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.16
+  },
+  {
+   "id": "q093",
+   "query": "under 2000",
+   "history": [
+    "bluetooth speaker"
+   ],
+   "tags": [
+    "followup",
+    "price"
+   ],
+   "shown": [
+    "B07B88KQZ8",
+    "B07NC12T2R",
+    "B08SMJT55F",
+    "B07W7Z6DVL",
+    "B0B12K5BPM"
+   ],
+   "shown_names": [
+    "JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL Signature Sound, Vib",
+    "boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playback, IPX5 and Integr",
+    "boAt Stone 250 Portable Wireless Speaker with 5W RMS Immersive Audio, RGB LEDs, ",
+    "Infinity (JBL Fuze 100, Wireless Portable Bluetooth Speaker with Mic, Deep Bass,",
+    "ZEBRONICS Zeb-Astra 20 Wireless BT v5.0 Portable Speaker with 10W RMS Output, TW"
+   ],
+   "preferences": {
+    "product": "bluetooth speaker",
+    "features": [],
+    "brand": null,
+    "max_price": 2000,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **JBL Go 2 Portable Bluetooth Speaker** — JBL\n   ₹1,999 · 4.3/5\n\n2. **boAt Stone 650 Bluetooth Speaker** — boAt\n   ₹1,799 · 4.2/5\n\n3. **boAt Stone 250 Portable Wireless Bluetooth Speaker** — boAt\n   ₹1,199 · 4.2",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.24
+  },
+  {
+   "id": "q096",
+   "query": "ok, under 2000 then",
+   "history": [
+    "boat headphones under 500"
+   ],
+   "tags": [
+    "followup",
+    "price",
+    "brand"
+   ],
+   "shown": [
+    "B07PR1CL3S",
+    "B01FSYQ2A4",
+    "B0856HY85J",
+    "B0856HNMR7",
+    "B078W65FJ7"
+   ],
+   "shown_names": [
+    "boAt Rockerz 450 Bluetooth On Ear Headphones with Mic, Upto 15 Hours Playback, 4",
+    "boAt Rockerz 400 Bluetooth On Ear Headphones With Mic With Upto 8 Hours Playback",
+    "boAt Rockerz 550 Over Ear Bluetooth Headphones with Upto 20 Hours Playback, 50MM",
+    "boAt Rockerz 370 On Ear Bluetooth Headphones with Upto 12 Hours Playtime, Cozy P",
+    "boAt BassHeads 900 On-Ear Wired Headphones with Mic (White)"
+   ],
+   "preferences": {
+    "product": "headphones",
+    "features": [],
+    "brand": "Boat",
+    "max_price": 2000,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **boAt Rockerz 450 Bluetooth On-Ear Headphones** — boAt\n   ₹1,220 · 4.1/5\n\n2. **boAt Rockerz 400 Bluetooth On-Ear Headphones** — boAt\n   ₹1,399 · 4.1/5\n\n3. **boAt Rockerz 550 Over Ear Bluetooth Headphones** — boAt\n   ₹1,799 · 4.1/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 0.2,
+    "precision3": 0.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.08
+  }
+ ],
+ "finished": "2026-11-23T13:30:01+00:00",
+ "summary": {
+  "queries": 25,
+  "scored": 25,
+  "errors": 0,
+  "recall@5": 1.0,
+  "precision@3": 0.88,
+  "mrr": 0.921,
+  "empty_rate": 0.0,
+  "correct_refusal_rate": null,
+  "llm_calls_per_query": 0.0,
+  "tokens_per_query": 0.0,
+  "p50_seconds": 0.16,
+  "p95_seconds": 1.88
+ },
+ "by_tag": {
+  "attribute": {
+   "scored": 5,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "brand": {
+   "scored": 6,
+   "recall@5": 1.0,
+   "precision@3": 0.667,
+   "mrr": 0.672,
+   "empty_rate": 0.0
+  },
+  "followup": {
+   "scored": 4,
+   "recall@5": 1.0,
+   "precision@3": 0.583,
+   "mrr": 0.633,
+   "empty_rate": 0.0
+  },
+  "plain": {
+   "scored": 10,
+   "recall@5": 1.0,
+   "precision@3": 0.933,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "price": {
+   "scored": 6,
+   "recall@5": 1.0,
+   "precision@3": 0.778,
+   "mrr": 0.867,
+   "empty_rate": 0.0
+  }
+ }
+}

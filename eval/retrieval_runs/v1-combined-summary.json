@@ -1,0 +1,91 @@
+{
+ "label": "v1-combined",
+ "parts": {
+  "v1-gptoss20b": "q001-q055, q088-q100",
+  "v1-gptoss120b-rest": "q056-q074",
+  "v1-qwen-rest": "q075-q087"
+ },
+ "summary": {
+  "queries": 100,
+  "scored": 100,
+  "errors": 0,
+  "recall@5": 0.874,
+  "precision@3": 0.87,
+  "mrr": 0.837,
+  "empty_rate": 0.095,
+  "correct_refusal_rate": 0.8,
+  "llm_calls_per_query": 2.2,
+  "tokens_per_query": 2227.58,
+  "p50_seconds": 1.13,
+  "p95_seconds": 1.72
+ },
+ "by_tag": {
+  "attribute": {
+   "scored": 24,
+   "recall@5": 0.75,
+   "precision@3": 0.778,
+   "mrr": 0.729,
+   "empty_rate": 0.208
+  },
+  "brand": {
+   "scored": 16,
+   "recall@5": 0.938,
+   "precision@3": 0.896,
+   "mrr": 0.854,
+   "empty_rate": 0.062
+  },
+  "brand_missing": {
+   "scored": 5,
+   "recall@5": 0.8,
+   "precision@3": 0.8,
+   "mrr": 0.8,
+   "empty_rate": 0.0
+  },
+  "followup": {
+   "scored": 15,
+   "recall@5": 0.933,
+   "precision@3": 0.844,
+   "mrr": 0.811,
+   "empty_rate": 0.067
+  },
+  "hinglish": {
+   "scored": 5,
+   "recall@5": 0.6,
+   "precision@3": 0.8,
+   "mrr": 0.6,
+   "empty_rate": 0.2
+  },
+  "out_of_scope": {
+   "scored": 5,
+   "correct_refusal_rate": 0.8
+  },
+  "plain": {
+   "scored": 20,
+   "recall@5": 1.0,
+   "precision@3": 0.983,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "price": {
+   "scored": 15,
+   "recall@5": 0.8,
+   "precision@3": 0.8,
+   "mrr": 0.689,
+   "empty_rate": 0.133
+  },
+  "typo": {
+   "scored": 5,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "vague": {
+   "scored": 10,
+   "recall@5": 0.8,
+   "precision@3": 0.733,
+   "mrr": 0.733,
+   "empty_rate": 0.2
+  }
+ }
+}

@@ -1,0 +1,437 @@
+{
+ "label": "v4b-test-gpt-oss-120b",
+ "model": "openai/gpt-oss-120b",
+ "mode": "fill",
+ "database": "multi_agent_baseline",
+ "cassette": "eval\\cassettes\\retrieval_openai-gpt-oss-120b.json",
+ "started": "2026-11-23T13:28:43+00:00",
+ "queries": [
+  {
+   "id": "q057",
+   "query": "I need hot water for bathing",
+   "history": [],
+   "tags": [
+    "vague"
+   ],
+   "shown": [
+    "B0BR4F878Q",
+    "B0BP89YBC1",
+    "B08QW937WV",
+    "B078JBK4GX",
+    "B08GM5S4CQ"
+   ],
+   "shown_names": [
+    "Swiffer Instant Electric Water Heater Faucet Tap Home-Kitchen Instantaneous Wate",
+    "Campfire Spring Chef Prolix Instant Portable Water Heater Geyser 1Ltr. for Use H",
+    "Homeistic Applience™ Instant Electric Water Heater Faucet Tap For Kitchen And Ba",
+    "Havells Instanio 1-Litre 3KW Instant Water Heater (Geyser), White Blue",
+    "Havells Instanio 10 Litre Storage Water Heater with Flexi Pipe and Free installa"
+   ],
+   "preferences": {
+    "product": "water heater",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Instant Electric Water Heater for Faucet Tap 3000W** — Swiffer\n   ₹1,439 · 4.8/5\n\n2. **Campfire Spring Chef Prolix 1L Instant Portable Water Heater** — Campfire\n   ₹1,499 · 4.7/5\n\n3. **Homeistic Instant Electr",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 1.94
+  },
+  {
+   "id": "q059",
+   "query": "something to listen to music while running",
+   "history": [],
+   "tags": [
+    "vague"
+   ],
+   "shown": [
+    "B08TV2P1N8",
+    "B092X94QNQ",
+    "B08D77XZX5",
+    "B0B1F6GQPS",
+    "B07LG59NPV"
+   ],
+   "shown_names": [
+    "boAt Rockerz 255 Pro+ in-Ear Bluetooth Neckband with Upto 40 Hours Playback, ASA",
+    "boAt Rockerz 330 in-Ear Bluetooth Neckband with Upto 30 Hours Playtime, ASAP  Ch",
+    "PTron Tangentbeat in-Ear Bluetooth 5.0 Wireless Headphones with Mic, Enhanced Ba",
+    "Boult Audio FXCharge with ENC, 32H Playtime, 5min=7H Type C Fast Charging, Zen E",
+    "Boult Audio Probass Curve Bluetooth Wireless in Ear Earphones with Mic with Ipx5"
+   ],
+   "preferences": {
+    "product": "neckband",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **boAt Rockerz 255 Pro+ Bluetooth Neckband** — boAt\n   ₹1,399 · 4.1/5\n\n2. **boAt Rockerz 330 Bluetooth Neckband** — boAt\n   ₹1,499 · 4.1/5\n\n3. **PTron Tangentbeat Bluetooth Neckband Earphones** — pTron\n   ₹599 · 3.9/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.13
+  },
+  {
+   "id": "q061",
+   "query": "remove fuzz balls from my sweaters",
+   "history": [],
+   "tags": [
+    "vague"
+   ],
+   "shown": [
+    "B00TDD0YM4",
+    "B08SKZ2RMG",
+    "B09JN37WBX",
+    "B09SFRNKSR",
+    "B09NNZ1GF7"
+   ],
+   "shown_names": [
+    "Philips GC026/30 Fabric Shaver, Lint Remover for Woolen Sweaters, Blankets, Jack",
+    "Demokrazy New Nova Lint Cum Fuzz Remover for All Woolens Sweaters, Blankets, Jac",
+    "Lint Remover Woolen Clothes Lint Extractor Battery Lint Removing Machine Bhur Re",
+    "FABWARE Lint Remover for Clothes - Sticky Lint Roller for Clothes, Furniture, Wo",
+    "Lint Remover For Clothes With 1 Year Warranty Fabric Shaver Lint Shaver for Wool"
+   ],
+   "preferences": {
+    "product": "lint remover",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Philips Fabric Shaver Lint Remover** — Philips\n   ₹1,490 · 4.4/5\n\n2. **Lint and Fuzz Remover for Woolens** — Demokrazy\n   ₹475 · 4.1/5\n\n3. **Battery Powered Lint Remover for Woolen Clothes** — Lint\n   ₹319 · 4.6/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.32
+  },
+  {
+   "id": "q063",
+   "query": "boil water quickly for tea",
+   "history": [],
+   "tags": [
+    "vague"
+   ],
+   "shown": [
+    "B07GLS2563"
+   ],
+   "shown_names": [
+    "Cello Quick Boil Popular Electric Kettle 1 Litre 1200 Watts | Stainless Steel bo"
+   ],
+   "preferences": {
+    "product": "electric kettle",
+    "features": [
+     "quick boil"
+    ],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Cello 1 L Stainless Steel Electric Kettle** — Cello\n   ₹1,199 · 4.2/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 1
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.1
+  },
+  {
+   "id": "q065",
+   "query": "somewhere to store my files and photos",
+   "history": [],
+   "tags": [
+    "vague"
+   ],
+   "shown": [
+    "B094QZLJQ6",
+    "B08ZJDWTJ1",
+    "B09X7DY7Q4",
+    "B07VTFN6HM",
+    "B06XDKWLJH"
+   ],
+   "shown_names": [
+    "Seagate One Touch 2TB External HDD with Password Protection – Black, for Windows",
+    "Seagate Expansion 1TB External HDD - USB 3.0 for Windows and Mac with 3 yr Data ",
+    "SanDisk Extreme SD UHS I 64GB Card for 4K Video for DSLR and Mirrorless Cameras ",
+    "Western Digital WD 2TB My Passport Portable Hard Disk Drive, USB 3.0 with  Autom",
+    "Western Digital WD 1.5TB Elements Portable Hard Disk Drive, USB 3.0, Compatible "
+   ],
+   "preferences": {
+    "product": "storage",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Seagate One Touch 2TB External HDD** — Seagate\n   ₹5,799 · 4.5/5\n\n2. **Seagate Expansion 1TB External HDD** — Seagate\n   ₹4,098 · 4.5/5\n\n3. **SanDisk Extreme 64GB SD Card** — SanDisk\n   ₹939 · 4.5/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 0.25,
+    "precision3": 0.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.18
+  },
+  {
+   "id": "q067",
+   "query": "samsng tv",
+   "history": [],
+   "tags": [
+    "typo",
+    "brand"
+   ],
+   "shown": [
+    "B092BJMT8Q",
+    "B09F6S8BT6",
+    "B0B15CPR37",
+    "B08PV1X771",
+    "B092BL5DCX"
+   ],
+   "shown_names": [
+    "Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart LED TV UA43AUE60AKLX",
+    "Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED Smart TV UA32T4340B",
+    "Samsung 108 cm (43 inches) Crystal 4K Neo Series Ultra HD Smart LED TV UA43AUE65",
+    "Samsung 80 cm (32 inches) Wondertainment Series HD Ready LED Smart TV UA32TE40AA",
+    "Samsung 138 cm (55 inches) Crystal 4K Series Ultra HD Smart LED TV UA55AUE60AKLX"
+   ],
+   "preferences": {
+    "product": "tv",
+    "features": [],
+    "brand": "samsng",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Samsung 43\" Crystal 4K Smart LED TV** — Samsung\n   ₹30,990 · 4.3/5\n\n2. **Samsung 32\" Wondertainment HD Ready Smart LED TV** — Samsung\n   ₹13,490 · 4.3/5\n\n3. **Samsung 43\" Crystal 4K Neo Smart LED TV** — Samsung\n   ₹32,990 · 4.3/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.07
+  },
+  {
+   "id": "q069",
+   "query": "miksar grinder",
+   "history": [],
+   "tags": [
+    "typo"
+   ],
+   "shown": [
+    "B00K57MR22",
+    "B078JT7LTD",
+    "B075S9FVRY",
+    "B07Y9PY6Y1",
+    "B071113J7M"
+   ],
+   "shown_names": [
+    "Sujata Dynamix DX Mixer Grinder, 900W, 3 Jars (White)",
+    "Sujata Dynamix, Mixer Grinder, 900 Watts, 3 Jars (White)",
+    "Sujata Supermix, Mixer Grinder, 900 Watts, 3 Jars (White)",
+    "Sujata Powermatic Plus, Juicer Mixer Grinder with Chutney Jar, 900 Watts, 3 Jars",
+    "Sujata Powermatic Plus 900 Watts Juicer Mixer Grinder"
+   ],
+   "preferences": {
+    "product": "mixer grinder",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Sujata Dynamix DX Mixer Grinder 900W with 3 Jars** — Sujata\n   ₹6,120 · 4.6/5\n\n2. **Sujata Dynamix Mixer Grinder 900W 3 Jars** — Sujata\n   ₹6,120 · 4.6/5\n\n3. **Sujata Supermix Mixer Grinder 900W 3 Jars** — Sujata\n   ₹5,490 · 4.5/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.16
+  },
+  {
+   "id": "q072",
+   "query": "garam pani ke liye geyser",
+   "history": [],
+   "tags": [
+    "hinglish"
+   ],
+   "shown": [
+    "B0BR4F878Q",
+    "B0BP89YBC1",
+    "B078JBK4GX",
+    "B08WRKSF9D",
+    "B097R45BH8"
+   ],
+   "shown_names": [
+    "Swiffer Instant Electric Water Heater Faucet Tap Home-Kitchen Instantaneous Wate",
+    "Campfire Spring Chef Prolix Instant Portable Water Heater Geyser 1Ltr. for Use H",
+    "Havells Instanio 1-Litre 3KW Instant Water Heater (Geyser), White Blue",
+    "V-Guard Divino 5 Star Rated 15 Litre Storage Water Heater (Geyser) with Advanced",
+    "Bajaj New Shakti Neo 15L Vertical Storage Water Heater (Geyser 15 litres) 4 Star"
+   ],
+   "preferences": {
+    "product": "water heater",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Instant Electric Water Heater for Faucet Tap 3000W** — Swiffer\n   ₹1,439 · 4.8/5\n\n2. **Campfire Spring Chef Prolix 1L Instant Portable Water Heater** — Campfire\n   ₹1,499 · 4.7/5\n\n3. **Havells Instanio 1L 3KW ",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.24
+  },
+  {
+   "id": "q074",
+   "query": "chai banane ke liye kettle",
+   "history": [],
+   "tags": [
+    "hinglish"
+   ],
+   "shown": [
+    "B09VGS66FV",
+    "B00TI8E7BI",
+    "B078V8R9BS",
+    "B07GLS2563",
+    "B07VZYMQNZ"
+   ],
+   "shown_names": [
+    "Tesora - Inspired by you Large Premium Electric Kettle 1.8L, Stainless Steel Inn",
+    "Philips HD9306/06 1.5-Litre Electric Kettle (Multicolor)",
+    "Butterfly EKN 1.5-Litre Electric Kettle (Silver with Black)",
+    "Cello Quick Boil Popular Electric Kettle 1 Litre 1200 Watts | Stainless Steel bo",
+    "Borosil Rio 1.5 L Electric Kettle, Stainless Steel Inner Body, Boil Water For Te"
+   ],
+   "preferences": {
+    "product": "electric kettle",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Tesora 1.8L Stainless Steel Electric Kettle** — Tesora\n   ₹1,349 · 4.4/5\n\n2. **Philips 1.5L Electric Kettle** — Philips\n   ₹2,695 · 4.4/5\n\n3. **Butterfly EKN 1.5L Electric Kettle** — Butterfly\n   ₹749 · 4.2/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.22
+  }
+ ],
+ "finished": "2026-11-23T13:28:59+00:00",
+ "summary": {
+  "queries": 9,
+  "scored": 9,
+  "errors": 0,
+  "recall@5": 1.0,
+  "precision@3": 0.889,
+  "mrr": 0.917,
+  "empty_rate": 0.0,
+  "correct_refusal_rate": null,
+  "llm_calls_per_query": 0.0,
+  "tokens_per_query": 0.0,
+  "p50_seconds": 0.18,
+  "p95_seconds": 1.94
+ },
+ "by_tag": {
+  "brand": {
+   "scored": 1,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "hinglish": {
+   "scored": 2,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "typo": {
+   "scored": 2,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "vague": {
+   "scored": 5,
+   "recall@5": 1.0,
+   "precision@3": 0.8,
+   "mrr": 0.85,
+   "empty_rate": 0.0
+  }
+ }
+}

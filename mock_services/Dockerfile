@@ -8,4 +8,4 @@ COPY mock_services/ ./mock_services/
 
 EXPOSE 9000
 
-CMD ["uvicorn", "mock_services.carrier_api:app", "--host", "0.0.0.0", "--port", "9000"]
+CMD ["sh", "-c", "uvicorn mock_services.carrier_api:app --host 0.0.0.0 --port ${PORT:-9000}"]

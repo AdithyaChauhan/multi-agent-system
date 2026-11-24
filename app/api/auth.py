@@ -1,6 +1,7 @@
 """OAuth authentication endpoints"""
 
 import os
+import re
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import RedirectResponse
 from authlib.integrations.starlette_client import OAuth
@@ -8,6 +9,7 @@ from starlette.config import Config
 from dotenv import load_dotenv
 
 from app.core.jwt_utils import create_access_token, verify_access_token
+from app.db import demo_shoppers
 from app.db.database import SessionLocal
 from app.models.user import User
 from app.core.logger import get_logger
@@ -125,23 +127,43 @@ async def logout():
     return {"message": "Logged out successfully. Please delete your token."}
 
 
+@router.post("/demo-shopper")
+async def demo_shopper(request: Request):
+    """One click, no input: a fresh demo shopper with five orders of their own (ADR 0016)."""
+    client_ip = request.client.host if request.client else None
+    if not demo_shoppers.allow_new_shopper(client_ip):
+        raise HTTPException(status_code=429, detail="Too many demo shoppers from this address. Try again later.")
+    db = SessionLocal()
+    try:
+        demo_shoppers.purge_old_demo_shoppers(db)
+        user_id, order_ids = demo_shoppers.create_demo_shopper(db)
+        token = create_access_token(user_id=user_id, email=f"{user_id}@demo.example", name="Demo shopper")
+        return {"access_token": token, "user_id": user_id, "orders": order_ids}
+    finally:
+        db.close()
+
+
+DEMO_USER_ID = re.compile(r"demo-user-\d{1,3}")
+
+
 @router.post("/demo-login")
 async def demo_login(request: Request):
-    """Login with just a user_id — no password, for demo/testing"""
-    body = await request.json()
-    user_id = body.get("user_id", "").strip()
+    """Sign in as one of the seeded demo shoppers (demo-user-1, demo-user-2, ...), no password.
 
-    if not user_id:
-        raise HTTPException(status_code=400, detail="user_id is required")
+    Only those accounts: they own only seeded demo orders. Any other id is refused, so this can't be
+    used to sign in as a real (Google) account or to create new ones.
+    """
+    body = await request.json()
+    user_id = str(body.get("user_id", "")).strip()
+
+    if not DEMO_USER_ID.fullmatch(user_id):
+        raise HTTPException(status_code=403, detail="Demo sign-in is only for the demo accounts (demo-user-1 ...)")
 
     db = SessionLocal()
     try:
         user = db.query(User).filter(User.user_id == user_id).first()
         if not user:
-            user = User(user_id=user_id, auth_provider="demo")
-            db.add(user)
-            db.commit()
-            db.refresh(user)
+            raise HTTPException(status_code=403, detail="Unknown demo account")
 
         token = create_access_token(
             user_id=user.user_id,

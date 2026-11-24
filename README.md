@@ -1,264 +1,89 @@
-# Multi-Agent E-Commerce Chatbot
+# Multi-Agent E-Commerce Assistant
 
-A production-style multi-agent customer service system built with **LangGraph**, **FastAPI**, and **PostgreSQL**. Three specialized LangGraph agents handle product discovery, order tracking, and customer support — all routed dynamically by an LLM-based intent classifier. Full observability through **LangSmith** and a **Grafana + Loki** monitoring dashboard.
+A chat assistant for an online electronics store. It finds products, answers questions about them, tracks orders, cancels them after a human "Yes", and hands safety reports to a person. It's built with LangGraph, FastAPI, Postgres + pgvector and Groq, and it was rebuilt in measured phases from a fragile prototype (about 4/10) to a tested, guarded system.
 
----
+**Live demo:** _link added at deploy_. Press **Try as a demo shopper**: no sign-up, and you get your own pretend account with five orders.
 
-## Architecture
+**Things to try:**
+1. `something to keep my room warm under 2000`, then `which of these is the most powerful?`
+2. `remove fuzz balls from my sweaters` (no product word, found by meaning)
+3. `where is my TV order?`
+4. `cancel my mouse order`, then press **Yes**
+5. `my charger caught fire` (a critical ticket, plus an alert to a human channel)
+
+**Docs:** [Case study](docs/CASE_STUDY.md) · [Setup, evals, deploy](docs/SETUP.md) · [Roadmap and scorecard](ROADMAP.md) · [Decisions (ADRs)](docs/decisions/README.md) · [Graph diagram](docs/architecture/graph.md)
+
+## Measured results
+Every number comes from a recorded run. The runs replay in CI at 0 tokens, and the build fails if a number drops.
+
+| What | Result | How it was measured |
+|---|---|---|
+| Right product in the top 5 (recall@5) | **0.979** (100 queries); **1.0** on the held-out half | 100 labelled queries; tuned on 53, reported on 47; gpt-oss-20b, gpt-oss-120b and qwen, 1 run |
+| Precision of the top 3 | **0.933** | same queries |
+| Shop with its section names renamed | recall drop **0 points** (it was 97 points before the rebuild) | 35 queries on a renamed copy of the catalog |
+| 51 multi-turn conversations | **48/51** | gpt-oss-20b, 1 run (the 3-run average follows at release) |
+| Attack conversations (prompt injection, cross-user orders, fake admin, someone else pressing Yes) | **15/15 safe** | scored on routes and database effects, never on wording |
+| Questions about shown products (tool loop) | **6/6** | gpt-oss-20b, 1 run |
+| A model is retired or rate-limited | still answers through the next model | live check with a retired model name |
+| Unit tests | 348, coverage 89% | `pytest` in CI |
+
+## How it works
 
 ```
-POST /chat
-    │
-    ▼
-Router (LLM intent classifier)
-    ├── product_agent  ──► product_enrichment_subgraph
-    ├── order_agent    ──► shipment_tracking_subgraph
-    └── support_agent  ──► escalation_handler_subgraph
+Browser ── /chat/stream ──► FastAPI (sign-in, rate limits, streaming step labels)
+                              │
+                              ▼
+                 LangGraph router (Postgres checkpointer: one thread per chat)
+     one structured LLM call: intent · order · issue · risk  ──► deterministic route()
+       │            │                │                   │
+   product        order           support              safety
+   subgraph      subgraph         subgraph            escalation
+       │            │                │                   │
+ extract filters  owner-only     cancel: interrupt()   critical ticket
+ hybrid search    DB lookup +    pause, Yes resumes    + webhook alert
+ (pgvector + full  carrier API   then a Python check
+  text + type,     template      tickets → escalation
+  fused) in a      reply         subgraph → webhook
+  relax loop
+ LLM ranker → product cards
+ questions about the cards → ToolNode loop (read-only tools)
 ```
+
+**What the model decides:**
+- the intent, the order meant, the support issue and the risk;
+- the search filters (only what changed in each message);
+- which results really match;
+- which product facts to look up when asked about the products on screen.
+
+**What the code decides:**
+- **Sign-in and ownership:** every order lookup is filtered by the signed-in user.
+- **Cancelling:** an order is cancelled only after that user presses Yes, which resumes the paused graph, and a Python node re-checks owner and status.
+- **Tickets:** escalation to tickets and alerts.
+- **The catalog's say:** whether we sell something is checked against the catalog, by meaning.
+- **Limits and fallbacks:** rate limits, the model fallback chain, and masking emails and phone numbers in logs and traces.
+- **The model's tools** read product facts for the products on screen only. No tool takes a user id or touches orders ([ADR 0002](docs/decisions/0002-guardrails-in-python.md), [0016](docs/decisions/0016-product-qa-and-demo-shoppers.md)).
+
+**LangGraph features in use:**
+- subgraphs with their own input and output schemas;
+- the search loop as graph edges;
+- `interrupt()` for the cancel pause;
+- a Postgres checkpointer, so a conversation survives restarts;
+- `stream_mode="tasks"` for live step labels;
+- a `ToolNode` agent loop with `InjectedState`.
+
+Each was adopted only where it replaced hand-written code ([ADR 0009](docs/decisions/0009-langgraph-primitives.md)). Every prompt is under 40 lines and lives in `app/prompts/` ([ADR 0010](docs/decisions/0010-prompt-budget.md)).
 
 | Layer | Technology |
 |---|---|
-| Backend | FastAPI + Uvicorn |
-| Agents | LangGraph (StateGraph) |
-| LLM | OpenAI GPT-4o-mini |
-| Database | PostgreSQL (SQLAlchemy 2.0) |
-| Auth | Google OAuth 2.0 + JWT |
-| Observability | LangSmith (tracing + prompts + eval) |
-| Monitoring | Grafana + Loki + Promtail |
-| CI/CD | GitHub Actions (6 stages) |
-
----
-
-## Quick Start
-
-### Prerequisites
-
-- Docker + Docker Compose
-- OpenAI API key
-- LangSmith account (free tier at [smith.langchain.com](https://smith.langchain.com))
-- Google OAuth credentials (for the login UI)
-
-### 1. Clone and configure
-
-```bash
-git clone https://github.com/AdithyaChauhan/multi-agent-system.git
-cd multi-agent-system
-cp .env.example .env
-# Fill in OPENAI_API_KEY, LANGCHAIN_API_KEY, GOOGLE_CLIENT_ID/SECRET
-```
-
-### 2. Start all containers
-
-```bash
-docker compose up -d --build
-```
-
-This starts:
-- `multiagent-app` — FastAPI app on **http://localhost:8000**
-- `multiagent-db` — PostgreSQL on port **5433**
-- `multiagent-mock-api` — Mock carrier tracking API on port **9000**
-- `multiagent-grafana` — Grafana dashboard on **http://localhost:3000**
-- `multiagent-loki` — Log aggregation on port 3100
-- `multiagent-promtail` — Log shipper
-
-### 3. Restore the database
-
-The app uses a pre-seeded catalog. Restore from the included backup:
-
-```bash
-# Drop and recreate schema
-docker exec multiagent-db psql -U postgres -d multi_agent_db -c \
-  "DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres;"
-
-# Restore data
-docker exec -i multiagent-db psql -U postgres -d multi_agent_db \
-  < backups/pre_taxonomy_migration_20260530_152745.sql
-
-# Apply taxonomy migrations
-docker exec -i multiagent-db psql -U postgres -d multi_agent_db \
-  < backups/v6_taxonomy_migration_20260531.sql
-docker exec -i multiagent-db psql -U postgres -d multi_agent_db \
-  < backups/mobiles_dissolution_20260531.sql
-docker exec -i multiagent-db psql -U postgres -d multi_agent_db \
-  < backups/remaining_category_cleanup_20260531.sql
-```
-
-### 4. Open the chat UI
-
-Navigate to **http://localhost:8000** — you'll be redirected to the chat interface. Sign in with Google to enable order tracking.
-
-### 5. Health check
-
-```bash
-curl http://localhost:8000/health
-# {"status":"ok"}
-```
-
----
-
-## Redeploy after code changes
-
-```bash
-# Python code changed (agents, tools, main.py, etc.)
-docker compose build app && docker compose up -d --no-recreate db && docker compose up -d app
-
-# Static HTML/JS only — live immediately, no rebuild needed
-```
-
----
-
-## API
-
-| Method | Path | Description |
-|---|---|---|
-| `POST` | `/chat` | Send a message; returns agent response + session ID |
-| `GET` | `/messages/{session_id}` | Retrieve conversation history for a session |
-| `GET` | `/health` | Health check |
-| `GET` | `/auth/login` | Initiate Google OAuth flow |
-| `GET` | `/auth/callback` | OAuth callback (handled automatically) |
-
-### Session management
-
-Pass `X-Session-ID` header to continue an existing session. The response always includes `X-Session-ID`. Sessions expire after `SESSION_EXPIRY_MINUTES` (default 60) of inactivity — a 410 response signals a new session is needed.
-
-```bash
-# First turn
-curl -X POST http://localhost:8000/chat \
-  -H "Content-Type: application/json" \
-  -H "X-User-ID: my-user-id" \
-  -d '{"message": "show me headphones under 2000"}'
-
-# Follow-up (reuse session)
-curl -X POST http://localhost:8000/chat \
-  -H "Content-Type: application/json" \
-  -H "X-User-ID: my-user-id" \
-  -H "X-Session-ID: <session_id_from_above>" \
-  -d '{"message": "show me cheaper options"}'
-```
-
----
-
-## LangSmith
-
-All traces, prompt versions, and evaluation results are visible in LangSmith.
-
-- **Project:** `multi-agent-ecommerce`
-- **Prompts in Hub:** `router-classification-prompt`, `support-classification-prompt`
-- **Evaluation dataset:** `multi-agent-ecommerce-eval`
-
-### View traces
-
-1. Go to [smith.langchain.com](https://smith.langchain.com)
-2. Open the **multi-agent-ecommerce** project
-3. Each chat request appears as a top-level run with nested node executions, LLM calls, and tool calls
-
-### Push updated prompts
-
-After editing `ROUTER_SYSTEM_PROMPT` in `app/agents/router.py`:
-
-```bash
-python3 push_router_prompt.py
-```
-
-### Run evaluation
-
-```bash
-# Against the LangSmith dataset (uses real LLM)
-source venv/bin/activate && python3 app/evaluation/run_eval.py
-
-# CI fixture mode (no API calls)
-python eval/run_deepeval.py
-
-# Live mode (calls the running app)
-RUN_LIVE_EVAL=true python eval/run_deepeval.py
-```
-
----
-
-## Monitoring — Grafana
-
-Open **http://localhost:3000** (admin / admin).
-
-The pre-configured dashboard shows:
-- Request volume over time
-- Agent selection distribution (product / order / support)
-- Average latency per agent
-- Error rate over time
-- LLM token consumption
-
-Application logs are ingested into Loki and searchable by `session_id`, `agent_name`, and `log_level` from the Explore tab.
-
----
-
-## Running Tests
-
-```bash
-source venv/bin/activate
-
-# Unit tests (CI-compatible — no PostgreSQL required)
-python -m pytest -m "not integration" --cov=app --cov-report=term-missing
-
-# Integration tests (requires live PostgreSQL on localhost:5433)
-python -m pytest -m integration
-
-# With coverage threshold
-python -m pytest -m "not integration" --cov=app --cov-fail-under=80
-```
-
----
-
-## CI/CD Pipeline
-
-GitHub Actions runs on every push to `main`/`stable` and on pull requests targeting `main`.
-
-| Stage | What | When |
-|---|---|---|
-| 1 — Lint | `black --check` + `flake8` | All pushes |
-| 2 — Tests | `pytest` + 80% coverage threshold | All pushes |
-| 3 — LLM Eval | DeepEval in fixture mode; reports uploaded as artifacts | All pushes |
-| 4 — Docker Build | Build app image | All pushes |
-| 5 — Push Image | Push to GHCR | `main` only |
-| 6 — Deploy | `helm upgrade --install` + smoke test + auto-rollback | `main` only |
-
-Required GitHub Actions secrets: `LANGCHAIN_API_KEY`, `KUBECONFIG`, `APP_URL`.
-
----
-
-## Project Structure
-
-```
-app/
-  agents/       router.py + product/order/support agents + subgraphs + state
-  api/          Google OAuth (auth.py)
-  core/         config, logger, JWT utils, LangSmith prompt loader
-  db/           SQLAlchemy engine + seed scripts
-  models/       ORM models (Product, Order, User, Session, Message, Review, Spec, SupportTicket)
-  tools/        DB query functions used by agents
-  static/       Frontend HTML/JS (chat.html, login.html, callback.html)
-  evaluation/   LangSmith evaluation scripts
-eval/
-  dataset.json  12 test cases for CI evaluation
-  config.yaml   Metric thresholds
-  run_deepeval.py  DeepEval evaluation script
-helm/           Kubernetes Helm charts
-monitoring/     Grafana + Loki + Promtail configuration
-tests/          pytest test suite (81% coverage)
-backups/        DB backup snapshots + migration SQL files
-```
-
----
-
-## Environment Variables
-
-See [.env.example](.env.example) for the full list. Key variables:
-
-| Variable | Description |
-|---|---|
-| `DATABASE_URL` | PostgreSQL connection string |
-| `OPENAI_API_KEY` | OpenAI API key for GPT-4o-mini |
-| `LANGCHAIN_API_KEY` | LangSmith API key |
-| `LANGCHAIN_PROJECT` | LangSmith project name (`multi-agent-ecommerce`) |
-| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
-| `JWT_SECRET_KEY` | Secret for signing JWT tokens |
-| `SESSION_EXPIRY_MINUTES` | Session inactivity timeout (default: 60) |
+| Agents | LangGraph 1.2 (subgraphs, checkpointer, `interrupt()`, ToolNode) |
+| LLM | Groq: gpt-oss-20b, falling back to gpt-oss-120b, then qwen3.8-27b |
+| Search | pgvector (HNSW) + Postgres full text, fused by reciprocal rank; local `fastembed` embeddings |
+| Backend | FastAPI, SQLAlchemy 2, Alembic |
+| Evals | 100 labelled queries, 51 + 15 + 6 conversations, record and replay, a CI gate |
+| Ops | Docker, GitHub Actions, Render + Neon, Helm (Kubernetes option), Prometheus, Grafana, Loki |
+
+## Honest limits
+- **The data is synthetic.** The catalog comes from a public Amazon India dataset, and the orders and users are demo data. There's no production traffic or A/B evidence.
+- **One known miss:** "table" shows laptop tables rather than "we don't sell furniture" ([ADR 0015](docs/decisions/0015-demo-never-breaks.md)).
+- **One instance only:** the rate limits and the answer cache are per process.
+- **Free-tier quota:** about 200K tokens a day per model. The fallback chain and the cache stretch it, and past it the chat says it's busy.

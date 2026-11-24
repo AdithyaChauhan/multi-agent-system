@@ -1,0 +1,1629 @@
+{
+ "0004f22a8593ab5656ad6a96e59d00e2": {
+  "agent": "product",
+  "message": "User request: \"what about Logitech\"\n\nProducts:\n1. Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, 12  | ₹699 | 4.5★ | Logitech\n2. Logitech B170 Wireless Mouse, 2.4 GHz with USB Nano Receiver ",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 603,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3
+   ],
+   "same_kind": [
+    1,
+    2,
+    3
+   ]
+  }
+ },
+ "109d08daa72378d2ce4af2d9014d5e8c": {
+  "agent": "product",
+  "message": "So far: {} | Message: apple airpods",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1248,
+  "value": {
+   "brand": "Apple",
+   "clear": [],
+   "features": [
+    "airpods"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "tws earbuds"
+  }
+ },
+ "130245bc97af34b2397458a18051cf4c": {
+  "agent": "product",
+  "message": "Previous: {} | Message: apple airpods",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1732,
+  "value": {
+   "brand": "Apple",
+   "category": "Electronics",
+   "keywords": [
+    "AirPods"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "headphones",
+   "suggestion": null,
+   "type": null
+  }
+ },
+ "14dff294067958ad2263849926380495": {
+  "agent": "product",
+  "message": "Previous: {} | Message: gaming laptop",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1628,
+  "value": {
+   "brand": null,
+   "features": [
+    "gaming"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "laptop"
+  }
+ },
+ "1b7f08b9e78b293b46f80a2cfc48c8d4": {
+  "agent": "product",
+  "message": "User request: \"samsung galaxy tablet\"\n\nProducts:\n1. Amazon Basics Wireless Mouse | 2.4 GHz Connection, 1600 DPI  | ₹499 | 5.0★ | Amazon\n2. Syncwire LTG to USB Cable for Fast Charging Compatible with  ",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 0,
+  "value": null
+ },
+ "1da39a0b3cfd95a8b8f6b6f5b27297b1": {
+  "agent": "product",
+  "message": "So far: {} | Message: bose speakers",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1227,
+  "value": {
+   "brand": "bose",
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "speaker"
+  }
+ },
+ "20b6d59f832cc70b14155b0d3ace3436": {
+  "agent": "product",
+  "message": "Previous: {} | Message: apple airpods",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1632,
+  "value": {
+   "brand": "Apple",
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "tws earbuds"
+  }
+ },
+ "2a11a6cd0e6e8d609479a29d3f89aab8": {
+  "agent": "product",
+  "message": "User request: \"apple airpods\"\n\nProducts:\n1. Redgear Cosmo 7,1 Usb Gaming Wired Over Ear Headphones With  | ₹1990 | 4.3★ | Redgear\n2. Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwat | ₹399",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 862,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "2afb1c4f980950df2c34db567f750318": {
+  "agent": "product",
+  "message": "Previous: {} | Message: bose speakers",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1716,
+  "value": {
+   "brand": "Bose",
+   "category": "Electronics",
+   "keywords": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "speakers",
+   "suggestion": null,
+   "type": null
+  }
+ },
+ "2c9b6ceadadb8fa701a353154550be82": {
+  "agent": "product",
+  "message": "Previous: {} | Message: washing machine",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1698,
+  "value": {
+   "brand": null,
+   "category": null,
+   "keywords": [
+    "washing machine"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": null,
+   "suggestion": null,
+   "type": null
+  }
+ },
+ "31ab0bc33a40c3081b2a1680d9576c69": {
+  "agent": "product",
+  "message": "User request: \"apple airpods\"\n\nProducts:\n1. Oraimo 18W USB & Type-C Dual Output Super Fast Charger Wall  | ₹699 | 4.0★ | Oraimo",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 511,
+  "value": {
+   "exact": [],
+   "same_kind": []
+  }
+ },
+ "3d98e827af75a16c74e52153f3b2079f": {
+  "agent": "product",
+  "message": "So far: {} | Message: breville electric kettle",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1688,
+  "value": {
+   "brand": "breville",
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": null
+  }
+ },
+ "42e13567da83a49c6c00b61e9ab6bef7": {
+  "agent": "product",
+  "message": "User request: \"bose speakers\"\n\nProducts:\n1. Gizga Essentials Cable Organiser, Cord Management System for | ₹249 | 4.5★ | Gizga\n2. Amazon Basics 16-Gauge Speaker Wire - 50 Feet | ₹399 | 4.4★ | Amazon\n3",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 837,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    4,
+    8,
+    9
+   ]
+  }
+ },
+ "43546f49770c3aabcb355657f7de13cc": {
+  "agent": "product",
+  "message": "Previous: {\"category\": \"Electronics\", \"subcategory\": \"tv\"} | Message: Samsung",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1804,
+  "value": {
+   "brand": null,
+   "category": null,
+   "keywords": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": null,
+   "suggestion": null,
+   "type": null
+  }
+ },
+ "440482bd21254692abde9c1610fb56a2": {
+  "agent": "product",
+  "message": "User request: \"apple airpods\"\n\nProducts:\n1. Wecool Moonwalk M1 ENC True Wireless in Ear Earbuds with Mic | ₹889 | 4.2★ | WeCool\n2. realme Buds Wireless in Ear Bluetooth Earphones with mic, 11 | ₹1679 ",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 866,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "4597d0dd78836be02106161c1c765b5e": {
+  "agent": "product",
+  "message": "User request: \"wireless mouse under 1000\"\n\nProducts:\n1. Amazon Basics Wireless Mouse | 2.4 GHz Connection, 1600 DPI  | ₹499 | 5.0★ | Amazon\n2. Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, ",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 904,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "47442940689357a1e38d5256071f09aa": {
+  "agent": "product",
+  "message": "User request: \"garmin smartwatch\"\n\nProducts:\n1. Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Spo | ₹2999 | 4.4★ | Fire-Boltt\n2. Fire-Boltt Gladiator 1.96\" Biggest Display Smart Watch with ",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 879,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "4b25508e2726f57d792e2310d7b3def0": {
+  "agent": "product",
+  "message": "So far: {} | Message: accha wala bluetooth speaker",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1693,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": 4.0,
+   "not_carried": null,
+   "product": "bluetooth speaker"
+  }
+ },
+ "4b7f040c33b280ad1ea35b2674c0b66a": {
+  "agent": "product",
+  "message": "Previous: {} | Message: washing machine",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1612,
+  "value": {
+   "brand": null,
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": null
+  }
+ },
+ "4c6e9e8840ea88ad6ee011c31c4dc61b": {
+  "agent": "product",
+  "message": "So far: {\"product\": \"mouse\", \"features\": [\"wireless\"], \"max_price\": 1000} | Message: what about Logitech",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1714,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "wireless mouse"
+  }
+ },
+ "4e2435eaed4862de125bafdfc40cd249": {
+  "agent": "product",
+  "message": "User request: \"wireless mouse under 1000\"\n\nProducts:\n1. Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, 12  | ₹699 | 4.5★ | Logitech\n2. Logitech B170 Wireless Mouse, 2.4 GHz with USB Nano Rec",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 890,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    5,
+    6,
+    7,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    5,
+    6,
+    7,
+    9,
+    10
+   ]
+  }
+ },
+ "57f39f4f336be0c16eee97b5745329a2": {
+  "agent": "product",
+  "message": "So far: {} | Message: garmin smartwatch",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1691,
+  "value": {
+   "brand": "Garmin",
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "smartwatch"
+  }
+ },
+ "5970e06b8ef92e79b0c651843fc98678": {
+  "agent": "product",
+  "message": "Previous: {} | Message: garmin smartwatch",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1718,
+  "value": {
+   "brand": "Garmin",
+   "category": "Electronics",
+   "keywords": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "smartwatch",
+   "suggestion": null,
+   "type": null
+  }
+ },
+ "5a2145d5274168366df2deb5ae365ed1": {
+  "agent": "product",
+  "message": "Previous: {} | Message: samsung galaxy tablet",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1704,
+  "value": {
+   "brand": null,
+   "category": null,
+   "keywords": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": "tablets",
+   "subcategory": null,
+   "suggestion": null,
+   "type": null
+  }
+ },
+ "5aaba80e58b15b277760b8a00b74c0a3": {
+  "agent": "product",
+  "message": "So far: {} | Message: dyson vacuum cleaner",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1230,
+  "value": {
+   "brand": "Dyson",
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "vacuum cleaner"
+  }
+ },
+ "5b92aaad1516906e2b9816a2d39fdac5": {
+  "agent": "product",
+  "message": "So far: {} | Message: samsung galaxy tablet",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1701,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [
+    "galaxy"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "\"tablet\"\n</Cat>\n<parameter=brand>\nSamsung"
+  }
+ },
+ "5eb6fae7cf92feb1b566c8511c3e1ffa": {
+  "agent": "product",
+  "message": "Previous: {} | Message: dyson vacuum cleaner",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1630,
+  "value": {
+   "brand": "Dyson",
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "vacuum cleaner"
+  }
+ },
+ "5f2c40eaf151d33f0efe501881477186": {
+  "agent": "product",
+  "message": "User request: \"apple airpods\"\n\nProducts:\n1. Amazon Basics Wireless Mouse | 2.4 GHz Connection, 1600 DPI  | ₹499 | 5.0★ | Amazon\n2. Syncwire LTG to USB Cable for Fast Charging Compatible with  | ₹399 |",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 821,
+  "value": {
+   "exact": [],
+   "same_kind": []
+  }
+ },
+ "66cec966eff372b3865581a38f47951c": {
+  "agent": "product",
+  "message": "Previous: {} | Message: accha wala bluetooth speaker",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1632,
+  "value": {
+   "brand": null,
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": 4.0,
+   "not_carried": null,
+   "product": "bluetooth speaker"
+  }
+ },
+ "6945c2dc48d9dc8c84e19f8adbcaf64d": {
+  "agent": "product",
+  "message": "User request: \"dyson vacuum cleaner\"\n\nProducts:\n1. Philips PowerPro FC9352/01 Compact Bagless Vacuum Cleaner (B | ₹8999 | 4.4★ | Philips\n2. ECOVACS DEEBOT N8 2-in-1 Robotic Vacuum Cleaner, 2022 New La",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 875,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "6c223a336d4e44e6c09167dd8fa56ef4": {
+  "agent": "product",
+  "message": "User request: \"garmin smartwatch\"\n\nProducts:\n1. Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Spo | ₹2999 | 4.4★ | Fire-Boltt\n2. Fire-Boltt Gladiator 1.96\" Biggest Display Smart Watch with ",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 875,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "6cac1e140b2c31cace955f29da1e9a14": {
+  "agent": "product",
+  "message": "Previous: {} | Message: gaming laptop",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1704,
+  "value": {
+   "brand": null,
+   "category": null,
+   "keywords": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": "laptops",
+   "subcategory": null,
+   "suggestion": "laptop bag",
+   "type": null
+  }
+ },
+ "71700ae66eb1280d4b6c92f82069298d": {
+  "agent": "product",
+  "message": "User request: \"breville electric kettle\"\n\nProducts:\n1. Amazon Basics Wireless Mouse | 2.4 GHz Connection, 1600 DPI  | ₹499 | 5.0★ | Amazon\n2. Syncwire LTG to USB Cable for Fast Charging Compatible wit",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 824,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    6
+   ]
+  }
+ },
+ "72d59c0e5bcb78aa0fdd8926badacd0a": {
+  "agent": "product",
+  "message": "User request: \"apple airpods\"\n\nProducts:\n1. boAt Airdopes 141 Bluetooth Truly Wireless in Ear Earbuds wi | ₹1499 | 3.9★ | boAt\n2. Wecool Moonwalk M1 ENC True Wireless in Ear Earbuds with Mic | ₹889 | ",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 872,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "72e91addc22ba8a3b18777926b4458a1": {
+  "agent": "product",
+  "message": "So far: {\"product\": \"tv\"} | Message: Samsung",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1677,
+  "value": {
+   "brand": "Samsung",
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": null
+  }
+ },
+ "731cd4707f751d51533419bd077eb944": {
+  "agent": "product",
+  "message": "Previous: {} | Message: accha wala bluetooth speaker",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1717,
+  "value": {
+   "brand": null,
+   "category": null,
+   "keywords": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": null,
+   "suggestion": null,
+   "type": null
+  }
+ },
+ "7d74d733be8267eba0f208da378d6983": {
+  "agent": "product",
+  "message": "User request: \"breville electric kettle\"\n\nProducts:\n1. Havells Aqua Plus 1.2 litre Double Wall Kettle / 304 Stainle | ₹1625 | 4.5★ | Havells\n2. Philips HD9306/06 1.5-Litre Electric Kettle (Multicolor)",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 869,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "7e04d341a279856a05649325192f9bdb": {
+  "agent": "product",
+  "message": "Previous: {} | Message: iphone 15",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1707,
+  "value": {
+   "brand": null,
+   "category": null,
+   "keywords": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": "iphone 15",
+   "subcategory": null,
+   "suggestion": "phone case",
+   "type": null
+  }
+ },
+ "85031e552186458df38a01427929c468": {
+  "agent": "product",
+  "message": "User request: \"washing machine\"\n\nProducts:\n1. NGI Store 2 Pieces Pet Hair Removers for Your Laundry Catche | ₹199 | 3.1★ | NGI",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 514,
+  "value": {
+   "exact": [],
+   "same_kind": []
+  }
+ },
+ "855304cbb6de9dc1878e547fc35683b2": {
+  "agent": "product",
+  "message": "So far: {} | Message: running shoes",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1676,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": "running shoes",
+   "product": null
+  }
+ },
+ "885fb94d3c56d4c2b944d35c4a023dff": {
+  "agent": "product",
+  "message": "User request: \"garmin smartwatch\"\n\nProducts:\n1. Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwat | ₹3999 | 4.3★ | Fire-Boltt\n2. Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwat",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 871,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "8946ecb4cfceeef65c23046629e9ff4e": {
+  "agent": "product",
+  "message": "Previous: {} | Message: running shoes",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1615,
+  "value": {
+   "brand": null,
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": "running shoes",
+   "product": null
+  }
+ },
+ "8ef5034d0d66b36bc0c3883a2de3d604": {
+  "agent": "product",
+  "message": "Previous: {\"product\": \"mouse\", \"features\": [\"wireless\"], \"max_price\": 1000} | Message: what about Logitech",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1681,
+  "value": {
+   "brand": "Logitech",
+   "features": [
+    "wireless"
+   ],
+   "max_price": 1000,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "mouse"
+  }
+ },
+ "90bd0b5edbae217fe87f9b7d64c686ae": {
+  "agent": "product",
+  "message": "Previous: {} | Message: show me some TVs",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1611,
+  "value": {
+   "brand": null,
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": null
+  }
+ },
+ "91209b89faf4616abe9d63e9e6505ea6": {
+  "agent": "product",
+  "message": "So far: {} | Message: washing machine",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1676,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": "washing machine",
+   "product": null
+  }
+ },
+ "9143ac27a480d1a60b66bbdffae79820": {
+  "agent": "product",
+  "message": "User request: \"dyson vacuum cleaner\"\n\nProducts:\n1. Philips PowerPro FC9352/01 Compact Bagless Vacuum Cleaner (B | ₹8999 | 4.4★ | Philips\n2. ECOVACS DEEBOT N8 2-in-1 Robotic Vacuum Cleaner, 2022 New La",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 870,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    4,
+    5,
+    6,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "94f42733372bcf6d14805b35dafc6957": {
+  "agent": "product",
+  "message": "Previous: {} | Message: wireless mouse under 1000",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1738,
+  "value": {
+   "brand": null,
+   "category": "Computers & Accessories",
+   "keywords": [
+    "wireless"
+   ],
+   "max_price": 1000,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "mouse",
+   "suggestion": null,
+   "type": null
+  }
+ },
+ "9bc996914a92f9f04a29402c8ec89272": {
+  "agent": "product",
+  "message": "User request: \"show me some TVs\"\n\nProducts:\n1. Sony Bravia 164 cm (65 inches) 4K Ultra HD Smart LED Google  | ₹77990 | 4.7★ | Sony\n2. Kodak 139 cm (55 inches) 4K Ultra HD Smart LED TV 55CA0909 ( | ₹29",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 0,
+  "value": null
+ },
+ "9deefe3cf6a3fc8541f51a1eb9eca352": {
+  "agent": "product",
+  "message": "So far: {} | Message: show me some TVs",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1675,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "tv"
+  }
+ },
+ "a1b794809a8bdb1ce773311bce36e568": {
+  "agent": "product",
+  "message": "User request: \"breville electric kettle\"\n\nProducts:\n1. Havells Aqua Plus 1.2 litre Double Wall Kettle / 304 Stainle | ₹1625 | 4.5★ | Havells\n2. Philips HD9306/06 1.5-Litre Electric Kettle (Multicolor)",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 880,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "a4820d81b5608eb0c59cc3330e4b430a": {
+  "agent": "product",
+  "message": "Previous: {} | Message: wireless mouse under 1000",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1648,
+  "value": {
+   "brand": null,
+   "features": [
+    "wireless"
+   ],
+   "max_price": 1000,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "mouse"
+  }
+ },
+ "a635dd02903e9580d547f9bba319726a": {
+  "agent": "product",
+  "message": "User request: \"Samsung\"\n\nProducts:\n1. Samsung 80 cm (32 inches) Wondertainment Series HD Ready LED | ₹15490 | 4.3★ | Samsung\n2. Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart  | ₹30990 | ",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 735,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ]
+  }
+ },
+ "a805987520e12584aa6a745b9fcb65b0": {
+  "agent": "product",
+  "message": "So far: {} | Message: gaming laptop",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1689,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [
+    "gaming"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "laptop"
+  }
+ },
+ "aa82fa550f253c4b5de8e0ce7d591a52": {
+  "agent": "product",
+  "message": "Previous: {} | Message: iphone 15",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1619,
+  "value": {
+   "brand": null,
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": "iphone 15",
+   "product": null
+  }
+ },
+ "abbd6226487cfd5d462a8c41a6681d58": {
+  "agent": "product",
+  "message": "User request: \"apple airpods\"\n\nProducts:\n1. Redgear Cosmo 7,1 Usb Gaming Wired Over Ear Headphones With  | ₹1990 | 4.3★ | Redgear\n2. Samsung Ehs64 Ehs64Avfwecinu Hands-Free Wired In Ear Earphon | ₹499",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 871,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "ac042f3da7d7048582e29af4049741ed": {
+  "agent": "product",
+  "message": "So far: {} | Message: wireless mouse under 1000",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1709,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [
+    "wireless"
+   ],
+   "max_price": 1000,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "mouse"
+  }
+ },
+ "b026f241add4b425e8b634fe6012320a": {
+  "agent": "product",
+  "message": "User request: \"show me some TVs\"\n\nProducts:\n1. Sony Bravia 164 cm (65 inches) 4K Ultra HD Smart LED Google  | ₹77990 | 4.7★ | Sony\n2. Cotbolt Silicone Protective Case Cover for LG an MR21GA Magi | ₹39",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 929,
+  "value": {
+   "exact": [
+    1,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "b1a3c4d1009c6ae853a715f8085ba5bb": {
+  "agent": "product",
+  "message": "User request: \"Samsung\"\n\nProducts:\n1. Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart  | ₹30990 | 4.3★ | Samsung\n2. Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED | ₹13490 | ",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 879,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    10
+   ]
+  }
+ },
+ "b3a9da463942711cd35cacfeace876ef": {
+  "agent": "product",
+  "message": "Previous: {\"category\": \"Computers & Accessories\", \"subcategory\": \"mouse\", \"max_price\": 1000, \"keywords\": [\"wireless\"]} | Message: what about Logitech",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1829,
+  "value": {
+   "brand": null,
+   "category": null,
+   "keywords": [
+    "wireless"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": null,
+   "suggestion": null,
+   "type": null
+  }
+ },
+ "b5c671f1b24646bf44469c0a4b8d3e09": {
+  "agent": "product",
+  "message": "Previous: {} | Message: show me some TVs",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1702,
+  "value": {
+   "brand": null,
+   "category": "Electronics",
+   "keywords": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "tv",
+   "suggestion": null,
+   "type": null
+  }
+ },
+ "b8b6ff2a158e7f48cc59d0b39d82294a": {
+  "agent": "product",
+  "message": "So far: {} | Message: dyson vacuum cleaner",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1691,
+  "value": {
+   "brand": "Dyson",
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "vacuum cleaner"
+  }
+ },
+ "bbcd6c239e4d6e8fca3613a9ce5c67ef": {
+  "agent": "product",
+  "message": "User request: \"headphones\"\n\nProducts:\n1. Redgear Cosmo 7,1 Usb Gaming Wired Over Ear Headphones With  | ₹1990 | 4.3★ | Redgear\n2. boAt BassHeads 900 On-Ear Wired Headphones with Mic (White) | ₹849 | 4",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 904,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "bbf33bcc97ac030401a6fbdb70899a49": {
+  "agent": "product",
+  "message": "Previous: {} | Message: dyson vacuum cleaner",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1718,
+  "value": {
+   "brand": "Dyson",
+   "category": "Home & Kitchen",
+   "keywords": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "vacuum cleaner",
+   "suggestion": null,
+   "type": null
+  }
+ },
+ "bcc4676070eed2bbbc8f423aa58b6bea": {
+  "agent": "product",
+  "message": "Previous: {} | Message: breville electric kettle",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1719,
+  "value": {
+   "brand": "Breville",
+   "category": "Home & Kitchen",
+   "keywords": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": "electric kettle",
+   "suggestion": null,
+   "type": null
+  }
+ },
+ "bf6b8fe027b099d89fdd6d9457c79d49": {
+  "agent": "product",
+  "message": "Previous: {} | Message: bose speakers",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1627,
+  "value": {
+   "brand": "Bose",
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "speaker"
+  }
+ },
+ "c8b184d5deef6a0d75d7c69f71e0a535": {
+  "agent": "product",
+  "message": "Previous: {} | Message: garmin smartwatch",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1630,
+  "value": {
+   "brand": "Garmin",
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "smartwatch"
+  }
+ },
+ "cf32c1a657f781b106276491aab1ac3d": {
+  "agent": "product",
+  "message": "User request: \"accha wala bluetooth speaker\"\n\nProducts:\n1. JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL  | ₹1999 | 4.3★ | JBL\n2. boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours P",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 730,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ]
+  }
+ },
+ "d69a566450ba448f6f66a37fec9335e7": {
+  "agent": "product",
+  "message": "Previous: {} | Message: running shoes",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1685,
+  "value": {
+   "brand": null,
+   "category": null,
+   "keywords": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": null,
+   "suggestion": null,
+   "type": null
+  }
+ },
+ "dd078e09b9abf075dd2fd8c1b12aa4b3": {
+  "agent": "product",
+  "message": "Previous: {} | Message: breville electric kettle",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1630,
+  "value": {
+   "brand": "Breville",
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "electric kettle"
+  }
+ },
+ "dd0fe0e191b6a0080dfa9d3b6a561596": {
+  "agent": "product",
+  "message": "Previous: {\"keywords\": [\"headphones\"]} | Message: under 1000",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1735,
+  "value": {
+   "brand": null,
+   "category": null,
+   "keywords": [
+    "headphones"
+   ],
+   "max_price": 1000,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": null,
+   "suggestion": null,
+   "type": null
+  }
+ },
+ "dfc4f91463c7d230509a87803656111a": {
+  "agent": "product",
+  "message": "Previous: {} | Message: Samsung",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1613,
+  "value": {
+   "brand": "Samsung",
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": null
+  }
+ },
+ "e425f732cd18d8ed2a43e96ec9959afc": {
+  "agent": "product",
+  "message": "So far: {} | Message: garmin smartwatch",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1230,
+  "value": {
+   "brand": "Garmin",
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "smartwatch"
+  }
+ },
+ "e5d06ae795b0cb61985e3b877ec9bc71": {
+  "agent": "product",
+  "message": "User request: \"dyson vacuum cleaner\"\n\nProducts:\n1. Philips PowerPro FC9352/01 Compact Bagless Vacuum Cleaner (B | ₹8999 | 4.4★ | Philips\n2. ECOVACS DEEBOT N8 2-in-1 Robotic Vacuum Cleaner, 2022 New La",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 883,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "e5f26e7c69c5c22385db1de56e9da557": {
+  "agent": "product",
+  "message": "User request: \"bose speakers\"\n\nProducts:\n1. Amazon Basics HDMI Coupler,Black | ₹209 | 4.4★ | Amazon\n2. JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL  | ₹1999 | 4.3★ | JBL\n3. boAt Stone 6",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 852,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    2,
+    3,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "e7d0e11fa5b2273992e1688d3da858d3": {
+  "agent": "product",
+  "message": "So far: {} | Message: bose speakers",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1688,
+  "value": {
+   "brand": "Bose",
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "speaker"
+  }
+ },
+ "e8f5942d5b9e6eb579a9cff1ab978c69": {
+  "agent": "product",
+  "message": "User request: \"what about Logitech\"\n\nProducts:\n1. Amazon Basics Wireless Mouse | 2.4 GHz Connection, 1600 DPI  | ₹499 | 5.0★ | Amazon\n2. Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Na | ",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 867,
+  "value": {
+   "exact": [
+    2,
+    3,
+    4,
+    5,
+    10
+   ],
+   "same_kind": [
+    2,
+    3,
+    4,
+    5,
+    10
+   ]
+  }
+ },
+ "e9e11cfa45a7ffbff174b40de63dd9f8": {
+  "agent": "product",
+  "message": "Previous: {} | Message: headphones",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1795,
+  "value": {
+   "brand": null,
+   "category": null,
+   "keywords": [
+    "headphones"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "subcategory": null,
+   "suggestion": null,
+   "type": null
+  }
+ },
+ "eb91f93660556387eaf27811f36aaca5": {
+  "agent": "product",
+  "message": "User request: \"bose speakers\"\n\nProducts:\n1. JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL  | ₹1999 | 4.3★ | JBL\n2. boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playb | ₹1799 | ",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 879,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "ecae2a4b5c7fe91e1c20f74a2c054d7a": {
+  "agent": "product",
+  "message": "User request: \"show me some TVs\"\n\nProducts:\n1. Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart  | ₹30990 | 4.3★ | Samsung\n2. Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED | ",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 931,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "ef86c1064e55f869af9406c370dc0591": {
+  "agent": "product",
+  "message": "So far: {} | Message: apple airpods",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1709,
+  "value": {
+   "brand": "Apple",
+   "clear": [],
+   "features": [
+    "airpods"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "tws earbuds"
+  }
+ },
+ "ef99760ee7aebf8e03b0b0a07941bc14": {
+  "agent": "product",
+  "message": "User request: \"garmin smartwatch\"\n\nProducts:\n1. Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Spo | ₹2999 | 4.4★ | Fire-Boltt\n2. Fire-Boltt Gladiator 1.96\" Biggest Display Smart Watch with ",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 876,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "f427b803bf97f180796acf431f25635a": {
+  "agent": "product",
+  "message": "Previous: {} | Message: samsung galaxy tablet",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1642,
+  "value": {
+   "brand": "Samsung",
+   "features": [
+    "Galaxy"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "tablet"
+  }
+ },
+ "f42efa0da906ef87da444a11260f0e57": {
+  "agent": "product",
+  "message": "So far: {} | Message: iphone 15",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1677,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": null
+  }
+ },
+ "fc40cc02c1f7bac257ff5339d603b955": {
+  "agent": "product",
+  "message": "User request: \"what about Logitech\"\n\nProducts:\n1. Amazon Basics Wireless Mouse | 2.4 GHz Connection, 1600 DPI  | ₹499 | 5.0★ | Amazon\n2. Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, 12  | ",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 877,
+  "value": {
+   "exact": [
+    2,
+    3,
+    4
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "fc9b02f3602a10266272a0131586f00c": {
+  "agent": "product",
+  "message": "User request: \"Samsung\"\n\nProducts:\n1. Samsung Original 25W USB Travel Lightning Adapter for Cellul | ₹1075 | 4.4★ | Samsung\n2. Samsung 25W USB Travel Adapter for Cellular Phones - White | ₹1219 | 4.4★",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 0,
+  "value": null
+ }
+}

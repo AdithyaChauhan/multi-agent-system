@@ -1,5 +1,5 @@
 import uuid
-from typing import Optional, List
+from typing import Optional
 from app.db.database import SessionLocal
 from app.models.support_ticket import SupportTicket, SeverityLevel, TicketStatus, IssueCategory
 
@@ -51,68 +51,6 @@ def create_support_ticket(
             "status": ticket.status.value,
             "created_at": ticket.created_at.isoformat(),
         }
-
-    finally:
-        db.close()
-
-
-def get_support_ticket(ticket_id: str) -> Optional[dict]:
-    """Get support ticket by ID"""
-    db = SessionLocal()
-    try:
-        ticket = db.query(SupportTicket).filter(SupportTicket.ticket_id == ticket_id).first()
-
-        if not ticket:
-            return None
-
-        return {
-            "ticket_id": ticket.ticket_id,
-            "user_id": ticket.user_id,
-            "order_id": ticket.order_id,
-            "severity": ticket.severity.value,
-            "status": ticket.status.value,
-            "category": ticket.category.value,
-            "description": ticket.description,
-            "resolution": ticket.resolution,
-            "created_at": ticket.created_at.isoformat(),
-            "resolved_at": ticket.resolved_at.isoformat() if ticket.resolved_at else None,
-        }
-
-    finally:
-        db.close()
-
-
-def get_user_ticket_history(user_id: str, limit: int = 10) -> List[dict]:
-    """
-    Get user's support ticket history.
-
-    Args:
-        user_id: User ID
-        limit: Maximum number of tickets to return
-
-    Returns:
-        List of ticket dictionaries
-    """
-    db = SessionLocal()
-    try:
-        tickets = (
-            db.query(SupportTicket)
-            .filter(SupportTicket.user_id == user_id)
-            .order_by(SupportTicket.created_at.desc())
-            .limit(limit)
-            .all()
-        )
-
-        return [
-            {
-                "ticket_id": t.ticket_id,
-                "severity": t.severity.value,
-                "category": t.category.value,
-                "status": t.status.value,
-                "created_at": t.created_at.isoformat(),
-            }
-            for t in tickets
-        ]
 
     finally:
         db.close()

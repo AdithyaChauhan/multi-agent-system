@@ -1,258 +1,109 @@
+"""Order agent: deterministic lookup (owner-only) and status replies."""
+
+from unittest.mock import patch
+
 import pytest
-from unittest.mock import MagicMock, patch
-from app.agents.state import AgentState
+
+import app.agents.order_agent as oa
+
+ORDERS = [
+    {"order_id": "ORD-2004", "product_name": "Croma 500W Mixer Grinder", "status": "delivered"},
+    {"order_id": "ORD-2003", "product_name": "Fire-Boltt Phoenix Smartwatch", "status": "shipped"},
+]
 
 
-class TestCheckOrderId:
-
-    def test_auto_selects_single_order(self):
-        """Auto-selects order when user has only one"""
-        mock_orders = [
-            {
-                "order_id": "ORD-2001",
-                "product_name": "AirPods",
-                "status": "shipped",
-                "tracking_id": "TRK-001",
-                "created_at": None,
-            }
-        ]
-
-        with patch("app.agents.order_agent.fetch_user_orders", return_value=mock_orders):
-            from app.agents.order_agent import check_order_id
-
-            state = AgentState(
-                user_message="Where is my order?",
-                user_id="test-user",
-                session_id="test-session",
-                conversation_history=[],
-            )
-            result = check_order_id(state)
-
-        assert result["order_id"] == "ORD-2001"
-
-    def test_returns_none_when_no_orders(self):
-        """Returns no order_id when user has no orders"""
-        with patch("app.agents.order_agent.fetch_user_orders", return_value=[]):
-            from app.agents.order_agent import check_order_id
-
-            state = AgentState(
-                user_message="Where is my order?",
-                user_id="test-user",
-                session_id="test-session",
-                conversation_history=[],
-            )
-            result = check_order_id(state)
-
-        assert result["order_id"] is None
-        assert result["user_orders"] == []
-
-    def test_extracts_order_id_from_message(self):
-        """Extracts order ID directly from message"""
-        with patch("app.agents.order_agent.fetch_user_orders", return_value=[]):
-            from app.agents.order_agent import check_order_id
-
-            state = AgentState(
-                user_message="Track order ORD-2001",
-                user_id="test-user",
-                session_id="test-session",
-                conversation_history=[],
-            )
-            result = check_order_id(state)
-
-        assert result["order_id"] == "ORD-2001"
-
-    def test_multiple_orders_returns_none(self):
-        """Returns None order_id when multiple orders exist"""
-        mock_orders = [
-            {
-                "order_id": "ORD-2001",
-                "product_name": "AirPods",
-                "status": "shipped",
-                "tracking_id": "TRK-001",
-                "created_at": None,
-            },
-            {
-                "order_id": "ORD-2002",
-                "product_name": "Headphones",
-                "status": "delivered",
-                "tracking_id": "TRK-002",
-                "created_at": None,
-            },
-        ]
-
-        with patch("app.agents.order_agent.fetch_user_orders", return_value=mock_orders):
-            from app.agents.order_agent import check_order_id
-
-            state = AgentState(
-                user_message="Where is my order?",
-                user_id="test-user",
-                session_id="test-session",
-                conversation_history=[],
-            )
-            result = check_order_id(state)
-
-        assert result["order_id"] is None
-        assert len(result["user_orders"]) == 2
+def _order(status, **extra):
+    return {
+        "order_id": "ORD-1",
+        "product_name": "Mixer",
+        "status": status,
+        "carrier": None,
+        "tracking_id": None,
+        **extra,
+    }
 
 
-class TestFetchOrder:
+class TestFindOrder:
+    def test_lookup_is_scoped_to_the_user(self):
+        with patch.object(oa, "fetch_user_orders", return_value=ORDERS), patch.object(
+            oa, "fetch_order_from_db", return_value=None
+        ) as fetch:
+            out = oa.find_order({"user_id": "demo-user-1", "order_id": "ORD-9901"})
+        fetch.assert_called_once_with("ORD-9901", "demo-user-1")
+        assert out["order_data"] is None
+        assert oa.route_after_find(out) == "not_found"
 
-    def test_fetch_existing_order(self):
-        """Fetches order that exists"""
-        mock_order = {"order_id": "ORD-2001", "product_name": "AirPods", "status": "shipped"}
+    def test_single_order_is_used_when_none_named(self):
+        with patch.object(oa, "fetch_user_orders", return_value=ORDERS[:1]), patch.object(
+            oa, "fetch_order_from_db", return_value=_order("delivered")
+        ):
+            out = oa.find_order({"user_id": "u1", "order_id": None})
+        assert out["order_id"] == "ORD-2004"
+        assert oa.route_after_find(out) == "status"
 
-        with patch("app.agents.order_agent.fetch_order_from_db", return_value=mock_order):
-            from app.agents.order_agent import fetch_order
+    def test_several_orders_and_none_named_lists_them(self):
+        with patch.object(oa, "fetch_user_orders", return_value=ORDERS):
+            out = oa.find_order({"user_id": "u1", "order_id": None})
+        assert oa.route_after_find(out) == "list"
 
-            state = AgentState(
-                user_message="Track my order",
-                user_id="test-user",
-                session_id="test-session",
-                order_id="ORD-2001",
-                conversation_history=[],
-            )
-            result = fetch_order(state)
-
-        assert result["order_data"]["order_id"] == "ORD-2001"
-
-    def test_fetch_nonexistent_order(self):
-        """Returns None for non-existent order"""
-        with patch("app.agents.order_agent.fetch_order_from_db", return_value=None):
-            from app.agents.order_agent import fetch_order
-
-            state = AgentState(
-                user_message="Track my order",
-                user_id="test-user",
-                session_id="test-session",
-                order_id="ORD-9999",
-                conversation_history=[],
-            )
-            result = fetch_order(state)
-
-        assert result["order_data"] is None
+    def test_no_orders(self):
+        with patch.object(oa, "fetch_user_orders", return_value=[]):
+            out = oa.find_order({"user_id": "u1", "order_id": None})
+        assert oa.route_after_find(out) == "no_orders"
 
 
-class TestFinalizeOrderResponse:
+class TestReplies:
+    def test_list(self):
+        text = oa.list_orders({"user_orders": ORDERS})["final_response"]
+        assert "ORD-2004" in text and "ORD-2003" in text and "Please provide the order ID" in text
 
-    def test_generates_response_post_tool(self):
-        """finalize_order_response produces a final_response after tracking tool call."""
-        mock_resp = MagicMock()
-        mock_resp.content = "Your order has been delivered."
+    def test_list_footer_when_more_than_five(self):
+        many = [dict(ORDERS[0], order_id=f"ORD-{i}") for i in range(7)]
+        assert "showing 5 most recent of 7 orders" in oa.list_orders({"user_orders": many})["final_response"]
 
-        with patch("app.agents.order_agent.load_prompt", return_value=(None, None)), patch(
-            "app.agents.order_agent.llm"
-        ) as mock_llm:
-            mock_llm.invoke.return_value = mock_resp
-            from app.agents.order_agent import finalize_order_response
+    def test_not_found_lists_own_orders(self):
+        text = oa.respond_not_found({"order_id": "ORD-7777", "user_orders": ORDERS})["final_response"]
+        assert "couldn't find order **ORD-7777**" in text and "1. **ORD-2004**" in text
 
-            state = AgentState(
-                user_message="Where is my order?",
-                user_id="u1",
-                session_id="s1",
-                order_data={"order_id": "ORD-1", "product_name": "AirPods", "status": "delivered"},
-                tracking_data={"carrier": "FedEx", "tracking_id": "TRK-001", "live_status": "delivered"},
-                messages=[],
-                conversation_history=[],
-            )
-            result = finalize_order_response(state)
+    def test_not_found_without_orders(self):
+        assert "double-check" in oa.respond_not_found({"order_id": "ORD-7777", "user_orders": []})["final_response"]
 
-        assert "final_response" in result
-        assert result["final_response"] == "Your order has been delivered."
-
-    def test_generates_response_with_tool_message(self):
-        """finalize_order_response incorporates live tracking data from ToolMessage."""
-        from langchain_core.messages import ToolMessage
-
-        mock_resp = MagicMock()
-        mock_resp.content = "FedEx shows your order is in transit."
-
-        tool_msg = ToolMessage(
-            content='{"carrier": "FedEx", "live_status": "in_transit"}',
-            tool_call_id="call_1",
-        )
-
-        with patch("app.agents.order_agent.load_prompt", return_value=(None, None)), patch(
-            "app.agents.order_agent.llm"
-        ) as mock_llm:
-            mock_llm.invoke.return_value = mock_resp
-            from app.agents.order_agent import finalize_order_response
-
-            state = AgentState(
-                user_message="Is it on the way?",
-                user_id="u1",
-                session_id="s1",
-                order_data={"order_id": "ORD-2", "product_name": "TV", "status": "shipped"},
-                tracking_data={},
-                messages=[tool_msg],
-                conversation_history=[{"role": "user", "content": "hello"}],
-            )
-            result = finalize_order_response(state)
-
-        assert "final_response" in result
-
-    def test_uses_prompt_from_hub_when_available(self):
-        """finalize_order_response uses hub prompt when load_prompt succeeds."""
-        mock_resp = MagicMock()
-        mock_resp.content = "Delivered yesterday."
-
-        with patch("app.agents.order_agent.load_prompt", return_value=("Hub system prompt", "abc123")), patch(
-            "app.agents.order_agent.llm"
-        ) as mock_llm:
-            mock_llm.invoke.return_value = mock_resp
-            from app.agents.order_agent import finalize_order_response
-
-            state = AgentState(
-                user_message="status?",
-                user_id="u1",
-                session_id="s1",
-                order_data={"order_id": "ORD-3", "product_name": "Phone", "status": "delivered"},
-                tracking_data={},
-                messages=[],
-                conversation_history=[],
-            )
-            result = finalize_order_response(state)
-
-        assert result["final_response"] == "Delivered yesterday."
+    def test_no_orders(self):
+        assert "couldn't find any orders" in oa.respond_no_orders({})["final_response"]
 
 
-class TestRouteToOrderTool:
+class TestOrderStatus:
+    @pytest.mark.parametrize(
+        "status,phrase",
+        [
+            ("delivered", "has been delivered"),
+            ("shipped", "has shipped"),
+            ("out_for_delivery", "is out for delivery"),
+            ("processing", "being prepared"),
+            ("cancelled", "was cancelled"),
+            ("lost", "has status: lost"),
+        ],
+    )
+    def test_each_status(self, status, phrase):
+        with patch.object(oa, "fetch_tracking_info", return_value=None):
+            assert phrase in oa.order_status({"order_data": _order(status)})["final_response"]
 
-    def test_routes_to_tools_when_tool_calls_present(self):
-        from app.agents.order_agent import route_to_order_tool
+    def test_shipped_with_carrier_and_live_tracking(self):
+        live = {"status": "In Transit", "current_location": "Mumbai Hub", "estimated_delivery": "2026-06-06"}
+        order = _order("shipped", carrier="DTDC", tracking_id="TRK-1")
+        with patch.object(oa, "fetch_tracking_info", return_value=live) as track:
+            out = oa.order_status({"order_data": order})
+        track.assert_called_once_with("TRK-1")
+        text = out["final_response"]
+        assert "with DTDC" in text and "In Transit at Mumbai Hub" in text
+        assert "Expected delivery: 2026-06-06" in text and "Tracking ID: TRK-1" in text
 
-        mock_msg = MagicMock()
-        mock_msg.tool_calls = [{"name": "fetch_tracking_info", "id": "1", "args": {}}]
-        state = AgentState(
-            user_message="track",
-            user_id="u1",
-            session_id="s1",
-            messages=[mock_msg],
-            conversation_history=[],
-        )
-        assert route_to_order_tool(state) == "order_tools"
 
-    def test_routes_to_end_when_no_tool_calls(self):
-        from app.agents.order_agent import route_to_order_tool
-
-        mock_msg = MagicMock()
-        mock_msg.tool_calls = None
-        state = AgentState(
-            user_message="track",
-            user_id="u1",
-            session_id="s1",
-            messages=[mock_msg],
-            conversation_history=[],
-        )
-        assert route_to_order_tool(state) == "end"
-
-    def test_routes_to_end_when_no_messages(self):
-        from app.agents.order_agent import route_to_order_tool
-
-        state = AgentState(
-            user_message="track",
-            user_id="u1",
-            session_id="s1",
-            messages=[],
-            conversation_history=[],
-        )
-        assert route_to_order_tool(state) == "end"
+def test_graph_end_to_end():
+    with patch.object(oa, "fetch_user_orders", return_value=ORDERS), patch.object(
+        oa, "fetch_order_from_db", return_value=dict(ORDERS[0], carrier="BlueDart", tracking_id="TRK-2004")
+    ), patch.object(oa, "fetch_tracking_info", return_value=None):
+        out = oa.order_agent_graph.invoke({"user_id": "demo-user-1", "order_id": "ORD-2004"})
+    assert out["final_response"].startswith(
+        "Good news! **Croma 500W Mixer Grinder** (order ORD-2004) has been delivered."
+    )

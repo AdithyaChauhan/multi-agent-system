@@ -14,7 +14,7 @@ jobs:
     runs-on: [self-hosted, minikube]
 
     env:
-      EVAL_OPENAI_API_KEY: ${{ secrets.EVAL_OPENAI_API_KEY }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
       LANGCHAIN_API_KEY: ${{ secrets.LANGCHAIN_API_KEY }}
       DEEPEVAL_TELEMETRY_OPT_OUT: "YES"
       RUN_LIVE_EVAL: "true"

@@ -1,0 +1,437 @@
+{
+ "label": "verify2_gptoss20b",
+ "run": 1,
+ "model": "openai/gpt-oss-20b",
+ "git_sha": "44f4792",
+ "started_at": "2026-11-18T06:24:11+00:00",
+ "finished_at": "2026-11-18T06:27:49+00:00",
+ "summary": {
+  "conversations": 5,
+  "conversations_passed": 4,
+  "turns": 10,
+  "turns_passed": 9,
+  "llm_calls": 28,
+  "llm_calls_per_turn": 2.8,
+  "tokens": 27508,
+  "tokens_per_turn": 2751,
+  "seconds_per_turn_mean": 1.54,
+  "seconds_per_turn_median": 1.6,
+  "rate_limited_calls": 0,
+  "sdk_retries": 0,
+  "infra_error_conversations": [],
+  "failed_conversations": [
+   "p10"
+  ],
+  "by_route": {
+   "product": {
+    "turns": 9,
+    "llm_calls": 27,
+    "seconds": 14.7,
+    "tokens": 26342,
+    "llm_calls_per_turn": 3.0,
+    "seconds_per_turn": 1.64,
+    "tokens_per_turn": 2927
+   },
+   "clarify": {
+    "turns": 1,
+    "llm_calls": 1,
+    "seconds": 0.7,
+    "tokens": 1166,
+    "llm_calls_per_turn": 1.0,
+    "seconds_per_turn": 0.71,
+    "tokens_per_turn": 1166
+   }
+  }
+ },
+ "conversations": [
+  {
+   "id": "p10",
+   "tags": [
+    "product"
+   ],
+   "passed": false,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "4k monitor",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": false,
+     "failures": [
+      "no product listing in reply",
+      "ranked_products empty"
+     ],
+     "llm_calls": 3,
+     "tokens": 2733,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.865,
+     "paced_wait_seconds": 21.8,
+     "extracted": {
+      "category": "Computers & Accessories",
+      "subcategory": "monitor",
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [],
+     "response": "I couldn't find any monitor matching your request. Try a different budget, brand or product."
+    }
+   ]
+  },
+  {
+   "id": "p12",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "show me a mouse",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2886,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.594,
+     "paced_wait_seconds": 19.7,
+     "extracted": {
+      "category": "Computers & Accessories",
+      "subcategory": "mouse",
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Logitech G402 Hyperion Fury USB Wired Gaming Mouse, 4,000 DP",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      },
+      {
+       "name": "Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Na",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      },
+      {
+       "name": "Logitech Pebble M350 Wireless Mouse with Bluetooth or USB - ",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      }
+     ],
+     "response": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Logitech G402 Hyperion Fury USB Wired Gaming Mouse, 4,000 DPI, Lightweight, 8 Programmable Buttons, Compatible for PC/Mac - Black** — Logitech\n   ₹1,995 · 4.6/5\n\n2. **Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Nano Receiver, 1000 DPI Optical Tracking, 3 Buttons, 24 Month Life Battery, PC/Mac/Laptop - Black** — Logitech\n   ₹1,295 · 4.6/5\n\n3. **Logitech Pebble M350 Wireless Mouse with Bluetooth or USB - Silent, Slim Computer Mouse with Quiet Click for Laptop, Notebook, PC and Mac - Graphite** — Logitech\n   ₹1,490 · 4.6/5\n"
+    },
+    {
+     "message": "gaming ones under 2000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3151,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.726,
+     "paced_wait_seconds": 21.2,
+     "extracted": {
+      "category": "Computers & Accessories",
+      "subcategory": "mouse",
+      "type": null,
+      "brand": null,
+      "max_price": 2000,
+      "min_rating": null,
+      "keywords": [
+       "gaming"
+      ]
+     },
+     "shown": [
+      {
+       "name": "Logitech G402 Hyperion Fury USB Wired Gaming Mouse, 4,000 DP",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      },
+      {
+       "name": "Logitech G102 USB Light Sync Gaming Mouse with Customizable ",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      },
+      {
+       "name": "Zebronics Zeb-Transformer-M Optical USB Gaming Mouse with LE",
+       "brand": "Zebronics",
+       "subcategory": "mouse"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Logitech G402 Hyperion Fury USB Wired Gaming Mouse, 4,000 DPI, Lightweight, 8 Programmable Buttons, Compatible for PC/Mac - Black** — Logitech\n   ₹1,995 · 4.6/5\n\n2. **Logitech G102 USB Light Sync Gaming Mouse with Customizable RGB Lighting, 6 Programmable Buttons, Gaming Grade Sensor, 8K DPI Tracking, 16.8mn Color, Light Weight - Black** — Logitech\n   ₹1,495 · 4.5/5\n\n3. **Zebronics Zeb-Transformer-M Optical USB Gaming Mouse with LED Effect(Black)** — Zebronics\n   ₹399 · 4.4/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p22",
+   "tags": [
+    "product",
+    "router"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "show me headphones",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2947,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.764,
+     "paced_wait_seconds": 23.1,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "headphones",
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Redgear Cosmo 7,1 Usb Gaming Wired Over Ear Headphones With ",
+       "brand": "Redgear",
+       "subcategory": "headphones"
+      },
+      {
+       "name": "Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwat",
+       "brand": "Fire-Boltt",
+       "subcategory": "headphones"
+      },
+      {
+       "name": "Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwat",
+       "brand": "Fire-Boltt",
+       "subcategory": "headphones"
+      }
+     ],
+     "response": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Redgear Cosmo 7,1 Usb Gaming Wired Over Ear Headphones With Mic With Virtual Surround Sound,50Mm Driver, Rgb Leds & Remote Control(Black)** — Redgear\n   ₹1,990 · 4.3/5\n\n2. **Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwatch with 368*448 Pixel Resolution 100+ Sports Mode, TWS Connection, Voice Assistance, SPO2 & Heart Rate Monitoring** — Fire-Boltt\n   ₹3,999 · 4.3/5\n\n3. **Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwatch with 368*448 Pixel Resolution 100+ Sports Mode, TWS Connection, Voice Assistance, SPO2 & Heart Rate Monitoring** — Fire-Boltt\n   ₹3,999 · 4.3/5\n"
+    },
+    {
+     "message": "hi",
+     "route": "clarify",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1166,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 0.712,
+     "paced_wait_seconds": 21.5,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "headphones",
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [],
+     "response": "Hi! I can help you find products, check an order, or sort out a problem with one. What do you need?"
+    },
+    {
+     "message": "bose speakers",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3051,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.771,
+     "paced_wait_seconds": 8.5,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "speakers",
+      "type": null,
+      "brand": "Bose",
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [],
+     "response": "We don't carry Bose speakers. I couldn't find any speakers matching your request. Try a different budget, brand or product."
+    },
+    {
+     "message": "bajaj smartwatches",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3082,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.505,
+     "paced_wait_seconds": 22.3,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "smartwatch",
+      "type": null,
+      "brand": "Bajaj",
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Spo",
+       "brand": "Fire-Boltt",
+       "subcategory": "smartwatch"
+      },
+      {
+       "name": "Fire-Boltt Gladiator 1.96\" Biggest Display Smart Watch with ",
+       "brand": "Fire-Boltt",
+       "subcategory": "smartwatch"
+      },
+      {
+       "name": "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",1",
+       "brand": "Fire-Boltt",
+       "subcategory": "smartwatch"
+      }
+     ],
+     "response": "We don't carry Bajaj smartwatch, so here are the closest options from other brands:\n\n1. **Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Sports Mode, 8 UI Interactions, Built in Speaker & Mic, 7 Days Battery & Fire-Boltt Health Suite** — Fire-Boltt\n   ₹2,999 · 4.4/5\n\n2. **Fire-Boltt Gladiator 1.96\" Biggest Display Smart Watch with Bluetooth Calling, Voice Assistant &123 Sports Modes, 8 Unique UI Interactions, SpO2, 24/7 Heart Rate Tracking** — Fire-Boltt\n   ₹3,999 · 4.4/5\n\n3. **Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 240*240 PX High Res with SpO2, Heart Rate Monitoring & IP67 Rating** — Fire-Boltt\n   ₹1,998 · 4.3/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p23",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "sony headphones under 500",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2925,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.604,
+     "paced_wait_seconds": 22.8,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "headphones",
+      "type": null,
+      "brand": "Sony",
+      "max_price": 500,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Samsung Ehs64 Ehs64Avfwecinu Hands-Free Wired In Ear Earphon",
+       "brand": "Samsung",
+       "subcategory": "headphones"
+      },
+      {
+       "name": "boAt BassHeads 122 Wired Earphones with Heavy Bass, Integrat",
+       "brand": "boAt",
+       "subcategory": "headphones"
+      },
+      {
+       "name": "boAt Bassheads 102 Wired in Ear Earphones with Mic (Mint Gre",
+       "brand": "boAt",
+       "subcategory": "headphones"
+      }
+     ],
+     "response": "I couldn't find Sony headphones within your filters, so here are the closest options from other brands:\n\n1. **Samsung Ehs64 Ehs64Avfwecinu Hands-Free Wired In Ear Earphones With Mic With Remote Note (White)** — Samsung\n   ₹499 · 4.2/5\n\n2. **boAt BassHeads 122 Wired Earphones with Heavy Bass, Integrated Controls and Mic (Gun Metal)** — boAt\n   ₹399 · 4.2/5\n\n3. **boAt Bassheads 102 Wired in Ear Earphones with Mic (Mint Green)** — boAt\n   ₹399 · 4.2/5\n"
+    },
+    {
+     "message": "under 3000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2831,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.414,
+     "paced_wait_seconds": 21.5,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "headphones",
+      "type": null,
+      "brand": "Sony",
+      "max_price": 3000,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Sony WI-C100 Wireless Headphones with Customizable Equalizer",
+       "brand": "Sony",
+       "subcategory": "headphones"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Sony WI-C100 Wireless Headphones with Customizable Equalizer for Deep Bass & 25 Hrs Battery, DSEE-Upscale, Splash Proof, 360RA, Fast Pair, in-Ear Bluetooth Headset with mic for Phone Calls (Black)** — Sony\n   ₹1,599 · 3.6/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p25",
+   "tags": [
+    "product",
+    "safety"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "amazon fire tv stick",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2736,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.479,
+     "paced_wait_seconds": 20.9,
+     "extracted": {
+      "category": "Electronics",
+      "subcategory": "streaming device",
+      "type": null,
+      "brand": "Amazon",
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Realme Smart TV Stick 4K",
+       "brand": "Realme",
+       "subcategory": "streaming device"
+      }
+     ],
+     "response": "We don't carry Amazon streaming device, so here are the closest options from other brands:\n\n1. **Realme Smart TV Stick 4K** — Realme\n   ₹4,699 · 4.5/5\n"
+    }
+   ]
+  }
+ ]
+}

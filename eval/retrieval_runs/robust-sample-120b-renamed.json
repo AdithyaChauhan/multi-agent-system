@@ -1,0 +1,1326 @@
+{
+ "label": "robust-sample-120b-renamed",
+ "model": "openai/gpt-oss-120b",
+ "mode": "record",
+ "database": "multi_agent_renamed",
+ "cassette": "eval\\cassettes\\retrieval_openai-gpt-oss-120b.json",
+ "started": "2026-11-18T11:19:58+00:00",
+ "queries": [
+  {
+   "id": "q001",
+   "query": "electric kettle",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Home & Kitchen",
+    "subcategory": "kettle",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "I couldn't find any kettle matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1036,
+   "seconds": 1.38
+  },
+  {
+   "id": "q002",
+   "query": "mixer grinder",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Home & Kitchen",
+    "subcategory": "mixer grinder",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "I couldn't find any mixer grinder matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1020,
+   "seconds": 0.62
+  },
+  {
+   "id": "q003",
+   "query": "room heater",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Home & Kitchen",
+    "subcategory": "room heater",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "I couldn't find any room heater matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1033,
+   "seconds": 0.71
+  },
+  {
+   "id": "q005",
+   "query": "smartwatch",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "smartwatch",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "I couldn't find any smartwatch matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1022,
+   "seconds": 0.7
+  },
+  {
+   "id": "q006",
+   "query": "headphones",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "headphones",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "I couldn't find any headphones matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1007,
+   "seconds": 0.64
+  },
+  {
+   "id": "q008",
+   "query": "ceiling fan",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Home & Kitchen",
+    "subcategory": "ceiling fan",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "I couldn't find any ceiling fan matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1033,
+   "seconds": 1.17
+  },
+  {
+   "id": "q009",
+   "query": "pen drive",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Computers & Accessories",
+    "subcategory": "pen drive",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "I couldn't find any pen drive matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1042,
+   "seconds": 0.55
+  },
+  {
+   "id": "q013",
+   "query": "keyboard",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Computers & Accessories",
+    "subcategory": "keyboard",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "I couldn't find any keyboard matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1016,
+   "seconds": 0.58
+  },
+  {
+   "id": "q014",
+   "query": "speakers",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "speakers",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "I couldn't find any speakers matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1011,
+   "seconds": 0.66
+  },
+  {
+   "id": "q016",
+   "query": "lint remover",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": null,
+    "subcategory": null,
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "Sorry, we don't carry lint remover. Would you like to see our vacuum cleaner range instead?",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1075,
+   "seconds": 0.78
+  },
+  {
+   "id": "q021",
+   "query": "logitech mouse",
+   "history": [],
+   "tags": [
+    "brand"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Computers & Accessories",
+    "subcategory": "mouse",
+    "type": null,
+    "brand": "logitech",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [
+    "brand"
+   ],
+   "reply": "We don't carry logitech mouse. I couldn't find any mouse matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1026,
+   "seconds": 0.69
+  },
+  {
+   "id": "q022",
+   "query": "samsung tv",
+   "history": [],
+   "tags": [
+    "brand"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "tv",
+    "type": null,
+    "brand": "samsung",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [
+    "brand"
+   ],
+   "reply": "We don't carry samsung tv. I couldn't find any tv matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1020,
+   "seconds": 0.48
+  },
+  {
+   "id": "q024",
+   "query": "bajaj room heater",
+   "history": [],
+   "tags": [
+    "brand"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Home & Kitchen",
+    "subcategory": "room heater",
+    "type": null,
+    "brand": "bajaj",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [
+    "brand"
+   ],
+   "reply": "We don't carry bajaj room heater. I couldn't find any room heater matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1039,
+   "seconds": 0.67
+  },
+  {
+   "id": "q026",
+   "query": "fire-boltt smartwatch",
+   "history": [],
+   "tags": [
+    "brand"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "smartwatch",
+    "type": null,
+    "brand": "fire-boltt",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [
+    "brand"
+   ],
+   "reply": "We don't carry fire-boltt smartwatch. I couldn't find any smartwatch matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1043,
+   "seconds": 0.64
+  },
+  {
+   "id": "q031",
+   "query": "mixer grinder under 3000",
+   "history": [],
+   "tags": [
+    "price"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Home & Kitchen",
+    "subcategory": "mixer grinder",
+    "type": null,
+    "brand": null,
+    "max_price": 3000,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [
+    "price"
+   ],
+   "reply": "I couldn't find any mixer grinder matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1045,
+   "seconds": 0.63
+  },
+  {
+   "id": "q033",
+   "query": "smart tv under 15000",
+   "history": [],
+   "tags": [
+    "price"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "tv",
+    "type": null,
+    "brand": null,
+    "max_price": 15000,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": [
+     "smart"
+    ]
+   },
+   "relaxed": [
+    "price",
+    "keywords"
+   ],
+   "reply": "I couldn't find any tv matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1039,
+   "seconds": 0.68
+  },
+  {
+   "id": "q035",
+   "query": "wireless mouse under 500",
+   "history": [],
+   "tags": [
+    "price",
+    "attribute"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Computers & Accessories",
+    "subcategory": "mouse",
+    "type": null,
+    "brand": null,
+    "max_price": 500,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": [
+     "wireless"
+    ]
+   },
+   "relaxed": [
+    "price",
+    "keywords"
+   ],
+   "reply": "I couldn't find any mouse matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1038,
+   "seconds": 0.56
+  },
+  {
+   "id": "q038",
+   "query": "smartwatch under 2000",
+   "history": [],
+   "tags": [
+    "price"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "smartwatch",
+    "type": null,
+    "brand": null,
+    "max_price": 2000,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [
+    "price"
+   ],
+   "reply": "I couldn't find any smartwatch matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1026,
+   "seconds": 0.68
+  },
+  {
+   "id": "q041",
+   "query": "wireless mouse",
+   "history": [],
+   "tags": [
+    "attribute"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Computers & Accessories",
+    "subcategory": "mouse",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": [
+     "wireless"
+    ]
+   },
+   "relaxed": [
+    "keywords"
+   ],
+   "reply": "I couldn't find any mouse matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1025,
+   "seconds": 0.78
+  },
+  {
+   "id": "q043",
+   "query": "32 inch smart tv",
+   "history": [],
+   "tags": [
+    "attribute"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "tv",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": [
+     "smart",
+     "32 inch"
+    ]
+   },
+   "relaxed": [
+    "keywords"
+   ],
+   "reply": "I couldn't find any tv matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1034,
+   "seconds": 0.63
+  },
+  {
+   "id": "q047",
+   "query": "bluetooth speaker",
+   "history": [],
+   "tags": [
+    "attribute"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "speakers",
+    "type": "bluetooth speaker",
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [
+    "type"
+   ],
+   "reply": "I couldn't find any speakers matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1026,
+   "seconds": 0.7
+  },
+  {
+   "id": "q056",
+   "query": "something to keep my room warm in winter",
+   "history": [],
+   "tags": [
+    "vague"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Home & Kitchen",
+    "subcategory": "room heater",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "I couldn't find any room heater matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1029,
+   "seconds": 0.66
+  },
+  {
+   "id": "q059",
+   "query": "something to listen to music while running",
+   "history": [],
+   "tags": [
+    "vague"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "headphones",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": [
+     "running"
+    ]
+   },
+   "relaxed": [
+    "keywords"
+   ],
+   "reply": "I couldn't find any headphones matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1056,
+   "seconds": 0.86
+  },
+  {
+   "id": "q062",
+   "query": "something to track my steps and heart rate",
+   "history": [],
+   "tags": [
+    "vague"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": null,
+    "subcategory": null,
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "Sorry, we don't carry fitness tracker. Would you like to see our smartwatch range instead?",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1036,
+   "seconds": 0.79
+  },
+  {
+   "id": "q066",
+   "query": "lojitech mouse",
+   "history": [],
+   "tags": [
+    "typo",
+    "brand"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Computers & Accessories",
+    "subcategory": "mouse",
+    "type": null,
+    "brand": "lojitech",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [
+    "brand"
+   ],
+   "reply": "We don't carry lojitech mouse. I couldn't find any mouse matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1025,
+   "seconds": 0.71
+  },
+  {
+   "id": "q068",
+   "query": "headfones",
+   "history": [],
+   "tags": [
+    "typo"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "headphones",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "I couldn't find any headphones matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1022,
+   "seconds": 0.64
+  },
+  {
+   "id": "q072",
+   "query": "garam pani ke liye geyser",
+   "history": [],
+   "tags": [
+    "hinglish"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Home & Kitchen",
+    "subcategory": "water heater",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "I couldn't find any water heater matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1032,
+   "seconds": 0.66
+  },
+  {
+   "id": "q076",
+   "query": "bose speakers",
+   "history": [],
+   "tags": [
+    "brand_missing"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "speakers",
+    "type": null,
+    "brand": "bose",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [
+    "brand"
+   ],
+   "reply": "We don't carry bose speakers. I couldn't find any speakers matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1025,
+   "seconds": 0.9
+  },
+  {
+   "id": "q081",
+   "query": "iphone 15",
+   "history": [],
+   "tags": [
+    "out_of_scope"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": null,
+    "subcategory": null,
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [],
+   "reply": "Sorry, we don't carry phones. Would you like to see our phone case range instead?",
+   "score": {
+    "kind": "none",
+    "correct_refusal": true,
+    "shown": 0
+   },
+   "llm_calls": 1,
+   "tokens": 1101,
+   "seconds": 1.15
+  },
+  {
+   "id": "q086",
+   "query": "what about Logitech",
+   "history": [
+    "wireless mouse under 1000"
+   ],
+   "tags": [
+    "followup",
+    "brand"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Computers & Accessories",
+    "subcategory": "mouse",
+    "type": null,
+    "brand": "Logitech",
+    "max_price": 1000,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [
+    "price",
+    "brand"
+   ],
+   "reply": "We don't carry Logitech mouse. I couldn't find any mouse matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 2,
+   "tokens": 2106,
+   "seconds": 0.52
+  },
+  {
+   "id": "q087",
+   "query": "Samsung",
+   "history": [
+    "show me some TVs"
+   ],
+   "tags": [
+    "followup",
+    "brand"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "tv",
+    "type": null,
+    "brand": "Samsung",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [
+    "brand"
+   ],
+   "reply": "We don't carry Samsung tv. I couldn't find any tv matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 2,
+   "tokens": 2041,
+   "seconds": 0.59
+  },
+  {
+   "id": "q089",
+   "query": "only Bajaj",
+   "history": [
+    "mixer grinder"
+   ],
+   "tags": [
+    "followup",
+    "brand"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Home & Kitchen",
+    "subcategory": "mixer grinder",
+    "type": null,
+    "brand": "Bajaj",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [
+    "brand"
+   ],
+   "reply": "We don't carry Bajaj mixer grinder. I couldn't find any mixer grinder matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 2,
+   "tokens": 2091,
+   "seconds": 0.54
+  },
+  {
+   "id": "q091",
+   "query": "with calling",
+   "history": [
+    "smartwatch"
+   ],
+   "tags": [
+    "followup",
+    "attribute"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "smartwatch",
+    "type": null,
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": [
+     "calling"
+    ]
+   },
+   "relaxed": [
+    "keywords"
+   ],
+   "reply": "I couldn't find any smartwatch matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 2,
+   "tokens": 2052,
+   "seconds": 0.6
+  },
+  {
+   "id": "q093",
+   "query": "under 2000",
+   "history": [
+    "bluetooth speaker"
+   ],
+   "tags": [
+    "followup",
+    "price"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "speakers",
+    "type": "bluetooth speaker",
+    "brand": null,
+    "max_price": 2000,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [
+    "type",
+    "price"
+   ],
+   "reply": "I couldn't find any speakers matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 2,
+   "tokens": 2079,
+   "seconds": 0.75
+  },
+  {
+   "id": "q096",
+   "query": "ok, under 2000 then",
+   "history": [
+    "boat headphones under 500"
+   ],
+   "tags": [
+    "followup",
+    "price",
+    "brand"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "category": "Electronics",
+    "subcategory": "headphones",
+    "type": null,
+    "brand": "boat",
+    "max_price": 2000,
+    "min_price": null,
+    "min_rating": null,
+    "keywords": []
+   },
+   "relaxed": [
+    "price",
+    "brand"
+   ],
+   "reply": "We don't carry boat headphones. I couldn't find any headphones matching your request. Try a different budget, brand or product.",
+   "score": {
+    "kind": "search",
+    "hit5": false,
+    "rr": 0.0,
+    "precision3": 0.0,
+    "empty": true,
+    "shown": 0
+   },
+   "llm_calls": 2,
+   "tokens": 2094,
+   "seconds": 0.74
+  }
+ ],
+ "finished": "2026-11-18T11:25:39+00:00",
+ "summary": {
+  "queries": 35,
+  "scored": 35,
+  "errors": 0,
+  "recall@5": 0.0,
+  "precision@3": 0.0,
+  "mrr": 0.0,
+  "empty_rate": 1.0,
+  "correct_refusal_rate": 1.0,
+  "llm_calls_per_query": 1.171,
+  "tokens_per_query": 1212.714,
+  "p50_seconds": 0.67,
+  "p95_seconds": 1.17
+ },
+ "by_tag": {
+  "attribute": {
+   "scored": 5,
+   "recall@5": 0.0,
+   "precision@3": 0.0,
+   "mrr": 0.0,
+   "empty_rate": 1.0
+  },
+  "brand": {
+   "scored": 9,
+   "recall@5": 0.0,
+   "precision@3": 0.0,
+   "mrr": 0.0,
+   "empty_rate": 1.0
+  },
+  "brand_missing": {
+   "scored": 1,
+   "recall@5": 0.0,
+   "precision@3": 0.0,
+   "mrr": 0.0,
+   "empty_rate": 1.0
+  },
+  "followup": {
+   "scored": 6,
+   "recall@5": 0.0,
+   "precision@3": 0.0,
+   "mrr": 0.0,
+   "empty_rate": 1.0
+  },
+  "hinglish": {
+   "scored": 1,
+   "recall@5": 0.0,
+   "precision@3": 0.0,
+   "mrr": 0.0,
+   "empty_rate": 1.0
+  },
+  "out_of_scope": {
+   "scored": 1,
+   "correct_refusal_rate": 1.0
+  },
+  "plain": {
+   "scored": 10,
+   "recall@5": 0.0,
+   "precision@3": 0.0,
+   "mrr": 0.0,
+   "empty_rate": 1.0
+  },
+  "price": {
+   "scored": 6,
+   "recall@5": 0.0,
+   "precision@3": 0.0,
+   "mrr": 0.0,
+   "empty_rate": 1.0
+  },
+  "typo": {
+   "scored": 2,
+   "recall@5": 0.0,
+   "precision@3": 0.0,
+   "mrr": 0.0,
+   "empty_rate": 1.0
+  },
+  "vague": {
+   "scored": 3,
+   "recall@5": 0.0,
+   "precision@3": 0.0,
+   "mrr": 0.0,
+   "empty_rate": 1.0
+  }
+ },
+ "rescored": "2026-11-18T12:31:02+00:00"
+}

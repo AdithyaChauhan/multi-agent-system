@@ -8,7 +8,14 @@ logger = get_logger("app.tools.shipment_tools")
 
 # Inside Docker the mock API is a separate container — use its service name.
 # Outside Docker (local scripts / tests) fall back to localhost.
-CARRIER_API_BASE = os.getenv("MOCK_CARRIER_API_URL", "http://mock-carrier-api:9000")
+_carrier_url = os.getenv("MOCK_CARRIER_API_URL")
+if _carrier_url:
+    CARRIER_API_BASE = _carrier_url.rstrip("/")
+else:
+    # Render supplies the carrier service host/port separately; local Docker
+    # Compose uses the service-name fallback below.
+    _carrier_hostport = os.getenv("MOCK_CARRIER_API_HOSTPORT", "mock-carrier-api:9000")
+    CARRIER_API_BASE = f"http://{_carrier_hostport}"
 
 
 def fetch_tracking_info(tracking_id: str) -> Optional[dict]:

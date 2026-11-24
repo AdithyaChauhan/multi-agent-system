@@ -112,14 +112,28 @@
         .user-info strong {
             color: #333;
         }
+        .demo-btn {
+            width: 100%; padding: 14px; margin-top: 0.5rem; background: #4f46e5; color: white;
+            border: none; border-radius: 10px; font-size: 17px; font-weight: 600; cursor: pointer;
+        }
+        .demo-btn:hover { background: #4338ca; }
+        .demo-btn:disabled { opacity: 0.6; cursor: wait; }
+        .demo-note { font-size: 13px; color: #6b7280; margin-top: 0.5rem; }
+        .demo-error { font-size: 13px; color: #dc2626; min-height: 1em; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🤖 Multi-Agent System</h1>
-        <p>Sign in to access the AI-powered e-commerce assistant</p>
+        <p>An AI shopping assistant: find products, track orders, get support.</p>
+
+        <button class="demo-btn" id="demoBtn" onclick="startDemo()">🛍️ Try as a demo shopper</button>
+        <p class="demo-note">No sign-up. You get your own pretend account with 5 orders to track, report or cancel.</p>
+        <p class="demo-error" id="demoError"></p>
+
+        <div style="margin: 1.5rem 0; color: #999; font-size: 14px;">─── or ───</div>
         
-        <a href="http://localhost:8000/auth/login" class="google-btn">
+        <a href="/auth/login" class="google-btn">
             <svg class="google-icon" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -129,20 +143,6 @@
             Sign in with Google
         </a>
 
-        <div style="margin: 1.5rem 0; color: #999; font-size: 14px;">─── or ───</div>
-
-        <div style="text-align: left;">
-            <label style="font-size: 14px; color: #555; display: block; margin-bottom: 6px;">Login with User ID</label>
-            <input id="userIdInput" type="text" placeholder="e.g. user-a4b41718"
-                style="width:100%; padding: 10px 14px; border: 2px solid #ddd; border-radius: 8px;
-                       font-size: 14px; outline: none; margin-bottom: 10px; box-sizing: border-box;">
-            <button onclick="loginWithUserId()"
-                style="width:100%; padding: 12px; background: #667eea; color: white;
-                       border: none; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer;">
-                🔑 Login with User ID
-            </button>
-        </div>
-        
         <div class="token-section" id="tokenSection">
             <div class="user-info" id="userInfo"></div>
             <p style="margin-top: 1.5rem; margin-bottom: 0.5rem;"><strong>Your Access Token:</strong></p>
@@ -202,22 +202,24 @@
         }, 2000);
     }
 
-    async function loginWithUserId() {
-        const userId = document.getElementById('userIdInput').value.trim();
-        if (!userId) { alert('Please enter a User ID'); return; }
-
-        const res = await fetch('/auth/demo-login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: userId })
-        });
-
-        if (res.ok) {
+    async function startDemo() {
+        const btn = document.getElementById('demoBtn');
+        const error = document.getElementById('demoError');
+        btn.disabled = true;
+        btn.textContent = 'Setting up your demo account…';
+        error.textContent = '';
+        try {
+            const res = await fetch('/auth/demo-shopper', { method: 'POST' });
             const data = await res.json();
+            if (!res.ok) throw new Error(data.detail || 'Could not start the demo');
             localStorage.setItem('access_token', data.access_token);
+            localStorage.setItem('demo_orders', JSON.stringify(data.orders || []));
+            localStorage.removeItem('chat_session_id');
             window.location.href = '/static/chat.html';
-        } else {
-            alert('Login failed. Check the user ID and try again.');
+        } catch (e) {
+            error.textContent = e.message;
+            btn.disabled = false;
+            btn.textContent = '🛍️ Try as a demo shopper';
         }
     }
 </script>

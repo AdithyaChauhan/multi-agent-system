@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:15-alpine
+    build:
+      context: docker/postgres
+    image: multiagent-postgres:15-pgvector
     container_name: multiagent-db
     environment:
       POSTGRES_USER: postgres

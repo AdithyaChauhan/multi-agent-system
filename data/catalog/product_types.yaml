@@ -1,0 +1,625 @@
+# Product types: the catalog's source of truth (ADR 0005).
+# Seeded into the product_types table by `scripts/enrich_catalog.py apply`; at runtime the database wins.
+#
+# Per type:
+#   name, category, served (false = in the DB but not sold), synonyms (other words shoppers use),
+#   suggestion (served: false only: what we offer instead), attributes.
+# Per attribute:
+#   type: enum (one value) | list (several values) | int | float | bool
+#   values: enum/list only, {value: [aliases]}
+#   unit, units: int/float only, the canonical unit and the words that mean it
+#   aliases: bool only, words that mean true
+#   required: counted in the "every required attribute filled" acceptance check
+# An attribute named `kind` is special: its values are product words a shopper can search for
+# ("pen drive" -> type storage, kind pen drive). A kind value named `other` is never a product word.
+# When a shopper's word matches several entries, a type name wins over a synonym, and a synonym
+# over a kind value.
+# Keep 3-6 attributes per type and only fields shoppers filter on. Synonyms come from general
+# shopping vocabulary, never from eval/product_queries.json (that would leak the test set).
+
+types:
+  # ── Computers & Accessories ───────────────────────────────────────────────
+  - name: cable
+    category: Computers & Accessories
+    synonyms: [charging cable, data cable, wire, cord, charger cable]
+    attributes:
+      connectors:
+        type: list
+        required: true
+        values:
+          usb-a: [usb a, usb-a, usb 2.0, usb 3.0]
+          usb-c: [type c, type-c, usb c, usb-c, c type]
+          lightning: [lightning, iphone, apple, 8 pin, ltg]
+          micro-usb: [micro usb, micro-usb, microusb, micro b, micro-b, v8]
+          mini-usb: [mini usb, mini-usb, mini b, mini 5 pin, 5 pin]
+          usb-b: [usb b, usb-b, b-male, b male, type b, printer cable]
+          hdmi: [hdmi]
+          displayport: [displayport, display port, dp]
+          vga: [vga]
+          ethernet: [ethernet, lan, rj45, cat6, cat5]
+          aux-3.5mm: [aux, 3.5mm, 3.5 mm, audio jack]
+          rca: [rca]
+          sata: [sata]
+          optical: [optical, toslink, spdif]
+          power cord: [power cable, 3 pin, mains]
+      length_m: {type: float, unit: m, units: [m, meter, meters, metre, metres, mtr]}
+      watts: {type: int, unit: w, units: [w, watt, watts]}
+      braided: {type: bool, aliases: [braided, nylon braided]}
+
+  - name: mouse
+    category: Computers & Accessories
+    synonyms: [mice, computer mouse]
+    attributes:
+      connectivity:
+        type: enum
+        required: true
+        values:
+          wired: [wired, usb wired]
+          wireless: [wireless, cordless, 2.4ghz, 2.4 ghz, bluetooth, bt]  # to a shopper, bluetooth is wireless
+      gaming: {type: bool, aliases: [gaming, gamer, rgb]}
+      silent: {type: bool, aliases: [silent, noiseless, quiet click]}
+
+  - name: keyboard
+    category: Computers & Accessories
+    synonyms: [keypad, keyboard mouse combo]
+    attributes:
+      connectivity:
+        type: enum
+        required: true
+        values:
+          wired: [wired]
+          wireless: [wireless, cordless, 2.4ghz, bluetooth, bt]
+      with_mouse: {type: bool, aliases: [combo, with mouse, keyboard and mouse, keyboard mouse]}
+      backlit: {type: bool, aliases: [backlit, backlight, rgb, led]}
+
+  - name: adapter
+    category: Computers & Accessories
+    synonyms: [dongle, connector, converter]
+    attributes:
+      kind:
+        type: enum
+        required: true
+        values:
+          otg adapter: [otg]
+          usb hub: [usb hub, hub, multiport, docking station]
+          converter: [converter, adapter, travel adapter, plug adapter]
+      connectors:
+        type: list
+        values:
+          usb-a: [usb a, usb-a, usb 3.0]
+          usb-c: [type c, type-c, usb c, usb-c]
+          hdmi: [hdmi]
+          vga: [vga]
+          ethernet: [ethernet, lan, rj45]
+          aux-3.5mm: [aux, 3.5mm]
+          micro-usb: [micro usb]
+
+  - name: laptop stand
+    category: Computers & Accessories
+    synonyms: [monitor stand, laptop riser, laptop table, lap desk, bed table, cooling pad, laptop cooler]
+    attributes:
+      kind:
+        type: enum
+        required: true
+        values:
+          laptop stand: [stand, riser, holder]
+          laptop table: [lap desk, bed table]
+          cooling pad: [cooling pad, cooler, cooling stand]
+      adjustable: {type: bool, aliases: [adjustable, foldable, height adjustable]}
+
+  - name: networking
+    category: Computers & Accessories
+    synonyms: [wifi, internet, network]
+    attributes:
+      kind:
+        type: enum
+        required: true
+        values:
+          router: [router, wifi router, modem]
+          range extender: [range extender, extender, repeater, booster]
+          wifi adapter: [wifi adapter, wifi dongle, wireless adapter, wifi receiver]
+          bluetooth adapter: [bluetooth adapter, bluetooth dongle, bluetooth receiver]
+      band:
+        type: enum
+        values:
+          single: [single band, 2.4ghz only]
+          dual: [dual band, 5ghz, 5 ghz, ac1200, ac600]
+      speed_mbps: {type: int, unit: mbps, units: [mbps]}
+
+  - name: storage
+    category: Computers & Accessories
+    synonyms: [data storage, ssd, solid state drive]
+    attributes:
+      kind:
+        type: enum
+        required: true
+        values:
+          pen drive: [pen drive, pendrive, usb drive, flash drive, usb stick, thumb drive]
+          memory card: [memory card, sd card, micro sd, microsd, microsdxc, microsdhc, sdxc, sdhc, tf card]
+          external hdd: [external hard disk, external hdd, hard drive, hard disk, portable hdd]
+          external ssd: [external ssd, portable ssd]
+          internal ssd: [internal ssd, sata ssd, nvme, m.2 ssd]
+      capacity_gb: {type: int, unit: gb, units: [gb, tb], required: true}
+
+  - name: drawing tablet
+    category: Computers & Accessories
+    synonyms: [graphics tablet, pen tablet, digital drawing pad, writing tablet]
+    attributes:
+      active_area_inches: {type: float, unit: inch, units: [inch, inches, in]}
+
+  - name: printer
+    category: Computers & Accessories
+    synonyms: [printing machine]
+    attributes:
+      kind:
+        type: enum
+        required: true
+        values:
+          inkjet printer: [inkjet, ink tank, ink jet]
+          laser printer: [laser]
+          ink cartridge: [ink cartridge, cartridge, toner, refill ink]
+      wireless: {type: bool, aliases: [wireless, wifi, wi-fi]}
+      all_in_one: {type: bool, aliases: [all in one, all-in-one, print scan copy, multifunction]}
+
+  - name: laptop bag
+    category: Computers & Accessories
+    synonyms: [laptop backpack, laptop sleeve, laptop case]
+    attributes:
+      kind:
+        type: enum
+        required: true
+        values:
+          laptop backpack: [backpack]
+          laptop sleeve: [sleeve, case]
+          messenger bag: [messenger, shoulder bag, briefcase]
+      fits_inches: {type: float, unit: inch, units: [inch, inches, in]}
+
+  - name: webcam
+    category: Computers & Accessories
+    synonyms: [web camera, pc camera]
+    attributes:
+      resolution:
+        type: enum
+        values:
+          hd: [720p, hd]
+          fhd: [1080p, full hd, fhd]
+          2k: [2k, 1440p]
+          4k: [4k]
+      microphone: {type: bool, aliases: [microphone, mic, with mic]}
+
+  - name: other computer accessory
+    category: Computers & Accessories
+    synonyms: []
+    attributes: {}
+
+  # ── Electronics ───────────────────────────────────────────────────────────
+  - name: tv
+    category: Electronics
+    synonyms: [television, telly, smart tv, led tv]
+    attributes:
+      screen_inches: {type: int, unit: inch, units: [inch, inches, in], required: true}
+      resolution:
+        type: enum
+        required: true
+        values:
+          hd: [hd ready, 720p]
+          fhd: [full hd, fhd, 1080p]
+          4k: [4k, uhd, ultra hd, 2160p]
+      smart: {type: bool, aliases: [smart, android tv, google tv, webos, tizen, fire tv]}
+      os:
+        type: enum
+        values:
+          android: [android, google tv]
+          webos: [webos]
+          tizen: [tizen]
+          fire tv: [fire tv]
+          other: [linux, vidaa, coolita]
+
+  - name: headphones
+    category: Electronics
+    synonyms: [earphones, earbuds, headset, earpods, buds]
+    attributes:
+      kind:
+        type: enum
+        required: true
+        values:
+          over-ear headphones: [over-ear, over ear, around ear]
+          on-ear headphones: [on-ear, on ear]
+          wired earphones: [wired earphones, in-ear wired, earphones with mic]
+          neckband: [neckband, neck band]
+          tws earbuds: [tws, true wireless, earbuds, airdopes, buds]
+      connectivity:
+        type: enum
+        required: true
+        values:
+          wired: [wired, 3.5mm, type c wired]
+          wireless: [wireless, bluetooth, bt]
+      anc: {type: bool, aliases: [anc, noise cancelling, noise cancellation, active noise]}
+
+  - name: smartwatch
+    category: Electronics
+    synonyms: [smart watch, fitness tracker, fitness watch, activity tracker]
+    attributes:
+      kind:
+        type: enum
+        required: true
+        values:
+          smartwatch: [smartwatch, smart watch]
+          fitness band: [fitness band, band, tracker]
+      bluetooth_calling: {type: bool, aliases: [bluetooth calling, calling, bt calling]}
+      display:
+        type: enum
+        values:
+          amoled: [amoled, oled]
+          lcd: [lcd, tft, ips]
+      display_inches: {type: float, unit: inch, units: [inch, inches, '"']}
+
+  - name: speaker
+    category: Electronics
+    synonyms: [speakers, sound system, music system]
+    attributes:
+      kind:
+        type: enum
+        required: true
+        values:
+          bluetooth speaker: [bluetooth speaker, portable speaker, wireless speaker]
+          soundbar: [soundbar, sound bar]
+          home theatre: [home theatre, home theater, 5.1, 2.1]
+          party speaker: [party speaker, tower speaker, trolley speaker]
+          computer speaker: [computer speaker, pc speaker, usb speaker]
+      watts: {type: int, unit: w, units: [w, watt, watts]}
+
+  - name: tv remote
+    category: Electronics
+    synonyms: [remote, remote control]
+    attributes:
+      voice: {type: bool, aliases: [voice, voice remote, alexa, google assistant]}
+
+  - name: tv accessory
+    category: Electronics
+    synonyms: [tv stick]
+    attributes:
+      kind:
+        type: enum
+        required: true
+        values:
+          streaming device: [fire stick, fire tv stick, chromecast, streaming stick, streaming device]
+          wall mount: [wall mount, bracket, tv mount]
+          tv stand: [tv stand, tv table, trolley]
+          remote cover: [remote cover, remote case]
+
+  - name: set top box
+    category: Electronics
+    synonyms: [dth, setup box, set-top box]
+    attributes:
+      hd: {type: bool, aliases: [hd]}
+
+  - name: power bank
+    category: Electronics
+    synonyms: [powerbank, portable charger]
+    attributes:
+      capacity_mah: {type: int, unit: mah, units: [mah], required: true}
+      watts: {type: int, unit: w, units: [w, watt, watts]}
+
+  - name: charger
+    category: Electronics
+    synonyms: [adapter charger, power adapter, wall adapter, plug]
+    attributes:
+      kind:
+        type: enum
+        required: true
+        values:
+          wall charger: [wall charger, mobile charger, travel adapter, wall adapter]
+          car charger: [car charger]
+          laptop charger: [laptop charger, laptop adapter]
+          battery charger: [battery charger, aa charger]
+      watts: {type: int, unit: w, units: [w, watt, watts]}
+      fast_charging: {type: bool, aliases: [fast charging, fast charger, quick charge, pd, supervooc, dash, warp]}
+
+  - name: battery
+    category: Electronics
+    synonyms: [batteries, cell, cells]
+    attributes:
+      size:
+        type: enum
+        required: true
+        values:
+          aa: [aa, double a, pencil cell]
+          aaa: [aaa, triple a]
+          9v: [9v]
+          coin: [coin, button cell, cr2032]
+          other: []
+      rechargeable: {type: bool, aliases: [rechargeable]}
+      pack_count: {type: int, unit: pcs, units: [pack, pcs, pieces]}
+
+  - name: phone holder
+    category: Electronics
+    synonyms: [mobile stand, phone stand, mobile holder]
+    attributes:
+      kind:
+        type: enum
+        required: true
+        values:
+          phone stand: [desk stand, mobile stand, tablet stand, wall mount, wall holder]
+          tripod: [tripod]
+          car mount: [car mount, car holder]
+          selfie stick: [selfie stick]
+
+  - name: screen protector
+    category: Electronics
+    synonyms: [tempered glass, screen guard]
+    attributes:
+      device:
+        type: enum
+        required: true
+        values:
+          phone: [phone, mobile, iphone]
+          tablet: [tablet, ipad]
+          laptop: [laptop]
+          watch: [watch, smartwatch]
+
+  - name: camera
+    category: Electronics
+    synonyms: [cctv]
+    attributes:
+      kind:
+        type: enum
+        required: true
+        values:
+          security camera: [security camera, cctv, wifi camera, home camera]
+          action camera: [action camera, gopro]
+          instant camera: [instant camera, instax]
+      resolution:
+        type: enum
+        values:
+          fhd: [1080p, full hd, 2mp]
+          2k: [2k, 3mp]
+          4k: [4k]
+      pan_tilt: {type: bool, aliases: [360, pan tilt, pan/tilt]}
+
+  - name: stylus
+    category: Electronics
+    synonyms: [stylus pen, ipad pencil, touch pen]
+    attributes: {}
+
+  - name: other electronics accessory
+    category: Electronics
+    synonyms: []
+    attributes: {}
+
+  - name: phone
+    category: Electronics
+    served: false
+    suggestion: phone holder
+    synonyms: [mobile, mobile phone, smartphone, cell phone, iphone]
+    attributes: {}
+
+  - name: laptop
+    category: Computers & Accessories
+    served: false
+    suggestion: laptop bag
+    synonyms: [notebook computer, macbook]
+    attributes: {}
+
+  - name: tablet
+    category: Computers & Accessories
+    served: false
+    suggestion: stylus
+    synonyms: [ipad, tab]
+    attributes: {}
+
+  # ── Home & Kitchen ────────────────────────────────────────────────────────
+  - name: room heater
+    category: Home & Kitchen
+    synonyms: [heater, blower, space heater]
+    attributes:
+      heater_type:
+        type: enum
+        required: true
+        values:
+          fan: [fan heater, fan, blower]
+          oil: [oil filled, oil]
+          halogen: [halogen]
+          ceramic: [ceramic, ptc]
+          infrared: [infrared, quartz]
+          carbon: [carbon]
+          convector: [convector, convection]
+          radiant: [radiant]
+      watts: {type: int, unit: w, units: [w, watt, watts]}
+
+  - name: water heater
+    category: Home & Kitchen
+    synonyms: [geyser, geysers, immersion rod]
+    attributes:
+      heater_type:
+        type: enum
+        required: true
+        values:
+          storage: [storage]
+          instant: [instant, gas]
+          immersion rod: [immersion rod, immersion heater, immersion water heater, rod]
+      capacity_l: {type: int, unit: l, units: [l, litre, litres, liter, liters, ltr]}
+      watts: {type: int, unit: w, units: [w, watt, watts]}
+
+  - name: mixer grinder
+    category: Home & Kitchen
+    synonyms: [mixer, grinder, mixie]
+    attributes:
+      watts: {type: int, unit: w, units: [w, watt, watts], required: true}
+      jars: {type: int, unit: jars, units: [jar, jars]}
+
+  - name: electric kettle
+    category: Home & Kitchen
+    synonyms: [kettle]
+    attributes:
+      capacity_l: {type: float, unit: l, units: [l, litre, litres, liter, ltr], required: true}
+      material:
+        type: enum
+        values:
+          steel: [steel, stainless steel]
+          glass: [glass]
+          plastic: [plastic]
+
+  - name: iron
+    category: Home & Kitchen
+    synonyms: [press, clothes iron, istri]
+    attributes:
+      kind:
+        type: enum
+        required: true
+        values:
+          dry iron: [dry iron, dry]
+          steam iron: [steam iron, steam]
+          garment steamer: [garment steamer, steamer]
+      watts: {type: int, unit: w, units: [w, watt, watts]}
+
+  - name: lint remover
+    category: Home & Kitchen
+    synonyms: [fabric shaver, lint roller]
+    attributes:
+      rechargeable: {type: bool, aliases: [rechargeable, usb charging]}
+
+  - name: vacuum cleaner
+    category: Home & Kitchen
+    synonyms: [vacuum, hoover]
+    attributes:
+      kind:
+        type: enum
+        required: true
+        values:
+          handheld vacuum: [handheld, hand held, car vacuum]
+          canister vacuum: [canister, bagless]
+          robot vacuum: [robot, robotic]
+          wet & dry vacuum: [wet and dry, wet & dry, wet dry]
+      cordless: {type: bool, aliases: [cordless, rechargeable, wireless]}
+
+  - name: blender
+    category: Home & Kitchen
+    synonyms: [food processor]
+    attributes:
+      kind:
+        type: enum
+        required: true
+        values:
+          hand blender: [hand blender, immersion blender, stick blender]
+          jar blender: [jar blender, personal blender, smoothie blender, portable blender]
+          hand mixer: [hand mixer, beater, egg beater]
+          milk frother: [frother, milk frother, coffee frother]
+          chopper: [chopper, vegetable chopper]
+          juicer: [juicer, juice maker, citrus press]
+      watts: {type: int, unit: w, units: [w, watt, watts]}
+
+  - name: water purifier
+    category: Home & Kitchen
+    synonyms: [ro, water filter, aquaguard]
+    attributes:
+      kind:
+        type: enum
+        required: true
+        values:
+          ro purifier: [ro, uv, ro+uv, electric purifier]
+          gravity purifier: [gravity, non electric]
+          tap filter: [tap filter, faucet filter]
+          filter cartridge: [cartridge, spare, filter replacement, candle]
+      capacity_l: {type: float, unit: l, units: [l, litre, litres, liter, ltr]}
+
+  - name: fan
+    category: Home & Kitchen
+    synonyms: [pankha]
+    attributes:
+      kind:
+        type: enum
+        required: true
+        values:
+          ceiling fan: [ceiling]
+          pedestal fan: [pedestal, stand fan]
+          table fan: [table fan, personal fan, usb fan, mini fan]
+          wall fan: [wall fan]
+          exhaust fan: [exhaust, ventilation fan]
+      bldc: {type: bool, aliases: [bldc, energy saving, 5 star]}
+
+  - name: kitchen scale
+    category: Home & Kitchen
+    synonyms: [weighing scale, weighing machine]
+    attributes:
+      max_kg: {type: float, unit: kg, units: [kg, kgs]}
+
+  - name: cooking appliance
+    category: Home & Kitchen
+    synonyms: []
+    attributes:
+      kind:
+        type: enum
+        required: true
+        values:
+          egg boiler: [egg boiler, egg cooker]
+          induction cooktop: [induction, induction cooktop, induction stove, induction chulha]
+          sandwich maker: [sandwich maker, grill sandwich, sandwich toaster]
+          toaster: [toaster, pop up toaster]
+          waffle maker: [waffle maker]
+          air fryer: [air fryer]
+          coffee maker: [coffee maker, coffee machine, espresso]
+          rice cooker: [rice cooker, electric cooker, multi cooker]
+          other: [roti maker, yogurt maker]
+      watts: {type: int, unit: w, units: [w, watt, watts]}
+
+  - name: home appliance
+    category: Home & Kitchen
+    synonyms: []
+    attributes:
+      kind:
+        type: enum
+        required: true
+        values:
+          air purifier: [air purifier]
+          humidifier: [humidifier]
+          air conditioner: [air conditioner, ac]
+          sewing machine: [sewing machine]
+          pressure washer: [pressure washer, car washer]
+          sealing machine: [sealing machine, sealer, packing machine]
+
+  - name: laundry basket
+    category: Home & Kitchen
+    synonyms: [laundry bag, clothes hamper, hamper]
+    attributes:
+      capacity_l: {type: int, unit: l, units: [l, litre, litres, ltr]}
+
+  - name: other home & kitchen
+    category: Home & Kitchen
+    synonyms: []
+    attributes: {}
+
+  # ── Office Products ───────────────────────────────────────────────────────
+  - name: stationery
+    category: Office Products
+    synonyms: [office supplies, school supplies]
+    attributes:
+      kind:
+        type: enum
+        required: true
+        values:
+          ball pen: [ball pen, ballpoint]
+          gel pen: [gel pen]
+          roller pen: [roller pen, rollerball, roller ball, roller ball pen]
+          fountain pen: [fountain pen, ink pen]
+          notebook: [notebook, copy, register, long book, drawing book]
+          sticky notes: [sticky notes, post-it]
+          calculator: [calculator]
+          ink: [ink bottle, ink]
+          pencil: [pencil, pencils, lead pencil]
+          other: []
+      pack_count: {type: int, unit: pcs, units: [pack, pcs, pieces]}
+
+  - name: art supplies
+    category: Office Products
+    synonyms: [art kit, craft supplies, painting]
+    attributes:
+      kind:
+        type: enum
+        values:
+          paint: [paint, acrylic, watercolour, colours]
+          pastels: [pastel, oil pastel, crayons]
+          colour pencils: [colour pencil, color pencil, coloured pencils]
+          sketch pens: [sketch pen, connector pen, felt pen]
+          craft paper: [craft paper, chart paper]
+          tape: [tape, double sided tape]

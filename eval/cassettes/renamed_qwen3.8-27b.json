@@ -1,0 +1,228 @@
+{
+ "020d22aff58f5ed73de5d0d440f2ac79": {
+  "agent": "product",
+  "message": "So far: {} | Message: show me some TVs",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1722,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "tv"
+  }
+ },
+ "0f33e9581bf228b0bc3bf97a00d9e4c7": {
+  "agent": "product",
+  "message": "So far: {} | Message: wireless mouse under 1000",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1758,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [
+    "wireless"
+   ],
+   "max_price": 1000,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "pointing device"
+  }
+ },
+ "152e2b013300e7d4f61ac38afaef044a": {
+  "agent": "product",
+  "message": "User request: \"bose speakers\"\n\nProducts:\n1. boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playb | ₹1799 | 4.2★ | boAt\n2. JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL  | ₹1999 |",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 869,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "18685a69b5892e292783ff7ffdbb94f2": {
+  "agent": "product",
+  "message": "User request: \"wireless mouse under 1000\"\n\nProducts:\n1. Lenovo 400 Wireless Mouse, 1200DPI Optical Sensor, 2.4GHz Wi | ₹629 | 4.4★ | Lenovo\n2. Logitech M221 Wireless Mouse, Silent Buttons, 2.4 GHz wit",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 905,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "400baa5367c9430fd147cbd8a2dd77e0": {
+  "agent": "product",
+  "message": "User request: \"show me some TVs\"\n\nProducts:\n1. Shopoflux Silicone Remote Cover for Mi Smart TV and Mi TV St | ₹246 | 4.2★ | Shopoflux\n2. Universal Remote Control for All Sony TV for All LCD LED and | ",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 796,
+  "value": {
+   "exact": [
+    8
+   ],
+   "same_kind": [
+    8
+   ]
+  }
+ },
+ "6db846d6e6e9de9fde5cf7d78c582d9c": {
+  "agent": "product",
+  "message": "So far: {} | Message: iphone 15",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1727,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": "iphone 15",
+   "product": null
+  }
+ },
+ "8f338e22fb72a0d866b7cd243c6e923f": {
+  "agent": "product",
+  "message": "User request: \"what about Logitech\"\n\nProducts:\n1. Logitech B170 Wireless Mouse, 2.4 GHz with USB Nano Receiver | ₹599 | 4.4★ | Logitech\n2. Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, 12  ",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 603,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3
+   ],
+   "same_kind": [
+    1,
+    2,
+    3
+   ]
+  }
+ },
+ "ae8ca11d353c893e49ba4564898fc9d5": {
+  "agent": "product",
+  "message": "So far: {\"product\": \"tv\"} | Message: Samsung",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1724,
+  "value": {
+   "brand": "Samsung",
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": null
+  }
+ },
+ "b75c29b7bf09cc66b0539fe6749ba0d9": {
+  "agent": "product",
+  "message": "User request: \"Samsung\"\n\nProducts:\n1. Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED | ₹13490 | 4.3★ | Samsung\n2. Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart  | ₹30990 | ",
+  "model": "qwen/qwen3.8-27b",
+  "node": "rank_products",
+  "total_tokens": 897,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "cd7e803d18ec655899245a31219a3f0f": {
+  "agent": "product",
+  "message": "So far: {\"product\": \"pointing device\", \"features\": [\"wireless\"], \"max_price\": 1000} | Message: what about Logitech",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1747,
+  "value": {
+   "brand": "Logitech",
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": null
+  }
+ },
+ "d6321146489aa431998dbf49b092f17a": {
+  "agent": "product",
+  "message": "So far: {} | Message: bose speakers",
+  "model": "qwen/qwen3.8-27b",
+  "node": "extract_preferences",
+  "total_tokens": 1737,
+  "value": {
+   "brand": "bose",
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "bluetooth speaker"
+  }
+ }
+}

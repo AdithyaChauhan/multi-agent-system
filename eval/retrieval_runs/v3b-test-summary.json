@@ -1,0 +1,87 @@
+{
+ "label": "v3b-test",
+ "note": "v3b runs restricted to the test half of eval/query_split.json (0 tokens).",
+ "summary": {
+  "queries": 47,
+  "scored": 47,
+  "errors": 0,
+  "recall@5": 0.933,
+  "precision@3": 0.9,
+  "mrr": 0.922,
+  "empty_rate": 0.022,
+  "correct_refusal_rate": 1.0,
+  "llm_calls_per_query": 0.085,
+  "tokens_per_query": 109.511,
+  "p50_seconds": 0.02,
+  "p95_seconds": 0.08
+ },
+ "by_tag": {
+  "attribute": {
+   "scored": 10,
+   "recall@5": 1.0,
+   "precision@3": 0.917,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "brand": {
+   "scored": 8,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "brand_missing": {
+   "scored": 2,
+   "recall@5": 0.5,
+   "precision@3": 0.334,
+   "mrr": 0.5,
+   "empty_rate": 0.0
+  },
+  "followup": {
+   "scored": 7,
+   "recall@5": 1.0,
+   "precision@3": 0.952,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "hinglish": {
+   "scored": 2,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "out_of_scope": {
+   "scored": 2,
+   "correct_refusal_rate": 1.0
+  },
+  "plain": {
+   "scored": 10,
+   "recall@5": 1.0,
+   "precision@3": 0.967,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "price": {
+   "scored": 6,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 0.917,
+   "empty_rate": 0.0
+  },
+  "typo": {
+   "scored": 2,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "vague": {
+   "scored": 5,
+   "recall@5": 0.6,
+   "precision@3": 0.6,
+   "mrr": 0.6,
+   "empty_rate": 0.2
+  }
+ }
+}

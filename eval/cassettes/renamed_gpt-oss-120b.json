@@ -1,0 +1,239 @@
+{
+ "1a477ba11cc03a13cd091c0806decf99": {
+  "agent": "product",
+  "message": "So far: {} | Message: lojitech mouse",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 2655,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "mouse"
+  }
+ },
+ "212646adfdee045d88a619cb0355b4af": {
+  "agent": "product",
+  "message": "User request: \"something to keep my room warm in winter\"\n\nProducts:\n1. Room Heater Warmer Wall-Outlet 400 Watts Electric Handy Room | ₹799 | 4.3★ | Room\n2. Morphy Richards Aristo 2000 Watts PTC Room H",
+  "model": "openai/gpt-oss-120b",
+  "node": "rank_products",
+  "total_tokens": 652,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "3409172e8f6a5ad9ceb0a1790f0bb9a5": {
+  "agent": "product",
+  "message": "So far: {} | Message: garam pani ke liye geyser",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1364,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "geyser"
+  }
+ },
+ "6026b96b401816afc8aa1216e8723781": {
+  "agent": "product",
+  "message": "So far: {} | Message: something to keep my room warm in winter",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1372,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "space heating"
+  }
+ },
+ "63f20f8efa074df2d79ad815e22fdb80": {
+  "agent": "product",
+  "message": "So far: {} | Message: headfones",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1362,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "headphones"
+  }
+ },
+ "64c9a9afcaf99120197a9a3028862f95": {
+  "agent": "product",
+  "message": "User request: \"something to listen to music while running\"\n\nProducts:\n1. boAt Airdopes 141 Bluetooth Truly Wireless in Ear Earbuds wi | ₹1499 | 3.9★ | boAt\n2. realme Buds Wireless in Ear Bluetooth Ear",
+  "model": "openai/gpt-oss-120b",
+  "node": "rank_products",
+  "total_tokens": 679,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "69330be13469aadf77b06c13959b63ee": {
+  "agent": "product",
+  "message": "User request: \"lojitech mouse\"\n\nProducts:\n1. Lenovo 300 Wired Plug & Play USB Mouse, High Resolution 1600 | ₹289 | 4.4★ | Lenovo\n2. Tizum Mouse Pad/ Computer Mouse Mat with Anti-Slip Rubber Ba | ₹169 ",
+  "model": "openai/gpt-oss-120b",
+  "node": "rank_products",
+  "total_tokens": 713,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    3,
+    4,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "84275572dd9c90bbda3626f38cc931a7": {
+  "agent": "product",
+  "message": "User request: \"something to track my steps and heart rate\"\n\nProducts:\n1. 10WeRun Id-116 Bluetooth Smartwatch Wireless Fitness Band fo | ₹499 | 4.1★ | 10WeRun\n2. Casio MJ-12D 150 Steps Check and Correc",
+  "model": "openai/gpt-oss-120b",
+  "node": "rank_products",
+  "total_tokens": 668,
+  "value": {
+   "exact": [
+    1
+   ],
+   "same_kind": [
+    1
+   ]
+  }
+ },
+ "bdadc3ee5279e46bf891d4d2a11867f8": {
+  "agent": "product",
+  "message": "User request: \"headfones\"\n\nProducts:\n1. Redgear Cosmo 7,1 Usb Gaming Wired Over Ear Headphones With  | ₹1990 | 4.3★ | Redgear\n2. boAt Rockerz 450 Bluetooth On Ear Headphones with Mic, Upto  | ₹1220 | ",
+  "model": "openai/gpt-oss-120b",
+  "node": "rank_products",
+  "total_tokens": 675,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "d67ce035b24e5340371271ae74af1c63": {
+  "agent": "product",
+  "message": "User request: \"garam pani ke liye geyser\"\n\nProducts:\n1. V-Guard Divino 5 Star Rated 15 Litre Storage Water Heater (G | ₹6499 | 4.4★ | V-Guard\n2. Havells Instanio 1-Litre 3KW Instant Water Heater (Geys",
+  "model": "openai/gpt-oss-120b",
+  "node": "rank_products",
+  "total_tokens": 720,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "ecb148acdb1e0f019c3504aa4c0b9ab9": {
+  "agent": "product",
+  "message": "So far: {} | Message: something to track my steps and heart rate",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1371,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "fitness band"
+  }
+ },
+ "fda8e5ddcbb90c25247dbb04c77c421d": {
+  "agent": "product",
+  "message": "So far: {} | Message: something to listen to music while running",
+  "model": "openai/gpt-oss-120b",
+  "node": "extract_preferences",
+  "total_tokens": 1387,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [
+    "wireless"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "tws earbuds"
+  }
+ }
+}

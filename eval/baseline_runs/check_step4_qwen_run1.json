@@ -1,0 +1,325 @@
+{
+ "label": "check_step4_qwen",
+ "run": 1,
+ "model": "qwen/qwen3.8-27b",
+ "git_sha": "e34a75c",
+ "started_at": "2026-11-18T05:46:06+00:00",
+ "finished_at": "2026-11-18T05:49:08+00:00",
+ "summary": {
+  "conversations": 4,
+  "conversations_passed": 3,
+  "turns": 8,
+  "turns_passed": 6,
+  "llm_calls": 18,
+  "llm_calls_per_turn": 2.25,
+  "tokens": 21296,
+  "tokens_per_turn": 2662,
+  "seconds_per_turn_mean": 1.11,
+  "seconds_per_turn_median": 0.99,
+  "rate_limited_calls": 0,
+  "sdk_retries": 0,
+  "infra_error_conversations": [],
+  "failed_conversations": [
+   "p02"
+  ],
+  "by_route": {
+   "product": {
+    "turns": 5,
+    "llm_calls": 15,
+    "seconds": 7.2,
+    "tokens": 16950,
+    "llm_calls_per_turn": 3.0,
+    "seconds_per_turn": 1.44,
+    "tokens_per_turn": 3390
+   },
+   "support": {
+    "turns": 2,
+    "llm_calls": 2,
+    "seconds": 1.1,
+    "tokens": 2948,
+    "llm_calls_per_turn": 1.0,
+    "seconds_per_turn": 0.56,
+    "tokens_per_turn": 1474
+   },
+   "safety": {
+    "turns": 1,
+    "llm_calls": 1,
+    "seconds": 0.5,
+    "tokens": 1398,
+    "llm_calls_per_turn": 1.0,
+    "seconds_per_turn": 0.53,
+    "tokens_per_turn": 1398
+   }
+  }
+ },
+ "conversations": [
+  {
+   "id": "p02",
+   "tags": [
+    "product"
+   ],
+   "passed": false,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "show me some TVs",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": false,
+     "failures": [
+      "subcategory None not in ['tv']",
+      "no product listing in reply",
+      "ranked_products empty"
+     ],
+     "llm_calls": 2,
+     "tokens": 2920,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.682,
+     "paced_wait_seconds": 23.6,
+     "extracted": {
+      "category": null,
+      "subcategory": null,
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [],
+     "response": "What are you looking for? Here's what we carry:\n\n• Electronics (463 products) — tv, headphones, smartwatch\n• Home & Kitchen (440 products) — room heater, water heater, mixer grinder\n• Computers & Accessories (402 products) — cable, mouse, adapter\n• Office Products (38 products) — stationery, art supplies, office electronics"
+    },
+    {
+     "message": "what about Samsung",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": false,
+     "failures": [
+      "subcategory None not in ['tv']"
+     ],
+     "llm_calls": 3,
+     "tokens": 3597,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.283,
+     "paced_wait_seconds": 21.4,
+     "extracted": {
+      "category": null,
+      "subcategory": null,
+      "type": null,
+      "brand": "Samsung",
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [
+      {
+       "name": "Samsung 25W USB Travel Adapter for Cellular Phones - White",
+       "brand": "Samsung",
+       "subcategory": "adapter"
+      },
+      {
+       "name": "Samsung Original Type C to C Cable - 3.28 Feet (1 Meter), Wh",
+       "brand": "Samsung",
+       "subcategory": "cable"
+      },
+      {
+       "name": "Samsung EVO Plus 128GB microSDXC UHS-I U3 130MB/s Full HD & ",
+       "brand": "Samsung",
+       "subcategory": "Accessories"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Samsung 25W USB Travel Adapter for Cellular Phones - White** — Samsung\n   ₹1,219 · 4.4/5\n\n2. **Samsung Original Type C to C Cable - 3.28 Feet (1 Meter), White** — Samsung\n   ₹599 · 4.3/5\n\n3. **Samsung EVO Plus 128GB microSDXC UHS-I U3 130MB/s Full HD & 4K UHD Memory Card with Adapter (MB-MC128KA), Blue** — Samsung\n   ₹1,149 · 4.3/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p03",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "I need a wireless mouse",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 4,
+     "tokens": 3530,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.651,
+     "paced_wait_seconds": 27.1,
+     "extracted": {
+      "category": "Computers & Accessories",
+      "subcategory": "mouse",
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": [
+       "wireless"
+      ]
+     },
+     "shown": [
+      {
+       "name": "Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Na",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      },
+      {
+       "name": "Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, 12 ",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      },
+      {
+       "name": "Logitech B170 Wireless Mouse, 2.4 GHz with USB Nano Receiver",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Nano Receiver, 1000 DPI Optical Tracking, 3 Buttons, 24 Month Life Battery, PC/Mac/Laptop - Black** — Logitech\n   ₹1,295 · 4.6/5\n\n2. **Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, 12 Month Life Battery, Compatible with Windows, Mac, Chromebook/PC/Laptop** — Logitech\n   ₹699 · 4.5/5\n\n3. **Logitech B170 Wireless Mouse, 2.4 GHz with USB Nano Receiver, Optical Tracking, 12-Months Battery Life, Ambidextrous, PC/Mac/Laptop - Black** — Logitech\n   ₹599 · 4.4/5\n"
+    },
+    {
+     "message": "under 1000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 4,
+     "tokens": 3703,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 1.919,
+     "paced_wait_seconds": 26.2,
+     "extracted": {
+      "category": "Computers & Accessories",
+      "subcategory": "mouse",
+      "type": null,
+      "brand": null,
+      "max_price": 1000,
+      "min_rating": null,
+      "keywords": [
+       "wireless"
+      ]
+     },
+     "shown": [
+      {
+       "name": "Logitech M221 Wireless Mouse, Silent Buttons, 2.4 GHz with U",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      },
+      {
+       "name": "Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, 12 ",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      },
+      {
+       "name": "Logitech B170 Wireless Mouse, 2.4 GHz with USB Nano Receiver",
+       "brand": "Logitech",
+       "subcategory": "mouse"
+      }
+     ],
+     "response": "Here are my top recommendations for you:\n\n1. **Logitech M221 Wireless Mouse, Silent Buttons, 2.4 GHz with USB Mini Receiver, 1000 DPI Optical Tracking, 18-Month Battery Life, Ambidextrous PC / Mac / Laptop - Charcoal Grey** — Logitech\n   ₹799 · 4.4/5\n\n2. **Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, 12 Month Life Battery, Compatible with Windows, Mac, Chromebook/PC/Laptop** — Logitech\n   ₹699 · 4.5/5\n\n3. **Logitech B170 Wireless Mouse, 2.4 GHz with USB Nano Receiver, Optical Tracking, 12-Months Battery Life, Ambidextrous, PC/Mac/Laptop - Black** — Logitech\n   ₹599 · 4.4/5\n"
+    },
+    {
+     "message": "table",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 3200,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 0.683,
+     "paced_wait_seconds": 27.3,
+     "extracted": {
+      "category": null,
+      "subcategory": null,
+      "type": null,
+      "brand": null,
+      "max_price": null,
+      "min_rating": null,
+      "keywords": []
+     },
+     "shown": [],
+     "response": "Sorry, we don't carry table. Here's what we do carry:\n\n• Electronics (463 products) — tv, headphones, smartwatch\n• Home & Kitchen (440 products) — room heater, water heater, mixer grinder\n• Computers & Accessories (402 products) — cable, mouse, adapter\n• Office Products (38 products) — stationery, art supplies, office electronics"
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "tags": [
+    "support"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "I received a damaged product",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1380,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 0.421,
+     "paced_wait_seconds": 24.5,
+     "extracted": {},
+     "shown": [],
+     "response": "To raise a support ticket, I need to know which order this is about.\n\nHere are your recent orders:\n\n1. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)\n2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)\n3. **ORD-2005** — Logitech M221 Wireless Mouse (Processing)\n4. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)\n5. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)\n_(showing 5 most recent of 7 orders)_\n\nPlease reply with the order number to open a support ticket."
+    },
+    {
+     "message": "ORD-2004",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1568,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 0.707,
+     "paced_wait_seconds": 10.5,
+     "extracted": {},
+     "shown": [],
+     "response": "I've created a support ticket: **TKT-0FF5808E**\n\n**Issue:** ORD-2004\n**Category:** Damaged Delivery\n**Priority:** P2\n**Response Time:** 24 hours\n\nOur support team will review this and contact you. You'll receive email updates at your registered address."
+    }
+   ]
+  },
+  {
+   "id": "s15",
+   "tags": [
+    "support",
+    "escalation",
+    "safety"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "my room heater caught fire and burned my hand",
+     "route": "safety",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1398,
+     "rate_limited": 0,
+     "sdk_retries": 0,
+     "seconds": 0.525,
+     "paced_wait_seconds": 11.5,
+     "extracted": {},
+     "shown": [],
+     "response": "We take safety seriously. If you're in immediate danger, please call emergency services. We've flagged your message and a human team member will follow up with you."
+    }
+   ]
+  }
+ ]
+}

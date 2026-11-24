@@ -16,7 +16,9 @@ logs/
 
 # Dataset / large files
 *.zip
-data/
+data/*
+# Versioned catalog definition and enrichment output (Phase 1, ADR 0005)
+!data/catalog/
 
 # OS/editor files
 .DS_Store
@@ -42,3 +44,15 @@ eval/reports/*.html
 
 # DeepEval local cache
 .deepeval/
+
+# Claude Code personal files
+.claude/settings.local.json
+CLAUDE.local.md
+
+# Extra env files with keys (keep the example)
+.env.*
+!.env.example
+
+# CI eval outputs (eval/ci_replay.sh)
+eval/retrieval_runs/ci-*
+eval/baseline_runs/ci-*

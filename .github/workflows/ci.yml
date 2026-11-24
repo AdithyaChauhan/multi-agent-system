@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [main, stable, stable_final]
+    branches: [main, stable, stable_final, ci-fix-cicd]
   pull_request:
     branches: [main]
 
@@ -45,7 +45,7 @@ jobs:
     needs: lint
 
     env:
-      OPENAI_API_KEY: ci-mock-key
+      GROQ_API_KEY: ci-mock-key
       LANGCHAIN_API_KEY: ci-mock-key
       LANGCHAIN_TRACING_V2: "false"
       JWT_SECRET_KEY: ci-test-secret
@@ -81,42 +81,76 @@ jobs:
           path: coverage.xml
 
   # ─────────────────────────────────────────────────────────────────
-  # Stage 3 — LLM Evaluation (live, gates deploy)
-  # Runs on self-hosted runner, hits docker-compose app at localhost:8000.
-  # Deploy only proceeds if this passes.
+  # Stage 3 — Replay evals (0 tokens, gates the image build)
+  # Product search (100 labelled queries), the 51 baseline conversations and the adversarial set,
+  # replayed from recorded model answers against a scrubbed copy of the catalog. A drop below the
+  # measured bars in eval/ci_gate.py fails the build. The live DeepEval run is eval.yml (manual).
   # ─────────────────────────────────────────────────────────────────
-  evaluate:
-    name: LLM Evaluation
-    runs-on: [self-hosted, minikube]
+  replay-evals:
+    name: Replay Evals
+    runs-on: ubuntu-latest
     needs: test
 
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.0-pg15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: multi_agent_baseline
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     env:
-      EVAL_OPENAI_API_KEY: ${{ secrets.EVAL_OPENAI_API_KEY }}
-      LANGCHAIN_API_KEY: ${{ secrets.LANGCHAIN_API_KEY }}
-      DEEPEVAL_TELEMETRY_OPT_OUT: "YES"
-      RUN_LIVE_EVAL: "true"
-      EVAL_API_URL: "http://localhost:8000"
+      CI_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/multi_agent_baseline
+      MOCK_CARRIER_API_URL: http://localhost:9000
+      FASTEMBED_CACHE_PATH: ${{ github.workspace }}/.fastembed
+      JWT_SECRET_KEY: ci-test-secret
 
     steps:
       - uses: actions/checkout@v4.2.2
 
-      - name: Verify app is reachable
-        run: |
-          curl -sf http://localhost:8000/health || (echo "docker-compose app not running at localhost:8000"; exit 1)
+      - name: Set up Python
+        uses: actions/setup-python@v5.6.0
+        with:
+          python-version: "3.12"
+          cache: pip
 
-      - name: Run DeepEval evaluation
-        run: |
-          source /home/admin1/project/multi-agent-system/venv/bin/activate
-          python eval/run_deepeval.py
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
-      - name: Upload evaluation reports
+      # The replay computes no embeddings: product vectors come with the fixture and query vectors are
+      # recorded (eval/cassettes/query_vectors.json). Vectors computed on a runner's CPU differed in the
+      # last digits, reordered near-tied search results and broke q05's replay about half the time.
+
+      # With the database container's own pg_restore (15), as scripts/load_live_db.sh does. The
+      # runner's newer client sends SET transaction_timeout, which Postgres 15 rejects (exit 1).
+      - name: Restore the scrubbed fixture
+        run: |
+          docker exec -i "${{ job.services.postgres.id }}" \
+            pg_restore --no-owner -U postgres -d multi_agent_baseline < eval/fixtures/ci_baseline.dump
+
+      - name: Start the mock carrier API
+        run: |
+          uvicorn mock_services.carrier_api:app --port 9000 &
+          sleep 3
+
+      - name: Replay evals and apply the gate
+        run: bash eval/ci_replay.sh
+
+      - name: Upload eval results
         uses: actions/upload-artifact@v4.6.2
         if: always()
         with:
-          name: eval-reports
+          name: replay-evals
           path: |
-            eval/reports/eval_report.json
-            eval/reports/eval_report.html
+            eval/retrieval_runs/ci-*.json
+            eval/baseline_runs/ci-*.json
 
   # ─────────────────────────────────────────────────────────────────
   # Stage 4 — Docker Build
@@ -124,7 +158,7 @@ jobs:
   docker-build:
     name: Docker Build
     runs-on: ubuntu-latest
-    needs: evaluate
+    needs: replay-evals
 
     steps:
       - uses: actions/checkout@v4.2.2
@@ -143,13 +177,13 @@ jobs:
           cache-to: type=gha,mode=max
 
   # ─────────────────────────────────────────────────────────────────
-  # Stage 5 — Push to Registry  (stable branch push only)
+  # Stage 5 — Push to Registry  (push to main only: only reviewed, merged code is published)
   # ─────────────────────────────────────────────────────────────────
   push-image:
     name: Push to Registry
     runs-on: ubuntu-latest
     needs: docker-build
-    if: needs.docker-build.result == 'success' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/stable' || github.ref == 'refs/heads/stable_final') && github.event_name == 'push'
+    if: needs.docker-build.result == 'success' && github.ref == 'refs/heads/main' && github.event_name == 'push'
     permissions:
       contents: read
       packages: write
@@ -189,18 +223,20 @@ jobs:
           cache-to: type=gha,mode=max
 
   # ─────────────────────────────────────────────────────────────────
-  # Stage 6 — Deploy to Kubernetes via Helm  (stable branch push only)
+  # Stage 6 — Deploy to Kubernetes via Helm  (push to main only)
   # Requires KUBECONFIG and APP_URL repository secrets.
   # Skips gracefully with a warning if secrets are not configured.
   # ─────────────────────────────────────────────────────────────────
   deploy:
     name: Deploy to Kubernetes
-    runs-on: [self-hosted, minikube]
+    # GitHub-hosted: helm lint/template always run; the live deploy runs only when a KUBECONFIG
+    # secret points at a reachable cluster (the old self-hosted runner no longer exists).
+    runs-on: ubuntu-latest
     needs: push-image
     # Explicitly require push-image to have SUCCEEDED (not just skipped/failed)
     # Without needs.push-image.result == 'success', GitHub may run this job
     # even when push-image was skipped due to its own if-condition being false.
-    if: needs.push-image.result == 'success' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/stable' || github.ref == 'refs/heads/stable_final') && github.event_name == 'push'
+    if: needs.push-image.result == 'success' && github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment: production
     continue-on-error: true  # deployment is best-effort; requires a live cluster
 
@@ -210,6 +246,8 @@ jobs:
       # Helm validation runs unconditionally — proves charts are correct even without a live cluster
       - name: Install Helm
         uses: azure/setup-helm@v4
+        with:
+          version: v3.16.4  # pinned: the version the chart was checked with (the default is the latest)
 
       - name: Helm lint
         run: helm lint ./helm --values helm/values.yaml
@@ -219,7 +257,7 @@ jobs:
           helm template multi-agent-system ./helm \
             --values helm/values.yaml \
             --set app.image.tag=sha-dryrun \
-            --set secrets.openaiApiKey=ci-mock \
+            --set secrets.groqApiKey=ci-mock \
             --set secrets.langchainApiKey=ci-mock \
             --set secrets.jwtSecretKey=ci-mock \
             --set secrets.googleClientId=ci-mock \
@@ -234,9 +272,9 @@ jobs:
           if [ -z "$KUBECONFIG_SECRET" ]; then
             echo "::warning::KUBECONFIG secret is not set — skipping live deployment (helm lint/template above passed)."
             echo "To enable live deploy: add KUBECONFIG (base64-encoded kubeconfig) as a repository secret."
-            echo "configured=false" >> $GITHUB_OUTPUT
+            echo "configured=false" >> "$GITHUB_OUTPUT"
           else
-            echo "configured=true" >> $GITHUB_OUTPUT
+            echo "configured=true" >> "$GITHUB_OUTPUT"
           fi
         env:
           KUBECONFIG_SECRET: ${{ secrets.KUBECONFIG }}
@@ -245,7 +283,7 @@ jobs:
         if: steps.prereqs.outputs.configured == 'true'
         run: |
           echo "${{ secrets.KUBECONFIG }}" | base64 -d > /tmp/kubeconfig.yaml
-          echo "KUBECONFIG=/tmp/kubeconfig.yaml" >> $GITHUB_ENV
+          echo "KUBECONFIG=/tmp/kubeconfig.yaml" >> "$GITHUB_ENV"
 
       - name: Check cluster connectivity
         if: steps.prereqs.outputs.configured == 'true'
@@ -254,16 +292,16 @@ jobs:
           SERVER=$(python3 -c "import yaml; c=yaml.safe_load(open('/tmp/kubeconfig.yaml')); print(c['clusters'][0]['cluster']['server'])" 2>/dev/null || echo "")
           if [ -z "$SERVER" ]; then
             echo "::warning::Could not parse cluster server from kubeconfig — skipping deployment."
-            echo "reachable=false" >> $GITHUB_OUTPUT
+            echo "reachable=false" >> "$GITHUB_OUTPUT"
           else
             HOST=$(echo "$SERVER" | sed 's~https://~~' | cut -d: -f1)
             PORT=$(echo "$SERVER" | sed 's~https://~~' | cut -d: -f2)
             if timeout 5 bash -c "cat < /dev/null > /dev/tcp/$HOST/$PORT" 2>/dev/null; then
               echo "Cluster at $SERVER is reachable."
-              echo "reachable=true" >> $GITHUB_OUTPUT
+              echo "reachable=true" >> "$GITHUB_OUTPUT"
             else
               echo "::warning::Kubernetes cluster at $SERVER is not reachable from this runner — skipping deployment."
-              echo "reachable=false" >> $GITHUB_OUTPUT
+              echo "reachable=false" >> "$GITHUB_OUTPUT"
             fi
           fi
 
@@ -289,10 +327,10 @@ jobs:
             --create-namespace \
             --values helm/values.yaml \
             --values helm/values-prod.yaml \
-            --set app.image.tag=$IMAGE_TAG \
-            --set app.image.repository=$IMAGE_REPO \
+            --set "app.image.tag=$IMAGE_TAG" \
+            --set "app.image.repository=$IMAGE_REPO" \
             --set app.image.pullSecrets[0]=ghcr-secret \
-            --set-string secrets.openaiApiKey=${{ secrets.OPENAI_API_KEY }} \
+            --set-string secrets.groqApiKey=${{ secrets.GROQ_API_KEY }} \
             --set-string secrets.langchainApiKey=${{ secrets.LANGCHAIN_API_KEY }} \
             --set-string secrets.jwtSecretKey=${{ secrets.JWT_SECRET_KEY }} \
             --set-string secrets.googleClientId=${{ secrets.GOOGLE_CLIENT_ID }} \

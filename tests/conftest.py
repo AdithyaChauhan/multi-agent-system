@@ -1,11 +1,15 @@
+import os
+
 import pytest
 from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.db.database import Base
-from app.main import app
+os.environ.setdefault("ALLOW_X_USER_ID", "true")  # tests name the caller with X-User-ID
+
+from app.db.database import Base  # noqa: E402
+from app.main import app  # noqa: E402
 
 # Use in-memory SQLite for tests
 TEST_DATABASE_URL = "sqlite:///./test.db"
@@ -34,6 +38,31 @@ def client():
         yield c
 
 
+TEST_BRANDS = [(1, "Xiaomi", ["MI", "Mi", "Redmi"]), (2, "Sony", []), (3, "Logitech", []), (4, "JBL", [])]
+
+
+def build_test_catalog():
+    """The real product types from data/catalog/product_types.yaml, with a few test brands."""
+    from app.catalog.runtime import build_catalog
+    from app.catalog.schema import load_types
+
+    rows = [
+        (i, t.name, t.category, t.served, list(t.synonyms), t.suggestion, t.attribute_schema())
+        for i, t in enumerate(load_types().values(), 1)
+    ]
+    return build_catalog(rows, TEST_BRANDS)
+
+
+@pytest.fixture
+def yaml_catalog():
+    """Patch the runtime catalog everywhere search reads it."""
+    catalog = build_test_catalog()
+    with patch("app.agents.product_agent.get_catalog", return_value=catalog), patch(
+        "app.tools.product_tools.get_catalog", return_value=catalog
+    ):
+        yield catalog
+
+
 @pytest.fixture
 def mock_llm_response():
     """Mock LLM response for router"""
@@ -43,7 +72,20 @@ def mock_llm_response():
 
 
 @pytest.fixture
-def mock_openai():
-    """Patch ChatOpenAI to avoid real LLM calls"""
-    with patch("langchain_openai.ChatOpenAI") as mock:
+def mock_groq():
+    """Patch ChatGroq to avoid real LLM calls"""
+    with patch("langchain_groq.ChatGroq") as mock:
         yield mock
+
+
+@pytest.fixture(autouse=True)
+def _fresh_limits_and_cache():
+    """Rate limits and the answer cache are process-wide: start every test from zero."""
+    from app.core import limits
+    from app.core.llm import clear_cache
+
+    limits.reset()
+    clear_cache()
+    yield
+    limits.reset()
+    clear_cache()

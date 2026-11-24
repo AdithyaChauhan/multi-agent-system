@@ -1,0 +1,1083 @@
+{
+ "08358a16670ec30c1b78bb1025c0497e": {
+  "agent": "product",
+  "message": "User request: \"room heater\"\n\nProducts:\n1. Room Heater Warmer Wall-Outlet 400 Watts Electric Handy Room | ₹799 | 4.3★ | Room\n2. Morphy Richards Aristo 2000 Watts PTC Room Heater (White) | ₹3711 | 4.3★ ",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 645,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "09382874e1e397ef1293e566272eda9e": {
+  "agent": "product",
+  "message": "So far: {} | Message: wireless mouse under 500",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1359,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [
+    "wireless"
+   ],
+   "max_price": 500,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "mouse"
+  }
+ },
+ "0c75ae0ce518c4fc427904d27078944f": {
+  "agent": "product",
+  "message": "So far: {\"product\": \"smartwatch\"} | Message: with calling",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1358,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [
+    "calling"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "smartwatch"
+  }
+ },
+ "16fd3ec2e48e6847563f41807cbc02a9": {
+  "agent": "product",
+  "message": "User request: \"headphones\"\n\nProducts:\n1. boAt Rockerz 450 Bluetooth On Ear Headphones with Mic, Upto  | ₹1220 | 4.1★ | boAt\n2. boAt Rockerz 400 Bluetooth On Ear Headphones With Mic With U | ₹1399 | 4.",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 644,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "17369dfe2f1f030c082182d984e0af6c": {
+  "agent": "product",
+  "message": "So far: {\"product\": \"bluetooth speaker\"} | Message: under 2000",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1351,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": 2000,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": null
+  }
+ },
+ "19896eef5d404be7ade0161e76b6531b": {
+  "agent": "product",
+  "message": "User request: \"with calling\"\n\nProducts:\n1. Fire-Boltt India's No 1 Smartwatch Brand Talk 2 Bluetooth Ca | ₹2199 | 4.2★ | Fire-Boltt\n2. Fire-Boltt India's No 1 Smartwatch Brand Talk 2 Bluetooth Ca | ₹2",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 702,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "1bf7a24f8048f9c7a985c18479a94ffa": {
+  "agent": "product",
+  "message": "User request: \"smartwatch under 2000\"\n\nProducts:\n1. Newly Launched Boult Dive+ with 1.85\" HD Display, Bluetooth  | ₹1999 | 4.3★ | Boult\n2. boAt Wave Lite Smartwatch with 1.69\" HD Display, Sleek Metal ",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 718,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "219d8b168de52e52a103f1254ac89295": {
+  "agent": "product",
+  "message": "User request: \"ceiling fan\"\n\nProducts:\n1. atomberg Renesa 1200mm BLDC Motor with Remote 3 Blade Energy | ₹3569 | 4.3★ | atomberg\n2. Havells Festiva 1200mm Dust Resistant Ceiling Fan (Gold Mist | ₹2899",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 639,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "29440e8112e91dcc42b3f802cfe49374": {
+  "agent": "product",
+  "message": "User request: \"fire-boltt smartwatch\"\n\nProducts:\n1. Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Spo | ₹2999 | 4.4★ | Fire-Boltt\n2. Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 704,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "2b35b459a22b0c9f38fdd60b8d8cf18b": {
+  "agent": "product",
+  "message": "So far: {} | Message: ceiling fan",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1342,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "ceiling fan"
+  }
+ },
+ "3368bd40edff6bdfdc6bacef9771728d": {
+  "agent": "product",
+  "message": "So far: {} | Message: speakers",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1396,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "computer speaker"
+  }
+ },
+ "40e5bc5161a97bf702c3eab7cb802804": {
+  "agent": "product",
+  "message": "So far: {} | Message: room heater",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1349,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "room heater"
+  }
+ },
+ "47d3bdc0fafe068121990a3fd3f55a74": {
+  "agent": "product",
+  "message": "So far: {} | Message: 32 inch smart tv",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1355,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [
+    "32 inch",
+    "smart"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "tv"
+  }
+ },
+ "4d17557080dc60c37034cdbb6423f748": {
+  "agent": "product",
+  "message": "So far: {} | Message: electric kettle",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1400,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": "electric kettle",
+   "product": "electric kettle"
+  }
+ },
+ "4dac7e565f3a3865fd736076a805e56f": {
+  "agent": "product",
+  "message": "So far: {} | Message: bajaj room heater",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1377,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "Space Heating"
+  }
+ },
+ "4e62c0c214916e72df596ce4bc83afd5": {
+  "agent": "product",
+  "message": "So far: {} | Message: mixer grinder",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1417,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "hand mixer"
+  }
+ },
+ "4e69aacf6ea89225e8a2251566d401e2": {
+  "agent": "product",
+  "message": "So far: {\"product\": \"hand mixer\"} | Message: only Bajaj",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1351,
+  "value": {
+   "brand": "Bajaj",
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "hand mixer"
+  }
+ },
+ "4f6cff4b1565b03a256a63ad2bc97db1": {
+  "agent": "product",
+  "message": "User request: \"lint remover\"\n\nProducts:\n1. Lint Remover For Clothes With 1 Year Warranty Fabric Shaver  | ₹445 | 4.3★ | Lint\n2. Philips GC026/30 Fabric Shaver, Lint Remover for Woolen Swea | ₹1490 | 4",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 634,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "5b0c696675622cf7aaf7d09cde73c27f": {
+  "agent": "product",
+  "message": "User request: \"ok, under 2000 then\"\n\nProducts:\n1. boAt Rockerz 450 Bluetooth On Ear Headphones with Mic, Upto  | ₹1220 | 4.1★ | boAt\n2. boAt Rockerz 400 Bluetooth On Ear Headphones With Mic With U | ₹",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 670,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "5dc8b00d32acf1d7da8fcea0e100ba08": {
+  "agent": "product",
+  "message": "So far: {} | Message: smart tv under 15000",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1353,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": 15000,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "tv"
+  }
+ },
+ "6328c40bc11ada665c8e0171dca5cf5d": {
+  "agent": "product",
+  "message": "So far: {} | Message: lint remover",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1423,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": "lint remover",
+   "product": "lint remover"
+  }
+ },
+ "6d64f419bceacf6206affa5e388e8048": {
+  "agent": "product",
+  "message": "User request: \"speakers\"\n\nProducts:\n1. Zebronics Zeb Wonderbar 10 USB Powered 2.0 Computer Speaker  | ₹849 | 4.0★ | Zebronics\n2. ZEBRONICS Zeb-Warrior II 10 watts 2.0 Multimedia Speaker wit | ₹649 | 4",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 628,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3
+   ]
+  }
+ },
+ "6f8540ac4bc4c2ca8daaf7effe65d9f9": {
+  "agent": "product",
+  "message": "So far: {} | Message: fire-boltt smartwatch",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1354,
+  "value": {
+   "brand": "fire-boltt",
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "smartwatch"
+  }
+ },
+ "7fe1b43d19b688f1e7f0e4ecf7224a99": {
+  "agent": "product",
+  "message": "User request: \"bluetooth speaker\"\n\nProducts:\n1. JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL  | ₹1999 | 4.3★ | JBL\n2. boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playb | ₹179",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 629,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "8056cfdafbcd7e110913b53045f37be4": {
+  "agent": "product",
+  "message": "So far: {} | Message: pen drive",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1340,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "pen drive"
+  }
+ },
+ "8950c3063fa5aab08f53be2e6ae21204": {
+  "agent": "product",
+  "message": "So far: {} | Message: mixer grinder under 3000",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1465,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": 3000,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "hand mixer"
+  }
+ },
+ "8a1dcb9e5dbee15afe57f6b7b3f4c9b0": {
+  "agent": "product",
+  "message": "User request: \"only Bajaj\"\n\nProducts:\n1. Bajaj HM-01 Powerful 250W Hand Mixer, Black | ₹1499 | 4.4★ | Bajaj\n2. Bajaj Rex 500W Mixer Grinder with Nutri-Pro Feature, 3 Jars, | ₹1999 | 4.2★ | Bajaj\n3. Ba",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 669,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "8dc78d5fe74737476f666b248f16f286": {
+  "agent": "product",
+  "message": "So far: {} | Message: boat headphones under 500",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1371,
+  "value": {
+   "brand": "Boat",
+   "clear": [],
+   "features": [],
+   "max_price": 500,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "headphones"
+  }
+ },
+ "911b63382dbdd1833d8f932e38309aeb": {
+  "agent": "product",
+  "message": "User request: \"mixer grinder\"\n\nProducts:\n1. T TOPLINE 180 W Electric Hand Mixer,Hand Blender , Egg Beate | ₹549 | 4.0★ | T TOPLINE\n2. JM SELLER 180 W 2021 Edition Electric Beater High Speed Hand | ₹47",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 659,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "9174421e4333df6e8d41caa078d619fc": {
+  "agent": "product",
+  "message": "User request: \"boat headphones under 500\"\n\nProducts:\n1. boAt BassHeads 100 in-Ear Wired Headphones with Mic (Black) | ₹365 | 4.1★ | boAt\n2. Boat A 350 Type C Cable 1.5m(Jet Black) | ₹299 | 4.4★ | boAt",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 679,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "9310393fa6e92134a19f3b08821b0679": {
+  "agent": "product",
+  "message": "User request: \"mixer grinder under 3000\"\n\nProducts:\n1. T TOPLINE 180 W Electric Hand Mixer,Hand Blender , Egg Beate | ₹549 | 4.0★ | T TOPLINE\n2. Bajaj HM-01 Powerful 250W Hand Mixer, Black | ₹1499 | 4",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 683,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "953cdd6bbee88ca7fac17b972006b270": {
+  "agent": "product",
+  "message": "User request: \"electric kettle\"\n\nProducts:\n1. Tesora - Inspired by you Large Premium Electric Kettle 1.8L, | ₹1349 | 4.4★ | Tesora\n2. Philips HD9306/06 1.5-Litre Electric Kettle (Multicolor) | ₹2695 |",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 640,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "95be6af9a7d602bcfb00236797d8c508": {
+  "agent": "product",
+  "message": "User request: \"wireless mouse under 500\"\n\nProducts:\n1. Amazon Basics Wireless Mouse | 2.4 GHz Connection, 1600 DPI  | ₹499 | 5.0★ | Amazon\n2. Zebronics Zeb-Jaguar Wireless Mouse, 2.4GHz with USB Nano ",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 660,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4
+   ]
+  }
+ },
+ "a54fc0274b71916f721988875a7243d3": {
+  "agent": "product",
+  "message": "User request: \"bajaj room heater\"\n\nProducts:\n1. Bajaj OFR Room Heater, 13 Fin 2900 Watts Oil Filled Room Hea | ₹9590 | 4.1★ | Bajaj\n2. Bajaj Majesty RX11 2000 Watts Heat Convector Room Heater (Wh | ₹2",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 731,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "a9a4d394b8acf054df0cb4b1655f1a6b": {
+  "agent": "product",
+  "message": "So far: {} | Message: samsung tv",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1345,
+  "value": {
+   "brand": "samsung",
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "tv"
+  }
+ },
+ "abebea643f2a3d1af02b99cb5d587c6a": {
+  "agent": "product",
+  "message": "So far: {} | Message: headphones",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1339,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "headphones"
+  }
+ },
+ "b2fb8e481d63dc849a579ac59f0866f1": {
+  "agent": "product",
+  "message": "So far: {} | Message: bluetooth speaker",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1342,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "bluetooth speaker"
+  }
+ },
+ "b8f47c5248f7fed1e4cd9d8da529791c": {
+  "agent": "product",
+  "message": "User request: \"pen drive\"\n\nProducts:\n1. SanDisk Ultra 64 GB USB Pen Drives (SDDDC2-064G-I35, Black,  | ₹729 | 4.3★ | SanDisk\n2. SanDisk Ultra 128 GB USB 3.0 Pen Drive (Black) | ₹889 | 4.3★ | SanDisk\n3",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 653,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "b921c1824c5f5b90bc17547dfd3eeec5": {
+  "agent": "product",
+  "message": "So far: {} | Message: logitech mouse",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1387,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "mouse"
+  }
+ },
+ "bc1708b6419e186140c06037581de3c5": {
+  "agent": "product",
+  "message": "User request: \"smart tv under 15000\"\n\nProducts:\n1. Mi 80 cm (32 inches) HD Ready Android Smart LED TV 4A PRO |  | ₹14999 | 4.3★ | Xiaomi\n2. Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 692,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "c6b55be7dc5e4a351d05ba81e8f8bd27": {
+  "agent": "product",
+  "message": "So far: {} | Message: smartwatch under 2000",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1353,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": 2000,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "smartwatch"
+  }
+ },
+ "c7f017b1013ddcde1f4d5c01c0023656": {
+  "agent": "product",
+  "message": "So far: {} | Message: keyboard",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1383,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "keyboard"
+  }
+ },
+ "cd3382039bb2bf52e6b0042c1afcccce": {
+  "agent": "product",
+  "message": "User request: \"under 2000\"\n\nProducts:\n1. JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL  | ₹1999 | 4.3★ | JBL\n2. boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playb | ₹1799 | 4.2",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 656,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "cea23e0579c5a382e897a9a4a9d70fcd": {
+  "agent": "product",
+  "message": "User request: \"samsung tv\"\n\nProducts:\n1. Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED | ₹13490 | 4.3★ | Samsung\n2. Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart  | ₹30990",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 680,
+  "value": {
+   "exact": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ]
+  }
+ },
+ "d9f581bdf053f7ad476bd046d8e46ccf": {
+  "agent": "product",
+  "message": "So far: {} | Message: smartwatch",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1337,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "smartwatch"
+  }
+ },
+ "dfa6d1e9cdd470355d1234fe1d6cee79": {
+  "agent": "product",
+  "message": "So far: {} | Message: wireless mouse",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1381,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [
+    "wireless"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "mouse"
+  }
+ },
+ "e4285a787358a72baaa4a4106f6d9bdf": {
+  "agent": "product",
+  "message": "User request: \"wireless mouse\"\n\nProducts:\n1. Lenovo 400 Wireless Mouse, 1200DPI Optical Sensor, 2.4GHz Wi | ₹629 | 4.4★ | Lenovo\n2. Lenovo 130 Wireless Compact Mouse, 1K DPI Optical sensor, 2. | ₹579 ",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 628,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "ef9a9e9c0faa6a47b267e3a4ed88550b": {
+  "agent": "product",
+  "message": "User request: \"logitech mouse\"\n\nProducts:\n1. Logitech G402 Hyperion Fury USB Wired Gaming Mouse, 4,000 DP | ₹1995 | 4.6★ | Logitech\n2. Logitech MK215 Wireless Keyboard and Mouse Combo for Windows | ₹1",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 638,
+  "value": {
+   "exact": [
+    1,
+    3,
+    4,
+    5,
+    6,
+    7,
+    9,
+    10
+   ],
+   "same_kind": [
+    1,
+    3,
+    4,
+    5,
+    6,
+    7,
+    9,
+    10
+   ]
+  }
+ },
+ "f16cadaad4067097f45af30cf7cc9043": {
+  "agent": "product",
+  "message": "User request: \"keyboard\"\n\nProducts:\n1. Logitech K380 Wireless Multi-Device Keyboard for Windows, Ap | ₹2640 | 4.5★ | Logitech\n2. Logitech K480 Wireless Multi-Device Keyboard for Windows, ma | ₹2595 | ",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 619,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "f2d01c7db0f2896a26dbcce7b1ee540c": {
+  "agent": "product",
+  "message": "User request: \"32 inch smart tv\"\n\nProducts:\n1. LG 80 cm (32 inches) HD Ready Smart LED TV 32LM563BPTC (Dark | ₹13490 | 4.3★ | LG\n2. LG 80 cm (32 inches) HD Ready Smart LED TV 32LQ576BPSA (Cera | ₹1599",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 687,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "f60d81aa813332831a6edcd06262a423": {
+  "agent": "product",
+  "message": "So far: {\"product\": \"headphones\", \"brand\": \"Boat\", \"max_price\": 500} | Message: ok, under 2000 then",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1365,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": 2000,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": null
+  }
+ },
+ "f99d51fd485843f81528d71f31fa5ee0": {
+  "agent": "product",
+  "message": "User request: \"smartwatch\"\n\nProducts:\n1. Fire-Boltt India's No 1 Smartwatch Brand Talk 2 Bluetooth Ca | ₹2199 | 4.2★ | Fire-Boltt\n2. Fire-Boltt India's No 1 Smartwatch Brand Talk 2 Bluetooth Ca | ₹219",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 661,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ }
+}

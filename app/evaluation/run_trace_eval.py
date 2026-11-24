@@ -28,11 +28,12 @@ from dotenv import load_dotenv
 load_dotenv('/home/admin1/project/multi-agent-system/.env')
 
 from langsmith import Client
-from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
+from app.core.config import GROQ_MODEL
 from langchain_core.messages import SystemMessage, HumanMessage
 
 client = Client(api_key=os.getenv("LANGCHAIN_API_KEY"))
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=os.getenv("OPENAI_API_KEY"))
+llm = ChatGroq(model=GROQ_MODEL, temperature=0, api_key=os.getenv("GROQ_API_KEY"))
 
 PROJECT_NAME = "multi-agent-ecommerce"
 
@@ -94,7 +95,7 @@ Respond ONLY with valid JSON: {{"score": 0.0|0.5|1.0, "reason": "one sentence"}}
 
 
 def _call_llm_judge(prompt: str) -> tuple[float, str]:
-    """Call GPT-4o-mini as judge. Returns (score, reason)."""
+    """Call Groq as judge. Returns (score, reason)."""
     messages = [
         SystemMessage(content="You are a strict but fair evaluator. Always respond with valid JSON only."),
         HumanMessage(content=prompt),

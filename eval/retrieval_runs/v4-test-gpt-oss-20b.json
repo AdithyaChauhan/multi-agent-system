@@ -1,0 +1,1512 @@
+{
+ "label": "v4-test-gpt-oss-20b",
+ "model": "openai/gpt-oss-20b",
+ "mode": "fill",
+ "database": "multi_agent_baseline",
+ "cassette": "eval\\cassettes\\retrieval_openai-gpt-oss-20b.json",
+ "started": "2026-11-23T12:57:00+00:00",
+ "queries": [
+  {
+   "id": "q002",
+   "query": "mixer grinder",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [
+    "B00K57MR22",
+    "B078JT7LTD",
+    "B071113J7M",
+    "B07Y9PY6Y1",
+    "B075S9FVRY"
+   ],
+   "shown_names": [
+    "Sujata Dynamix DX Mixer Grinder, 900W, 3 Jars (White)",
+    "Sujata Dynamix, Mixer Grinder, 900 Watts, 3 Jars (White)",
+    "Sujata Powermatic Plus 900 Watts Juicer Mixer Grinder",
+    "Sujata Powermatic Plus, Juicer Mixer Grinder with Chutney Jar, 900 Watts, 3 Jars",
+    "Sujata Supermix, Mixer Grinder, 900 Watts, 3 Jars (White)"
+   ],
+   "preferences": {
+    "product": "mixer grinder",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Sujata Dynamix DX Mixer Grinder 900W with 3 Jars** — Sujata\n   ₹6,120 · 4.6/5\n\n2. **Sujata Dynamix Mixer Grinder 900W 3 Jars** — Sujata\n   ₹6,120 · 4.6/5\n\n3. **Sujata Powermatic Plus 900W Juicer Mixer Grinder*",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 661,
+   "seconds": 3.08
+  },
+  {
+   "id": "q004",
+   "query": "vacuum cleaner",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [
+    "B072J83V9W",
+    "B0B19VJXQZ",
+    "B07H3N8RJH",
+    "B09FZ89DK6",
+    "B072NCN9M4"
+   ],
+   "shown_names": [
+    "Philips PowerPro FC9352/01 Compact Bagless Vacuum Cleaner (Blue)",
+    "ECOVACS DEEBOT N8 2-in-1 Robotic Vacuum Cleaner, 2022 New Launch, Most Powerful ",
+    "AmazonBasics Cylinder Bagless Vacuum Cleaner with Power Suction, Low Sound, High",
+    "Eureka Forbes Supervac 1600 Watts Powerful Suction,bagless Vacuum Cleaner with c",
+    "AMERICAN MICRONIC- Imported Wet & Dry Vacuum Cleaner, 21 Litre Stainless Steel w"
+   ],
+   "preferences": {
+    "product": "vacuum cleaner",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Philips PowerPro FC9352/01 Compact Bagless Vacuum Cleaner** — Philips\n   ₹8,999 · 4.4/5\n\n2. **ECOVACS DEEBOT N8 2-in-1 Robotic Vacuum Cleaner** — ECOVACS\n   ₹27,900 · 4.4/5\n\n3. **AmazonBasics Bagless Vacuum Cl",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 644,
+   "seconds": 0.66
+  },
+  {
+   "id": "q006",
+   "query": "headphones",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [
+    "B079S811J3",
+    "B078W65FJ7",
+    "B0873L7J6X",
+    "B01DEWVZ2C",
+    "B01FSYQ2A4"
+   ],
+   "shown_names": [
+    "Redgear Cosmo 7,1 Usb Gaming Wired Over Ear Headphones With Mic With Virtual Sur",
+    "boAt BassHeads 900 On-Ear Wired Headphones with Mic (White)",
+    "Infinity (JBL Glide 510, 72 Hrs Playtime with Quick Charge, Wireless On Ear Head",
+    "JBL C100SI Wired In Ear Headphones with Mic, JBL Pure Bass Sound, One Button Mul",
+    "boAt Rockerz 400 Bluetooth On Ear Headphones With Mic With Upto 8 Hours Playback"
+   ],
+   "preferences": {
+    "product": "headphones",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Redgear Cosmo 7.1 Wired Over Ear Gaming Headphones** — Redgear\n   ₹1,990 · 4.3/5\n\n2. **boAt BassHeads 900 On-Ear Wired Headphones with Mic** — boAt\n   ₹849 · 4.2/5\n\n3. **Infinity JBL Glide 510 Wireless On‑Ear ",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 645,
+   "seconds": 0.54
+  },
+  {
+   "id": "q008",
+   "query": "ceiling fan",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [
+    "B08Y5QJXSR",
+    "B08ZHYNTM1",
+    "B01LYU3BZF",
+    "B01L7C4IU2",
+    "B09MT94QLL"
+   ],
+   "shown_names": [
+    "atomberg Renesa 1200mm BLDC Motor with Remote 3 Blade Energy Saving Ceiling Fan ",
+    "Havells Festiva 1200mm Dust Resistant Ceiling Fan (Gold Mist)",
+    "Havells Ambrose 1200mm Ceiling Fan (Gold Mist Wood)",
+    "Havells Ambrose 1200mm Ceiling Fan (Pearl White Wood)",
+    "Havells Glaze 74W Pearl Ivory Gold Ceiling Fan, Sweep: 1200 Mm"
+   ],
+   "preferences": {
+    "product": "ceiling fan",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **atomberg Renesa Ceiling Fan** — atomberg\n   ₹3,569 · 4.3/5\n\n2. **Havells Festiva Dust Resistant Ceiling Fan** — Havells\n   ₹2,899 · 4.3/5\n\n3. **Havells Ambrose 1200mm Ceiling Fan Gold Mist** — Havells\n   ₹2,19",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 639,
+   "seconds": 0.52
+  },
+  {
+   "id": "q010",
+   "query": "power bank",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [
+    "B08HV83HL3",
+    "B08HVL8QN3",
+    "B08HVJCW95",
+    "B08MC57J31",
+    "B07RD611Z8"
+   ],
+   "shown_names": [
+    "MI Power Bank 3i 20000mAh Lithium Polymer 18W Fast Power Delivery Charging | Inp",
+    "Mi 10000mAH Li-Polymer, Micro-USB and Type C Input Port, Power Bank 3i with 18W ",
+    "MI 10000mAh 3i Lithium Polymer Power Bank Dual Input(Micro-USB and Type C) and O",
+    "MI 10000mAh Lithium Ion, Lithium Polymer Power Bank Pocket Pro with 22.5 Watt Fa",
+    "Ambrane 20000mAh Power Bank with 20W Fast Charging, Triple Output, Power Deliver"
+   ],
+   "preferences": {
+    "product": "power bank",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **MI Power Bank 3i 20000 mAh 18W PD** — Xiaomi\n   ₹2,049 · 4.3/5\n\n2. **Mi 10000mAh Power Bank 18W Fast Charging** — Xiaomi\n   ₹1,149 · 4.3/5\n\n3. **MI 10000mAh Power Bank Dual Input 18W Fast Charging** — Xiaomi\n ",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 654,
+   "seconds": 0.66
+  },
+  {
+   "id": "q012",
+   "query": "induction cooktop",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [
+    "B0756KCV5K",
+    "B00EDJJ7FS",
+    "B07YCBSCYB",
+    "B09NBZ36F7",
+    "B0BL11S5QK"
+   ],
+   "shown_names": [
+    "Prestige PIC 15.0+ 1900-Watt Induction Cooktop (Black)",
+    "Philips Viva Collection HD4928/01 2100-Watt Induction Cooktop with Feather Touch",
+    "AmazonBasics Induction Cooktop 1600 Watt (Black)",
+    "Usha CookJoy (CJ1600WPC) 1600 Watt Induction cooktop (Black)",
+    "iBELL Induction Cooktop, 2000W with Auto Shut Off and Overheat Protection, BIS C"
+   ],
+   "preferences": {
+    "product": "induction cooktop",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Prestige PIC 15.0+ 1900W Induction Cooktop** — Prestige\n   ₹3,180 · 4.2/5\n\n2. **Philips Viva Collection 2100W Induction Cooktop** — Philips\n   ₹3,229 · 4.2/5\n\n3. **AmazonBasics Induction Cooktop 1600W** — Amaz",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 665,
+   "seconds": 0.48
+  },
+  {
+   "id": "q014",
+   "query": "speakers",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [
+    "B07B88KQZ8",
+    "B07NC12T2R",
+    "B08SMJT55F",
+    "B08SBH499M",
+    "B08JMC1988"
+   ],
+   "shown_names": [
+    "JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL Signature Sound, Vib",
+    "boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playback, IPX5 and Integr",
+    "boAt Stone 250 Portable Wireless Speaker with 5W RMS Immersive Audio, RGB LEDs, ",
+    "ZEBRONICS Zeb-Warrior II 10 watts 2.0 Multimedia Speaker with RGB Lights, USB Po",
+    "boAt Stone 180 5W Bluetooth Speaker with Upto 10 Hours Playback, 1.75\" Driver, I"
+   ],
+   "preferences": {
+    "product": "speaker",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **JBL Go 2 Portable Bluetooth Speaker** — JBL\n   ₹1,999 · 4.3/5\n\n2. **boAt Stone 650 Bluetooth Speaker** — boAt\n   ₹1,799 · 4.2/5\n\n3. **boAt Stone 250 Portable Wireless Bluetooth Speaker** — boAt\n   ₹1,199 · 4.2",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 647,
+   "seconds": 0.7
+  },
+  {
+   "id": "q016",
+   "query": "lint remover",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [
+    "B09JN37WBX",
+    "B00TDD0YM4",
+    "B09NNZ1GF7",
+    "B09MTLG4TP",
+    "B0BK1K598K"
+   ],
+   "shown_names": [
+    "Lint Remover Woolen Clothes Lint Extractor Battery Lint Removing Machine Bhur Re",
+    "Philips GC026/30 Fabric Shaver, Lint Remover for Woolen Sweaters, Blankets, Jack",
+    "Lint Remover For Clothes With 1 Year Warranty Fabric Shaver Lint Shaver for Wool",
+    "SAIELLIN Electric Lint Remover for Clothes Fabric Shaver Lint Shaver for Woolen ",
+    "AGARO LR2007 Lint Remover, Rechargeable, for Woolen Sweaters, Blankets, Jackets,"
+   ],
+   "preferences": {
+    "product": "lint remover",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Battery Powered Lint Remover for Woolen Clothes** — Lint\n   ₹319 · 4.6/5\n\n2. **Philips Fabric Shaver Lint Remover** — Philips\n   ₹1,490 · 4.4/5\n\n3. **Fabric Shaver Lint Remover for Clothes** — Lint\n   ₹445 · 4",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 640,
+   "seconds": 0.38
+  },
+  {
+   "id": "q018",
+   "query": "wifi router",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [
+    "B07W9KYT62",
+    "B07GVR9TG7",
+    "B0759QMF85",
+    "B01HGCLUH6",
+    "B0085IATT6"
+   ],
+   "shown_names": [
+    "TP-Link AC1200 Archer A6 Smart WiFi, 5GHz Gigabit Dual Band MU-MIMO Wireless Int",
+    "TP-Link Archer AC1200 Archer C6 Wi-Fi Speed Up to 867 Mbps/5 GHz + 400 Mbps/2.4 ",
+    "TP-Link AC750 Dual Band Wireless Cable Router, 4 10/100 LAN + 10/100 WAN Ports, ",
+    "TP-link N300 WiFi Wireless Router TL-WR845N | 300Mbps Wi-Fi Speed | Three 5dBi h",
+    "D-Link DIR-615 Wi-fi Ethernet-N300 Single_band 300Mbps Router, Mobile App Suppor"
+   ],
+   "preferences": {
+    "product": "router",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Archer A6 AC1200 Smart WiFi Dual Band Router** — TP-Link\n   ₹2,499 · 4.4/5\n\n2. **TP‑Link Archer C6 AC1200 Dual‑Band Router** — TP-Link\n   ₹2,499 · 4.4/5\n\n3. **TP-Link Archer C20 AC750 Dual Band Router** — TP-L",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 0.667,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 670,
+   "seconds": 0.68
+  },
+  {
+   "id": "q020",
+   "query": "sandwich maker",
+   "history": [],
+   "tags": [
+    "plain"
+   ],
+   "shown": [
+    "B09XRBJ94N",
+    "B01486F4G6",
+    "B07S851WX5",
+    "B00935MGHS",
+    "B0B2DD8BQ8"
+   ],
+   "shown_names": [
+    "iBELL SM1301 3-in-1 Sandwich Maker with Detachable Plates for Toast / Waffle / G",
+    "Borosil Jumbo 1000-Watt Grill Sandwich Maker (Black)",
+    "Prestige Sandwich Maker PGMFD 01, Black",
+    "Prestige PSMFB 800 Watt Sandwich Toaster with Fixed Plates, Black",
+    "Wipro Vesta Grill 1000 Watt Sandwich Maker |Dual function-SW Maker&Griller|Non s"
+   ],
+   "preferences": {
+    "product": "sandwich maker",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **iBELL SM1301 3-in-1 Sandwich Maker** — iBELL\n   ₹2,092 · 4.3/5\n\n2. **Borosil 1000W Grill Sandwich Maker** — Borosil\n   ₹2,863 · 4.3/5\n\n3. **Prestige Sandwich Maker PGMFD 01** — Prestige\n   ₹1,299 · 4.2/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 640,
+   "seconds": 0.61
+  },
+  {
+   "id": "q022",
+   "query": "samsung tv",
+   "history": [],
+   "tags": [
+    "brand"
+   ],
+   "shown": [
+    "B092BJMT8Q",
+    "B09F6S8BT6",
+    "B08PV1X771",
+    "B0B15CPR37",
+    "B092BL5DCX"
+   ],
+   "shown_names": [
+    "Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart LED TV UA43AUE60AKLX",
+    "Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED Smart TV UA32T4340B",
+    "Samsung 80 cm (32 inches) Wondertainment Series HD Ready LED Smart TV UA32TE40AA",
+    "Samsung 108 cm (43 inches) Crystal 4K Neo Series Ultra HD Smart LED TV UA43AUE65",
+    "Samsung 138 cm (55 inches) Crystal 4K Series Ultra HD Smart LED TV UA55AUE60AKLX"
+   ],
+   "preferences": {
+    "product": "tv",
+    "features": [],
+    "brand": "samsung",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Samsung 43\" Crystal 4K Smart LED TV** — Samsung\n   ₹30,990 · 4.3/5\n\n2. **Samsung 32\" Wondertainment HD Ready Smart LED TV** — Samsung\n   ₹13,490 · 4.3/5\n\n3. **Samsung 32\" Wondertainment Series HD Ready Smart TV** — Samsung\n   ₹15,490 · 4.3/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 680,
+   "seconds": 0.63
+  },
+  {
+   "id": "q024",
+   "query": "bajaj room heater",
+   "history": [],
+   "tags": [
+    "brand"
+   ],
+   "shown": [
+    "B01N1XVVLC",
+    "B009P2LITG",
+    "B08MV82R99",
+    "B009P2LK08",
+    "B00LUGTJGO"
+   ],
+   "shown_names": [
+    "Bajaj OFR Room Heater, 13 Fin 2900 Watts Oil Filled Room Heater with 400W PTC Ce",
+    "Bajaj Majesty RX11 2000 Watts Heat Convector Room Heater (White, ISI Approved)",
+    "Bajaj Waterproof 1500 Watts Immersion Rod Heater",
+    "Bajaj Minor 1000 Watts Radiant Room Heater (Steel, ISI Approved)",
+    "Bajaj RHX-2 800-Watt Room Heater (White)"
+   ],
+   "preferences": {
+    "product": "room heater",
+    "features": [],
+    "brand": "Bajaj",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Bajaj OFR Oil Filled Room Heater with Fan** — Bajaj\n   ₹9,590 · 4.1/5\n\n2. **Bajaj Majesty RX11 2000W convector heater** — Bajaj\n   ₹2,169 · 4.1/5\n\n3. **Bajaj 1500W Immersion Rod Water Heater** — Bajaj\n   ₹653 · 4.1/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 0.667,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 707,
+   "seconds": 0.65
+  },
+  {
+   "id": "q026",
+   "query": "fire-boltt smartwatch",
+   "history": [],
+   "tags": [
+    "brand"
+   ],
+   "shown": [
+    "B0BNXFDTZ2",
+    "B0BP18W8TM",
+    "B0B3RRWSF6",
+    "B0B3N7LR6K",
+    "B0B3RSDSZ3"
+   ],
+   "shown_names": [
+    "Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Sports Mode, 8 UI Inter",
+    "Fire-Boltt Gladiator 1.96\" Biggest Display Smart Watch with Bluetooth Calling, V",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24",
+    "Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwatch with 368*448 Pixe",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24"
+   ],
+   "preferences": {
+    "product": "smartwatch",
+    "features": [],
+    "brand": "fire-boltt",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Fire-Boltt Tank 1.85\" Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹2,999 · 4.4/5\n\n2. **Fire-Boltt Gladiator 1.96\" Bluetooth Smartwatch** — Fire-Boltt\n   ₹3,999 · 4.4/5\n\n3. **Fire-Boltt Phoenix Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹1,998 · 4",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 704,
+   "seconds": 0.84
+  },
+  {
+   "id": "q028",
+   "query": "sandisk pen drive",
+   "history": [],
+   "tags": [
+    "brand"
+   ],
+   "shown": [
+    "B07JJFSG2B",
+    "B01EZ0X3L8",
+    "B07SLMR1K6",
+    "B01N6LU1VF",
+    "B0819ZZK5K"
+   ],
+   "shown_names": [
+    "SanDisk Ultra 128 GB USB 3.0 Pen Drive (Black)",
+    "SanDisk Ultra 64 GB USB Pen Drives (SDDDC2-064G-I35, Black, Silver)",
+    "SanDisk Ultra Flair 64GB USB 3.0 Pen Drive, Multicolor",
+    "SanDisk Ultra Dual 64 GB USB 3.0 OTG Pen Drive (Black)",
+    "SanDisk Ultra Dual Drive Go USB Type C Pendrive for Mobile (Black, 128 GB, 5Y - "
+   ],
+   "preferences": {
+    "product": "pen drive",
+    "features": [],
+    "brand": "sandisk",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **SanDisk Ultra 128GB USB Pen Drive** — SanDisk\n   ₹889 · 4.3/5\n\n2. **SanDisk Ultra 64GB USB Pen Drive** — SanDisk\n   ₹729 · 4.3/5\n\n3. **SanDisk Ultra Flair 64GB USB 3.0 Pen Drive** — SanDisk\n   ₹519 · 4.3/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 585,
+   "seconds": 0.81
+  },
+  {
+   "id": "q030",
+   "query": "duracell batteries",
+   "history": [],
+   "tags": [
+    "brand"
+   ],
+   "shown": [
+    "B014SZO90Y",
+    "B01DJJVFPC",
+    "B00E3DVQFS",
+    "B08Y5QJTVK",
+    "B014SZPBM4"
+   ],
+   "shown_names": [
+    "Duracell Ultra Alkaline AA Battery, 8 Pcs",
+    "Duracell Ultra Alkaline AAA Battery, 8 Pcs",
+    "Duracell Rechargeable AA 2500mAh Batteries, 4 Pcs",
+    "Duracell CR2025 3V Lithium Coin Battery, 5 pcs, 2025 Coin Button Cell Battery, D",
+    "Duracell Ultra Alkaline D Battery, 2 Pcs"
+   ],
+   "preferences": {
+    "product": "battery",
+    "features": [],
+    "brand": "Duracell",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Duracell Ultra Alkaline AA Batteries** — Duracell\n   ₹266 · 4.5/5\n\n2. **Duracell Ultra Alkaline AAA Batteries (8 pcs)** — Duracell\n   ₹269 · 4.5/5\n\n3. **Duracell Rechargeable AA Batteries 2500mAh (4 pcs)** — D",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 658,
+   "seconds": 0.54
+  },
+  {
+   "id": "q032",
+   "query": "headphones under 1000",
+   "history": [],
+   "tags": [
+    "price"
+   ],
+   "shown": [
+    "B078W65FJ7",
+    "B01DF26V7A",
+    "B01DEWVZ2C",
+    "B00Y4ORQ46",
+    "B07T9FV9YP"
+   ],
+   "shown_names": [
+    "boAt BassHeads 900 On-Ear Wired Headphones with Mic (White)",
+    "JBL C100SI Wired In Ear Headphones with Mic, JBL Pure Bass Sound, One Button Mul",
+    "JBL C100SI Wired In Ear Headphones with Mic, JBL Pure Bass Sound, One Button Mul",
+    "Logitech H111 Wired On Ear Headphones With Mic Black",
+    "Redgear Cloak Wired RGB Wired Over Ear Gaming Headphones with Mic for PC"
+   ],
+   "preferences": {
+    "product": "headphones",
+    "features": [],
+    "brand": null,
+    "max_price": 1000,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **boAt BassHeads 900 On-Ear Wired Headphones with Mic** — boAt\n   ₹849 · 4.2/5\n\n2. **JBL C100SI Wired In-Ear Headphones with Mic** — JBL\n   ₹599 · 4.1/5\n\n3. **JBL C100SI Wired In-Ear Headphones with Mic** — JBL\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 630,
+   "seconds": 0.66
+  },
+  {
+   "id": "q034",
+   "query": "room heater below 2000",
+   "history": [],
+   "tags": [
+    "price"
+   ],
+   "shown": [
+    "B099FDW2ZF",
+    "B07VX71FZP",
+    "B09KRHXTLN",
+    "B09P1MFKG1",
+    "B0BMTZ4T1D"
+   ],
+   "shown_names": [
+    "Maharaja Whiteline Nano Carbon Neo, 500 Watts Room Heater (Black, White), Standa",
+    "Amazon Brand - Solimo 2000/1000 Watts Room Heater with Adjustable Thermostat (IS",
+    "Candes Gloster All in One Silent Blower Fan Room Heater Ideal for Small and Medi",
+    "Melbon VM-905 2000-Watt Room Heater (ISI Certified, White Color) Ideal Electric ",
+    "!!1000 Watt/2000-Watt Room Heater!! Fan Heater!!Pure White!!HN-2500!!Made in Ind"
+   ],
+   "preferences": {
+    "product": "room heater",
+    "features": [],
+    "brand": null,
+    "max_price": 2000,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Nano Carbon 500W Room Heater** — Maharaja Whiteline\n   ₹1,235 · 4.1/5\n\n2. **2000W Room Heater with Adjustable Thermostat** — Amazon Brand - Solimo\n   ₹1,199 · 4.0/5\n\n3. **Candes Gloster Silent Blower Fan Room Heater 2000W** — Candes\n   ₹1,069 · 3.9/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 675,
+   "seconds": 0.48
+  },
+  {
+   "id": "q036",
+   "query": "electric kettle under 1000",
+   "history": [],
+   "tags": [
+    "price"
+   ],
+   "shown": [
+    "B078V8R9BS",
+    "B07QDSN9V6",
+    "B07F366Z51",
+    "B08C7TYHPB",
+    "B0B2DZ5S6R"
+   ],
+   "shown_names": [
+    "Butterfly EKN 1.5-Litre Electric Kettle (Silver with Black)",
+    "INALSA Electric Kettle 1.5 Litre with Stainless Steel Body - Absa|Auto Shut Off ",
+    "Singer Aroma 1.8 Liter Electric Kettle High Grade Stainless Steel with Cool and ",
+    "iBELL Castor CTEK15L Premium 1.5 Litre Stainless Steel Electric Kettle,1500W Aut",
+    "Amazon Basics 1500 W Electric Kettle (Stainless Steel Body, 1.5 L)"
+   ],
+   "preferences": {
+    "product": "electric kettle",
+    "features": [],
+    "brand": null,
+    "max_price": 1000,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Butterfly EKN 1.5L Electric Kettle** — Butterfly\n   ₹749 · 4.2/5\n\n2. **INALSA 1.5L Electric Kettle with Auto Shut Off** — INALSA\n   ₹699 · 4.1/5\n\n3. **Singer 1.8 L Electric Kettle with Cool‑Touch Body** — Singer\n   ₹949 · 4.1/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 679,
+   "seconds": 0.71
+  },
+  {
+   "id": "q038",
+   "query": "smartwatch under 2000",
+   "history": [],
+   "tags": [
+    "price"
+   ],
+   "shown": [
+    "B0BMVWKZ8G",
+    "B0B3RRWSF6",
+    "B0B3RSDSZ3",
+    "B0B3RS9DNF",
+    "B09YV463SW"
+   ],
+   "shown_names": [
+    "Newly Launched Boult Dive+ with 1.85\" HD Display, Bluetooth Calling Smartwatch, ",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24",
+    "Fire-Boltt Ninja 3 Smartwatch Full Touch 1.69 \" & 60 Sports Modes with IP68, Sp0"
+   ],
+   "preferences": {
+    "product": "smartwatch",
+    "features": [],
+    "brand": null,
+    "max_price": 2000,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Boult Dive+ 1.85\" HD Smartwatch** — Boult\n   ₹1,999 · 4.3/5\n\n2. **Fire-Boltt Phoenix Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹1,998 · 4.3/5\n\n3. **Fire-Boltt Phoenix Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹1,999 · 4.3/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 718,
+   "seconds": 0.49
+  },
+  {
+   "id": "q040",
+   "query": "geyser under 5000",
+   "history": [],
+   "tags": [
+    "price"
+   ],
+   "shown": [
+    "B078JBK4GX",
+    "B078JF6X9B",
+    "B097R4D42G",
+    "B097MKZHNV",
+    "B097R2V1W8"
+   ],
+   "shown_names": [
+    "Havells Instanio 1-Litre 3KW Instant Water Heater (Geyser), White Blue",
+    "Havells Instanio 3-Litre 4.5KW Instant Water Heater (Geyser), White Blue",
+    "Bajaj New Shakti Neo 10L Vertical Storage Water Heater (Geyser 10 Litres) 4 Star",
+    "Racold Pronto Pro 3Litres 3KW Vertical Instant Water Heater (Geyser)",
+    "Bajaj Splendora 3 Litre 3KW IWH Instant Water Heater (Geyser), White"
+   ],
+   "preferences": {
+    "product": "water heater",
+    "features": [],
+    "brand": null,
+    "max_price": 5000,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Havells Instanio 1L 3KW Instant Water Heater** — Havells\n   ₹2,599 · 4.4/5\n\n2. **Havells Instanio 3L 4.5KW Instant Water Heater** — Havells\n   ₹3,645 · 4.2/5\n\n3. **Bajaj New Shakti Neo 10L Vertical Storage Wat",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 695,
+   "seconds": 0.9
+  },
+  {
+   "id": "q042",
+   "query": "55 inch 4k tv",
+   "history": [],
+   "tags": [
+    "attribute"
+   ],
+   "shown": [
+    "B08XXF5V6G",
+    "B092BL5DCX",
+    "B0B15GSPQW",
+    "B0B3XXSB1K",
+    "B09RWQ7YR6"
+   ],
+   "shown_names": [
+    "Kodak 139 cm (55 inches) 4K Ultra HD Smart LED TV 55CA0909 (Black)",
+    "Samsung 138 cm (55 inches) Crystal 4K Series Ultra HD Smart LED TV UA55AUE60AKLX",
+    "Samsung 138 cm (55 inches) Crystal 4K Neo Series Ultra HD Smart LED TV UA55AUE65",
+    "LG 139 cm (55 inches) 4K Ultra HD Smart LED TV 55UQ7500PSF (Ceramic Black)",
+    "MI 138.8 cm (55 inches) 5X Series 4K Ultra HD LED Smart Android TV L55M6-ES (Gre"
+   ],
+   "preferences": {
+    "product": "tv",
+    "features": [
+     "55 inch",
+     "4k"
+    ],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Kodak 55 Inch 4K Ultra HD Smart LED TV** — Kodak\n   ₹29,999 · 4.4/5\n\n2. **Samsung 55\" Crystal 4K Smart LED TV** — Samsung\n   ₹45,999 · 4.3/5\n\n3. **Samsung 55\" Crystal 4K Neo Smart LED TV** — Samsung\n   ₹47,990 · 4.3/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 719,
+   "seconds": 0.85
+  },
+  {
+   "id": "q044",
+   "query": "type c to type c cable",
+   "history": [],
+   "tags": [
+    "attribute"
+   ],
+   "shown": [
+    "B09QGZFBPM",
+    "B08V9C4B1J",
+    "B09C6HWG18",
+    "B0B86CDHL1",
+    "B084MZYBTV"
+   ],
+   "shown_names": [
+    "Wayona Type C To Type C Long Fast Charging Cable Type C Charger Cord Compatible ",
+    "Synqe Type C to Type C Short Fast Charging 60W Cable Compatible with Samsung Gal",
+    "Duracell Type C To Type C 5A (100W) Braided Sync & Fast Charging Cable, 3.9 Feet",
+    "oraimo 65W Type C to C Fast Charging Cable USB C to USB C Cable High Speed Synci",
+    "Belkin USB C to USB-C Fast Charging Type C Cable, 60W PD, 3.3 feet (1 meter) for"
+   ],
+   "preferences": {
+    "product": "cable",
+    "features": [
+     "type c to type c"
+    ],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Wayona 65W Type-C to Type-C Fast Charging Cable 2m** — Wayona\n   ₹399 · 4.3/5\n\n2. **Synqe Type C to Type C Fast Charging 60W Cable** — Synqe\n   ₹349 · 4.3/5\n\n3. **Duracell Type C to C Fast Charging Cable** — Duracell\n   ₹970 · 4.2/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 797,
+   "seconds": 1.08
+  },
+  {
+   "id": "q046",
+   "query": "braided type-c cable",
+   "history": [],
+   "tags": [
+    "attribute"
+   ],
+   "shown": [
+    "B083342NKJ",
+    "B07CWNJLPC",
+    "B07CWDX49D",
+    "B0B86CDHL1",
+    "B08NW8GHCJ"
+   ],
+   "shown_names": [
+    "MI Braided USB Type-C Cable for Charging Adapter (Red)",
+    "AmazonBasics Double Braided Nylon USB Type-C to Type-C 2.0 Cable Smartphone (Dar",
+    "AmazonBasics Double Braided Nylon USB Type-C to Type-C 2.0 Cable, Charging Adapt",
+    "oraimo 65W Type C to C Fast Charging Cable USB C to USB C Cable High Speed Synci",
+    "Synqe USB C to USB C 60W Nylon Braided Fast Charging Type C to Type C Cable Comp"
+   ],
+   "preferences": {
+    "product": "cable",
+    "features": [
+     "braided",
+     "type-c"
+    ],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **MI Braided USB‑C Charging Cable** — Xiaomi\n   ₹349 · 4.4/5\n\n2. **AmazonBasics Double Braided Nylon USB Type-C to Type-C Cable 3ft** — Amazon\n   ₹499 · 4.3/5\n\n3. **AmazonBasics Double Braided Nylon USB Type-C to Type-C Cable 6ft** — Amazon\n   ₹649 · 4.3/",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 736,
+   "seconds": 0.75
+  },
+  {
+   "id": "q048",
+   "query": "earbuds with noise cancellation",
+   "history": [],
+   "tags": [
+    "attribute"
+   ],
+   "shown": [
+    "B0B31FR4Y2",
+    "B09NR6G588"
+   ],
+   "shown_names": [
+    "Boult Audio Omega with 30dB ANC+ ENC, 32H Playtime, 45ms Latency Gaming Mode, Qu",
+    "Boult Audio ZCharge Bluetooth Wireless in Ear Earphones with Mic, 40H Playtime a"
+   ],
+   "preferences": {
+    "product": "headphones",
+    "features": [
+     "noise cancellation"
+    ],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Boult Audio Omega ANC True Wireless Earbuds** — Boult Audio\n   ₹1,999 · 3.7/5\n\n2. **Boult Audio ZCharge Bluetooth TWS Earbuds** — Boult Audio\n   ₹1,199 · 3.8/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 0.5,
+    "empty": false,
+    "shown": 2
+   },
+   "llm_calls": 1,
+   "tokens": 671,
+   "seconds": 0.76
+  },
+  {
+   "id": "q050",
+   "query": "oil filled radiator heater",
+   "history": [],
+   "tags": [
+    "attribute"
+   ],
+   "shown": [
+    "B09M3F4HGB",
+    "B01N1XVVLC",
+    "B01M5F614J",
+    "B08QHLXWV3"
+   ],
+   "shown_names": [
+    "Borosil Volcano 13 Fin Oil Filled Radiator Room Heater, 2900 W, Black",
+    "Bajaj OFR Room Heater, 13 Fin 2900 Watts Oil Filled Room Heater with 400W PTC Ce",
+    "Morphy Richards OFR Room Heater, 09 Fin 2000 Watts Oil Filled Room Heater , ISI ",
+    "Kenstar 2400 Watts 9 Fins Oil Filled Radiator with PTC Fan Heater (BLACK GOLD)"
+   ],
+   "preferences": {
+    "product": "room heater",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Borosil Volcano 13 Fin Oil Filled Radiator Heater** — Borosil\n   ₹9,495 · 4.2/5\n\n2. **Bajaj OFR Oil Filled Room Heater with Fan** — Bajaj\n   ₹9,590 · 4.1/5\n\n3. **Morphy Richards OFR Oil Filled Room Heater** — ",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 4
+   },
+   "llm_calls": 1,
+   "tokens": 655,
+   "seconds": 0.7
+  },
+  {
+   "id": "q052",
+   "query": "1.5 litre electric kettle",
+   "history": [],
+   "tags": [
+    "attribute"
+   ],
+   "shown": [
+    "B0B3TBY2YX",
+    "B07QDSN9V6",
+    "B08C7TYHPB",
+    "B07T4D9FNY",
+    "B07VNFP3C2"
+   ],
+   "shown_names": [
+    "AGARO Royal Double Layered Kettle, 1.5 Litres, Double Layered Cool Touch , Dry B",
+    "INALSA Electric Kettle 1.5 Litre with Stainless Steel Body - Absa|Auto Shut Off ",
+    "iBELL Castor CTEK15L Premium 1.5 Litre Stainless Steel Electric Kettle,1500W Aut",
+    "iBELL SEK15L Premium 1.5 Litre Stainless Steel Electric Kettle,1500W Auto Cut-Of",
+    "Prestige 1.5 Litre Kettle 1500-watts, Red"
+   ],
+   "preferences": {
+    "product": "electric kettle",
+    "features": [
+     "1.5 litre"
+    ],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **AGARO Royal Double Layered 1.5L Electric Kettle** — AGARO\n   ₹1,260 · 4.3/5\n\n2. **INALSA 1.5L Electric Kettle with Auto Shut Off** — INALSA\n   ₹699 · 4.1/5\n\n3. **iBELL 1.5L Stainless Steel Electric Kettle** — ",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 669,
+   "seconds": 0.77
+  },
+  {
+   "id": "q054",
+   "query": "wireless keyboard",
+   "history": [],
+   "tags": [
+    "attribute"
+   ],
+   "shown": [
+    "B0148NPH9I",
+    "B00MUTWLW4",
+    "B01N4EV2TL",
+    "B00CEQEGPI",
+    "B09T3H12GV"
+   ],
+   "shown_names": [
+    "Logitech K380 Wireless Multi-Device Keyboard for Windows, Apple iOS, Apple TV An",
+    "Logitech K480 Wireless Multi-Device Keyboard for Windows, macOS, iPadOS, Android",
+    "Logitech MK240 Nano Wireless USB Keyboard and Mouse Set, 12 Function Keys 2.4GHz",
+    "Logitech MK270r USB Wireless Keyboard and Mouse Set for Windows, 2.4 GHz Wireles",
+    "Dell USB Wireless Keyboard and Mouse Set- KM3322W, Anti-Fade & Spill-Resistant K"
+   ],
+   "preferences": {
+    "product": "keyboard",
+    "features": [
+     "wireless"
+    ],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Logitech K380 Multi-Device Bluetooth Keyboard** — Logitech\n   ₹2,640 · 4.5/5\n\n2. **Logitech K480 Wireless Multi-Device Keyboard** — Logitech\n   ₹2,595 · 4.4/5\n\n3. **Logitech MK240 Nano Wireless Keyboard and Mo",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 628,
+   "seconds": 0.79
+  },
+  {
+   "id": "q089",
+   "query": "only Bajaj",
+   "history": [
+    "mixer grinder"
+   ],
+   "tags": [
+    "followup",
+    "brand"
+   ],
+   "shown": [
+    "B0187F2IOK",
+    "B0073QGKAS",
+    "B00HVXS7WC",
+    "B01C8P29N0",
+    "B00F159RIK"
+   ],
+   "shown_names": [
+    "Bajaj HM-01 Powerful 250W Hand Mixer, Black",
+    "Bajaj ATX 4 750-Watt Pop-up Toaster (White)",
+    "Bajaj Rex 500W Mixer Grinder with Nutri-Pro Feature, 3 Jars, White",
+    "Bajaj DX-6 1000W Dry Iron with Advance Soleplate and Anti-bacterial German Coati",
+    "Bajaj DX-2 600W Dry Iron with Advance Soleplate and Anti-bacterial German Coatin"
+   ],
+   "preferences": {
+    "product": "mixer grinder",
+    "features": [],
+    "brand": "Bajaj",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Bajaj HM-01 Hand Mixer** — Bajaj\n   ₹1,499 · 4.4/5\n\n2. **Bajaj ATX 4 750W Pop-up Toaster** — Bajaj\n   ₹1,499 · 4.3/5\n\n3. **Bajaj Rex 500W Mixer Grinder with 3 Jars** — Bajaj\n   ₹1,999 · 4.2/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 0.333,
+    "precision3": 0.333,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 1,
+   "tokens": 669,
+   "seconds": 0.65
+  },
+  {
+   "id": "q091",
+   "query": "with calling",
+   "history": [
+    "smartwatch"
+   ],
+   "tags": [
+    "followup",
+    "attribute"
+   ],
+   "shown": [
+    "B0B3N7LR6K",
+    "B0B3NDPCS9",
+    "B0B3RRWSF6",
+    "B0B3RSDSZ3",
+    "B0B3RS9DNF"
+   ],
+   "shown_names": [
+    "Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwatch with 368*448 Pixe",
+    "Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwatch with 368*448 Pixe",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24",
+    "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",120+ Sports Modes, 24"
+   ],
+   "preferences": {
+    "product": "smartwatch",
+    "features": [
+     "calling"
+    ],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Fire-Boltt Visionary Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹3,999 · 4.3/5\n\n2. **Fire-Boltt Visionary AMOLED Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹3,999 · 4.3/5\n\n3. **Fire-Boltt Phoenix Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹1",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 2,
+   "tokens": 1363,
+   "seconds": 0.73
+  },
+  {
+   "id": "q093",
+   "query": "under 2000",
+   "history": [
+    "bluetooth speaker"
+   ],
+   "tags": [
+    "followup",
+    "price"
+   ],
+   "shown": [
+    "B07B88KQZ8",
+    "B07NC12T2R",
+    "B08SMJT55F",
+    "B07W7Z6DVL",
+    "B0B12K5BPM"
+   ],
+   "shown_names": [
+    "JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL Signature Sound, Vib",
+    "boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playback, IPX5 and Integr",
+    "boAt Stone 250 Portable Wireless Speaker with 5W RMS Immersive Audio, RGB LEDs, ",
+    "Infinity (JBL Fuze 100, Wireless Portable Bluetooth Speaker with Mic, Deep Bass,",
+    "ZEBRONICS Zeb-Astra 20 Wireless BT v5.0 Portable Speaker with 10W RMS Output, TW"
+   ],
+   "preferences": {
+    "product": "bluetooth speaker",
+    "features": [],
+    "brand": null,
+    "max_price": 2000,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **JBL Go 2 Portable Bluetooth Speaker** — JBL\n   ₹1,999 · 4.3/5\n\n2. **boAt Stone 650 Bluetooth Speaker** — boAt\n   ₹1,799 · 4.2/5\n\n3. **boAt Stone 250 Portable Wireless Bluetooth Speaker** — boAt\n   ₹1,199 · 4.2",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 2,
+   "tokens": 1285,
+   "seconds": 0.56
+  },
+  {
+   "id": "q095",
+   "query": "and a keyboard",
+   "history": [
+    "wireless mouse"
+   ],
+   "tags": [
+    "followup"
+   ],
+   "shown": [
+    "B0148NPH9I",
+    "B09BVCVTBC",
+    "B00MUTWLW4",
+    "B00ZYLMQH0",
+    "B08498H13H"
+   ],
+   "shown_names": [
+    "Logitech K380 Wireless Multi-Device Keyboard for Windows, Apple iOS, Apple TV An",
+    "Redragon K617 Fizz 60% Wired RGB Gaming Keyboard, 61 Keys Compact Mechanical Key",
+    "Logitech K480 Wireless Multi-Device Keyboard for Windows, macOS, iPadOS, Android",
+    "Dell KB216 Wired Multimedia USB Keyboard with Super Quite Plunger Keys with Spil",
+    "HP GK320 Wired Full Size RGB Backlight Mechanical Gaming Keyboard, 4 LED Indicat"
+   ],
+   "preferences": {
+    "product": "keyboard",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "These don't match everything you asked for, but they're the closest options we have:\n\n1. **Logitech K380 Multi-Device Bluetooth Keyboard** — Logitech\n   ₹2,640 · 4.5/5\n\n2. **K617 Fizz 60% Wired RGB Mechanical Keyboard** — Redragon\n   ₹2,649 · 4.5/5\n\n3. **Logitech K480 Wireless Multi-Device Keyboard*",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 2,
+   "tokens": 1266,
+   "seconds": 0.77
+  },
+  {
+   "id": "q097",
+   "query": "instant one, 3 litre",
+   "history": [
+    "geyser"
+   ],
+   "tags": [
+    "followup",
+    "attribute"
+   ],
+   "shown": [
+    "B078JDNZJ8",
+    "B0B9RN5X8B",
+    "B097R2V1W8",
+    "B09DL9978Y",
+    "B07WKB69RS"
+   ],
+   "shown_names": [
+    "Havells Instanio 3-Litre Instant Geyser (White/Blue)",
+    "V-Guard Zio Instant Water Geyser | 3 Litre | 3000 W Heating | White-Blue | | 2 Y",
+    "Bajaj Splendora 3 Litre 3KW IWH Instant Water Heater (Geyser), White",
+    "Hindware Atlantic Compacto 3 Litre Instant water heater with Stainless Steel Tan",
+    "Lifelong LLWH106 Flash 3 Litres Instant Water Heater for Home Use, 8 Bar Pressur"
+   ],
+   "preferences": {
+    "product": "geyser",
+    "features": [
+     "instant",
+     "3 litre"
+    ],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Havells Instanio 3L Instant Water Heater** — Havells\n   ₹3,600 · 4.3/5\n\n2. **V-Guard Zio Instant Water Geyser 3L** — V-Guard\n   ₹2,699 · 4.2/5\n\n3. **Bajaj Splendora 3L Instant Water Heater** — Bajaj\n   ₹2,599 · 4.1/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 0.5,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 2,
+   "tokens": 1350,
+   "seconds": 0.94
+  },
+  {
+   "id": "q099",
+   "query": "braided ones",
+   "history": [
+    "type c cable"
+   ],
+   "tags": [
+    "followup",
+    "attribute"
+   ],
+   "shown": [
+    "B08WKFSN84",
+    "B08NW8GHCJ",
+    "B09C6HWG18",
+    "B082LSVT4B",
+    "B07CWNJLPC"
+   ],
+   "shown_names": [
+    "Wayona Type C To Type C 65W/3.25A Nylon Braided Fast Charging Cable Compatible F",
+    "Synqe USB C to USB C 60W Nylon Braided Fast Charging Type C to Type C Cable Comp",
+    "Duracell Type C To Type C 5A (100W) Braided Sync & Fast Charging Cable, 3.9 Feet",
+    "Ambrane Unbreakable 60W / 3A Fast Charging 1.5m Braided Type C to Type C Cable f",
+    "AmazonBasics Double Braided Nylon USB Type-C to Type-C 2.0 Cable Smartphone (Dar"
+   ],
+   "preferences": {
+    "product": "cable",
+    "features": [
+     "type c",
+     "braided"
+    ],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Wayona Type C 65W Nylon Braided Fast Charging Cable** — Wayona\n   ₹379 · 4.3/5\n\n2. **Synqe USB‑C to USB‑C 60W Nylon Braided Fast Charging Cable** — Synqe\n   ₹389 · 4.3/5\n\n3. **Duracell Type C to C Fast Charging Cable** — Duracell\n   ₹970 · 4.2/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 2,
+   "tokens": 1411,
+   "seconds": 0.92
+  }
+ ],
+ "finished": "2026-11-23T13:00:31+00:00",
+ "summary": {
+  "queries": 33,
+  "scored": 33,
+  "errors": 0,
+  "recall@5": 1.0,
+  "precision@3": 0.944,
+  "mrr": 0.965,
+  "empty_rate": 0.0,
+  "correct_refusal_rate": null,
+  "llm_calls_per_query": 1.152,
+  "tokens_per_query": 771.364,
+  "p50_seconds": 0.7,
+  "p95_seconds": 1.08
+ },
+ "by_tag": {
+  "attribute": {
+   "scored": 10,
+   "recall@5": 1.0,
+   "precision@3": 0.95,
+   "mrr": 0.95,
+   "empty_rate": 0.0
+  },
+  "brand": {
+   "scored": 6,
+   "recall@5": 1.0,
+   "precision@3": 0.833,
+   "mrr": 0.889,
+   "empty_rate": 0.0
+  },
+  "followup": {
+   "scored": 6,
+   "recall@5": 1.0,
+   "precision@3": 0.889,
+   "mrr": 0.805,
+   "empty_rate": 0.0
+  },
+  "plain": {
+   "scored": 10,
+   "recall@5": 1.0,
+   "precision@3": 0.967,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "price": {
+   "scored": 6,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  }
+ }
+}

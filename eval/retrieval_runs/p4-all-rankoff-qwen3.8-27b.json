@@ -1,0 +1,577 @@
+{
+ "label": "p4-all-rankoff-qwen3.8-27b",
+ "model": "qwen/qwen3.8-27b",
+ "mode": "replay",
+ "database": "multi_agent_baseline",
+ "cassette": "eval\\cassettes\\retrieval_qwen-qwen3-8-27b.json",
+ "started": "2026-11-23T14:35:55+00:00",
+ "queries": [
+  {
+   "id": "q075",
+   "query": "accha wala bluetooth speaker",
+   "history": [],
+   "tags": [
+    "hinglish",
+    "attribute"
+   ],
+   "shown": [
+    "B07NC12T2R",
+    "B07B88KQZ8",
+    "B07W6VWZ8C",
+    "B08JMC1988",
+    "B08SMJT55F"
+   ],
+   "shown_names": [
+    "boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playback, IPX5 and Integr",
+    "JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL Signature Sound, Vib",
+    "Infinity (JBL Fuze Pint, Wireless Ultra Portable Mini Speaker with Mic, Deep Bas",
+    "boAt Stone 180 5W Bluetooth Speaker with Upto 10 Hours Playback, 1.75\" Driver, I",
+    "boAt Stone 250 Portable Wireless Speaker with 5W RMS Immersive Audio, RGB LEDs, "
+   ],
+   "preferences": {
+    "product": "bluetooth speaker",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": 4.0
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **boAt Stone 650 Bluetooth Speaker** — boAt\n   ₹1,799 · 4.2/5\n\n2. **JBL Go 2 Portable Bluetooth Speaker** — JBL\n   ₹1,999 · 4.3/5\n\n3. **Fuze Pint Wireless Mini Bluetooth Speaker with Mic** — Infinity (JBL)\n   ₹899 · 4.1/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 1.55
+  },
+  {
+   "id": "q076",
+   "query": "bose speakers",
+   "history": [],
+   "tags": [
+    "brand_missing"
+   ],
+   "shown": [
+    "B07NC12T2R",
+    "B07W6VWZ8C",
+    "B07B88KQZ8",
+    "B08SBH499M",
+    "B08SMJT55F"
+   ],
+   "shown_names": [
+    "boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playback, IPX5 and Integr",
+    "Infinity (JBL Fuze Pint, Wireless Ultra Portable Mini Speaker with Mic, Deep Bas",
+    "JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL Signature Sound, Vib",
+    "ZEBRONICS Zeb-Warrior II 10 watts 2.0 Multimedia Speaker with RGB Lights, USB Po",
+    "boAt Stone 250 Portable Wireless Speaker with 5W RMS Immersive Audio, RGB LEDs, "
+   ],
+   "preferences": {
+    "product": "speaker",
+    "features": [],
+    "brand": "Bose",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [
+    "brand"
+   ],
+   "reply": "We don't carry Bose speaker, so here are the closest options from other brands:\n\n1. **boAt Stone 650 Bluetooth Speaker** — boAt\n   ₹1,799 · 4.2/5\n\n2. **Fuze Pint Wireless Mini Bluetooth Speaker with Mic** — Infinity (JBL)\n   ₹899 · 4.1/5\n\n3. **JBL Go 2 Portable Bluetooth Speaker** — JBL\n   ₹1,999 · ",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.1
+  },
+  {
+   "id": "q077",
+   "query": "apple airpods",
+   "history": [],
+   "tags": [
+    "brand_missing"
+   ],
+   "shown": [
+    "B09N3ZNHTY",
+    "B0B5GJRTHB",
+    "B07XJWTYM2",
+    "B08JQN8DGZ",
+    "B09MDCZJXS"
+   ],
+   "shown_names": [
+    "boAt Airdopes 141 Bluetooth Truly Wireless in Ear Earbuds with mic, 42H Playtime",
+    "Wecool Moonwalk M1 ENC True Wireless in Ear Earbuds with Mic, Titanium Drivers f",
+    "realme Buds Wireless in Ear Bluetooth Earphones with mic, 11.2mm Bass Boost Driv",
+    "boAt Airdopes 121v2 in-Ear True Wireless Earbuds with Upto 14 Hours Playback, 8M",
+    "Wings Phantom Pro Earphones Gaming Earbuds with LED Battery Indicator, 50ms Low "
+   ],
+   "preferences": {
+    "product": "tws earbuds",
+    "features": [
+     "airpods"
+    ],
+    "brand": "Apple",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [
+    "brand",
+    "attributes",
+    "keywords"
+   ],
+   "reply": "We don't carry Apple tws earbuds, so here are the closest options from other brands:\n\n1. **boAt Airdopes 141 Bluetooth TWS Earbuds** — boAt\n   ₹1,499 · 3.9/5\n\n2. **Wecool Moonwalk M1 True Wireless Earbuds** — WeCool\n   ₹889 · 4.2/5\n\n3. **realme Buds Wireless TWS Earbuds** — realme\n   ₹1,679 · 4.1/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 0.667,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.2
+  },
+  {
+   "id": "q078",
+   "query": "dyson vacuum cleaner",
+   "history": [],
+   "tags": [
+    "brand_missing"
+   ],
+   "shown": [
+    "B0B19VJXQZ",
+    "B07H3N8RJH",
+    "B072NCN9M4",
+    "B072J83V9W",
+    "B09FZ89DK6"
+   ],
+   "shown_names": [
+    "ECOVACS DEEBOT N8 2-in-1 Robotic Vacuum Cleaner, 2022 New Launch, Most Powerful ",
+    "AmazonBasics Cylinder Bagless Vacuum Cleaner with Power Suction, Low Sound, High",
+    "AMERICAN MICRONIC- Imported Wet & Dry Vacuum Cleaner, 21 Litre Stainless Steel w",
+    "Philips PowerPro FC9352/01 Compact Bagless Vacuum Cleaner (Blue)",
+    "Eureka Forbes Supervac 1600 Watts Powerful Suction,bagless Vacuum Cleaner with c"
+   ],
+   "preferences": {
+    "product": "vacuum cleaner",
+    "features": [],
+    "brand": "Dyson",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [
+    "brand"
+   ],
+   "reply": "We don't carry Dyson vacuum cleaner, so here are the closest options from other brands:\n\n1. **ECOVACS DEEBOT N8 2-in-1 Robotic Vacuum Cleaner** — ECOVACS\n   ₹27,900 · 4.4/5\n\n2. **AmazonBasics Bagless Vacuum Cleaner** — Amazon\n   ₹3,799 · 4.2/5\n\n3. **American Micronic 21L Wet & Dry Vacuum Cleaner** —",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 0.667,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.14
+  },
+  {
+   "id": "q079",
+   "query": "garmin smartwatch",
+   "history": [],
+   "tags": [
+    "brand_missing"
+   ],
+   "shown": [
+    "B0B3N7LR6K",
+    "B0B3NDPCS9",
+    "B09YV3K34W",
+    "B09YV4MW2T",
+    "B09TBCVJS3"
+   ],
+   "shown_names": [
+    "Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwatch with 368*448 Pixe",
+    "Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwatch with 368*448 Pixe",
+    "Fire-Boltt India's No 1 Smartwatch Brand Talk 2 Bluetooth Calling Smartwatch wit",
+    "Fire-Boltt India's No 1 Smartwatch Brand Talk 2 Bluetooth Calling Smartwatch wit",
+    "Amazfit GTS2 Mini (New Version) Smart Watch with Always-on AMOLED Display, Alexa"
+   ],
+   "preferences": {
+    "product": "smartwatch",
+    "features": [],
+    "brand": "Garmin",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [
+    "brand"
+   ],
+   "reply": "We don't carry Garmin smartwatch, so here are the closest options from other brands:\n\n1. **Fire-Boltt Visionary Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹3,999 · 4.3/5\n\n2. **Fire-Boltt Visionary AMOLED Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹3,999 · 4.3/5\n\n3. **Fire-Boltt Talk 2 Blueto",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.18
+  },
+  {
+   "id": "q080",
+   "query": "breville electric kettle",
+   "history": [],
+   "tags": [
+    "brand_missing"
+   ],
+   "shown": [
+    "B09VGS66FV",
+    "B00TI8E7BI",
+    "B078V8R9BS",
+    "B097RN7BBK",
+    "B07F366Z51"
+   ],
+   "shown_names": [
+    "Tesora - Inspired by you Large Premium Electric Kettle 1.8L, Stainless Steel Inn",
+    "Philips HD9306/06 1.5-Litre Electric Kettle (Multicolor)",
+    "Butterfly EKN 1.5-Litre Electric Kettle (Silver with Black)",
+    "Kitchen Kit Electric Kettle, 1.8L Stainless Steel Tea Kettle, Fast Boil Water Wa",
+    "Singer Aroma 1.8 Liter Electric Kettle High Grade Stainless Steel with Cool and "
+   ],
+   "preferences": {
+    "product": "electric kettle",
+    "features": [],
+    "brand": "breville",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [
+    "brand"
+   ],
+   "reply": "We don't carry breville electric kettle, so here are the closest options from other brands:\n\n1. **Tesora 1.8L Stainless Steel Electric Kettle** — Tesora\n   ₹1,349 · 4.4/5\n\n2. **Philips 1.5L Electric Kettle** — Philips\n   ₹2,695 · 4.4/5\n\n3. **Butterfly EKN 1.5L Electric Kettle** — Butterfly\n   ₹749 ·",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.14
+  },
+  {
+   "id": "q081",
+   "query": "iphone 15",
+   "history": [],
+   "tags": [
+    "out_of_scope"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "product": "iphone",
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Sorry, we don't carry iphone. Would you like to see our phone holder range instead?",
+   "score": {
+    "kind": "none",
+    "correct_refusal": true,
+    "shown": 0
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.01
+  },
+  {
+   "id": "q082",
+   "query": "gaming laptop",
+   "history": [],
+   "tags": [
+    "out_of_scope"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "product": "laptop",
+    "features": [
+     "gaming"
+    ],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Sorry, we don't carry laptop. Would you like to see our laptop bag range instead?",
+   "score": {
+    "kind": "none",
+    "correct_refusal": true,
+    "shown": 0
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.01
+  },
+  {
+   "id": "q083",
+   "query": "samsung galaxy tablet",
+   "history": [],
+   "tags": [
+    "out_of_scope"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "product": "tablet",
+    "features": [
+     "galaxy"
+    ],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Sorry, we don't carry tablet. Would you like to see our stylus range instead?",
+   "score": {
+    "kind": "none",
+    "correct_refusal": true,
+    "shown": 0
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.01
+  },
+  {
+   "id": "q084",
+   "query": "washing machine",
+   "history": [],
+   "tags": [
+    "out_of_scope"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "product": null,
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Sorry, we don't carry washing machine. Here's what we do carry:\n\n• Home & Kitchen (441 products) — cooking appliance, blender, room heater\n• Electronics (402 products) — tv, headphones, smartwatch\n• Computers & Accessories (391 products) — cable, mouse, storage\n• Office Products (36 products) — stat",
+   "score": {
+    "kind": "none",
+    "correct_refusal": true,
+    "shown": 0
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.04
+  },
+  {
+   "id": "q085",
+   "query": "running shoes",
+   "history": [],
+   "tags": [
+    "out_of_scope"
+   ],
+   "shown": [],
+   "shown_names": [],
+   "preferences": {
+    "product": null,
+    "features": [],
+    "brand": null,
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Sorry, we don't carry running shoes. Here's what we do carry:\n\n• Home & Kitchen (441 products) — cooking appliance, blender, room heater\n• Electronics (402 products) — tv, headphones, smartwatch\n• Computers & Accessories (391 products) — cable, mouse, storage\n• Office Products (36 products) — statio",
+   "score": {
+    "kind": "none",
+    "correct_refusal": true,
+    "shown": 0
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.04
+  },
+  {
+   "id": "q086",
+   "query": "what about Logitech",
+   "history": [
+    "wireless mouse under 1000"
+   ],
+   "tags": [
+    "followup",
+    "brand"
+   ],
+   "shown": [
+    "B004IO5BMQ",
+    "B01J0XWYKQ",
+    "B01M72LILF",
+    "B07J2NGB69",
+    "B099SD8PRP"
+   ],
+   "shown_names": [
+    "Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, 12 Month Life Battery, ",
+    "Logitech B170 Wireless Mouse, 2.4 GHz with USB Nano Receiver, Optical Tracking, ",
+    "Logitech M221 Wireless Mouse, Silent Buttons, 2.4 GHz with USB Mini Receiver, 10",
+    "Lenovo 400 Wireless Mouse, 1200DPI Optical Sensor, 2.4GHz Wireless Nano USB, 3-B",
+    "Lenovo 130 Wireless Compact Mouse, 1K DPI Optical sensor, 2.4GHz Wireless NanoUS"
+   ],
+   "preferences": {
+    "product": "wireless mouse",
+    "features": [
+     "wireless"
+    ],
+    "brand": null,
+    "max_price": 1000,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Logitech M235 Wireless Mouse** — Logitech\n   ₹699 · 4.5/5\n\n2. **Logitech B170 Wireless Optical Mouse** — Logitech\n   ₹599 · 4.4/5\n\n3. **Logitech M221 Wireless Mouse** — Logitech\n   ₹799 · 4.4/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.11
+  },
+  {
+   "id": "q087",
+   "query": "Samsung",
+   "history": [
+    "show me some TVs"
+   ],
+   "tags": [
+    "followup",
+    "brand"
+   ],
+   "shown": [
+    "B092BJMT8Q",
+    "B09F6S8BT6",
+    "B08PV1X771",
+    "B0B15CPR37",
+    "B092BL5DCX"
+   ],
+   "shown_names": [
+    "Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart LED TV UA43AUE60AKLX",
+    "Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED Smart TV UA32T4340B",
+    "Samsung 80 cm (32 inches) Wondertainment Series HD Ready LED Smart TV UA32TE40AA",
+    "Samsung 108 cm (43 inches) Crystal 4K Neo Series Ultra HD Smart LED TV UA43AUE65",
+    "Samsung 138 cm (55 inches) Crystal 4K Series Ultra HD Smart LED TV UA55AUE60AKLX"
+   ],
+   "preferences": {
+    "product": "tv",
+    "features": [],
+    "brand": "Samsung",
+    "max_price": null,
+    "min_price": null,
+    "min_rating": null
+   },
+   "relaxed": [],
+   "reply": "Here are my top recommendations for you:\n\n1. **Samsung 43\" Crystal 4K Smart LED TV** — Samsung\n   ₹30,990 · 4.3/5\n\n2. **Samsung 32\" Wondertainment HD Ready Smart LED TV** — Samsung\n   ₹13,490 · 4.3/5\n\n3. **Samsung 32\" Wondertainment Series HD Ready Smart TV** — Samsung\n   ₹15,490 · 4.3/5\n",
+   "score": {
+    "kind": "search",
+    "hit5": true,
+    "rr": 1.0,
+    "precision3": 1.0,
+    "empty": false,
+    "shown": 5
+   },
+   "llm_calls": 0,
+   "tokens": 0,
+   "seconds": 0.05
+  }
+ ],
+ "finished": "2026-11-23T14:35:57+00:00",
+ "summary": {
+  "queries": 13,
+  "scored": 13,
+  "errors": 0,
+  "recall@5": 1.0,
+  "precision@3": 0.917,
+  "mrr": 1.0,
+  "empty_rate": 0.0,
+  "correct_refusal_rate": 1.0,
+  "llm_calls_per_query": 0.0,
+  "tokens_per_query": 0.0,
+  "p50_seconds": 0.1,
+  "p95_seconds": 1.55
+ },
+ "by_tag": {
+  "attribute": {
+   "scored": 1,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "brand": {
+   "scored": 2,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "brand_missing": {
+   "scored": 5,
+   "recall@5": 1.0,
+   "precision@3": 0.867,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "followup": {
+   "scored": 2,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "hinglish": {
+   "scored": 1,
+   "recall@5": 1.0,
+   "precision@3": 1.0,
+   "mrr": 1.0,
+   "empty_rate": 0.0
+  },
+  "out_of_scope": {
+   "scored": 5,
+   "correct_refusal_rate": 1.0
+  }
+ }
+}

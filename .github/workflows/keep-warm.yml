@@ -1,0 +1,20 @@
+name: Keep the live demo awake
+
+# Render's free web service sleeps after 15 idle minutes; a judge's first visit would then wait
+# about a minute. Ping it every 10 minutes. Set the repository variable LIVE_URL (Settings ->
+# Secrets and variables -> Actions -> Variables), e.g. https://multi-agent-chatbot.onrender.com
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping /health
+        env:
+          LIVE_URL: ${{ vars.LIVE_URL }}
+        run: |
+          if [ -z "$LIVE_URL" ]; then echo "LIVE_URL is not set; nothing to ping."; exit 0; fi
+          curl -fsS --max-time 90 "$LIVE_URL/health" && echo " awake"
