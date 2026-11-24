@@ -65,6 +65,9 @@ def main() -> int:
         key, value = arg.split("=", 1)
         env[key] = value
         i += 1
+    if mode == "replay":
+        # Replay never calls Groq, but the client refuses to start without a key, and CI has no .env.
+        env["GROQ_API_KEY"] = "replay-no-calls"
     if db:
         from eval.run_baseline import DEFAULT_DB
 
