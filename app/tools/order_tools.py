@@ -42,7 +42,11 @@ def fetch_user_orders(user_id: str) -> List[dict]:
 
     db = SessionLocal()
     try:
-        orders = db.query(Order).filter(Order.user_id == user_id).order_by(Order.created_at.desc()).all()
+        # Newest first; id breaks ties, or Postgres returns tied rows in storage order, which
+        # shifts after updates (it changed the router prompt between CI runs on 2026-11-24).
+        orders = (
+            db.query(Order).filter(Order.user_id == user_id).order_by(Order.created_at.desc(), Order.id.desc()).all()
+        )
 
         return [
             {
