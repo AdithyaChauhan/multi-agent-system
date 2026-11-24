@@ -271,6 +271,8 @@ def install_cassette(mode: str, path: Path) -> None:
             last = str(getattr(messages[-1], "content", messages[-1]))[:300].replace("\n", " | ")
             last = last.encode("ascii", "backslashreplace").decode("ascii")  # "₹" crashes a Windows console
             print(f"  CASSETTE MISS ({kind}, {len(messages)} messages): {last}", flush=True)
+            if os.getenv("GITHUB_ACTIONS") == "true":  # an annotation: readable on the PR without the log
+                print(f"::error title=Cassette miss ({kind})::{last}", flush=True)
             raise
 
     llm._replay = counted
