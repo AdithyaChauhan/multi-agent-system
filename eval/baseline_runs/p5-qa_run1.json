@@ -3,7 +3,7 @@
  "run": 1,
  "model": "openai/gpt-oss-20b",
  "mode": "fill",
- "git_sha": "e864886",
+ "git_sha": "85e47c4",
  "started_at": "2026-11-23T16:11:30+00:00",
  "finished_at": "2026-11-23T16:12:09+00:00",
  "summary": {

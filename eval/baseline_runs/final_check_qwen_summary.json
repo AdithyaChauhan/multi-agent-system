@@ -2,7 +2,7 @@
  "label": "final_check_qwen",
  "model": "qwen/qwen3.8-27b",
  "runs": 1,
- "git_sha": "8c047c6",
+ "git_sha": "c5f0be9",
  "conversation_ids": [
   "p03",
   "p09",

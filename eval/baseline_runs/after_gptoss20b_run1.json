@@ -2,7 +2,7 @@
  "label": "after_gptoss20b",
  "run": 1,
  "model": "openai/gpt-oss-20b",
- "git_sha": "044b8bb",
+ "git_sha": "c638e44",
  "started_at": "2026-11-18T05:59:39+00:00",
  "finished_at": "2026-11-18T06:09:24+00:00",
  "summary": {

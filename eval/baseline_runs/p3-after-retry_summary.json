@@ -2,7 +2,7 @@
  "label": "p3-after-retry",
  "model": "openai/gpt-oss-20b",
  "runs": 1,
- "git_sha": "99f8b3f",
+ "git_sha": "7b57a02",
  "conversation_ids": [
   "p12",
   "p13",

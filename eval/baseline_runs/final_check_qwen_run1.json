@@ -2,7 +2,7 @@
  "label": "final_check_qwen",
  "run": 1,
  "model": "qwen/qwen3.8-27b",
- "git_sha": "8c047c6",
+ "git_sha": "c5f0be9",
  "started_at": "2026-11-18T06:28:45+00:00",
  "finished_at": "2026-11-18T06:33:02+00:00",
  "summary": {

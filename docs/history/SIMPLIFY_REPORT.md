@@ -1,6 +1,6 @@
 # Simplification report
 
-Branch `simplify-agents`: 15 commits on top of your work snapshot `c8a0fa6`. Nothing was pushed,
+Branch `simplify-agents`: 15 commits on top of your work snapshot `e0bdf3c`. Nothing was pushed,
 deployed or changed in LangSmith. Details behind every claim here are in `DIAGNOSIS.md` and
 `eval/baseline_runs/`.
 
@@ -14,7 +14,7 @@ The model ID was fine. The app failed for three reasons:
 
 ## 2. Before and after
 
-| | Before (`c8a0fa6`) | After (`HEAD`) |
+| | Before (`e0bdf3c`) | After (`HEAD`) |
 |---|---|---|
 | System-prompt text | 224 lines in 8 prompts, 3 of which actually ran from older, different hub copies; plus 957 lines of push scripts | **67 lines in 4 files** (`app/prompts/`), read from disk |
 | Steering rules that override the model | 38 | **10** (listed in §3/§4) |
@@ -25,16 +25,16 @@ The model ID was fine. The app failed for three reasons:
 | LLM calls per turn (baseline mean) | 2.34 | **2.02** |
 | Tokens per turn / per product turn | 2,764 / 3,606 | **1,989 / 2,787** (−28% / −23%) |
 | Seconds per turn (mean, unthrottled) | 2.19 | **1.50** |
-| Baseline pass rate | **37/51** conversations (73%), 73/90 turns | **43/51** (84%), 80/90 turns, at `7776fea`; see below for later fixes |
+| Baseline pass rate | **37/51** conversations (73%), 73/90 turns | **43/51** (84%), 80/90 turns, at `8b5c2b8`; see below for later fixes |
 | Unit tests | 253 pass, 2 fail, 84% coverage | 175 pass, 0 fail, **90%** coverage |
 
 **How the pass rate was measured. Please read this before quoting it.**
 
 - **One run each, not three.** Qwen's daily quota was used up by the Phase 1 checks (`run_20_tests.py`, `test_live.py`). A full run of the old app costs ~250K tokens, more than one model's daily allowance.
 - **Stand-in models.** Before and after both ran on the same key's other Groq models, which have separate quotas: p07–p25 on `openai/gpt-oss-120b`, the other 32 conversations on `openai/gpt-oss-20b`. Each conversation used the same model before and after, so the comparison is fair, but it is not a measurement of qwen.
-- **The old app was measured exactly as it ran**, hub prompts included, from a worktree at `b2e46e5`.
+- **The old app was measured exactly as it ran**, hub prompts included, from a worktree at `4207491`.
 
-**After that run**, I fixed the five regressions it showed (o03, o05, p09, p10, s07) with prompt wording and a clearer ranker question (`b576dfb`, `8c047c6`). I re-tested only the 8 conversations that still failed, plus an 8-conversation regression sample, on gpt-oss-20b:
+**After that run**, I fixed the five regressions it showed (o03, o05, p09, p10, s07) with prompt wording and a clearer ranker question (`44f4792`, `c5f0be9`). I re-tested only the 8 conversations that still failed, plus an 8-conversation regression sample, on gpt-oss-20b:
 - 6 of the 8 now pass;
 - p10 ("4k monitor") is flaky (the ranker answers it correctly in isolation);
 - s16 fails as it did before;
@@ -45,7 +45,7 @@ That is a subset check, not a new pass rate.
 **On qwen itself**, checks were limited by its quota:
 - the step-4 spot check showed the router misses described in §5;
 - `p03` and `p09` pass on the final code, before the quota ran out again;
-- in Docker, the full UI-style session (product search → order lookup → support complaint) worked on qwen at `7776fea`, and on the final image with `GROQ_MODEL=openai/gpt-oss-120b`.
+- in Docker, the full UI-style session (product search → order lookup → support complaint) worked on qwen at `8b5c2b8`, and on the final image with `GROQ_MODEL=openai/gpt-oss-120b`.
 
 ## 3. What was removed, and why it was safe
 

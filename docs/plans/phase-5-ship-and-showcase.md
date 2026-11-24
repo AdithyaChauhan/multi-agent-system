@@ -26,7 +26,7 @@ Meet the definition of done in `ROADMAP.md`. A judge opens the README, clicks a 
 - [x] **Final run 1** (51 conversations, gpt-oss-20b): 48/51. The Q&A set 6/6; adversarial 14/15 (a12 is routing, reported).
 - [ ] **Final runs 2 and 3:** live, `--mode live`, about 196K tokens each. One per key per day: `--env-file .env.eval` for one of them. The 2026-11-24 attempt was stopped and doesn't count (see Results): it found the `functions.` tool-name bug.
 - [ ] **Load test:** built (`eval/loadtest/`: `locustfile.py`, `run.sh`, `summarize.py`, `SMOKE=1` for a 0-token run). First run 2026-11-24 failed the latency target and found the SDK retry wait (fixed). Rerun after the fix when gpt-oss-20b quota allows.
-- [x] **The CI simulation passes** with the new cassettes (2026-11-23, `python:3.12-slim`): retrieval 0.979/0.933, baseline 48/51, adversarial 14/15 (a12 routing), Q&A 6/6, gate passed. It found the replay wrapper bug fixed in `1acbad4`.
+- [x] **The CI simulation passes** with the new cassettes (2026-11-23, `python:3.12-slim`): retrieval 0.979/0.933, baseline 48/51, adversarial 14/15 (a12 routing), Q&A 6/6, gate passed. It found the replay wrapper bug fixed in `96b74bf`.
 - [ ] `docs/CASE_STUDY.md`: drafted 2026-11-24; release numbers marked pending.
 - [ ] **Visual explainer:** built steps lose "Proposed", add the tool loop and hybrid search, measured numbers, republish to the same URL (see `docs/visual/README.md`).
 - [x] **Grafana panels:** a "Demo never breaks" row: turn latency p50/p95 (new `chat_turn_seconds`, which times `/chat/stream` to the reply), turns by outcome (new `chat_turns_total`), fallbacks, cache hit rate, limited turns. Prometheus also scrapes the load-test container.

@@ -5,9 +5,9 @@
  "database": "multi_agent_baseline",
  "parts": {
   "p2-before": "40 conversations, main key (stopped at the daily cap)",
-  "p2-before-rest": "11 conversations, .env.eval key, worktree at 07a0904"
+  "p2-before-rest": "11 conversations, .env.eval key, worktree at 6d019fe"
  },
- "code": "07a0904 (Phase 1 code + ported harness)",
+ "code": "6d019fe (Phase 1 code + ported harness)",
  "conversations_passed": 45,
  "conversations_total": 51,
  "turns_passed": 84,

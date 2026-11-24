@@ -2,7 +2,7 @@
  "label": "before_gptoss120b",
  "model": "openai/gpt-oss-120b",
  "runs": 1,
- "git_sha": "b2e46e5",
+ "git_sha": "4207491",
  "conversation_ids": [
   "p07",
   "p08",

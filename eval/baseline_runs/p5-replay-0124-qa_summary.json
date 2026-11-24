@@ -2,7 +2,7 @@
  "label": "p5-replay-0124-qa",
  "model": "openai/gpt-oss-20b",
  "runs": 1,
- "git_sha": "1acbad4",
+ "git_sha": "96b74bf",
  "conversation_ids": [
   "q01",
   "q02",

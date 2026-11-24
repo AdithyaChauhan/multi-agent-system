@@ -30,7 +30,7 @@ Newest first. `/handoff` adds an entry at the end of every session. Keep entries
 - **Decisions:** [0016](decisions/0016-product-qa-and-demo-shoppers.md).
 - **Open questions:** none for the user until go-live (Neon, Discord, Render accounts; permission to push).
 - **Next:** final runs 2 and 3, the load test, the case study, the visual explainer, Grafana, then go live together.
-- **Commits:** `e864886`, `0478da0` and the handoff on `phase-5-ship`.
+- **Commits:** `85e47c4`, `fc9986a` and the handoff on `phase-5-ship`.
 
 ## 2026-11-23 · Phase 4 · Demo never breaks: fallback, limits, safety floor, CI eval gate
 - **Done:**
@@ -85,7 +85,7 @@ Newest first. `/handoff` adds an entry at the end of every session. Keep entries
   - renamed-catalog precision;
   - a burst of Groq 500s during the baseline (Phase 4's fallback chain).
 - **Next:** new chat, `/resume`, plan Phase 4.
-- **Commits:** `3da0290` (gate), `99f8b3f` (roadmap reset), and this phase's code and eval commits on `phase-3-hybrid-search`.
+- **Commits:** `1284bf7` (gate), `7b57a02` (roadmap reset), and this phase's code and eval commits on `phase-3-hybrid-search`.
 
 ## 2026-11-23 · Phase 3 · Gate says go: renamed catalog drops recall@5 by 11.8 points
 - **Done:**
@@ -115,7 +115,7 @@ Newest first. `/handoff` adds an entry at the end of every session. Keep entries
 - **Decisions:** [0012](decisions/0012-phase-2-graph-contracts.md).
 - **Open questions:** the Phase 3 gate (renamed-catalog sample, about 70K tokens); the Phase 0 label review.
 - **Next:** new chat, `/resume`, plan Phase 3 starting with its gate.
-- **Commits:** `0e9a8e2` (Phase 1) through this handoff on `phase-2-architecture`.
+- **Commits:** `404a865` (Phase 1) through this handoff on `phase-2-architecture`.
 
 ## 2026-11-19 · Phase 1 · Typed catalog live; search targets met; phase closed
 - **Done:**
@@ -149,7 +149,7 @@ Newest first. `/handoff` adds an entry at the end of every session. Keep entries
 - **Decisions:** [0009](decisions/0009-langgraph-primitives.md), [0010](decisions/0010-prompt-budget.md).
 - **Open questions:** label review by the user; whether qwen's generic "What are you looking for?" replies are tool-call failures.
 - **Next:** in a **new chat**, `/resume`: run q088–q100, replay once, close Phase 0, then plan Phase 1.
-- **Commits:** `c9dd1ea` (re-plan), plus this handoff.
+- **Commits:** `6c65da3` (re-plan), plus this handoff.
 
 ## 2026-11-18 · Phase 0 · Measuring stick built; first numbers
 - **Done:**

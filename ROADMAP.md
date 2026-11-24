@@ -48,7 +48,7 @@ Statuses: Not started, In progress, Done, Dropped (say why in the plan). The ord
 ## Scorecard
 Judged on 2026-11-18; updated 2026-11-19 after Phase 1, 2026-11-21 after Phase 2 (`phase-2-architecture`) and 2026-11-23 after Phases 3 and 4 (hybrid search; renamed recall drop 0 points; adversarial 15/15; CI eval gate; fallback chain) for the measured rows. Change the Today column only with measured evidence.
 
-| Aspect | Before (`c8a0fa6`) | Today | Target | Moved by phase |
+| Aspect | Before (`e0bdf3c`) | Today | Target | Moved by phase |
 |---|---|---|---|---|
 | Architecture clarity | 4 | 8.5 | 9 | 1, 2 |
 | Product search correctness | 4 | 9 | 9 | 0, 1, 3 |

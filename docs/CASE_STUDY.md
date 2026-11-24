@@ -5,7 +5,7 @@ A chat assistant for an electronics store: it finds products, answers questions 
 > **Status:** release numbers still to come. The 3-run average, the load test, the live link and the alert timing are marked _pending_ and get filled in when Phase 5 closes.
 
 ## 1. Where it started
-Commit `c8a0fa6`, rated about 4.2/10. The full diagnosis is in [docs/history/DIAGNOSIS.md](history/DIAGNOSIS.md).
+Commit `e0bdf3c`, rated about 4.2/10. The full diagnosis is in [docs/history/DIAGNOSIS.md](history/DIAGNOSIS.md).
 
 - **It didn't start.** A startup "migration" sent SQL that Postgres rejects, so the app crash-looped after the README's own setup steps.
 - **It ran out of model quota.** A product turn sent about 3,650 tokens, mostly fixed prompt text. On Groq's free tier (200K tokens a day per model) every message failed with HTTP 500 after about 55 product turns, across all users.

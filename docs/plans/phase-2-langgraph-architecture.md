@@ -1,7 +1,7 @@
 # Phase 2: LangGraph-native architecture
 - **Status:** Done 2026-11-21 (plan approved 2026-11-20). Two size criteria are missed and recall is one query below v2; see the acceptance check in Results.
 - **Branch:** `phase-2-architecture`
-- **Depends on:** Phase 0 (replay makes the refactors cheap to verify) and Phase 1 (committed as `0e9a8e2`; this branch starts from it).
+- **Depends on:** Phase 0 (replay makes the refactors cheap to verify) and Phase 1 (committed as `404a865`; this branch starts from it).
 - **Decisions:** [0009](../decisions/0009-langgraph-primitives.md) (supersedes the storage part of 0007), [0010](../decisions/0010-prompt-budget.md)
 
 ## Goal
@@ -78,7 +78,7 @@ Each step is its own commit with tests.
 - **Streaming must not bypass guardrails.** Stream only step labels and the final reply, never raw model output.
 
 ## Results
-- **Before** (2026-11-20, code `07a0904` = Phase 1 + ported harness, gpt-oss-20b, 1 run, `multi_agent_baseline`): **45/51 conversations, 84/90 turns**, about 186K tokens (main key capped after 40 conversations; the other 11 ran on the `.env.eval` key from a worktree at the same commit). Recorded to `eval/cassettes/baseline_openai-gpt-oss-20b.json`; summary in `eval/baseline_runs/p2-before-combined_summary.json`.
+- **Before** (2026-11-20, code `6d019fe` = Phase 1 + ported harness, gpt-oss-20b, 1 run, `multi_agent_baseline`): **45/51 conversations, 84/90 turns**, about 186K tokens (main key capped after 40 conversations; the other 11 ran on the `.env.eval` key from a worktree at the same commit). Recorded to `eval/cassettes/baseline_openai-gpt-oss-20b.json`; summary in `eval/baseline_runs/p2-before-combined_summary.json`.
   - p03 "table": shows laptop tables (the YAML kind `table` under laptop stand) instead of "we don't carry furniture". A data fix.
   - p10 "4k monitor": the catalog has one Full HD monitor, so the app says it doesn't carry monitors.
   - p07 "lojitec mouse" and p22 "bajaj smartwatches": the model dropped the brand.

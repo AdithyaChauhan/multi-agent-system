@@ -1,8 +1,8 @@
 # Diagnosis: why the multi-agent chatbot is broken
 
-Branch `simplify-agents`, starting from `c8a0fa6` (the uncommitted work snapshot: OpenAI → Groq switch).
+Branch `simplify-agents`, starting from `e0bdf3c` (the uncommitted work snapshot: OpenAI → Groq switch).
 Everything below was checked on 2026-11-17 against the real model, the real database restore and the
-real code. Nothing was pushed, deployed or changed in LangSmith. `file:line` references are to `c8a0fa6`.
+real code. Nothing was pushed, deployed or changed in LangSmith. `file:line` references are to `e0bdf3c`.
 
 ## Summary
 

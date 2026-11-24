@@ -2,7 +2,7 @@
  "label": "p4-adversarial",
  "model": "openai/gpt-oss-20b",
  "runs": 1,
- "git_sha": "92b24ed",
+ "git_sha": "dcf6bad",
  "conversation_ids": [
   "a01",
   "a02",

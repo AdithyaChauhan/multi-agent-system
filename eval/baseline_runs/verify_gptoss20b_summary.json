@@ -2,7 +2,7 @@
  "label": "verify_gptoss20b",
  "model": "openai/gpt-oss-20b",
  "runs": 1,
- "git_sha": "b576dfb",
+ "git_sha": "44f4792",
  "conversation_ids": [
   "p01",
   "p02",
