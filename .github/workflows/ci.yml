@@ -177,13 +177,13 @@ jobs:
           cache-to: type=gha,mode=max
 
   # ─────────────────────────────────────────────────────────────────
-  # Stage 5 — Push to Registry  (stable branch push only)
+  # Stage 5 — Push to Registry  (push to main only: only reviewed, merged code is published)
   # ─────────────────────────────────────────────────────────────────
   push-image:
     name: Push to Registry
     runs-on: ubuntu-latest
     needs: docker-build
-    if: needs.docker-build.result == 'success' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/stable' || github.ref == 'refs/heads/stable_final' || github.ref == 'refs/heads/ci-fix-cicd') && github.event_name == 'push'
+    if: needs.docker-build.result == 'success' && github.ref == 'refs/heads/main' && github.event_name == 'push'
     permissions:
       contents: read
       packages: write
@@ -223,7 +223,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   # ─────────────────────────────────────────────────────────────────
-  # Stage 6 — Deploy to Kubernetes via Helm  (stable branch push only)
+  # Stage 6 — Deploy to Kubernetes via Helm  (push to main only)
   # Requires KUBECONFIG and APP_URL repository secrets.
   # Skips gracefully with a warning if secrets are not configured.
   # ─────────────────────────────────────────────────────────────────
@@ -236,7 +236,7 @@ jobs:
     # Explicitly require push-image to have SUCCEEDED (not just skipped/failed)
     # Without needs.push-image.result == 'success', GitHub may run this job
     # even when push-image was skipped due to its own if-condition being false.
-    if: needs.push-image.result == 'success' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/stable' || github.ref == 'refs/heads/stable_final' || github.ref == 'refs/heads/ci-fix-cicd') && github.event_name == 'push'
+    if: needs.push-image.result == 'success' && github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment: production
     continue-on-error: true  # deployment is best-effort; requires a live cluster
 
@@ -246,6 +246,8 @@ jobs:
       # Helm validation runs unconditionally — proves charts are correct even without a live cluster
       - name: Install Helm
         uses: azure/setup-helm@v4
+        with:
+          version: v3.16.4  # pinned: the version the chart was checked with (the default is the latest)
 
       - name: Helm lint
         run: helm lint ./helm --values helm/values.yaml
@@ -270,9 +272,9 @@ jobs:
           if [ -z "$KUBECONFIG_SECRET" ]; then
             echo "::warning::KUBECONFIG secret is not set — skipping live deployment (helm lint/template above passed)."
             echo "To enable live deploy: add KUBECONFIG (base64-encoded kubeconfig) as a repository secret."
-            echo "configured=false" >> $GITHUB_OUTPUT
+            echo "configured=false" >> "$GITHUB_OUTPUT"
           else
-            echo "configured=true" >> $GITHUB_OUTPUT
+            echo "configured=true" >> "$GITHUB_OUTPUT"
           fi
         env:
           KUBECONFIG_SECRET: ${{ secrets.KUBECONFIG }}
@@ -281,7 +283,7 @@ jobs:
         if: steps.prereqs.outputs.configured == 'true'
         run: |
           echo "${{ secrets.KUBECONFIG }}" | base64 -d > /tmp/kubeconfig.yaml
-          echo "KUBECONFIG=/tmp/kubeconfig.yaml" >> $GITHUB_ENV
+          echo "KUBECONFIG=/tmp/kubeconfig.yaml" >> "$GITHUB_ENV"
 
       - name: Check cluster connectivity
         if: steps.prereqs.outputs.configured == 'true'
@@ -290,16 +292,16 @@ jobs:
           SERVER=$(python3 -c "import yaml; c=yaml.safe_load(open('/tmp/kubeconfig.yaml')); print(c['clusters'][0]['cluster']['server'])" 2>/dev/null || echo "")
           if [ -z "$SERVER" ]; then
             echo "::warning::Could not parse cluster server from kubeconfig — skipping deployment."
-            echo "reachable=false" >> $GITHUB_OUTPUT
+            echo "reachable=false" >> "$GITHUB_OUTPUT"
           else
             HOST=$(echo "$SERVER" | sed 's~https://~~' | cut -d: -f1)
             PORT=$(echo "$SERVER" | sed 's~https://~~' | cut -d: -f2)
             if timeout 5 bash -c "cat < /dev/null > /dev/tcp/$HOST/$PORT" 2>/dev/null; then
               echo "Cluster at $SERVER is reachable."
-              echo "reachable=true" >> $GITHUB_OUTPUT
+              echo "reachable=true" >> "$GITHUB_OUTPUT"
             else
               echo "::warning::Kubernetes cluster at $SERVER is not reachable from this runner — skipping deployment."
-              echo "reachable=false" >> $GITHUB_OUTPUT
+              echo "reachable=false" >> "$GITHUB_OUTPUT"
             fi
           fi
 
@@ -325,8 +327,8 @@ jobs:
             --create-namespace \
             --values helm/values.yaml \
             --values helm/values-prod.yaml \
-            --set app.image.tag=$IMAGE_TAG \
-            --set app.image.repository=$IMAGE_REPO \
+            --set "app.image.tag=$IMAGE_TAG" \
+            --set "app.image.repository=$IMAGE_REPO" \
             --set app.image.pullSecrets[0]=ghcr-secret \
             --set-string secrets.groqApiKey=${{ secrets.GROQ_API_KEY }} \
             --set-string secrets.langchainApiKey=${{ secrets.LANGCHAIN_API_KEY }} \
