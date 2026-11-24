@@ -60,7 +60,9 @@ def hybrid_available() -> bool:
 
 @lru_cache(maxsize=512)
 def _query_vector(query: str) -> str:
-    return to_pgvector(embed_query(query))
+    from app.core.llm import recorded_vector  # recorded under the eval cassette modes
+
+    return recorded_vector(query, lambda: to_pgvector(embed_query(query)))
 
 
 def _where(brand_id, max_price, min_price, min_rating, keywords) -> tuple:

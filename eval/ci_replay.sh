@@ -10,7 +10,8 @@ export GROQ_API_KEY="${GROQ_API_KEY:-ci-replay-no-calls}"  # replay never calls 
 export LANGCHAIN_TRACING_V2=false
 
 DATABASE_URL="$CI_DATABASE_URL" python -m alembic upgrade head
-python scripts/embed_catalog.py --database-url "$CI_DATABASE_URL"
+# No scripts/embed_catalog.py here: the fixture carries the product vectors and the query vectors are
+# recorded, so the replay doesn't depend on the runner's CPU (2026-11-24).
 
 python eval/run_split.py ci-retrieval all PRODUCT_RANKER=off --mode replay
 python eval/run_baseline.py --label ci-baseline --model openai/gpt-oss-20b --mode replay

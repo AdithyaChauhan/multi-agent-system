@@ -6,8 +6,9 @@ that isn't needed or could be personal:
 - users: only the demo shoppers and the synthetic users who own orders stay, and every email
   becomes <user_id>@example.com (names and Google ids are cleared);
 - chat sessions, messages, support tickets, LangGraph checkpoints, reviews and specs: emptied;
-- product embeddings: nulled (CI recomputes them with scripts/embed_catalog.py; it keeps the file
-  small and proves the embedding step works).
+- product embeddings: kept, with embedding_meta. CI used to recompute them, but another CPU's
+  last digits reordered near-tied search results and broke the replay (2026-11-24); the query
+  vectors are recorded for the same reason (eval/cassettes/query_vectors.json).
 
 Then dump it (custom format) into the repo:
 
@@ -40,7 +41,6 @@ EMPTIED = (
     "checkpoint_writes",
     "checkpoint_blobs",
     "checkpoints",
-    "embedding_meta",
 )
 
 
@@ -77,7 +77,6 @@ def main() -> int:
                 "UPDATE users SET email = user_id || '@example.com', name = NULL, google_id = NULL, auth_provider = 'demo'"
             )
         )
-        conn.execute(text("UPDATE products SET embedding = NULL"))
         counts = conn.execute(
             text(
                 "SELECT (SELECT count(*) FROM users), (SELECT count(*) FROM orders), (SELECT count(*) FROM products), "

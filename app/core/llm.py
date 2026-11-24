@@ -351,17 +351,51 @@ def _store(agent: str, node: str, messages: list, schema, result, usage: dict, t
         "value": value,
         "total_tokens": usage.get("total_tokens", 0),
     }
-    _cassette_file.parent.mkdir(parents=True, exist_ok=True)
-    tmp = _cassette_file.with_suffix(".tmp")
+    _write_json(_cassette_file, data)
+
+
+def _write_json(path: Path, data: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(".tmp")
     tmp.write_text(json.dumps(data, indent=1, sort_keys=True, ensure_ascii=False), encoding="utf-8")
     for attempt in range(20):  # OneDrive briefly locks a file it is syncing (WinError 5)
         try:
-            tmp.replace(_cassette_file)
+            tmp.replace(path)
             return
         except PermissionError:
             if attempt == 19:
                 raise
             time.sleep(0.5)
+
+
+# Query embeddings are model outputs too. Under a cassette mode they are recorded and replayed like
+# the answers, so a replay doesn't depend on the CPU's floating-point details: GitHub's runners
+# differ from the machine that recorded, and on 2026-11-24 that swapped near-tied search results and
+# changed a ranker prompt. VECTOR_CASSETTE_RECORD=1 adds missing vectors during a replay (0 tokens).
+VECTOR_CASSETTE = Path(__file__).resolve().parents[2] / "eval" / "cassettes" / "query_vectors.json"
+_vectors: Optional[dict] = None
+_vectors_lock = threading.Lock()
+
+
+def recorded_vector(query: str, compute):
+    """The query's embedding (pgvector text): computed live, or recorded and replayed in cassette modes."""
+    mode = cassette_mode()
+    if not mode:
+        return compute()
+    global _vectors
+    path = Path(os.getenv("VECTOR_CASSETTE_PATH") or VECTOR_CASSETTE)
+    with _vectors_lock:
+        if _vectors is None:
+            _vectors = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+        if query in _vectors:
+            return _vectors[query]
+    if mode == "replay" and os.getenv("VECTOR_CASSETTE_RECORD") != "1":
+        raise CassetteMiss(f"no recorded vector for {query[:60]!r} in {path}; record it again")
+    value = compute()
+    with _vectors_lock:
+        _vectors[query] = value
+        _write_json(path, _vectors)
+    return value
 
 
 def _replay(messages: list, schema=None, tools=None):

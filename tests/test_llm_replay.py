@@ -126,3 +126,44 @@ def test_fill_replays_what_it_has_and_records_only_the_rest(cassette, monkeypatc
         assert llm_module.call_llm("product", "extract", other, schema=Answer) == Answer(value=2)
     assert fake.with_structured_output.called
     assert len(json.loads(cassette.read_text(encoding="utf-8"))) == 2
+
+
+class TestRecordedVectors:
+    """Query embeddings are recorded like answers, so a replay never depends on the CPU (2026-11-24)."""
+
+    @pytest.fixture
+    def vectors(self, tmp_path, monkeypatch):
+        path = tmp_path / "vectors.json"
+        monkeypatch.setenv("VECTOR_CASSETTE_PATH", str(path))
+        monkeypatch.delenv("VECTOR_CASSETTE_RECORD", raising=False)
+        monkeypatch.setattr(llm_module, "_vectors", None)
+        return path
+
+    def test_live_computes_without_a_file(self, vectors, monkeypatch):
+        monkeypatch.delenv("LLM_CASSETTE_MODE", raising=False)
+        assert llm_module.recorded_vector("tv", lambda: "[0.1]") == "[0.1]"
+        assert not vectors.exists()
+
+    def test_record_then_replay_without_computing(self, vectors, monkeypatch):
+        monkeypatch.setenv("LLM_CASSETTE_MODE", "record")
+        assert llm_module.recorded_vector("tv", lambda: "[0.1]") == "[0.1]"
+        assert json.loads(vectors.read_text(encoding="utf-8")) == {"tv": "[0.1]"}
+
+        monkeypatch.setenv("LLM_CASSETTE_MODE", "replay")
+        monkeypatch.setattr(llm_module, "_vectors", None)
+
+        def never():
+            raise AssertionError("replay must not compute an embedding")
+
+        assert llm_module.recorded_vector("tv", never) == "[0.1]"
+
+    def test_replay_miss_fails_loudly(self, vectors, monkeypatch):
+        monkeypatch.setenv("LLM_CASSETTE_MODE", "replay")
+        with pytest.raises(llm_module.CassetteMiss):
+            llm_module.recorded_vector("radio", lambda: "[0.2]")
+
+    def test_replay_can_add_missing_vectors_on_request(self, vectors, monkeypatch):
+        monkeypatch.setenv("LLM_CASSETTE_MODE", "replay")
+        monkeypatch.setenv("VECTOR_CASSETTE_RECORD", "1")
+        assert llm_module.recorded_vector("radio", lambda: "[0.2]") == "[0.2]"
+        assert "radio" in json.loads(vectors.read_text(encoding="utf-8"))
