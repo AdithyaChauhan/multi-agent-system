@@ -3,6 +3,8 @@
 import json
 from unittest.mock import patch
 
+from prometheus_client import REGISTRY
+
 import app.agents.product_agent as pa
 import app.agents.router as router
 from app.agents.router import RouteDecision
@@ -15,6 +17,15 @@ MOUSE = {
     "rating": 4.2,
     "type": "mouse",
 }
+
+
+def turns(endpoint: str, outcome: str) -> float:
+    """chat_turns_total for one endpoint and outcome (0 before the first)."""
+    return REGISTRY.get_sample_value("chat_turns_total", {"endpoint": endpoint, "outcome": outcome}) or 0.0
+
+
+def timed(endpoint: str) -> float:
+    return REGISTRY.get_sample_value("chat_turn_seconds_count", {"endpoint": endpoint}) or 0.0
 
 
 def _events(text: str) -> list:
@@ -34,7 +45,10 @@ def _product_turn(client, path):
 
 
 def test_steps_then_the_same_reply_as_chat(client, yaml_catalog):
+    answered, seconds = turns("/chat/stream", "answered"), timed("/chat/stream")
     streamed = _product_turn(client, "/chat/stream")
+    # The turn is timed to its reply, not to the first byte (the HTTP histogram can't do that here).
+    assert turns("/chat/stream", "answered") == answered + 1 and timed("/chat/stream") == seconds + 1
     assert streamed.status_code == 200 and streamed.headers["content-type"].startswith("text/event-stream")
     events = _events(streamed.text)
     labels = [data["label"] for name, data in events if name == "step"]
@@ -53,9 +67,11 @@ def test_steps_then_the_same_reply_as_chat(client, yaml_catalog):
 
 
 def test_a_failing_turn_ends_with_an_error_event(client):
+    errors = turns("/chat/stream", "error")
     with patch.object(router, "call_llm", side_effect=RuntimeError("boom")):
         events = _events(client.post("/chat/stream", json={"message": "hi"}).text)
     assert events[-1][0] == "error" and "boom" not in events[-1][1]["detail"]
+    assert turns("/chat/stream", "error") == errors + 1  # a 200 response, but counted as an error
 
 
 def test_a_refused_confirm_is_a_single_reply(client):

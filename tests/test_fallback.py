@@ -4,10 +4,18 @@ from unittest.mock import MagicMock, patch
 
 import httpx
 import pytest
-from groq import APIConnectionError, BadRequestError, InternalServerError, NotFoundError, RateLimitError
+from groq import (
+    APIConnectionError,
+    AuthenticationError,
+    BadRequestError,
+    InternalServerError,
+    NotFoundError,
+    RateLimitError,
+)
 
 import app.core.llm as llm_module
 from app.core import config, limits
+from tests.test_chat_stream import turns
 
 REQUEST = httpx.Request("POST", "https://api.groq.com/openai/v1/chat/completions")
 
@@ -67,6 +75,14 @@ class TestFallbackChain:
         with pytest.raises(llm_module.ModelsUnavailable):
             llm_module.call_llm("router", "classify", ["hi"])
 
+    def test_rejected_key_is_busy_not_an_error_page(self, chain):
+        # Found by the load test's smoke mode: a 401 used to escape as a 500 on every turn.
+        m2 = _client("m2")
+        chain(_client("m1", error=_error(AuthenticationError, 401, "Invalid API Key")), m2, _client("m3"))
+        with pytest.raises(llm_module.ModelsUnavailable):
+            llm_module.call_llm("router", "classify", ["hi"])
+        m2.invoke.assert_not_called()  # the same key would fail there too
+
     def test_other_errors_are_not_hidden(self, chain):
         bad = _error(BadRequestError, 400, "invalid request")
         m2 = _client("m2")
@@ -83,6 +99,10 @@ class TestFallbackChain:
         llm_module.call_llm("router", "classify", ["two"])
         assert m1.invoke.call_count == 1  # skipped on the second call
         assert llm_module._cooldown_seconds(daily) == 600.0
+
+    def test_clients_do_not_sleep_on_a_429(self):
+        # The SDK's own retry waits retry-after before the chain can move on (load test, 2026-11-24).
+        assert llm_module._new_client("m1").max_retries == 0
 
     def test_retry_after_header_sets_the_cooldown(self):
         assert llm_module._cooldown_seconds(_error(RateLimitError, 429, "tpm", {"retry-after": "7"})) == 7.0
@@ -115,6 +135,38 @@ class TestAnswerCache:
         assert m1.invoke.call_count == 2
 
 
+class TestStructuredOutput:
+    """gpt-oss sometimes prefixes its tool call's name with 'functions.' (2026-11-24, 18% of router calls)."""
+
+    def _structured(self, chain, raw_calls):
+        from langchain_core.messages import AIMessage
+
+        from app.agents.router import RouteDecision
+
+        raw = AIMessage(content="", tool_calls=raw_calls, response_metadata={"token_usage": {"total_tokens": 5}})
+        m1 = _client("m1")
+        m1.with_structured_output.return_value.invoke.return_value = {
+            "raw": raw,
+            "parsed": None,
+            "parsing_error": ValueError("Unknown tool type: 'functions.RouteDecision'"),
+        }
+        chain(m1, _client("m2"), _client("m3"))
+        return llm_module.call_llm("router", "classify", ["hi"], schema=RouteDecision)
+
+    def test_prefixed_tool_name_is_parsed(self, chain):
+        call = {"name": "functions.RouteDecision", "args": {"intent": "product"}, "id": "c1", "type": "tool_call"}
+        decision = self._structured(chain, [call])
+        assert decision is not None and decision.intent == "product"
+
+    def test_invalid_arguments_stay_a_failure(self, chain):
+        call = {"name": "functions.RouteDecision", "args": {"intent": "teleport"}, "id": "c1", "type": "tool_call"}
+        assert self._structured(chain, [call]) is None
+
+    def test_another_tool_name_stays_a_failure(self, chain):
+        call = {"name": "functions.Something", "args": {"intent": "product"}, "id": "c1", "type": "tool_call"}
+        assert self._structured(chain, [call]) is None
+
+
 class TestLimits:
     def test_rate_per_minute(self, monkeypatch):
         monkeypatch.setattr(config, "CHAT_RATE_PER_MINUTE", 3)
@@ -134,6 +186,7 @@ class TestLimits:
 
 class TestChatEndpoint:
     def test_busy_reply_instead_of_an_error_page(self, client):
+        busy = turns("/chat", "busy")
         with patch("app.main.router_graph") as graph:
             graph.invoke.side_effect = llm_module.ModelsUnavailable("all down")
             r = client.post("/chat", json={"message": "tv under 30000"})
@@ -142,9 +195,11 @@ class TestChatEndpoint:
             r.json()["response"]
             == "I'm getting a lot of questions right now and couldn't answer this one. Please try again in a minute."
         )
+        assert turns("/chat", "busy") == busy + 1
 
     def test_rate_limited_reply(self, client, monkeypatch):
         monkeypatch.setattr(config, "CHAT_RATE_PER_MINUTE", 1)
+        limited = turns("/chat", "limited")
         with patch("app.main.router_graph") as graph:
             graph.invoke.return_value = {"final_response": "ok"}
             first = client.post("/chat", json={"message": "hi"})
@@ -152,6 +207,7 @@ class TestChatEndpoint:
         assert first.json()["response"] == "ok"
         assert second.status_code == 200 and second.json()["response"] == limits.RATE_LIMITED
         assert graph.invoke.call_count == 1
+        assert turns("/chat", "limited") == limited + 1
 
 
 class TestIdentity:

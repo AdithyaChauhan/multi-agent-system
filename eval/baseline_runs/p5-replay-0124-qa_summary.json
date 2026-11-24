@@ -1,0 +1,33 @@
+{
+ "label": "p5-replay-0124-qa",
+ "model": "openai/gpt-oss-20b",
+ "runs": 1,
+ "git_sha": "1acbad4",
+ "conversation_ids": [
+  "q01",
+  "q02",
+  "q03",
+  "q04",
+  "q05",
+  "q06"
+ ],
+ "conversations_passed_per_run": [
+  6
+ ],
+ "conversations_total": 6,
+ "pass_rate_mean": 1.0,
+ "turns_passed_per_run": [
+  13
+ ],
+ "turns_total": 13,
+ "llm_calls_per_turn_mean": 0.0,
+ "tokens_per_turn_mean": 0,
+ "seconds_per_turn_mean": 1.25,
+ "seconds_per_turn_median_mean": 1.19,
+ "rate_limited_calls": 0,
+ "mode": "replay",
+ "cassette_misses": 0,
+ "failed_conversations_per_run": [
+  []
+ ]
+}

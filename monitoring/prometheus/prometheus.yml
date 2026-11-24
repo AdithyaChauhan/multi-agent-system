@@ -8,3 +8,10 @@ scrape_configs:
       - targets:
           - app:8000
     metrics_path: /metrics
+
+  # The 20-user load test's own app container (eval/loadtest/run.sh); down when no test is running.
+  - job_name: multiagent-loadtest
+    static_configs:
+      - targets:
+          - multiagent-loadtest:8000
+    metrics_path: /metrics

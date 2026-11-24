@@ -22,6 +22,7 @@ from groq import (
     APIConnectionError,
     APIStatusError,
     APITimeoutError,
+    AuthenticationError,
     BadRequestError,
     InternalServerError,
     NotFoundError,
@@ -48,8 +49,9 @@ logger = get_logger("app.core.llm")
 
 
 def _new_client(model: str) -> ChatGroq:
-    # One quick retry, then move down the chain: a demo shouldn't wait on a busy model.
-    return ChatGroq(model=model, temperature=0, api_key=os.getenv("GROQ_API_KEY"), max_retries=1, timeout=20)
+    # No SDK retries: on a 429 the SDK sleeps for retry-after (9 s in the 2026-11-24 load test) before
+    # trying again. The fallback chain already handles it: cool this model down, ask the next one.
+    return ChatGroq(model=model, temperature=0, api_key=os.getenv("GROQ_API_KEY"), max_retries=0, timeout=20)
 
 
 llm = _new_client(GROQ_MODEL)
@@ -132,6 +134,12 @@ def _invoke(agent: str, node: str, messages: list, schema=None, tools=None):
     for i, client in enumerate(chain):
         try:
             return _invoke_one(client, agent, node, messages, schema, tools)
+        except AuthenticationError as exc:
+            # The key itself is refused (revoked or mistyped). Every model shares it, so don't walk the
+            # chain: answer with the busy reply instead of an error page, and say why in the log.
+            logger.error(f"request_id={get_request_id()} | LLM_KEY_REJECTED | {agent}.{node} | check GROQ_API_KEY")
+            llm_unavailable_total.inc()
+            raise ModelsUnavailable(f"the Groq key was rejected ({agent}.{node})") from exc
         except Exception as exc:
             reason = _why_fall_back(exc)
             if reason is None:
@@ -185,9 +193,28 @@ def _invoke_one(client, agent: str, node: str, messages: list, schema=None, tool
             if attempt == 2:
                 return None, {}
     usage = _record(agent, node, out.get("raw"), time.perf_counter() - start)
+    parsed = out.get("parsed")
     if out.get("parsing_error"):
-        logger.error(f"request_id={get_request_id()} | {agent}.{node} parse error | {out['parsing_error']}")
-    return out.get("parsed"), usage
+        parsed = _salvage(schema, out.get("raw"))
+        level = logger.warning if parsed is not None else logger.error
+        level(
+            f"request_id={get_request_id()} | {agent}.{node} parse error | {out['parsing_error']}"
+            f" | salvaged={parsed is not None}"
+        )
+    return parsed, usage
+
+
+def _salvage(schema, raw):
+    """gpt-oss sometimes names its tool call 'functions.RouteDecision' (its own namespace), and the
+    parser rejects the name. Seen on 18% of router calls on 2026-11-24, never before. If the call's
+    name minus that prefix is the schema's, validate its arguments; anything else stays a failure."""
+    for call in getattr(raw, "tool_calls", None) or []:
+        if str(call.get("name", "")).rsplit(".", 1)[-1] == schema.__name__:
+            try:
+                return schema.model_validate(call.get("args") or {})
+            except ValueError:  # pydantic's ValidationError is a ValueError
+                return None
+    return None
 
 
 def call_llm(agent: str, node: str, messages: list, schema=None, tools=None):

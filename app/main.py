@@ -1,10 +1,11 @@
 import json
 import os
 import threading
+import time
 import uuid
 from datetime import datetime, timezone, timedelta
 from contextlib import asynccontextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from fastapi.responses import RedirectResponse, StreamingResponse
 
@@ -49,7 +50,7 @@ from fastapi.staticfiles import StaticFiles
 from langchain_core.tracers.context import collect_runs
 from langchain_core.tracers.run_collector import RunCollectorCallbackHandler
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
-from app.core.metrics import http_requests_total, http_request_duration_seconds
+from app.core.metrics import chat_turn_seconds, chat_turns_total, http_requests_total, http_request_duration_seconds
 
 _LANGSMITH_CLIENT = None
 _LANGSMITH_CLIENT_LOCK = threading.Lock()
@@ -346,6 +347,14 @@ class Turn:
     config: dict
     graph_input: object = None
     refusal: Optional[str] = None
+    endpoint: str = "/chat"
+    started: float = field(default_factory=time.perf_counter)
+
+
+def _observe(turn: Turn, outcome: str) -> None:
+    """Count how the turn ended and time it, start to reply (Grafana's turn panels)."""
+    chat_turns_total.labels(endpoint=turn.endpoint, outcome=outcome).inc()
+    chat_turn_seconds.labels(endpoint=turn.endpoint).observe(time.perf_counter() - turn.started)
 
 
 def start_turn(db, request_obj: Request, chat_request: ChatRequest, x_session_id: Optional[str]) -> Turn:
@@ -373,7 +382,7 @@ def start_turn(db, request_obj: Request, chat_request: ChatRequest, x_session_id
         },
         "run_name": f"chat_request_{get_request_id()[:8]}",
     }
-    turn = Turn(user_id=user_id, session=session, config=config)
+    turn = Turn(user_id=user_id, session=session, config=config, endpoint=request_obj.url.path)
     client_ip = request_obj.client.host if request_obj.client else None
     turn.refusal = limits.check_turn(limits.caller_key(user_id, client_ip))
     if turn.refusal:
@@ -399,6 +408,7 @@ def finish_turn(db, turn: Turn, chat_request: ChatRequest, graph_result: dict, r
     if run_id:  # per-turn feedback scores to LangSmith, fire-and-forget
         threading.Thread(target=_submit_turn_feedback, args=(run_id, chat_request.message, text), daemon=True).start()
     _store_reply(db, turn.session, text, run_id)
+    _observe(turn, "answered")
     return ChatResponse(
         session_id=turn.session.session_id,
         user_id=turn.user_id,
@@ -419,8 +429,10 @@ def product_cards(graph_result: dict) -> Optional[list]:
     return [{k: p.get(k) for k in CARD_FIELDS} for p in shown] or None
 
 
-def _refused(db, turn: Turn) -> ChatResponse:
+def _refused(db, turn: Turn, outcome: str = "") -> ChatResponse:
     _store_reply(db, turn.session, turn.refusal)
+    limited = turn.refusal in (limits.RATE_LIMITED, limits.DAILY_LIMIT)
+    _observe(turn, outcome or ("limited" if limited else "refused"))
     return ChatResponse(session_id=turn.session.session_id, user_id=turn.user_id, response=turn.refusal)
 
 
@@ -432,7 +444,7 @@ def _busy(db, turn: Turn, error: Exception) -> ChatResponse:
     logger.error(f"request_id={get_request_id()} | MODELS_UNAVAILABLE | {error} | cause={error.__cause__!r}"[:500])
     db.rollback()
     turn.refusal = BUSY_REPLY
-    return _refused(db, turn)
+    return _refused(db, turn, "busy")
 
 
 @app.post("/chat", response_model=ChatResponse)
@@ -443,6 +455,7 @@ def chat(
     x_session_id: Optional[str] = Header(default=None),
 ):
     db = SessionLocal()
+    turn = None
     try:
         turn = start_turn(db, request_obj, chat_request, x_session_id)
         response.headers["X-Session-ID"] = turn.session.session_id
@@ -471,6 +484,8 @@ def chat(
     except Exception as e:
         logger.error(f"request_id={get_request_id()} | ERROR | {str(e)}")
         db.rollback()
+        if turn:
+            _observe(turn, "error")
         raise HTTPException(
             status_code=500,
             detail="Something went wrong on our end. Please try again.",
@@ -542,6 +557,7 @@ def chat_stream(
         except Exception as e:
             logger.error(f"request_id={get_request_id()} | STREAM_ERROR | {str(e)}")
             db.rollback()
+            _observe(turn, "error")
             yield _event("error", {"detail": "Something went wrong on our end. Please try again."})
         finally:
             db.close()

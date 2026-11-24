@@ -126,6 +126,7 @@ class Meter:
         self.calls = 0
         self.tokens = 0
         self.rate_limited = 0
+        self.unreachable = 0  # Groq not reachable (network down): infra, not a model mistake
         self.errors = 0
         self.sdk_retries = 0
         # Groq's tokens-per-minute limit behaves like a token bucket that refills continuously.
@@ -139,6 +140,7 @@ class Meter:
                 "calls": self.calls,
                 "tokens": self.tokens,
                 "rate_limited": self.rate_limited,
+                "unreachable": self.unreachable,
                 "errors": self.errors,
                 "sdk_retries": self.sdk_retries,
             }
@@ -186,6 +188,11 @@ def install_meter() -> None:
             with METER.lock:
                 METER.calls += 1
                 METER.rate_limited += 1
+            raise
+        except groq.APIConnectionError:  # includes timeouts
+            with METER.lock:
+                METER.calls += 1
+                METER.unreachable += 1
             raise
         except Exception:
             with METER.lock:
@@ -618,6 +625,7 @@ def run_conversation(client, conv, router_rec, reroute_rec, phrase_sets, args):
                 "llm_calls": after["calls"] - before["calls"],
                 "tokens": after["tokens"] - before["tokens"],
                 "rate_limited": after["rate_limited"] - before["rate_limited"],
+                "unreachable": after["unreachable"] - before["unreachable"],
                 "sdk_retries": after["sdk_retries"] - before["sdk_retries"],
                 "seconds": round(seconds, 3),
                 "paced_wait_seconds": round(paced, 1),
@@ -638,7 +646,7 @@ def run_conversation(client, conv, router_rec, reroute_rec, phrase_sets, args):
                 "response": text[:700],
             }
         )
-    infra = any(t["rate_limited"] for t in turns_out)
+    infra = any(t["rate_limited"] or t["unreachable"] for t in turns_out)
     return {
         "id": conv["id"],
         "tags": conv.get("tags", []),
@@ -675,6 +683,7 @@ def summarize(results: list) -> dict:
         "seconds_per_turn_mean": round(statistics.mean(secs), 2) if secs else None,
         "seconds_per_turn_median": round(statistics.median(secs), 2) if secs else None,
         "rate_limited_calls": sum(t["rate_limited"] for t in turns),
+        "unreachable_calls": sum(t["unreachable"] for t in turns),
         "sdk_retries": sum(t["sdk_retries"] for t in turns),
         "infra_error_conversations": [c["id"] for c in results if c["infra_error"]],
         "failed_conversations": [c["id"] for c in results if not c["passed"]],
@@ -751,12 +760,18 @@ def main() -> int:
             for conv in convs:
                 outcome = run_conversation(client, conv, router_rec, reroute_rec, phrase_sets, args)
                 if outcome["infra_error"]:
-                    print(f"  [{conv['id']}] rate-limited by Groq — cooling down 65 s and retrying once", flush=True)
+                    print(
+                        f"  [{conv['id']}] rate-limited or Groq unreachable — cooling down 65 s and retrying once",
+                        flush=True,
+                    )
                     time.sleep(65)
                     outcome = run_conversation(client, conv, router_rec, reroute_rec, phrase_sets, args)
                     outcome["retried_after_rate_limit"] = True
                     if outcome["infra_error"]:
-                        print("  still rate-limited after a retry (daily quota?) — stopping this run", flush=True)
+                        print(
+                            "  still rate-limited or unreachable after a retry (daily quota? network?) — stopping this run",
+                            flush=True,
+                        )
                         break
                 results.append(outcome)
                 mark = "PASS" if outcome["passed"] else "FAIL"

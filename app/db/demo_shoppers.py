@@ -6,6 +6,7 @@ Visitors are deleted after DEMO_SHOPPER_DAYS. They are ordinary users to the res
 ownership check (ADR 0002) applies.
 """
 
+import os
 import secrets
 import threading
 import time
@@ -24,7 +25,8 @@ logger = get_logger("app.db.demo_shoppers")
 
 PREFIX = "demo-"
 DEMO_SHOPPER_DAYS = 2
-PER_IP_PER_HOUR = 5
+# Raised only for the local load test (eval/loadtest), where every simulated user shares one address.
+PER_IP_PER_HOUR = int(os.getenv("DEMO_SHOPPERS_PER_IP_HOUR", "5"))
 
 # (product name, status, carrier, tracking id): tracking ids the mock carrier API knows.
 ORDERS = (
