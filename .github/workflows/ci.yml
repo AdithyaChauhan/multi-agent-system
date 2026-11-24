@@ -122,9 +122,7 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          sudo apt-get install -y --no-install-recommends postgresql-client
+        run: pip install -r requirements.txt
 
       - name: Cache the embedding model
         uses: actions/cache@v4.2.3
@@ -132,8 +130,12 @@ jobs:
           path: .fastembed
           key: fastembed-bge-small-en-v1.5
 
+      # With the database container's own pg_restore (15), as scripts/load_live_db.sh does. The
+      # runner's newer client sends SET transaction_timeout, which Postgres 15 rejects (exit 1).
       - name: Restore the scrubbed fixture
-        run: pg_restore --no-owner -d "$CI_DATABASE_URL" eval/fixtures/ci_baseline.dump
+        run: |
+          docker exec -i "${{ job.services.postgres.id }}" \
+            pg_restore --no-owner -U postgres -d multi_agent_baseline < eval/fixtures/ci_baseline.dump
 
       - name: Start the mock carrier API
         run: |
