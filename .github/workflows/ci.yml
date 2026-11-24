@@ -124,11 +124,9 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Cache the embedding model
-        uses: actions/cache@v4.2.3
-        with:
-          path: .fastembed
-          key: fastembed-bge-small-en-v1.5
+      # No cache for the embedding model: download it fresh every run. On 2026-11-24 every run that
+      # restored a cached copy missed 2 Q&A recordings (q05) and every fresh download passed (4 of 4);
+      # the cached copy's vectors differed enough to swap near-tied search results.
 
       # With the database container's own pg_restore (15), as scripts/load_live_db.sh does. The
       # runner's newer client sends SET transaction_timeout, which Postgres 15 rejects (exit 1).

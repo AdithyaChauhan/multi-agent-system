@@ -269,6 +269,7 @@ def install_cassette(mode: str, path: Path) -> None:
             # Say which call missed: CI shows only this output, so a count alone can't be debugged.
             kind = schema.__name__ if schema is not None else ("tools" if tools else "text")
             last = str(getattr(messages[-1], "content", messages[-1]))[:300].replace("\n", " | ")
+            last = last.encode("ascii", "backslashreplace").decode("ascii")  # "₹" crashes a Windows console
             print(f"  CASSETTE MISS ({kind}, {len(messages)} messages): {last}", flush=True)
             raise
 
