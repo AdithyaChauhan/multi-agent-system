@@ -249,11 +249,20 @@ def names_a_search(message: str) -> bool:
     return catalog.product_in(message)[0] is not None
 
 
+def asks_about_shown(message: str, model_says: bool, shown) -> bool:
+    """A question about the cards on screen rather than a search: the router model says so, or the message
+    points at the list, and either way it names no search. The model alone now and then misses "does the
+    first one come with a warranty?" (1 of 5 calls on 2026-11-25), and that turn then searched for kettles."""
+    if not shown or names_a_search(message):
+        return False
+    return bool(model_says or LIST_REFERENCE.search(message or ""))
+
+
 def route_entry(state: ProductState) -> Literal["edit", "qa", "extract"]:
     if state.get("filter_edit"):
         return "edit"
-    if state.get("about_shown") and state.get("shown_products") and not names_a_search(state.get("user_message", "")):
-        return "qa"  # a question about the cards on screen: the tool-using Q&A loop (ADR 0016)
+    if state.get("about_shown") and state.get("shown_products"):
+        return "qa"  # the router decided (asks_about_shown): the tool-using Q&A loop (ADR 0016)
     return "extract"
 
 
@@ -511,12 +520,13 @@ def format_recommendations(state: ProductState) -> dict:
     prefs = state.get("preferences") or {}
     top3 = (state.get("ranked_products") or [])[:3]
     relaxed = state.get("relaxed_filters") or []
+    # Say the results miss something only when code knows what: the brand isn't among them, or the
+    # search loop widened a filter. The ranker's `exact` list is no evidence either way (gpt-oss-20b
+    # leaves it empty in 65% of its recorded answers, matching results included), so it only orders.
     header = _brand_note(prefs, top3)
     if not header and relaxed:
         header = f"I couldn't find an exact match, so I widened {', '.join(RELAXED_WORDS[r] for r in relaxed)}:\n"
-    if not header and all(p["llm_tier"] == 1 for p in top3):
-        header = "These don't match everything you asked for, but they're the closest options we have:\n"
-    lines = [header or "Here are my top recommendations for you:\n"]
+    lines = [header or "Here's what I found:\n"]
     for i, p in enumerate(top3, 1):
         rating = f"{p['rating']:.1f}/5" if p.get("rating") is not None else "Not rated"
         lines.append(f"{i}. **{p.get('title') or p['name']}** — {p.get('brand') or 'Unknown brand'}")

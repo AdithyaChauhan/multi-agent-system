@@ -3,12 +3,11 @@
 `agent-flow.html` is the source of the scroll-driven 3D explainer, published as a claude.ai artifact:
 https://claude.ai/artifact/2ZtU89shqw2C7Jqq56nGgF (private until it's shared from the page's Share menu).
 
-It follows one chat message through the browser, FastAPI, the router, an agent, Groq and Postgres. There are six stories (refine a product search, track an order, report a damaged item, cancel an order, report a safety risk, ask while signed out), and a Today / Proposed switch that shows the Phase 1–4 design.
+It follows one chat message through the browser, FastAPI, the router, an agent, Groq and Postgres, as the code on `main` runs it. There are seven stories: refine a product search (hybrid search and the search loop), ask about the cards (the read-only tool loop), track an order, report a damaged item (the escalation subgraph and the Discord alert), cancel an order (the `interrupt()` pause and resume), report a safety risk (the model plus the safety floor) and ask while signed out. The last screen shows measured numbers, each with how it was measured.
 
-## Updating it at project completion (Phase 5)
-- Steps that are now built lose their "Proposed" tag. Remove the "not built yet" wording, and make the built design the default (or drop the switch).
-- Replace illustrative numbers with measured ones: tokens per turn, recall@5, p95 latency.
-- Check every step's file and function reference (`ref`) against the code.
+## Updating it
+- Republished 2026-11-25 (version 3): the Today / Proposed switch is gone because the proposed design is built, and every step's `ref` was checked against the code. Products, orders and attributes come from `multi_agent_baseline`.
+- When the code changes, check each step's `ref` and the numbers on the last screen (`STORIES` near the top of the script, and the `.stats` block).
 - Republish to the same link: ask Claude to read the artifact at the URL above, then publish this file to that URL.
 
 ## Notes

@@ -131,7 +131,7 @@ class TestReplies:
 
     def test_plain_recommendations(self):
         text = self._format({"product": "mouse"}, [{**_product(1), "llm_tier": 0}])
-        assert text.startswith("Here are my top recommendations")
+        assert text.startswith("Here's what I found:")
         assert "**Logitech Wireless Mouse 1** — Logitech" in text and "₹900 · 4.4/5" in text
 
     def test_says_which_filters_were_widened(self):
@@ -150,9 +150,11 @@ class TestReplies:
             )
         assert text["final_response"].startswith("I couldn't find Sony headphones within your filters")
 
-    def test_only_maybe_results(self):
+    def test_ranker_doubts_are_not_told_to_the_shopper(self):
+        # An empty `exact` list from the ranker is no evidence that the results miss anything.
         text = self._format({"product": "mouse"}, [{**_product(1), "llm_tier": 1}])
-        assert text.startswith("These don't match everything")
+        assert text.startswith("Here's what I found:")
+        assert "match" not in text.split("\n", 1)[0]
 
     @pytest.mark.parametrize(
         "stocked,prefix", [([], "We don't carry Bose speaker."), ([_product(1)], "I couldn't find")]
@@ -173,7 +175,7 @@ def test_graph_end_to_end():
         pa, "search_products", return_value=[_product(1)]
     ):
         out = pa.product_agent_graph.invoke({"user_message": "wireless mouse", "preferences": {}})
-    assert out["final_response"].startswith("Here are my top recommendations")
+    assert out["final_response"].startswith("Here's what I found:")
     assert out["preferences"]["features"] == ["wireless"]
     # The subgraph hands back only its declared outputs; search internals stay inside it.
     assert set(out) <= {

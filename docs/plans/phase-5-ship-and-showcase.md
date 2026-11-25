@@ -26,16 +26,17 @@ Meet the definition of done in `ROADMAP.md`. A judge opens the README, clicks a 
 - [x] **Root cleanup:** 8 files removed, 11 cache folders deleted, history reports moved to `docs/history/`.
 - [x] **Final run 1** (51 conversations, gpt-oss-20b): 48/51. The Q&A set 6/6; adversarial 14/15 (a12 is routing, reported).
 - [ ] **Final runs 2 and 3:** live, `--mode live`, about 196K tokens each. One per key per day: `--env-file .env.eval` for one of them. The first 2026-11-24 attempt was stopped and doesn't count (it found the `functions.` tool-name bug). **Run 2: 48/51** (2026-11-24, `.env.eval` key). Run 3: the main key, once its gpt-oss-20b quota is free again (after about 17:30 on 2026-11-25).
-- [ ] **Load test:** built (`eval/loadtest/`: `locustfile.py`, `run.sh`, `summarize.py`, `SMOKE=1` for a 0-token run). First run 2026-11-24 failed the latency target and found the SDK retry wait (fixed). Rerun after the fix when gpt-oss-20b quota allows.
+- [x] **Load test:** built (`eval/loadtest/`: `locustfile.py`, `run.sh`, `summarize.py`, `SMOKE=1` for a 0-token run). First run 2026-11-24 failed the latency target and found the SDK retry wait (fixed). **Rerun 2026-11-25: p95 1.3 s, 0 of 377 requests failed, 14% of chat replies real answers** (see Results).
+- [x] **Honest product replies** (2026-11-25, found by the user on the live site: "hdmi cables" said "These don't match everything you asked for" over three HDMI cables). The header came from the ranker's `exact` list, which gpt-oss-20b leaves empty in 65% of its recorded answers. The header is now "Here's what I found:"; only the brand note and "I widened…" say something is missing. A new harness check fails any reply that claims a mismatch the shown products don't have. Re-recording found a second flake, fixed in code: `asks_about_shown` (see Results).
 - [x] **The CI simulation passes** with the new cassettes (2026-11-23, `python:3.12-slim`): retrieval 0.979/0.933, baseline 48/51, adversarial 14/15 (a12 routing), Q&A 6/6, gate passed. It found the replay wrapper bug fixed in `96b74bf`.
-- [ ] `docs/CASE_STUDY.md`: drafted 2026-11-24. The live link, the Discord timing and runs 1–2 are filled in; run 3 and the load-test rerun are still pending.
-- [ ] **Visual explainer:** built steps lose "Proposed", add the tool loop and hybrid search, measured numbers, republish to the same URL (see `docs/visual/README.md`).
+- [ ] `docs/CASE_STUDY.md`: drafted 2026-11-24. The live link, the Discord timing, runs 1–2, the load-test rerun and the false-claim finding are filled in; run 3 is still pending.
+- [x] **Visual explainer** (2026-11-25, version 3 at the same URL): the Today / Proposed switch removed; stories rebuilt from the code on `main` (hybrid search and the search loop, the Q&A tool loop, the `interrupt()` pause, the escalation subgraph with the Discord alert, the safety floor); a last screen of six measured numbers. Run 3 and the load test can be added to it when measured.
 - [x] **Grafana panels:** a "Demo never breaks" row: turn latency p50/p95 (new `chat_turn_seconds`, which times `/chat/stream` to the reply), turns by outcome (new `chat_turns_total`), fallbacks, cache hit rate, limited turns. Prometheus also scrapes the load-test container.
 - [x] **Go live with the user:** PR #3 merged (`1b26114`), CI green on GitHub; Neon loaded with `scripts/load_live_db.sh`; Render deploys `main`; the live link checked end to end; Discord alerts arrive. The first live check found a fifth bug (Neon closes idle connections), fixed in PR #4 (`42ce007`). See Results.
 - [x] **CI green on GitHub's runners**, for the first time: four problems the local simulation had hidden, fixed (see Results, ADR 0018). 5 green runs in a row since.
 - [x] **`LIVE_URL` repository variable** set by the user (2026-11-25): keep-warm now pings the live site every 10 minutes.
 - [x] **Removed the stale `KUBECONFIG` secret** (the user, 2026-11-25): it pointed at an EKS cluster that no longer exists, and stage 6 printed that address in a public log.
-- [ ] `eval.yml` (manual only) still names the old self-hosted `minikube` runner: point it at `ubuntu-latest` or remove it.
+- [x] `eval.yml` removed (2026-11-25): it named the dead self-hosted `minikube` runner, and on `ubuntu-latest` it would have had no app to call (the live site ignores its `X-User-ID`). Live evals run from this machine.
 - [ ] Delete the local branch `backup/phase-5-ship-before-rewrite` once the user is happy with the rewritten history (commit messages carry no Claude attribution, 2026-11-24).
 - [ ] Final scorecard in the ROADMAP; Results; `/handoff`.
 
@@ -49,12 +50,12 @@ Meet the definition of done in `ROADMAP.md`. A judge opens the README, clicks a 
 
 **Status (2026-11-25):**
 - live link and judge path: **met** (10 s, see Results);
-- 3 live runs: 2 of 3 done, 48/51 each;
-- adversarial safety cases and Q&A: met in replay on GitHub;
-- load test: **not met** (p95 22 s before the retry fix; rerun pending);
+- 3 live runs: 2 of 3 done, 48/51 each under the checks of the time; **38/51 each** under the false-claim check added 2026-11-25. The fixed code replays at 48/51. How to count the runs of the old code is open (see Results);
+- adversarial safety cases and Q&A: met in replay (local, 2026-11-25, with the new check);
+- load test: **met** (p95 1.3 s, 0 errors; 14% real answers, the free-tier ceiling);
 - Discord within 1 minute: **met**;
 - prompts and diagram: met;
-- case study: partly; explainer: not started.
+- case study: partly; explainer: **met** (republished 2026-11-25).
 
 ## Results (so far)
 - **Live response times** (gpt-oss-20b, 2026-11-23):
@@ -116,3 +117,29 @@ Meet the definition of done in `ROADMAP.md`. A judge opens the README, clicks a 
   - main key: about 133K (the stopped run 2), about 108K (the load test, three models), about 27K (a smoke run whose invalid key didn't apply), about 20K (live checks);
   - `.env.eval` key: 198.8K (run 2).
 - **Tests:** 361 pass, coverage 90%, lint clean, `actionlint` clean on `ci.yml`.
+
+### 2026-11-25: a false claim on half the product replies; the load test meets its target
+- **Found by the user on the live site:** "hdmi cables" showed three HDMI cables under "These don't match everything you asked for, but they're the closest options we have".
+  - **Cause:** the ranker answers `same_kind` and `exact`, and `format_recommendations` printed that header when no shown product was in `exact`. gpt-oss-20b leaves `exact` empty in 65% of its recorded answers (60 of 92 in the conversation cassette, 119 of 185 in retrieval; gpt-oss-120b 26%), matching results included. For "hdmi cable" it answered `same_kind: [1..10], exact: []`.
+  - **Why the evals missed it:** they checked routes, filters and the products shown, never the reply's first line. "I want to buy headphones under 2000" passed with three headphones under 2000 below the header.
+  - **Size:** in final run 2, 25 of 43 product replies carried the header. The new check calls 13 of them certainly false (14 in run 1), in 10 conversations. Under the check, runs 1 and 2 score **38/51**, not 48/51.
+  - **Fix (the user's wording):** the default header is "Here's what I found:". The brand note and "I widened…" stay, because code checks both. The ranker's `exact` now only orders results. A later change can decide `exact` in code from the typed catalog and drop it from the ranking prompt (that needs the ranker calls re-recorded).
+  - **New harness check** (`false_mismatch_claim` in `eval/run_baseline.py`): a product reply fails if its first line claims a mismatch while every shown product is the kind asked for and meets the brand, price and rating asked for. Requests with features are skipped, because the harness can't check them.
+  - **Re-recording:** the router reads the previous reply, so the new header made 27 router recordings miss (20 baseline, 7 Q&A). Filled on the `.env.eval` key: 31 calls, 36.5K tokens.
+- **A second flake, found by the re-recording:** q04 "does the first one come with a warranty?" lost `about_shown` and searched again ("I couldn't find any electric kettle…"). The header didn't cause it: the same input gave `about_shown=true` 8 of 8 times (4 with each header, about 20K tokens), so the recorded call was a 1-in-5 sample. Fixed in code, not by re-recording until it passed: `asks_about_shown`, called by the router, takes the model's flag or a message that points at the list ("the first one", "which of these"), and either way needs no brand, budget or product word. It changes no turn in the baseline or attack sets: only q01, q02, q04 and q06 point at a list after a listing, and all four are real questions.
+- **Replay on the fixed code** (local, `multi_agent_baseline`, gpt-oss-20b cassettes, with the new check): baseline **48/51** (p03, p10, s16, as before), 0 false claims, 0 misses; adversarial 14/15 (a12 routing, reported); Q&A **6/6**; retrieval unchanged (0.979 / 0.933 / 1.0); `ci_gate.py` passed.
+- **Open for the user:** runs 1 and 2 measured the old code. Either count them as scored then (48/51, with the 38/51 re-score next to them), or measure the fixed code with three new live runs (about 196K tokens each, one per key per day).
+- **Load test rerun** (`p5-load-20u-r2`: local Docker, 20 users, 3 minutes, gpt-oss-20b first with the fallback chain and the cache on, `.env.eval` key, `multi_agent_baseline`; the image predates the header fix, which doesn't touch latency):
+
+  | | First run (2026-11-24) | Rerun | Target |
+  |---|---|---|---|
+  | HTTP errors | 0 of 216 | **0 of 377** | < 1% |
+  | p95, all requests | 22 s | **1.3 s** | < 3 s |
+  | p95, search step | 31 s | 3.3 s | |
+  | Chat replies answered | 51 of 175 (29%) | 42 of 306 (14%) | reported |
+  | Model calls / tokens / cache hits | 84 / 107.6K / 30 | 73 / 96.1K / 15 | |
+  | Fallbacks | 56 | 13 (all rate limits) | |
+
+  The answered share fell because the busy reply now returns at once, so the simulated users send more turns in 3 minutes, while the free tier answers about the same number.
+- **Tokens on 2026-11-25:** `.env.eval` key: about 96K (load test, three models), 36.5K (fill), about 20K (router check), under 1K (quota probe). Main key: under 1K (quota probe).
+- **Tests:** 369 pass, coverage 90%, lint clean.

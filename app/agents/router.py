@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 from app.agents.escalation import escalation_graph
 from app.agents.order_agent import order_agent_graph
-from app.agents.product_agent import product_agent_graph
+from app.agents.product_agent import asks_about_shown, product_agent_graph
 from app.agents.state import RouterState
 from app.agents.support_agent import support_agent_graph
 from app.core import config
@@ -119,18 +119,21 @@ def classify(state: RouterState) -> dict:
     if decision.intent == "unclear" and _sells_what_this_describes(message):
         decision.intent, decision.reply = "product", None
 
+    about_shown = decision.intent == "product" and asks_about_shown(
+        message, decision.about_shown, state.get("shown_products")
+    )
     if decision.intent in ("order", "product", "support"):
         agent_requests_total.labels(agent=decision.intent).inc()
     logger.info(
         f"request_id={get_request_id()} | Router | intent={decision.intent} | order_id={decision.order_id}"
-        f" | issue={decision.issue} | risk={decision.risk}"
+        f" | issue={decision.issue} | risk={decision.risk} | about_shown={about_shown} (model {decision.about_shown})"
     )
     return {
         "intent": decision.intent,
         "order_id": normalize_order_id(decision.order_id),
         "support_issue": {"category": decision.issue or "other", "description": state.get("user_message", "")},
         "risk": decision.risk,
-        "about_shown": decision.intent == "product" and decision.about_shown,
+        "about_shown": about_shown,
         "final_response": decision.reply if decision.intent == "unclear" else None,
     }
 

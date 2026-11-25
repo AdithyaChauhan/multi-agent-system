@@ -86,6 +86,17 @@ def test_a_brand_price_or_new_product_is_a_search_not_a_question(yaml_catalog):
         assert not pa.names_a_search(message), message
 
 
-def test_route_entry_prefers_a_search_when_the_message_names_one(yaml_catalog):
-    state = {"about_shown": True, "shown_products": SHOWN, "user_message": "what about Sony"}
-    assert pa.route_entry(state) == "extract"
+def _classify(message, model_says, shown=SHOWN):
+    with patch.object(router, "call_llm", return_value=RouteDecision(intent="product", about_shown=model_says)):
+        return router.classify({"user_message": message, "user_id": "anon-1", "shown_products": shown})["about_shown"]
+
+
+def test_a_named_search_overrules_the_models_question_flag(yaml_catalog):
+    assert _classify("what about Sony", model_says=True) is False
+
+
+def test_a_question_about_the_cards_counts_even_when_the_model_misses_it(yaml_catalog):
+    # gpt-oss-20b left the flag false on this once in 5 calls, and the turn searched for kettles instead.
+    assert _classify("does the first one come with a warranty?", model_says=False) is True
+    assert _classify("does the first one come with a warranty?", model_says=False, shown=[]) is False
+    assert _classify("show me cheaper kettles", model_says=False) is False
