@@ -2,7 +2,7 @@
 
 A chat assistant for an online electronics store. It finds products, answers questions about them, tracks orders, cancels them after a human "Yes", and hands safety reports to a person. It's built with LangGraph, FastAPI, Postgres + pgvector and Groq, and it was rebuilt in measured phases from a fragile prototype (about 4/10) to a tested, guarded system.
 
-**Live demo:** _link added at deploy_. Press **Try as a demo shopper**: no sign-up, and you get your own pretend account with five orders.
+**Live demo:** https://multi-agent-chatbot-58ur.onrender.com/static/login.html. Press **Try as a demo shopper**: no sign-up, and you get your own pretend account with five orders. (Free hosting: after a quiet spell the first page can take up to a minute.)
 
 **Things to try:**
 1. `something to keep my room warm under 2000`, then `which of these is the most powerful?`
@@ -21,11 +21,14 @@ Every number comes from a recorded run. The runs replay in CI at 0 tokens, and t
 | Right product in the top 5 (recall@5) | **0.979** (100 queries); **1.0** on the held-out half | 100 labelled queries; tuned on 53, reported on 47; gpt-oss-20b, gpt-oss-120b and qwen, 1 run |
 | Precision of the top 3 | **0.933** | same queries |
 | Shop with its section names renamed | recall drop **0 points** (it was 97 points before the rebuild) | 35 queries on a renamed copy of the catalog |
-| 51 multi-turn conversations | **48/51** | gpt-oss-20b, 1 run (the 3-run average follows at release) |
+| 51 multi-turn conversations | **48/51** in each of 2 live runs | gpt-oss-20b (the third run follows at release) |
 | Attack conversations (prompt injection, cross-user orders, fake admin, someone else pressing Yes) | **15/15 safe** | scored on routes and database effects, never on wording |
 | Questions about shown products (tool loop) | **6/6** | gpt-oss-20b, 1 run |
 | A model is retired or rate-limited | still answers through the next model | live check with a retired model name |
-| Unit tests | 348, coverage 89% | `pytest` in CI |
+| A judge's path on the live site (demo shopper, search, a question, an order, a cancel) | **10 s** in total | the live site, 2026-11-24 |
+| A safety report reaches a person | the Discord alert is posted before the reply, which came **1.7 s** after sending | the live site, 2026-11-24 |
+| CI on GitHub | every eval replayed at 0 tokens; nothing machine-specific is recomputed | 5 green runs in a row |
+| Unit tests | 361, coverage 90% | `pytest` in CI |
 
 ## How it works
 
@@ -86,4 +89,4 @@ Each was adopted only where it replaced hand-written code ([ADR 0009](docs/decis
 - **The data is synthetic.** The catalog comes from a public Amazon India dataset, and the orders and users are demo data. There's no production traffic or A/B evidence.
 - **One known miss:** "table" shows laptop tables rather than "we don't sell furniture" ([ADR 0015](docs/decisions/0015-demo-never-breaks.md)).
 - **One instance only:** the rate limits and the answer cache are per process.
-- **Free-tier quota:** about 200K tokens a day per model. The fallback chain and the cache stretch it, and past it the chat says it's busy.
+- **Free-tier quota:** about 200K tokens a day per model, and about 22K tokens a minute across the three models, roughly 5 product searches a minute. The fallback chain and the cache stretch it; past it, the chat says it's busy, quickly and without errors. In a 20-user load test (3 minutes, everyone chatting at once), 0 requests failed and 29% of the replies were real answers. A few people at a time get full answers ([ADR 0017](docs/decisions/0017-free-tier-capacity.md)).

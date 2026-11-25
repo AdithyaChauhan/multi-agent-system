@@ -2,7 +2,7 @@
 
 A chat assistant for an electronics store: it finds products, answers questions about them, tracks and cancels orders, and hands safety reports to a person. This is the story of taking it from a prototype that didn't start to a system with measured quality, in six phases. Each number below says how it was measured: the model, the number of runs and the database.
 
-> **Status:** release numbers still to come. The 3-run average, the load test, the live link and the alert timing are marked _pending_ and get filled in when Phase 5 closes.
+> **Status:** live at https://multi-agent-chatbot-58ur.onrender.com since 2026-11-24. Still _pending_: the third live run and the load-test rerun after a latency fix.
 
 ## 1. Where it started
 Commit `e0bdf3c`, rated about 4.2/10. The full diagnosis is in [docs/history/DIAGNOSIS.md](history/DIAGNOSIS.md).
@@ -30,7 +30,7 @@ Three rules held across every phase. Each is written down as a decision record.
 | 2. LangGraph architecture | Postgres checkpointer, `interrupt()` for the cancel pause, the search loop as graph edges, subgraph schemas, streaming, an escalation subgraph, filter chips | 51 conversations: 45 → **47**. A pending cancel survives an app restart |
 | 3. Hybrid search and cards | pgvector + full text + product type, fused by rank; local embeddings; the catalog decides "we don't carry X"; product cards with photos | Held-out half (47 queries): recall@5 0.933 → **1.0**. Renamed shop: recall drop 11.8 → **0** points. Search about 90 ms |
 | 4. Demo never breaks | Model fallback chain, a "busy" reply instead of an error page, an answer cache, per-user limits, a safety floor, CI replays every eval | Attack conversations **15/15** safe. 51 conversations **48/51**. CI gate replays everything at 0 tokens |
-| 5. Ship and showcase | One-click demo shoppers, product questions through a read-only tool loop, a free single-service deploy | Final run 1: **48/51**. Product questions 6/6. Runs 2 and 3, the load test and the live link: _pending_ |
+| 5. Ship and showcase | One-click demo shoppers, product questions through a read-only tool loop, a free single-service deploy, CI on GitHub's runners | Live runs 1 and 2: **48/51** each. Product questions 6/6. The judge path on the live site: **10 s** |
 
 ## 4. Decisions worth explaining
 
@@ -51,7 +51,8 @@ Three rules held across every phase. Each is written down as a decision record.
 - **Conversations:** 51 multi-turn conversations scored on routes, extracted filters, products shown and database effects, not on exact wording.
 - **Attacks:** 15 conversations: prompt injection, asking for another user's order, a fake admin, and someone else pressing Yes on a cancel. Scored on what reaches the database.
 - **Record and replay:** each model answer is stored with a key that includes the prompt, so replay fails loudly if a prompt changed. CI replays all of it at 0 tokens and fails the build if a number drops.
-- **Unit tests:** 355, coverage 90%.
+- **Unit tests:** 361, coverage 90%.
+- **Replays are machine-independent** ([0018](decisions/0018-machine-independent-replays.md)). Even the embedding vectors are recorded: CI's first runs on GitHub showed that another CPU's last digits could reorder near-tied search results.
 
 ## 6. What didn't work, or isn't done
 - **Three conversations still fail:**
@@ -63,12 +64,14 @@ Three rules held across every phase. Each is written down as a decision record.
 - **One instance only.** The rate limits and the answer cache live in process memory.
 - **The data is synthetic.** The catalog comes from a public dataset, and the orders and users are demo data. There's no production traffic or A/B evidence.
 - **The labels need a second reviewer.** The 100 query labels were written by the AI assistant that helped build the project and haven't been reviewed by a person yet.
+- **The free tier has a ceiling** ([0017](decisions/0017-free-tier-capacity.md)). Three models give about 22K tokens a minute, roughly 5 product searches. In a 20-user load test, 0 requests failed but only 29% of the replies were real answers; the rest were a quick "busy" reply. p95 was 22 s, because the Groq SDK slept on each rate limit before the fallback could move on. That's fixed, and the rerun is pending.
+- **Release testing found five bugs that the evals and unit tests had not.** The model started naming its tool call `functions.RouteDecision` (18% of router calls one afternoon), the SDK's retry sleeps, a rejected key returning errors, a network outage scored as a run, and the live database closing idle connections. Each was reproduced, then fixed in code with a test. The local CI simulation also missed four problems that only GitHub's runners showed.
 
-## 7. Release numbers (_pending_)
+## 7. Release numbers
 | What | Target | Result |
 |---|---|---|
-| 51 conversations, average of 3 live runs (gpt-oss-20b) | ≥ 47/51 | run 1: 48/51; runs 2 and 3 _pending_ |
-| 20-user load test, p95 latency | < 3 s | _pending_ |
-| 20-user load test, errors | < 1% | _pending_ |
-| A safety report reaches Discord | < 1 minute | _pending_ |
-| A judge tries search, an order and a cancel from the live link | < 2 minutes, no sign-up | _pending_ |
+| 51 conversations, average of 3 live runs (gpt-oss-20b) | ≥ 47/51 | runs 1 and 2: 48/51 each; run 3 _pending_ |
+| 20-user load test, p95 latency | < 3 s | 22 s before the retry fix; rerun _pending_ |
+| 20-user load test, errors | < 1% | **0%** (0 of 216); 29% real answers |
+| A safety report reaches Discord | < 1 minute | **met**: posted before the reply, which came 1.7 s after sending |
+| A judge tries search, an order and a cancel from the live link | < 2 minutes, no sign-up | **met**: 10 s, with a question about a result too |

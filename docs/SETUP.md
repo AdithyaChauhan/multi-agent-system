@@ -66,6 +66,20 @@ python eval/run_baseline.py --label qa --model openai/gpt-oss-20b --mode replay 
 - `--mode live` saves nothing.
 - Tune search only on the dev half of `eval/query_split.json`.
 - The renamed-catalog robustness check uses `scripts/make_renamed_catalog_db.py`.
+- **Query embeddings are recorded too** (`eval/cassettes/query_vectors.json`), so a replay computes no embeddings and gives the same result on any machine (ADR 0018). After a change that alters search queries, add the missing vectors at 0 tokens by replaying with `VECTOR_CASSETTE_RECORD=1`, for example `VECTOR_CASSETTE_RECORD=1 python eval/run_baseline.py --label rec --model openai/gpt-oss-20b --mode replay` (and the same for each suite).
+- A replay miss prints the call that missed. On GitHub it also shows as an annotation on the run.
+
+### Load test
+
+`eval/loadtest/` runs 20 simulated demo shoppers against a separate app container (port 8001, the `multi_agent_baseline` database, alerts off). Locust isn't in `requirements.txt`: install `locust==2.32.4` into its own venv.
+
+```bash
+docker compose build app
+SMOKE=1 USERS=5 DURATION=40s LOCUST=<path to locust> bash eval/loadtest/run.sh smoke   # 0 tokens: an invalid key, every reply is "busy"
+LOCUST=<path to locust> bash eval/loadtest/run.sh p5-load-20u                          # costs tokens: about 110K over three models
+```
+
+`KEY_ENV_FILE=.env.eval` takes the second key. The summary reports p95, errors, the share of real answers, cache hits and fallbacks, and is written to `$TEMP/mas-loadtest/`.
 
 ## Tests
 
@@ -81,30 +95,34 @@ python -m pytest -m integration                         # needs the local Postgr
 |---|---|
 | Lint | `black --check`, `flake8` |
 | Unit tests | `pytest`, coverage ≥ 80% |
-| Replay evals | Postgres + pgvector service, scrubbed fixture, every eval replayed at 0 tokens. `eval/ci_gate.py` fails the build if a number drops below its measured bar. |
+| Replay evals | Postgres + pgvector service, the scrubbed fixture (with the product vectors), every eval replayed at 0 tokens with recorded query vectors, so nothing machine-specific is recomputed. `eval/ci_gate.py` fails the build if a number drops below its measured bar. |
 | Docker build | the app image, with the embedding model baked in |
-| Push image | GHCR, on pushes to the release branches |
-| Kubernetes | `helm lint` and `helm template` always; a live `helm upgrade` only when a `KUBECONFIG` secret points at a reachable cluster |
+| Push image | GHCR (`ghcr.io/adithyachauhan/multi-agent-system`), on pushes to `main` only |
+| Kubernetes | on pushes to `main`: `helm lint` and `helm template` (Helm v3.16.4); a live `helm upgrade` only when a `KUBECONFIG` secret points at a reachable cluster |
 
 `keep-warm.yml` pings the live demo every 10 minutes, and `eval.yml` is the manual live DeepEval run.
+
+**To reproduce the replay job locally,** extract a clean copy with `git archive HEAD`, never the working folder (it holds `.env`). Run it in the CI images: `pgvector/pgvector:0.8.0-pg15` for the database, with the fixture restored by that container's own `pg_restore`, and `python:3.12` with `CI=true` for `bash eval/ci_replay.sh`.
 
 ## Put the demo online (free)
 
 The app runs on Render's free web service and the database on Neon's free Postgres, which has pgvector and doesn't expire. The mock carrier API runs inside the app.
 
-1. **Neon.** Create a project at [neon.tech](https://neon.tech) and copy the connection string, which starts with `postgresql://` and ends with `?sslmode=require`. Put it in a file named `.env.deploy` in the repo root, as one line: `LIVE_DATABASE_URL=<the string>`. That file is git-ignored.
+**`main` is the live site:** Render deploys every push to `main` without waiting for CI, so change `main` only through a PR with green CI (ADR 0019).
+
+1. **Neon.** Create a project at [neon.tech](https://neon.tech) in the region closest to Render's (AWS Singapore for `render.yaml`). Copy the **direct** connection string: in **Connect**, turn connection pooling off (the conversation memory uses prepared statements, which the pooler breaks). It starts with `postgresql://` and ends with `?sslmode=require`. Put it in a file named `.env.deploy` in the repo root, as one line: `LIVE_DATABASE_URL=<the string>`. That file is git-ignored. With the Neon CLI instead: `neon login`, then `neon connection-string <branch> --project-id <id>` (unpooled by default).
 2. **Load the database** from this machine, with the local Docker stack running:
    ```bash
    bash scripts/load_live_db.sh
    ```
-3. **Discord alerts.** In a Discord server, go to the channel's settings, then **Integrations**, then **Webhooks**, then **New Webhook**, and copy the webhook URL.
-4. **Render.** At [render.com](https://render.com), choose **New → Blueprint**, pick this GitHub repository and the `main` branch. When asked, paste:
+3. **Discord alerts.** Create a server just for yourself if needed (**+** in the left sidebar → **Create My Own**; it comes with `#general`). Open the channel's settings → **Integrations** → **Webhooks** → **New Webhook**. Click the new webhook (it gets a random name such as "Captain Hook"), then **Copy Webhook URL**. To test it before going live, add `ESCALATION_WEBHOOK_URL=<the URL>` as a second line in `.env.deploy`.
+4. **Render.** First delete any older services from earlier attempts: the free plan's 750 instance-hours a month cover one always-awake service. Then, at [render.com](https://render.com), choose **New → Blueprint**, pick this GitHub repository and the `main` branch. When asked, paste:
    - `DATABASE_URL`: the Neon string;
    - `GROQ_API_KEY`;
    - `ESCALATION_WEBHOOK_URL`: the Discord URL.
 
-   Google sign-in variables are optional.
-5. **Keep it awake.** On GitHub, go to **Settings → Secrets and variables → Actions → Variables** and add `LIVE_URL`, the Render URL (for example `https://multi-agent-chatbot.onrender.com`).
+   Google sign-in variables are optional. The service's address gets a random ending when the plain name is taken; the live one is https://multi-agent-chatbot-58ur.onrender.com.
+5. **Keep it awake.** On GitHub, go to **Settings → Secrets and variables → Actions → Variables** and add `LIVE_URL`, the Render URL (here `https://multi-agent-chatbot-58ur.onrender.com`).
 6. **Check it.** Open the live URL in a private window, press **Try as a demo shopper**, then search for a product, ask about one of the results, track an order, and cancel the processing one. "My charger caught fire" should post to the Discord channel.
 
 `helm/` remains as the Kubernetes option (`helm upgrade --install … --values helm/values.yaml`).
