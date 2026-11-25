@@ -23,6 +23,7 @@ One file per decision that would be costly to reverse, or easy to undo by accide
 | [0017](0017-free-tier-capacity.md) | Free-tier capacity: fail fast, and report the share of real answers | Accepted (the user's choice) |
 | [0018](0018-machine-independent-replays.md) | Replays depend on nothing machine-specific | Accepted, implemented |
 | [0019](0019-main-is-live.md) | `main` is the live site: change it through a PR; every pool checks its connections | Accepted, implemented |
+| [0020](0020-replies-claim-only-what-code-checked.md) | A reply claims only what code checked, and the evals check the claims | Accepted, implemented |
 
 ## Template
 ```markdown

@@ -12,6 +12,14 @@ Newest first. `/handoff` adds an entry at the end of every session. Keep entries
 - **Commits:**
 -->
 
+## 2026-11-25 · Phase 5 · Honest product replies live; run 3 of the fixed code 48/51; load test meets its target
+- **Done:** the user found "These don't match everything you asked for" over three HDMI cables on the live site. Header now "Here's what I found:"; only code-checked notes say something is missing; a harness check fails false mismatch claims; `asks_about_shown` backs up the router's Q&A flag (PR #6, CI green, merged `1082d60`, checked live). Visual explainer rebuilt from the code (v3, v4). `eval.yml` removed.
+- **Measured:** final run 3, fixed code (gpt-oss-20b, live, 1 run, `multi_agent_baseline`, main key): **48/51**, 0 false claims, 196.5K tokens. Runs 1 and 2 re-scored: 38/51 each. Replay of the fix: 48/51, adversarial 14/15 (a12 routing), Q&A 6/6, retrieval unchanged. Load test, 20 users: p95 22 s → **1.3 s**, 0 of 377 errors, 14% real answers. 369 tests, coverage 90%.
+- **Decisions:** [0020](decisions/0020-replies-claim-only-what-code-checked.md) (with the user's choice: three new live runs of the fixed code).
+- **Open questions:** delete the local `backup/phase-5-ship-before-rewrite`? The Phase 0 labels review and the 50-product spot check are still open.
+- **Next:** runs 4 and 5 on 2026-11-26 after 05:30 IST (one per key), the 3-run average into the docs, the final scorecard.
+- **Commits:** PR #6 (`807c3dc`, merge `1082d60`) and this handoff's PR.
+
 ## 2026-11-24 · Phase 5 · Live on Render + Neon; CI green on GitHub; five release bugs fixed
 - **Done:** live at https://multi-agent-chatbot-58ur.onrender.com (PR #3; Neon loaded; Discord alerts). CI green on GitHub after four CI-only fixes. Release bugs fixed: `functions.` tool names, SDK retry sleeps, a rejected key's 500, an unreachable Groq scored as a run, Neon's closed connections (PR #4). Load test tooling, turn metrics, a Grafana row, the case study draft; publish and deploy only from `main`; history rewritten without Claude attribution.
 - **Measured:** final run 2 48/51 (gpt-oss-20b, live, 1 run, `multi_agent_baseline`, 198.8K tokens); load test, 20 users: 0 errors, p95 22 s before the retry fix, 29% real answers; live: judge path 10 s, Discord alert before a 1.7 s reply, Neon suspend test 3/3; 361 tests, coverage 90%.
