@@ -5,14 +5,17 @@
 ## Now
 - **Current phase:** Phase 5, Ship and showcase: in progress. Phases 0–4 are done.
 - **Live:** https://multi-agent-chatbot-58ur.onrender.com (Render free, Neon free, Singapore). `main` is the live site: Render deploys every push to it, so change it only through a PR with green CI ([0019](docs/decisions/0019-main-is-live.md)).
-- **Branch:** `main` (`phase-5-ship` merged as PR #3, the Neon fix as PR #4); new work goes on short branches with a PR each.
+- **Branch:** `main` (`phase-5-ship` merged as PR #3, the Neon fix as PR #4, honest replies as PR #6); new work goes on short branches with a PR each.
 - **Phase 5 so far:**
   - one-click demo shoppers;
   - product Q&A through a read-only ToolNode loop;
   - **live** on Render + Neon: the judge path (demo shopper → search → question → order → cancel) takes 10 s; safety alerts reach Discord;
   - CI green on GitHub's runners, publishing the image from `main`; replays depend on nothing machine-specific ([0018](docs/decisions/0018-machine-independent-replays.md));
   - showcase README, `docs/SETUP.md`, the case study draft, Grafana panels;
-  - final runs 1 and 2 **48/51** each; Q&A 6/6; adversarial safety cases 14/14;
+  - replies claim only what code checked ([0020](docs/decisions/0020-replies-claim-only-what-code-checked.md)): the false "don't match" header the user found live is gone, and the evals now fail such claims;
+  - final run 3, the first live run of the fixed code: **48/51**, 0 false claims (runs 1 and 2 of the old code: 48/51 then, 38/51 re-scored; not counted); Q&A 6/6; adversarial safety cases 14/14;
+  - 20-user load test: p95 **1.3 s**, 0 of 377 errors, 14% real answers;
+  - the visual explainer rebuilt from the code (version 3);
   - five bugs found by the release checks, all fixed (`functions.` tool names, SDK retry sleeps, a rejected key's 500, an unreachable Groq scored as a run, Neon's closed connections);
   - the free tier's ceiling, reported rather than bought: about 5 product turns a minute ([0017](docs/decisions/0017-free-tier-capacity.md)).
 - **Phase 4 result** ([0015](docs/decisions/0015-demo-never-breaks.md)):
@@ -30,10 +33,10 @@
   - product replies show cards with photos.
 - **Roadmap reset (2026-11-23, [0013](docs/decisions/0013-judge-facing-priorities.md)):** the remaining phases are ordered by what a judge sees: a demo that never breaks (4), then a live link that stays up with a one-click demo and a showcase README (5).
 - **Next action:** new chat, `/resume`, then finish Phase 5 (see its plan):
-  - final run 3 on the main key, once its gpt-oss-20b quota is free again (after about 17:30 on 2026-11-25), about 196K tokens;
-  - rerun the 20-user load test after the retry fix (about 110K tokens across three models);
-  - the visual explainer; the case study's last numbers; the final scorecard.
-- **For the user:** nothing pending (`LIVE_URL` is set for keep-warm; the stale `KUBECONFIG` secret is removed).
+  - final runs 4 and 5 of the fixed code on 2026-11-26 after 05:30 IST (the quota's daily reset), one per key, about 196K tokens each;
+  - the 3-run average into the case study, the plan and the explainer's last screen;
+  - the final scorecard, then mark Phase 5 done.
+- **For the user:** merge this handoff's PR; can the local branch `backup/phase-5-ship-before-rewrite` be deleted?
 - **Still open:** the user's review of the Phase 0 labels; the user skipped the 50-product spot check.
 - **Blocked on:** nothing (only quota timing).
 
@@ -93,6 +96,7 @@ Details and the reasoning are in [docs/decisions/](docs/decisions/README.md).
 - Hybrid search: pgvector + full text + the product type, fused by rank; local embeddings from the products' own words. (0006, 0014)
 - Order the work by what a judge sees: a live demo that never breaks and needs no sign-up comes before internal polish. (0013)
 - Safety escalates if the model flags it or a narrow pattern matches. (0008)
+- A reply claims only what code checked, and the evals check the claims. (0020)
 
 ## Out of scope
 - Replacing LangGraph, a separate vector database, or one autonomous tool-calling agent (0001).

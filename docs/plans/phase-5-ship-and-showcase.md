@@ -2,7 +2,7 @@
 - **Status:** In progress (started 2026-11-23)
 - **Branch:** `phase-5-ship`, off `phase-4-reliability`, merged into `main` as PR #3 (2026-11-24). Since then `main` is what's live: each change is a short branch and a PR (the Neon fix was PR #4).
 - **Live:** https://multi-agent-chatbot-58ur.onrender.com (Render free, Neon free, both in Singapore)
-- **Decisions:** [0013](../decisions/0013-judge-facing-priorities.md), [0016](../decisions/0016-product-qa-and-demo-shoppers.md), [0017](../decisions/0017-free-tier-capacity.md), [0018](../decisions/0018-machine-independent-replays.md), [0019](../decisions/0019-main-is-live.md)
+- **Decisions:** [0013](../decisions/0013-judge-facing-priorities.md), [0016](../decisions/0016-product-qa-and-demo-shoppers.md), [0017](../decisions/0017-free-tier-capacity.md), [0018](../decisions/0018-machine-independent-replays.md), [0019](../decisions/0019-main-is-live.md), [0020](../decisions/0020-replies-claim-only-what-code-checked.md)
 - **The user's choices (2026-11-23):**
   - free hosting kept awake (Render + Neon);
   - safety alerts to a Discord channel;
@@ -25,11 +25,12 @@ Meet the definition of done in `ROADMAP.md`. A judge opens the README, clicks a 
 - [x] **Docs:** `docs/SETUP.md`, the README showcase, ADR 0016, and the regenerated graph diagram.
 - [x] **Root cleanup:** 8 files removed, 11 cache folders deleted, history reports moved to `docs/history/`.
 - [x] **Final run 1** (51 conversations, gpt-oss-20b): 48/51. The Q&A set 6/6; adversarial 14/15 (a12 is routing, reported).
-- [ ] **Final runs 2 and 3:** live, `--mode live`, about 196K tokens each. One per key per day: `--env-file .env.eval` for one of them. The first 2026-11-24 attempt was stopped and doesn't count (it found the `functions.` tool-name bug). **Run 2: 48/51** (2026-11-24, `.env.eval` key). Run 3: the main key, once its gpt-oss-20b quota is free again (after about 17:30 on 2026-11-25).
+- [x] **Final run 2** (2026-11-24, `.env.eval` key): 48/51. The first 2026-11-24 attempt was stopped and doesn't count (it found the `functions.` tool-name bug). Runs 1 and 2 measured the old header: **38/51** each under the false-claim check, so they don't count toward the release average (the user's choice, ADR 0020).
+- [ ] **Three live runs of the fixed code** (`--mode live`, about 196K tokens each, one per key per day; Groq's daily quota resets at about 05:30 IST). **Run 3: 48/51** (2026-11-25, main key, `807c3dc`). Runs 4 and 5: 2026-11-26 after 05:30 IST, one on the main key and one with `--env-file .env.eval`.
 - [x] **Load test:** built (`eval/loadtest/`: `locustfile.py`, `run.sh`, `summarize.py`, `SMOKE=1` for a 0-token run). First run 2026-11-24 failed the latency target and found the SDK retry wait (fixed). **Rerun 2026-11-25: p95 1.3 s, 0 of 377 requests failed, 14% of chat replies real answers** (see Results).
 - [x] **Honest product replies** (2026-11-25, found by the user on the live site: "hdmi cables" said "These don't match everything you asked for" over three HDMI cables). The header came from the ranker's `exact` list, which gpt-oss-20b leaves empty in 65% of its recorded answers. The header is now "Here's what I found:"; only the brand note and "I widened…" say something is missing. A new harness check fails any reply that claims a mismatch the shown products don't have. Re-recording found a second flake, fixed in code: `asks_about_shown` (see Results).
 - [x] **The CI simulation passes** with the new cassettes (2026-11-23, `python:3.12-slim`): retrieval 0.979/0.933, baseline 48/51, adversarial 14/15 (a12 routing), Q&A 6/6, gate passed. It found the replay wrapper bug fixed in `96b74bf`.
-- [ ] `docs/CASE_STUDY.md`: drafted 2026-11-24. The live link, the Discord timing, runs 1–2, the load-test rerun and the false-claim finding are filled in; run 3 is still pending.
+- [ ] `docs/CASE_STUDY.md`: drafted 2026-11-24. The live link, the Discord timing, runs 1–3, the load-test rerun and the false-claim finding are filled in; runs 4 and 5 and their average are still pending.
 - [x] **Visual explainer** (2026-11-25, version 3 at the same URL): the Today / Proposed switch removed; stories rebuilt from the code on `main` (hybrid search and the search loop, the Q&A tool loop, the `interrupt()` pause, the escalation subgraph with the Discord alert, the safety floor); a last screen of six measured numbers. Run 3 and the load test can be added to it when measured.
 - [x] **Grafana panels:** a "Demo never breaks" row: turn latency p50/p95 (new `chat_turn_seconds`, which times `/chat/stream` to the reply), turns by outcome (new `chat_turns_total`), fallbacks, cache hit rate, limited turns. Prometheus also scrapes the load-test container.
 - [x] **Go live with the user:** PR #3 merged (`1b26114`), CI green on GitHub; Neon loaded with `scripts/load_live_db.sh`; Render deploys `main`; the live link checked end to end; Discord alerts arrive. The first live check found a fifth bug (Neon closes idle connections), fixed in PR #4 (`42ce007`). See Results.
@@ -50,14 +51,22 @@ Meet the definition of done in `ROADMAP.md`. A judge opens the README, clicks a 
 
 **Status (2026-11-25):**
 - live link and judge path: **met** (10 s, see Results);
-- 3 live runs: 2 of 3 done, 48/51 each under the checks of the time; **38/51 each** under the false-claim check added 2026-11-25. The fixed code replays at 48/51. How to count the runs of the old code is open (see Results);
-- adversarial safety cases and Q&A: met in replay (local, 2026-11-25, with the new check);
+- 3 live runs of the fixed code: 1 of 3 done, **48/51** (run 3). Runs 1 and 2 of the old code: 48/51 then, 38/51 under the false-claim check; they don't count (ADR 0020);
+- adversarial safety cases and Q&A: met in replay (local, 2026-11-25, with the new check) and in CI on PR #6;
 - load test: **met** (p95 1.3 s, 0 errors; 14% real answers, the free-tier ceiling);
 - Discord within 1 minute: **met**;
 - prompts and diagram: met;
-- case study: partly; explainer: **met** (republished 2026-11-25).
+- case study: partly (runs 4 and 5 pending); explainer: **met** (republished 2026-11-25).
 
 ## Results (so far)
+### 2026-11-25 (later): the fix is live; run 3 of the fixed code 48/51
+- **PR #6** (`807c3dc`, merged as `1082d60`): CI green on GitHub (lint, unit tests, replay evals, Docker build; publish and deploy skipped on a PR).
+- **Live check after the deploy:** "hdmi cables" answers "Here's what I found:" over three HDMI cables. "electric kettle", then "does the first one come with a warranty?", goes to the Q&A loop: "The facts don't mention a warranty for the Tesora 1.8L Stainless Steel Electric Kettle."
+- **Final run 3** (`p5-final-r3`: gpt-oss-20b, `--mode live`, 1 run, local app on `multi_agent_baseline`, main key, 15:27–15:54 IST, code `807c3dc`): **48/51** (p03, p10, s16, the known three), 87 of 90 turns, **0 false claims**, 0 rate limits, 0 cassette misses. 2.02 model calls and 2,184 tokens per turn, median 1.9 s per turn; 196.5K tokens in all.
+- **Counting the runs** (the user's choice, Option B): three live runs of the fixed code, recorded in ADR 0020. Runs 1 and 2 stay below with both scores.
+- **Groq's daily quota resets at a fixed time,** about 05:30 IST (00:00 UTC), not over a rolling 24 hours: the main key ran run 3 at 15:27 with 0 rate limits, less than 24 hours after its heavy use ended. Both keys are full again after 05:30.
+- **Tokens on 2026-11-25, main key:** 196.5K (run 3), under 1K (probe).
+
 - **Live response times** (gpt-oss-20b, 2026-11-23):
   - product search turn: median 2.5 s;
   - question about shown products: median 2.4 s;
@@ -128,7 +137,7 @@ Meet the definition of done in `ROADMAP.md`. A judge opens the README, clicks a 
   - **Re-recording:** the router reads the previous reply, so the new header made 27 router recordings miss (20 baseline, 7 Q&A). Filled on the `.env.eval` key: 31 calls, 36.5K tokens.
 - **A second flake, found by the re-recording:** q04 "does the first one come with a warranty?" lost `about_shown` and searched again ("I couldn't find any electric kettle…"). The header didn't cause it: the same input gave `about_shown=true` 8 of 8 times (4 with each header, about 20K tokens), so the recorded call was a 1-in-5 sample. Fixed in code, not by re-recording until it passed: `asks_about_shown`, called by the router, takes the model's flag or a message that points at the list ("the first one", "which of these"), and either way needs no brand, budget or product word. It changes no turn in the baseline or attack sets: only q01, q02, q04 and q06 point at a list after a listing, and all four are real questions.
 - **Replay on the fixed code** (local, `multi_agent_baseline`, gpt-oss-20b cassettes, with the new check): baseline **48/51** (p03, p10, s16, as before), 0 false claims, 0 misses; adversarial 14/15 (a12 routing, reported); Q&A **6/6**; retrieval unchanged (0.979 / 0.933 / 1.0); `ci_gate.py` passed.
-- **Open for the user:** runs 1 and 2 measured the old code. Either count them as scored then (48/51, with the 38/51 re-score next to them), or measure the fixed code with three new live runs (about 196K tokens each, one per key per day).
+- **Decided by the user:** three new live runs of the fixed code (see the entry above and ADR 0020).
 - **Load test rerun** (`p5-load-20u-r2`: local Docker, 20 users, 3 minutes, gpt-oss-20b first with the fallback chain and the cache on, `.env.eval` key, `multi_agent_baseline`; the image predates the header fix, which doesn't touch latency):
 
   | | First run (2026-11-24) | Rerun | Target |
