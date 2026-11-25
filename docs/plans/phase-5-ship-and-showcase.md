@@ -1,7 +1,8 @@
 # Phase 5: Ship and showcase
 - **Status:** In progress (started 2026-11-23)
-- **Branch:** `phase-5-ship`, off `phase-4-reliability`
-- **Decisions:** [0013](../decisions/0013-judge-facing-priorities.md), [0016](../decisions/0016-product-qa-and-demo-shoppers.md)
+- **Branch:** `phase-5-ship`, off `phase-4-reliability`, merged into `main` as PR #3 (2026-11-24). Since then `main` is what's live: each change is a short branch and a PR (the Neon fix was PR #4).
+- **Live:** https://multi-agent-chatbot-58ur.onrender.com (Render free, Neon free, both in Singapore)
+- **Decisions:** [0013](../decisions/0013-judge-facing-priorities.md), [0016](../decisions/0016-product-qa-and-demo-shoppers.md), [0017](../decisions/0017-free-tier-capacity.md), [0018](../decisions/0018-machine-independent-replays.md), [0019](../decisions/0019-main-is-live.md)
 - **The user's choices (2026-11-23):**
   - free hosting kept awake (Render + Neon);
   - safety alerts to a Discord channel;
@@ -24,13 +25,18 @@ Meet the definition of done in `ROADMAP.md`. A judge opens the README, clicks a 
 - [x] **Docs:** `docs/SETUP.md`, the README showcase, ADR 0016, and the regenerated graph diagram.
 - [x] **Root cleanup:** 8 files removed, 11 cache folders deleted, history reports moved to `docs/history/`.
 - [x] **Final run 1** (51 conversations, gpt-oss-20b): 48/51. The Q&A set 6/6; adversarial 14/15 (a12 is routing, reported).
-- [ ] **Final runs 2 and 3:** live, `--mode live`, about 196K tokens each. One per key per day: `--env-file .env.eval` for one of them. The 2026-11-24 attempt was stopped and doesn't count (see Results): it found the `functions.` tool-name bug.
+- [ ] **Final runs 2 and 3:** live, `--mode live`, about 196K tokens each. One per key per day: `--env-file .env.eval` for one of them. The first 2026-11-24 attempt was stopped and doesn't count (it found the `functions.` tool-name bug). **Run 2: 48/51** (2026-11-24, `.env.eval` key). Run 3: the main key, once its gpt-oss-20b quota is free again (after about 17:30 on 2026-11-25).
 - [ ] **Load test:** built (`eval/loadtest/`: `locustfile.py`, `run.sh`, `summarize.py`, `SMOKE=1` for a 0-token run). First run 2026-11-24 failed the latency target and found the SDK retry wait (fixed). Rerun after the fix when gpt-oss-20b quota allows.
 - [x] **The CI simulation passes** with the new cassettes (2026-11-23, `python:3.12-slim`): retrieval 0.979/0.933, baseline 48/51, adversarial 14/15 (a12 routing), Q&A 6/6, gate passed. It found the replay wrapper bug fixed in `96b74bf`.
-- [ ] `docs/CASE_STUDY.md`: drafted 2026-11-24; release numbers marked pending.
+- [ ] `docs/CASE_STUDY.md`: drafted 2026-11-24. The live link, the Discord timing and runs 1–2 are filled in; run 3 and the load-test rerun are still pending.
 - [ ] **Visual explainer:** built steps lose "Proposed", add the tool loop and hybrid search, measured numbers, republish to the same URL (see `docs/visual/README.md`).
 - [x] **Grafana panels:** a "Demo never breaks" row: turn latency p50/p95 (new `chat_turn_seconds`, which times `/chat/stream` to the reply), turns by outcome (new `chat_turns_total`), fallbacks, cache hit rate, limited turns. Prometheus also scrapes the load-test container.
-- [ ] **Go live with the user** (step 7 of the plan): push after asking, PR to `main`, CI green, merge; the user creates Neon, Discord and Render and pastes the secrets; `bash scripts/load_live_db.sh`; check the live link end to end; time the Discord alert.
+- [x] **Go live with the user:** PR #3 merged (`1b26114`), CI green on GitHub; Neon loaded with `scripts/load_live_db.sh`; Render deploys `main`; the live link checked end to end; Discord alerts arrive. The first live check found a fifth bug (Neon closes idle connections), fixed in PR #4 (`42ce007`). See Results.
+- [x] **CI green on GitHub's runners**, for the first time: four problems the local simulation had hidden, fixed (see Results, ADR 0018). 5 green runs in a row since.
+- [x] **`LIVE_URL` repository variable** set by the user (2026-11-25): keep-warm now pings the live site every 10 minutes.
+- [x] **Removed the stale `KUBECONFIG` secret** (the user, 2026-11-25): it pointed at an EKS cluster that no longer exists, and stage 6 printed that address in a public log.
+- [ ] `eval.yml` (manual only) still names the old self-hosted `minikube` runner: point it at `ubuntu-latest` or remove it.
+- [ ] Delete the local branch `backup/phase-5-ship-before-rewrite` once the user is happy with the rewritten history (commit messages carry no Claude attribution, 2026-11-24).
 - [ ] Final scorecard in the ROADMAP; Results; `/handoff`.
 
 ## Acceptance criteria
@@ -40,6 +46,15 @@ Meet the definition of done in `ROADMAP.md`. A judge opens the README, clicks a 
 - A safety report reaches Discord within 1 minute.
 - Prompts under 40 lines (router 27, Q&A 6); the graph diagram shows the subgraphs, the loop, the pause and the tool loop.
 - The case study and the visual explainer show measured numbers.
+
+**Status (2026-11-25):**
+- live link and judge path: **met** (10 s, see Results);
+- 3 live runs: 2 of 3 done, 48/51 each;
+- adversarial safety cases and Q&A: met in replay on GitHub;
+- load test: **not met** (p95 22 s before the retry fix; rerun pending);
+- Discord within 1 minute: **met**;
+- prompts and diagram: met;
+- case study: partly; explainer: not started.
 
 ## Results (so far)
 - **Live response times** (gpt-oss-20b, 2026-11-23):
@@ -70,3 +85,34 @@ Meet the definition of done in `ROADMAP.md`. A judge opens the README, clicks a 
   - **Why mostly busy:** all 125 rate limits were per minute (gpt-oss-20b and -120b about 7K tokens a minute, qwen on input tokens). Three models give about 22K tokens a minute, about 5 product turns. 20 users with 5–15 s think time ask for far more. This is the free tier's ceiling, not a bug.
   - The rerun after the fix needs fresh gpt-oss-20b quota (the main key spent about 170K on it today).
 - **Tests:** 355 pass, coverage 90%, lint clean.
+
+### 2026-11-24 (evening): final run 2, CI on GitHub, the live site
+- **Final run 2: 48/51** (gpt-oss-20b, live, 1 run, `.env.eval` key, `multi_agent_baseline`, current `main`):
+  - 198.8K tokens; 2.04 model calls and 2,209 tokens per turn; median 1.97 s per turn; 0 rate limits;
+  - the failures are the same as run 1: p03 "table", p10 "4k monitor", s16;
+  - the model sent the `functions.RouteDecision` name 10 times; all 10 were salvaged, none lost.
+- **CI on GitHub's runners failed four ways that the local simulation hid** (all fixed, ADR 0018):
+  1. the runner's newer `pg_restore` sent `SET transaction_timeout`, which Postgres 15 rejects: the fixture is now restored with the database container's own client;
+  2. `run_split.py` strips `GROQ_API_KEY` from its child runs, and CI has no `.env`: replay runs get a placeholder key;
+  3. a user's seeded orders shared one timestamp, so their order in the router prompt depended on storage order, which shifts as the harness updates rows: `fetch_user_orders` breaks ties by id, and `scripts/untie_order_times.py` spaced tied times 1 µs apart (the eval users in the order their recordings saw, recovered by matching every recorded router call's key, 0 tokens);
+  4. CI recomputed every embedding on the runner's CPU; the last digits differed from this machine and reordered near-tied smartwatches, so q05 missed its ranker recording on 3 of 6 runs. Now the fixture carries the product vectors (0.7 → 2.6 MB), and the 166 query vectors are recorded (`eval/cassettes/query_vectors.json`). A replay computes no embeddings; checked with the model blocked (offline, empty cache).
+  - The simulation missed them because it copied the working folder (`.env` included) and used Debian's Postgres 15 client and this machine's CPU. Simulate from `git archive HEAD` in the CI images instead.
+  - Two dead ends, for the record: tied order times weren't q05's cause, and neither was the embedding-model cache (the 4-of-4 pattern was chance). The annotation that named the missed call settled it.
+  - Since the fix: **5 green runs in a row** (PR runs `23d6fb2`, `249cf91`, `55026e4`; `main` after each merge, `1b26114` and `42ce007`). On `main` all six stages pass; the image is published to GHCR; stage 6 skips the live deploy (its `KUBECONFIG` points at a deleted EKS cluster).
+- **Neon** (free, `aws-ap-southeast-1`, Postgres 18.7, pgvector 0.8.7) loaded with `scripts/load_live_db.sh`: 1,350 products with vectors, 2,315 orders, 0 tied order times, migrations at head (`c3a9d2e7f4b1`). The connection string is the direct (unpooled) one: the checkpointer uses prepared statements.
+- **The first live check found a fifth bug:** HTTP 500 on the first turns after Neon suspends (5 idle minutes), from the checkpointer pool's dead connections. Reproduced by suspending Neon through its API between two messages: 2 of 3 messages failed before the fix, 3 of 3 passed after it (`check=ConnectionPool.check_connection`, `max_idle=240`). PR #4.
+- **The live site** (Render free + Neon, 2026-11-24/25, gpt-oss-20b with the fallback chain, main key):
+
+  | Check | Result |
+  |---|---|
+  | messages right after Neon suspends | 3 of 3 pass; the first takes 2.4 s while Neon wakes |
+  | `X-User-ID` impersonation | ignored: anonymous, asked to sign in |
+  | judge path: demo shopper → search → question → order → cancel + Yes | **10 s** in total; turns 0.2–4.7 s |
+  | `/chat/stream` (the chat page) | 4 step labels, then the reply |
+  | "my charger caught fire" | a critical ticket; the Discord alert is posted before the reply, which came 1.7 s after sending; it arrived in #general |
+  | "my steam iron arrived damaged" | a medium ticket; its alert arrived too |
+
+- **Tokens on 2026-11-24:**
+  - main key: about 133K (the stopped run 2), about 108K (the load test, three models), about 27K (a smoke run whose invalid key didn't apply), about 20K (live checks);
+  - `.env.eval` key: 198.8K (run 2).
+- **Tests:** 361 pass, coverage 90%, lint clean, `actionlint` clean on `ci.yml`.

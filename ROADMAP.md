@@ -4,13 +4,17 @@
 
 ## Now
 - **Current phase:** Phase 5, Ship and showcase: in progress. Phases 0–4 are done.
-- **Branch:** `phase-5-ship` (off `phase-4-reliability`); committed, not pushed.
+- **Live:** https://multi-agent-chatbot-58ur.onrender.com (Render free, Neon free, Singapore). `main` is the live site: Render deploys every push to it, so change it only through a PR with green CI ([0019](docs/decisions/0019-main-is-live.md)).
+- **Branch:** `main` (`phase-5-ship` merged as PR #3, the Neon fix as PR #4); new work goes on short branches with a PR each.
 - **Phase 5 so far:**
   - one-click demo shoppers;
   - product Q&A through a read-only ToolNode loop;
-  - free single-service deploy files (Render + Neon, keep-warm);
-  - showcase README and `docs/SETUP.md`; root cleanup;
-  - final run 1 **48/51**; Q&A 6/6; adversarial safety cases 14/14.
+  - **live** on Render + Neon: the judge path (demo shopper → search → question → order → cancel) takes 10 s; safety alerts reach Discord;
+  - CI green on GitHub's runners, publishing the image from `main`; replays depend on nothing machine-specific ([0018](docs/decisions/0018-machine-independent-replays.md));
+  - showcase README, `docs/SETUP.md`, the case study draft, Grafana panels;
+  - final runs 1 and 2 **48/51** each; Q&A 6/6; adversarial safety cases 14/14;
+  - five bugs found by the release checks, all fixed (`functions.` tool names, SDK retry sleeps, a rejected key's 500, an unreachable Groq scored as a run, Neon's closed connections);
+  - the free tier's ceiling, reported rather than bought: about 5 product turns a minute ([0017](docs/decisions/0017-free-tier-capacity.md)).
 - **Phase 4 result** ([0015](docs/decisions/0015-demo-never-breaks.md)):
   - a model fallback chain (a retired model still answers, live-checked); a "busy" reply instead of a 500;
   - an answer cache and per-user limits;
@@ -26,12 +30,12 @@
   - product replies show cards with photos.
 - **Roadmap reset (2026-11-23, [0013](docs/decisions/0013-judge-facing-priorities.md)):** the remaining phases are ordered by what a judge sees: a demo that never breaks (4), then a live link that stays up with a one-click demo and a showcase README (5).
 - **Next action:** new chat, `/resume`, then finish Phase 5 (see its plan):
-  - final runs 2 and 3 (about 196K tokens each, one per key per day);
-  - the 20-user load test;
-  - the case study, the visual explainer and Grafana panels;
-  - then go live with the user: push after asking, and the user creates the Neon, Discord and Render accounts.
+  - final run 3 on the main key, once its gpt-oss-20b quota is free again (after about 17:30 on 2026-11-25), about 196K tokens;
+  - rerun the 20-user load test after the retry fix (about 110K tokens across three models);
+  - the visual explainer; the case study's last numbers; the final scorecard.
+- **For the user:** nothing pending (`LIVE_URL` is set for keep-warm; the stale `KUBECONFIG` secret is removed).
 - **Still open:** the user's review of the Phase 0 labels; the user skipped the 50-product spot check.
-- **Blocked on:** nothing.
+- **Blocked on:** nothing (only quota timing).
 
 ## Phases
 | # | Phase | Status | Plan | Exit criteria (short) |
@@ -46,7 +50,7 @@
 Statuses: Not started, In progress, Done, Dropped (say why in the plan). The order changed on 2026-11-18 to match the user's goals (see 0009 and 0010), and again on 2026-11-23 to put what a judge sees first (0013).
 
 ## Scorecard
-Judged on 2026-11-18; updated 2026-11-19 after Phase 1, 2026-11-21 after Phase 2 (`phase-2-architecture`) and 2026-11-23 after Phases 3 and 4 (hybrid search; renamed recall drop 0 points; adversarial 15/15; CI eval gate; fallback chain) for the measured rows. Change the Today column only with measured evidence.
+Judged on 2026-11-18; updated 2026-11-19 after Phase 1, 2026-11-21 after Phase 2 (`phase-2-architecture`) and 2026-11-23 after Phases 3 and 4 (hybrid search; renamed recall drop 0 points; adversarial 15/15; CI eval gate; fallback chain) and 2026-11-25 after going live (the live judge path; a Discord safety alert delivered; impersonation blocked on the live site; CI green on GitHub's runners, 5 runs in a row, with machine-independent replays) for the measured rows. Change the Today column only with measured evidence.
 
 | Aspect | Before (`e0bdf3c`) | Today | Target | Moved by phase |
 |---|---|---|---|---|
@@ -54,14 +58,14 @@ Judged on 2026-11-18; updated 2026-11-19 after Phase 1, 2026-11-21 after Phase 2
 | Product search correctness | 4 | 9 | 9 | 0, 1, 3 |
 | Follow-up turns | 4 | 7.5 | 9 | 2 |
 | Robustness to catalog changes | 3 | 8 | 9 | 1, 3 |
-| Guardrails and safety | 5 | 9 | 9.5 | 2, 4 |
+| Guardrails and safety | 5 | 9.5 | 9.5 | 2, 4, 5 |
 | State and scaling | 3 | 6 | 9 | 2, 5 |
 | Cost and latency | 4 | 7 | 9 | 1, 4 |
-| Evaluation rigor | 4 | 8.5 | 9 | 0, 3, 4 |
+| Evaluation rigor | 4 | 9 | 9 | 0, 3, 4, 5 |
 | Maintainability | 3.5 | 7 | 9 | 1, 2 |
-| Ops and deploy | 5 | 6.5 | 9 | 4, 5 |
-| Portfolio signal | 5 | 8 | 9.5 | 2, 3, 5 |
-| **Overall** | **~4.2** | **~7.9** | **9** | |
+| Ops and deploy | 5 | 8 | 9 | 4, 5 |
+| Portfolio signal | 5 | 8.5 | 9.5 | 2, 3, 5 |
+| **Overall** | **~4.2** | **~8.0** | **9** | |
 
 ## Definition of done (the 9 bar)
 - Recall@5 ≥ 0.9 and precision@3 ≥ 0.85 on the labelled product queries, and recall drops by less than 5 points when category names are renamed.

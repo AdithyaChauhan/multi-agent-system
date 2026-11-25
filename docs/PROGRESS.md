@@ -12,6 +12,14 @@ Newest first. `/handoff` adds an entry at the end of every session. Keep entries
 - **Commits:**
 -->
 
+## 2026-11-24 · Phase 5 · Live on Render + Neon; CI green on GitHub; five release bugs fixed
+- **Done:** live at https://multi-agent-chatbot-58ur.onrender.com (PR #3; Neon loaded; Discord alerts). CI green on GitHub after four CI-only fixes. Release bugs fixed: `functions.` tool names, SDK retry sleeps, a rejected key's 500, an unreachable Groq scored as a run, Neon's closed connections (PR #4). Load test tooling, turn metrics, a Grafana row, the case study draft; publish and deploy only from `main`; history rewritten without Claude attribution.
+- **Measured:** final run 2 48/51 (gpt-oss-20b, live, 1 run, `multi_agent_baseline`, 198.8K tokens); load test, 20 users: 0 errors, p95 22 s before the retry fix, 29% real answers; live: judge path 10 s, Discord alert before a 1.7 s reply, Neon suspend test 3/3; 361 tests, coverage 90%.
+- **Decisions:** [0017](decisions/0017-free-tier-capacity.md) (the user's choice: stay on the free tier, report the answered share), [0018](decisions/0018-machine-independent-replays.md), [0019](decisions/0019-main-is-live.md).
+- **Open questions:** none (the user set `LIVE_URL` and removed the stale `KUBECONFIG` secret).
+- **Next:** final run 3 (main key, after about 17:30 on 2026-11-25), the load-test rerun, the visual explainer, the final scorecard.
+- **Commits:** PR #3 (`1b26114`), PR #4 (`42ce007`), and this handoff's PR.
+
 ## 2026-11-23 · Phase 5 · Demo shoppers, product Q&A tool loop, deploy setup, showcase README
 - **Done:**
   - one-click demo shoppers (own orders, per-IP limit, purge after 2 days);

@@ -28,7 +28,8 @@ Multi-agent e-commerce chat assistant: FastAPI, a LangGraph router with product,
 | `app/db/demo_shoppers.py` | One-click demo shoppers with their own orders |
 | `app/prompts/*.md` | Every prompt. The file in git is the prompt that runs |
 | `app/core/llm.py`, `app/core/config.py` | One shared ChatGroq client; `GROQ_MODEL` is the only model setting |
-| `eval/` | 51-conversation behavioural baseline, DeepEval, run logs |
+| `eval/` | 51-conversation behavioural baseline, DeepEval, run logs; `eval/loadtest/` the 20-user load test |
+| Live site | https://multi-agent-chatbot-58ur.onrender.com: Render deploys `main`; the database is Neon (its URL only in the git-ignored `.env.deploy`) |
 
 ## Commands (Git Bash on Windows)
 ```bash
@@ -39,6 +40,8 @@ PRODUCT_SEARCH=hybrid PRODUCT_RANKER=off venv/Scripts/python eval/run_retrieval.
 venv/Scripts/python scripts/embed_catalog.py --database-url <postgres url>   # after the catalog changes (hybrid search)
 venv/Scripts/python eval/run_baseline.py --conversations eval/adversarial_conversations.json --label <name> --model openai/gpt-oss-20b --mode replay --cassette eval/cassettes/adversarial_openai-gpt-oss-20b.json   # 15 attack conversations, 0 tokens
 CI_DATABASE_URL=<restored fixture> bash eval/ci_replay.sh   # what CI's replay-evals job runs; fixture from scripts/make_ci_fixture.py
+VECTOR_CASSETTE_RECORD=1 venv/Scripts/python eval/run_baseline.py --label rec --model openai/gpt-oss-20b --mode replay   # add missing query vectors, 0 tokens (ADR 0018)
+SMOKE=1 USERS=5 DURATION=40s LOCUST=<locust> bash eval/loadtest/run.sh smoke   # load-test plumbing at 0 tokens; without SMOKE it costs ~110K
 black --check app/ tests/ eval/ && flake8 app/ tests/ eval/                         # CI pins black 26.5.1, flake8 7.3.0
 venv/Scripts/python eval/run_baseline.py --label <name> --runs 1 --model openai/gpt-oss-20b   # costs tokens, see below
 docker compose up -d --build              # full stack; UI at http://localhost:8000/static/login.html
@@ -63,3 +66,6 @@ docker exec multiagent-db psql -U postgres -d multi_agent_baseline -c "<read-onl
 - Use LangGraph features only where they replace hand-written code (ADR 0009). No new agents, supervisor agent, or tool calling for deterministic flows.
 - A second Groq key, in another organization with its own quota, may exist in `.env.eval` (git-ignored). Use it with `--env-file .env.eval` on eval scripts when the main key is capped. Never print it, and make sure `GROQ_API_KEY` isn't exported in the shell, because that would win.
 - Give the user bash syntax for anything they run by hand.
+- `main` is the live site: Render deploys every push to it without waiting for CI. Change it only through a short branch and a PR with green CI (ADR 0019).
+- Commits and PR texts carry no Claude attribution: no `Co-Authored-By: Claude` line and no "Generated with Claude Code" line (the user's rule, 2026-11-24).
+- Replays must not depend on the machine: no embeddings computed in CI, a tie-breaker on every ordering a prompt uses, and CI simulated from `git archive HEAD`, never the working folder (ADR 0018).
