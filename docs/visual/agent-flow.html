@@ -46,9 +46,6 @@ button, select { font: inherit; color: inherit }
 .hud.bl { bottom: calc(18px + env(safe-area-inset-bottom, 0px)); left: var(--gutter-l); display: flex; gap: 12px; align-items: baseline }
 .hud.br { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); right: var(--gutter-r); display: flex; gap: 16px; align-items: center }
 .chapter { font: italic 400 40px/1 var(--serif); color: var(--fg); letter-spacing: 0; text-transform: none; font-variant-numeric: tabular-nums }
-.seg { display: inline-flex; border: 1px solid var(--hair); border-radius: 999px; padding: 2px; backdrop-filter: blur(8px); background: rgba(5,7,13,.4) }
-.seg button { border: 0; background: none; padding: 6px 12px; border-radius: 999px; cursor: pointer; font-size: 12px; color: var(--muted) }
-.seg button[aria-pressed="true"] { background: var(--fg); color: var(--bg) }
 .sel { appearance: none; border: 1px solid var(--hair); border-radius: 999px; padding: 7px 30px 7px 12px; font-size: 12px; cursor: pointer;
   background: rgba(5,7,13,.4) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%238391A3' stroke-width='1.3'/%3E%3C/svg%3E") no-repeat right 12px center; backdrop-filter: blur(8px) }
 .sel option { background: #0B0F18; color: var(--fg) }
@@ -98,8 +95,6 @@ h1 em { color: var(--db) }
 .meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap }
 .tag { font: 500 10.5px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--k); display: inline-flex; align-items: center; gap: 7px }
 .tag::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--k); box-shadow: 0 0 12px var(--k) }
-.tag.new { color: var(--embed); border: 1px solid rgba(235,142,255,.4); padding: 4px 7px; border-radius: 999px }
-.tag.new::before { display: none }
 .card h3 { font: 400 clamp(34px, 3.8vw, 52px)/1.02 var(--serif); margin: 0; letter-spacing: -.01em; text-wrap: balance }
 .card p { margin: 0; color: #C3CCD8; font-size: 16.5px; max-width: 40ch }
 .card pre { margin: 0; font: 400 12px/1.6 var(--mono); color: var(--fg); background: rgba(236,241,247,.04); border-left: 1px solid var(--k);
@@ -108,14 +103,14 @@ h1 em { color: var(--db) }
 
 .compare { flex-direction: column; align-items: stretch; justify-content: center; gap: 40px }
 .compare h2 { font: 400 clamp(40px, 5.6vw, 76px)/1 var(--serif); margin: 0; max-width: 16ch; text-wrap: balance }
-.cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 980px; border-top: 1px solid var(--hair) }
-.col { padding: 22px 28px 8px 0; min-width: 0 }
-.col + .col { padding-left: 28px; border-left: 1px solid var(--hair) }
-.col h4 { margin: 0 0 14px; font: 500 11px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted) }
-.col:last-child h4 { color: var(--embed) }
-.col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px }
-.col li { font-size: 16px; color: #C3CCD8; padding-left: 18px; position: relative }
-.col li::before { content: ""; position: absolute; left: 0; top: .7em; width: 8px; height: 1px; background: var(--muted) }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 980px; border-top: 1px solid var(--hair) }
+.stat { display: grid; gap: 6px; align-content: start; padding: 22px 24px 22px 0; border-bottom: 1px solid var(--hair); min-width: 0 }
+.stat b { font: 400 clamp(44px, 5vw, 64px)/1 var(--serif); color: var(--fg); font-variant-numeric: tabular-nums }
+.stat b small { font-size: .45em; color: var(--muted); margin-left: 2px }
+.stat span { font-size: 15px; color: #C3CCD8 }
+.stat em { font: 400 11.5px/1.4 var(--mono); font-style: normal; color: var(--faint) }
+.live { justify-self: start; font: 500 12px var(--mono); letter-spacing: .06em; color: var(--db); text-decoration: none; border-bottom: 1px solid rgba(67,227,194,.4); padding-bottom: 2px }
+.live:hover { border-bottom-color: var(--db) }
 .same { max-width: 980px; color: var(--muted); margin: 0; font-size: 15px }
 .same b { color: var(--fg); font-weight: 500 }
 .actions { display: flex; flex-wrap: wrap; gap: 12px }
@@ -130,13 +125,11 @@ h1 em { color: var(--db) }
   .step { align-items: flex-end; padding-bottom: 92px }
   .hud.tl .proj { display: none }
   .count { display: none }
-  .cols { grid-template-columns: minmax(0, 1fr) }
-  .col + .col { padding-left: 0; border-left: 0; border-top: 1px solid var(--hair) }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)) }
   .chapter { font-size: 30px }
 }
 @media (max-width: 560px) {
-  .hud.tr .seg button { padding: 6px 9px }
-  .sel { max-width: 150px }
+  .sel { max-width: 200px }
   .hud.tl { display: none }
   .hud.tr { left: var(--gutter-l); justify-content: space-between }
   .card h3 { font-size: 32px }
@@ -156,10 +149,6 @@ h1 em { color: var(--db) }
 <div class="hud tl"><b>Agent Flow</b><span class="proj">· multi-agent-system</span></div>
 <div class="hud tr">
   <select class="sel" id="storySel" aria-label="Story"></select>
-  <div class="seg" role="group" aria-label="Version">
-    <button id="m-now" aria-pressed="true">Today</button>
-    <button id="m-next" aria-pressed="false">Proposed</button>
-  </div>
 </div>
 <div class="hud bl hud-fade hide" id="hudBL"><span class="chapter" id="chap">01</span><span id="chapOf">/ 09</span></div>
 <div class="hud br hud-fade hide" id="hudBR">
@@ -180,37 +169,31 @@ h1 em { color: var(--db) }
       </div>
       <p class="lede">Pick a story and scroll. The message moves from your browser through the router, an agent, the model and the database, and every stop names the file that does the work.</p>
       <ul class="boot">
-        <li>prompts loaded from app/prompts · 67 lines</li>
-        <li>4 graphs · 22 nodes</li>
-        <li>guardrails in Python: sign-in, ownership, cancel confirm, escalation</li>
+        <li>5 prompts from app/prompts · 75 lines</li>
+        <li>7 graphs · a search loop · a pause · a tool loop</li>
+        <li>guardrails in Python: sign-in, ownership, cancel after Yes, escalation</li>
       </ul>
+      <a class="live" href="https://multi-agent-chatbot-58ur.onrender.com" target="_blank" rel="noopener">Try the live assistant →</a>
       <nav class="picker" id="picker" aria-label="Stories"></nav>
     </div>
   </section>
   <div id="story"></div>
   <section class="screen compare" id="compare">
-    <h2>Today, and what could come next.</h2>
-    <div class="cols">
-      <div class="col"><h4>Today</h4><ul>
-        <li>The model fills a category form and SQL filters on it.</li>
-        <li>Rename the categories and search breaks.</li>
-        <li>Follow-up filters live inside one Python process.</li>
-        <li>Safety detection is the model alone.</li>
-      </ul></div>
-      <div class="col"><h4>Proposed · not built yet</h4><ul>
-        <li>The model rewrites the query. pgvector and full-text search find matches together.</li>
-        <li>Category becomes one ranking signal, not a gate.</li>
-        <li>Search state lives in Postgres and survives restarts.</li>
-        <li>The model or a narrow pattern can escalate. The pattern can't route anywhere else.</li>
-      </ul></div>
+    <h2>How it measures up.</h2>
+    <div class="stats">
+      <div class="stat"><b>48<small>/51</small></b><span>test conversations pass</span><em>gpt-oss-20b replay, with false claims in replies counted as failures</em></div>
+      <div class="stat"><b>1.0</b><span>recall@5 on held-out product queries</span><em>47 test-half queries, hybrid search</em></div>
+      <div class="stat"><b>0<small> pts</small></b><span>recall lost when the categories are renamed</span><em>was 11.8 points before hybrid search</em></div>
+      <div class="stat"><b>14<small>/14</small></b><span>safety cases in the attack set</span><em>injection and other users’ orders, replayed in CI</em></div>
+      <div class="stat"><b>2.0<small> s</small></b><span>median turn, about 2,200 tokens</span><em>final run 2, 51 conversations</em></div>
+      <div class="stat"><b>10<small> s</small></b><span>the whole judge path on the live site</span><em>demo shopper, search, question, order, cancel</em></div>
     </div>
-    <p class="same"><b>The same in both:</b> owner-only lookups, template replies for orders, cancel only after you press Yes, one open ticket per order.</p>
+    <p class="same"><b>Never left to a prompt:</b> sign-in, order ownership, cancel only after you press Yes, one open ticket per order, escalation to a person.</p>
     <div class="actions">
       <button class="btn" id="nextStory">Next story →</button>
-      <button class="btn" id="flipMode">Replay in the proposed design</button>
       <button class="btn" id="toTop">Back to the top</button>
     </div>
-    <p class="foot">Built from app/agents/*.py on the simplify-agents branch. Order numbers match the demo data; prices, ratings and reply text are illustrative.</p>
+    <p class="foot">Built from app/agents/*.py on main. Order numbers and products come from the demo data; ticket numbers and replies are shortened.</p>
   </section>
 </main>
 
@@ -224,129 +207,167 @@ const KN = { http: 'HTTP', llm: 'LLM call', db: 'Database', embed: 'Embedding', 
 
 /* ---------- nodes ---------- */
 const NODE = {
-  browser: { label: 'Browser', sub: 'chat UI', role: 'edge' },
-  api:     { label: 'FastAPI', sub: 'POST /chat', role: 'edge' },
-  router:  { label: 'Router', sub: 'LangGraph · classify', role: 'edge' },
-  cancel:  { label: '/cancel-order', sub: 'no model', role: 'guard' },
-  floor:   { label: 'Safety floor', sub: 'escalate only', role: 'guard', modes: ['next'] },
-  extract: { label: { now: 'extract_preferences', next: 'rewrite_query' }, sub: 'product agent' },
-  search:  { label: { now: 'find_products', next: 'hybrid_search' }, sub: { now: 'SQL filters', next: 'vector + keywords' } },
-  rank:    { label: { now: 'rank_products', next: 'rerank' }, sub: 'same kind? exact?' },
-  format:  { label: { now: 'format_recommendations', next: 'format_reply' }, sub: 'template' },
+  browser: { label: 'Browser', sub: 'chat page', role: 'edge' },
+  api:     { label: 'FastAPI', sub: 'POST /chat/stream', role: 'edge' },
+  router:  { label: 'Router', sub: 'classify → route()', role: 'edge' },
+  floor:   { label: 'Safety floor', sub: 'escalate only', role: 'guard' },
+  extract: { label: 'extract_preferences', sub: 'what changed' },
+  search:  { label: 'find_products', sub: 'search loop · hybrid' },
+  rank:    { label: 'rank_products', sub: 'same kind? exact?' },
+  format:  { label: 'format_recommendations', sub: 'template + cards' },
+  qthink:  { label: 'qa_think', sub: 'Q&A loop' },
+  qtools:  { label: 'qa_tools', sub: 'ToolNode · read-only', role: 'guard' },
+  qanswer: { label: 'qa_answer', sub: 'from the facts' },
   ofind:   { label: 'find_order', sub: 'order agent', role: 'guard' },
-  ostatus: { label: 'order_status', sub: 'template' },
+  ostatus: { label: 'order_status', sub: 'database + carrier' },
   sfind:   { label: 'find_order', sub: 'support agent', role: 'guard' },
-  scancel: { label: 'handle_cancellation', sub: 'asks, never acts', role: 'guard' },
+  scancel: { label: 'handle_cancellation', sub: 'still processing?' },
+  spause:  { label: 'confirm_cancel', sub: 'interrupt() · waits', role: 'guard' },
+  sdo:     { label: 'cancel_order', sub: 'owner + status re-checked', role: 'guard' },
   sticket: { label: 'create_ticket', sub: 'one per order' },
-  safety:  { label: 'safety_escalation', sub: 'critical ticket', role: 'guard' },
+  handoff: { label: 'escalation', sub: 'open_ticket → notify' },
+  safety:  { label: 'safety', sub: 'critical ticket', role: 'guard' },
+  discord: { label: 'Support team', sub: 'Discord channel', role: 'human' },
   signin:  { label: 'sign_in', sub: 'template', role: 'guard' },
-  groq:    { label: 'Groq', sub: 'qwen3.8-27b', role: 'llm' },
-  pg:      { label: 'Postgres', sub: { now: 'orders · products · tickets', next: '+ pgvector · session_state' }, role: 'db' },
-  embed:   { label: 'Embeddings', sub: 'API or local', role: 'embed', modes: ['next'] },
+  groq:    { label: 'Groq', sub: 'gpt-oss-20b → 120b → qwen', role: 'llm' },
+  pg:      { label: 'Postgres', sub: 'orders · products · checkpoints', role: 'db' },
+  embed:   { label: 'Embeddings', sub: 'bge-small · local', role: 'embed' },
 };
-const ROLE = { edge: '#ECF1F7', agent: '#B7C2D0', guard: '#FF6E86', llm: '#A08FFF', db: '#43E3C2', embed: '#EB8EFF' };
+const ROLE = { edge: '#ECF1F7', agent: '#B7C2D0', guard: '#FF6E86', llm: '#A08FFF', db: '#43E3C2', embed: '#EB8EFF', human: '#FFB45E' };
 
 /* ---------- stories ---------- */
-const head = (mode, msg, call) => [
+const head = (msg, call) => [
   { k: 'http', path: ['browser', 'api'], title: 'The message lands',
-    line: 'The chat UI posts it to /chat. Who you are comes from the session cookie, never from the text.',
-    ref: 'app/main.py · chat()', pay: `POST /chat  {"message": "${msg}"}` },
-  mode === 'now'
-    ? { k: 'db', path: ['api', 'pg', 'api'], title: 'Recall the conversation',
-        line: 'Find the session, save the message, load the last 20 turns.', ref: 'main.py · get_or_create_session' }
-    : { k: 'db', path: ['api', 'pg', 'api'], isNew: true, title: 'Recall the conversation and the search',
-        line: 'The same, plus one session_state row: the last query, its filters and what was shown. A restart keeps it.', ref: 'proposed · session_state table' },
+    line: 'The chat page posts it to /chat/stream. Who you are comes from your sign-in token, never from the text.',
+    ref: 'app/main.py · start_turn()', pay: `POST /chat/stream  {"message": "${msg}"}` },
+  { k: 'db', path: ['api', 'pg', 'api'], title: 'Recall the conversation',
+    line: 'Each chat is one checkpointed graph thread. Your filters and the products on screen come back from Postgres, even after a restart.',
+    ref: 'main.py · start_turn · core/checkpoint.py' },
   Object.assign({ k: 'llm', path: ['api', 'router', 'groq', 'router'], title: 'One decision',
-    line: 'The router makes one structured call with the last four messages and your own orders. It gets back intent, order, issue and risk.',
+    line: 'One structured call with the last four messages and your own orders returns intent, order, issue and risk. If Groq is busy, the next model in the chain answers.',
     ref: 'router.py · classify · prompts/router.md' }, call),
 ];
+const back = (from, line, pay, ref = 'main.py · finish_turn') => ({ k: 'http', path: [from, 'api', 'browser'], title: 'Back to you', line, pay, ref });
 
 const STORIES = [
   { id: 'product', name: 'Refine a product search', msg: 'what about Logitech', who: 'after “wireless mouse under 1000”', lane: ['extract', 'search', 'rank', 'format'],
-    steps: m => [
-      ...head(m, 'what about Logitech', { pay: '→ {"intent": "product", "risk": "none"}' }),
-      ...(m === 'now' ? [
-        { k: 'llm', path: ['router', 'extract', 'groq', 'extract'], title: 'Fill the catalog form',
-          line: 'The model maps your words onto the catalog: category, subcategory, brand, price. Rename the categories and this is the step that breaks.',
-          ref: 'product_agent.py · extract_preferences', pay: '→ {"subcategory": "mouse", "brand": "Logitech",\n   "max_price": 1000, "keywords": ["wireless"]}' },
-        { k: 'db', path: ['extract', 'search', 'pg', 'search'], title: 'Filter in SQL',
-          line: 'Exact filters, best rated first. Nothing found? Relax type, then price by 25%, then brand, then keywords.',
-          ref: 'product_agent.py · find_products', pay: "WHERE subcategory = 'mouse' AND brand = 'Logitech'\n  AND price <= 1000 AND name ILIKE '%wireless%'" },
-      ] : [
-        { k: 'llm', path: ['router', 'extract', 'groq', 'extract'], isNew: true, title: 'Rewrite, don’t classify',
-          line: 'The model writes one standalone query and pulls out only hard limits. No category names, so a renamed catalog can’t break it.',
-          ref: 'proposed · prompts/query_rewrite.md', pay: '→ {"query": "wireless Logitech mouse",\n   "max_price": 1000, "brand": "Logitech"}' },
-        { k: 'embed', path: ['extract', 'search', 'embed', 'search'], isNew: true, title: 'Words into a vector',
-          line: 'An embedding model turns the query into 384 numbers. Every product was embedded once, offline.',
-          ref: 'proposed · embeddings', pay: '[0.021, -0.113, 0.087, … ]' },
-        { k: 'db', path: ['search', 'pg', 'search'], isNew: true, title: 'Meaning and keywords, one query',
-          line: 'pgvector finds similar products, full-text search finds exact words, and rank fusion merges them. Price and brand stay plain filters.',
-          ref: 'proposed · pgvector in the same Postgres', pay: "ORDER BY embedding <=> :query   -- meaning\n       ts_rank(tsv, :words)      -- keywords\nWHERE price <= 1000 AND brand = 'Logitech'" },
-      ]),
+    steps: [
+      ...head('what about Logitech', { pay: '→ {"intent": "product", "risk": "none"}' }),
+      { k: 'llm', path: ['router', 'extract', 'groq', 'extract'], title: 'Only what changed',
+        line: 'The model reports what this message changes and nothing else. Code merges it into your filters, which show as chips you can remove.',
+        ref: 'product_agent.py · extract_preferences · merge_preferences', pay: '→ {"brand": "Logitech"}\nfilters: mouse · wireless · Logitech · under ₹1,000' },
+      { k: 'embed', path: ['extract', 'search', 'embed', 'search'], title: 'Words into numbers',
+        line: 'A small model on the server turns the query into 384 numbers. Every product was embedded once, from its own words. No API call.',
+        ref: 'search/embeddings.py · bge-small-en-v1.5', pay: '"mouse wireless" → [0.021, -0.113, 0.087, … ]' },
+      { k: 'db', path: ['search', 'pg', 'search'], title: 'Three lists, one ranking',
+        line: 'Meaning, words and product type each rank the catalog. Rank fusion merges them, so a renamed category is one vote, never a gate. Brand and price stay hard filters.',
+        ref: 'search/hybrid.py · hybrid_search · rrf', pay: "vector  ORDER BY embedding <=> :query\ntext    search_tsv @@ 'mouse | wireless'\ntype    t.name = 'mouse'\nWHERE brand = Logitech AND price <= 1000" },
+      { k: 'code', path: ['search', 'search'], title: 'Nothing found? Widen and retry',
+        line: 'The search is a loop in the graph. If the type asked for isn’t there, it raises the price by 25%, then drops brand, features and keywords, one at a time.',
+        ref: 'product_agent.py · build_search_loop · loosen', pay: 'plan_search → search → loosen → search → …' },
       { k: 'llm', path: ['search', 'rank', 'groq', 'rank'], title: 'Same kind? Exact match?',
-        line: 'The ranker drops mouse pads from a mouse search. One score sorts the rest: rating, budget fit, match.',
-        ref: 'product_agent.py · rank_products', pay: '→ {"same_kind": [1, 2, 4, 5], "exact": [1, 2]}' },
-      m === 'now'
-        ? { k: 'code', path: ['rank', 'format'], title: 'Write the answer', line: 'A template, not a model. It says so when filters had to be widened.', ref: 'product_agent.py · format_recommendations' }
-        : { k: 'db', path: ['rank', 'format', 'pg', 'format'], isNew: true, title: 'Remember the change', line: 'Only what changed is saved, here the brand. Code merges it, not the model.', ref: 'proposed · session_state', pay: `state || '{"brand": "Logitech"}'` },
-      { k: 'http', path: ['format', 'api', 'browser'], title: 'Back to you',
-        line: m === 'now' ? 'The filters wait in a Python dict for your next message. A restart forgets them.' : 'A template reply. Your next message starts from the stored search.',
-        ref: 'main.py', pay: '1. Logitech M221 Silent Wireless   ₹799  ★4.3\n2. Logitech B170 Wireless          ₹695  ★4.2' },
+        line: 'The ranker drops mouse pads from a mouse search and marks exact matches. One score orders the rest: rating, budget fit, match.',
+        ref: 'product_agent.py · rank_products · prompts/product_ranking.md', pay: '→ {"same_kind": [1, 2, 3, 5], "exact": [1, 2, 3]}' },
+      { k: 'code', path: ['rank', 'format'], title: 'Cards from a template',
+        line: 'No model writes this reply. Each card has a photo, price and rating, and the reply says so when filters were widened.',
+        ref: 'product_agent.py · format_recommendations' },
+      back('format', 'Three cards and your filter chips. The products on screen are saved for the next question.',
+        '1. Logitech M235 Wireless Mouse    ₹699  ★4.5\n2. Logitech B170 Wireless Optical  ₹599  ★4.4\n3. Logitech M221 Wireless Mouse    ₹799  ★4.4'),
+    ] },
+  { id: 'question', name: 'Ask about the cards', msg: 'which of these is silent?', who: 'after the three Logitech mice', lane: ['qthink', 'qtools', 'qanswer'],
+    steps: [
+      ...head('which of these is silent?', { pay: '→ {"intent": "product", "about_shown": true}' }),
+      { k: 'code', path: ['router', 'qthink'], title: 'A question, not a search',
+        line: 'No brand, no budget, no new product word, and it points at the list. Python sends it to the Q&A loop instead of searching again.',
+        ref: 'router.py · classify → product_agent.py · asks_about_shown' },
+      { k: 'llm', path: ['qthink', 'groq', 'qthink'], title: 'The model picks a tool',
+        line: 'This is the one place the model chooses its own tools. It can only read facts about the products on screen, by their number in the list.',
+        ref: 'product_qa.py · qa_think · prompts/product_qa.md', pay: '→ compare_products(positions=[1, 2, 3])' },
+      { k: 'db', guard: true, path: ['qthink', 'qtools', 'pg', 'qtools'], title: 'Read-only, by list position',
+        line: 'A ToolNode runs the call. No tool takes a user id or touches orders, so an injected order number has nothing to reach.',
+        ref: 'product_qa.py · compare_products · ADR 0016', pay: '[{"title": "Logitech M235 …", "connectivity": "wireless"},\n {"title": "Logitech M221 …", "silent": true}, …]' },
+      { k: 'llm', path: ['qtools', 'qthink', 'groq', 'qthink'], title: 'Answer from the facts',
+        line: 'Back in qa_think, the model has what it needs and answers. After three rounds of tools it must answer with what it has.',
+        ref: 'product_qa.py · MAX_TOOL_ROUNDS = 3' },
+      back('qanswer', 'When the facts don’t cover something, it says so instead of guessing.',
+        'The Logitech M221 Wireless Mouse (₹799) is the silent one.\nThe details for the other two don’t mention noise.', 'product_qa.py · qa_answer'),
     ] },
   { id: 'order', name: 'Track an order', msg: 'where is my TV order?', who: 'signed in as demo-user-1', lane: ['ofind', 'ostatus'],
-    steps: m => [
-      ...head(m, 'where is my TV order?', { line: 'Your own orders are in the prompt, so “my TV order” becomes ORD-2002. Python fixes the number format.',
+    steps: [
+      ...head('where is my TV order?', { line: 'Your own orders are in the prompt, so “my TV order” becomes ORD-2002. Python fixes the number format.',
         pay: 'Their orders: ORD-2002 Mi 108cm LED TV (shipped) …\n→ {"intent": "order", "order_id": "ORD-2002"}' }),
       { k: 'db', guard: true, path: ['router', 'ofind', 'pg', 'ofind'], title: 'Only your orders',
         line: 'Every lookup filters by your user id. Someone else’s order number simply isn’t found.', ref: 'order_agent.py · find_order', pay: "WHERE order_id = 'ORD-2002' AND user_id = :you" },
-      { k: 'code', path: ['ofind', 'ostatus'], title: 'Answer from the row', line: 'Status and tracking come straight from the database through a template. No model writes the facts.', ref: 'order_agent.py · order_status' },
-      { k: 'http', path: ['ostatus', 'api', 'browser'], title: 'Back to you', line: 'One model call for the whole turn.', ref: 'main.py', pay: 'ORD-2002 · Mi 108cm LED TV · shipped' },
+      { k: 'code', path: ['ofind', 'ostatus'], title: 'Answer from the row',
+        line: 'Status comes from the database and live tracking from the carrier, through a template. No model writes the facts.', ref: 'order_agent.py · order_status' },
+      back('ostatus', 'One model call for the whole turn.', 'ORD-2002 · Mi 108cm Full HD Android LED TV · shipped'),
     ] },
-  { id: 'damaged', name: 'Report a damaged item', msg: 'ORD-2004 arrived damaged', who: 'signed in as demo-user-1', lane: ['sfind', 'sticket'],
-    steps: m => [
-      ...head(m, 'ORD-2004 arrived damaged', { pay: '→ {"intent": "support", "issue": "damaged_delivery",\n   "order_id": "ORD-2004"}' }),
-      { k: 'db', guard: true, path: ['router', 'sfind', 'pg', 'sfind'], title: 'Only your orders', line: 'The same ownership filter. With no order number, it would ask which one.', ref: 'support_agent.py · find_order' },
-      { k: 'db', guard: true, path: ['sfind', 'sticket', 'pg', 'sticket'], title: 'One ticket per order',
-        line: 'A fixed map, not the model, turns damage, defects, wrong items and refunds into tickets. An open ticket is reused, never duplicated.',
+  { id: 'damaged', name: 'Report a damaged item', msg: 'ORD-2004 arrived damaged', who: 'signed in as demo-user-1', lane: ['sfind', 'sticket', 'handoff', 'discord'],
+    steps: [
+      ...head('ORD-2004 arrived damaged', { pay: '→ {"intent": "support", "issue": "damaged_delivery",\n   "order_id": "ORD-2004"}' }),
+      { k: 'db', guard: true, path: ['router', 'sfind', 'pg', 'sfind'], title: 'Only your orders',
+        line: 'The same ownership filter. With no order number, it lists your orders and asks which one.', ref: 'support_agent.py · find_order' },
+      { k: 'guard', path: ['sfind', 'sticket'], title: 'One ticket per order',
+        line: 'A fixed map, not the model, decides which issues need a person. An open ticket for the order is reused, never duplicated.',
         ref: 'support_agent.py · route_support · create_ticket' },
-      { k: 'http', path: ['sticket', 'api', 'browser'], title: 'Back to you', line: 'You get the ticket number.', ref: 'main.py', pay: 'Ticket raised for ORD-2004 (damaged delivery).' },
+      { k: 'db', path: ['sticket', 'handoff', 'pg', 'handoff'], title: 'Hand it to a person',
+        line: 'One escalation subgraph serves every handoff: open the ticket, then alert the team. Safety reports use the same one.',
+        ref: 'agents/escalation.py · open_ticket' },
+      { k: 'http', path: ['handoff', 'discord'], title: 'The team hears about it',
+        line: 'A webhook posts the ticket to the support channel. If the alert fails, the ticket is already saved.',
+        ref: 'escalation.py · notify', pay: '[MEDIUM] TKT-59CBEF17 | damaged_delivery | order ORD-2004' },
+      back('handoff', 'You get the ticket number and the response time.', 'I’ve created a support ticket: TKT-59CBEF17\nPriority: P2', 'support_agent.py · ticket_reply'),
     ] },
-  { id: 'cancel', name: 'Cancel an order', msg: 'cancel ORD-2005', who: 'signed in as demo-user-1', lane: ['sfind', 'scancel'],
-    steps: m => [
-      ...head(m, 'cancel ORD-2005', { pay: '→ {"intent": "support", "issue": "cancel",\n   "order_id": "ORD-2005"}' }),
-      { k: 'db', guard: true, path: ['router', 'sfind', 'pg', 'sfind'], title: 'Only your orders', line: 'ORD-2005 is yours and still processing.', ref: 'support_agent.py · find_order' },
-      { k: 'guard', path: ['sfind', 'scancel'], title: 'Ask, never act', line: 'The graph has no way to cancel. It asks the UI for a Yes/No button instead.',
-        ref: 'support_agent.py · handle_cancellation', pay: '{"action_required": {"type": "confirm_cancel",\n                     "order_id": "ORD-2005"}}' },
-      { k: 'http', path: ['scancel', 'api', 'browser'], title: 'The question comes back', line: 'The chat shows two buttons.', ref: 'main.py', pay: 'Cancel ORD-2005?    [ Yes ]   [ No ]' },
-      { k: 'http', path: ['browser', 'cancel'], title: 'You press Yes', line: 'A separate endpoint takes over. No model from here on.', ref: 'main.py · /cancel-order', pay: 'POST /cancel-order  {"order_id": "ORD-2005"}' },
-      { k: 'db', guard: true, path: ['cancel', 'pg', 'cancel'], title: 'Yours, and still processing',
-        line: 'The update matches only your order, and only while it is processing. Guests get a 401.', ref: 'order_tools.py · cancel_order_in_db',
+  { id: 'cancel', name: 'Cancel an order', msg: 'cancel ORD-2005', who: 'signed in as demo-user-1', lane: ['sfind', 'scancel', 'spause', 'sdo'],
+    steps: [
+      ...head('cancel ORD-2005', { pay: '→ {"intent": "support", "issue": "cancel",\n   "order_id": "ORD-2005"}' }),
+      { k: 'db', guard: true, path: ['router', 'sfind', 'pg', 'sfind'], title: 'Only your orders', line: 'ORD-2005 is yours: a Logitech M221 mouse, still processing.', ref: 'support_agent.py · find_order' },
+      { k: 'code', path: ['sfind', 'scancel'], title: 'Can it still be cancelled?',
+        line: 'A shipped, delivered or already cancelled order gets a plain explanation. Only a processing order goes on.', ref: 'support_agent.py · handle_cancellation' },
+      { k: 'guard', path: ['scancel', 'spause', 'pg', 'spause'], title: 'The graph pauses',
+        line: 'interrupt() stops the graph mid-run, and the checkpoint keeps it waiting in Postgres. Nothing has changed yet.',
+        ref: 'support_agent.py · confirm_cancel · interrupt()', pay: '{"type": "confirm_cancel", "order_id": "ORD-2005"}' },
+      { k: 'http', path: ['spause', 'api', 'browser'], title: 'The question comes back', line: 'The chat shows two buttons.', ref: 'main.py · finish_turn',
+        pay: 'Cancel ORD-2005 (Logitech M221 Wireless Mouse)?\n[ Yes ]   [ No ]' },
+      { k: 'http', guard: true, path: ['browser', 'api'], title: 'You press Yes',
+        line: 'The answer resumes the paused graph only for the signed-in owner of this chat, and only while a question is waiting.',
+        ref: 'main.py · check_resume · Command(resume=…)', pay: 'POST /chat/stream  {"confirm": true}' },
+      { k: 'code', path: ['api', 'spause', 'sdo'], title: 'Back where it stopped',
+        line: 'confirm_cancel receives the answer and the graph carries on. No model call from here on.', ref: 'support_agent.py · route_answer' },
+      { k: 'db', guard: true, path: ['sdo', 'pg', 'sdo'], title: 'Yours, and still processing',
+        line: 'The person who pressed Yes must be the person in this chat. The update checks the owner and the status again.',
+        ref: 'support_agent.py · cancel_order · order_tools.py',
         pay: "UPDATE orders SET status = 'cancelled'\nWHERE order_id = 'ORD-2005' AND user_id = :you\n  AND status = 'processing'" },
-      { k: 'http', path: ['cancel', 'browser'], title: 'Done', line: 'The confirmation is saved to the chat history too.', ref: 'CancelOrderResponse', pay: 'Order ORD-2005 has been cancelled successfully.' },
+      back('sdo', 'The reply is saved to the chat history too.', 'Order ORD-2005 has been cancelled.', 'support_agent.py · cancel_order'),
     ] },
-  { id: 'safety', name: 'Report a safety risk', msg: 'my room heater caught fire and burned my hand', who: 'any visitor, signed in or not', lane: ['safety'],
-    steps: m => [
-      ...head(m, 'my room heater caught fire…', { pay: '→ {"intent": "support", "issue": "defective_product",\n   "risk": "safety"}',
-        line: m === 'now' ? 'The model flags risk “safety”. It is the only detector today. The old keyword gate was removed because it flagged “fire tv stick”.'
-                          : 'The model flags risk “safety”, and stays the main detector.' }),
-      ...(m === 'next' ? [{ k: 'guard', isNew: true, path: ['router', 'floor', 'router'], title: 'A floor under the model',
-        line: 'A short pattern runs beside the router. It can only escalate, and “Fire TV” doesn’t trip it.', ref: 'proposed · router.py', pay: 'caught fire | burned my | electric shock | sparks from' }] : []),
-      { k: 'guard', path: ['router', 'safety'], title: 'Safety outranks everything', line: 'Checked before intent and before sign-in, so even a guest reaches a human.', ref: 'router.py · route()' },
-      { k: 'db', guard: true, path: ['safety', 'pg', 'safety'], title: 'Critical ticket', line: 'Severity critical, safety alert on, straight to the human team.', ref: 'router.py · safety_escalation' },
-      { k: 'http', path: ['safety', 'api', 'browser'], title: 'Back to you', line: 'A fixed, careful reply.', ref: 'router.py · SAFETY_RESPONSE', pay: "If you're in immediate danger, please call\nemergency services. A human will follow up." },
+  { id: 'safety', name: 'Report a safety risk', msg: 'my room heater caught fire and burned my hand', who: 'any visitor, signed in or not', lane: ['safety', 'handoff', 'discord'],
+    steps: [
+      ...head('my room heater caught fire…', { line: 'The model flags risk “safety”. It is the main detector.',
+        pay: '→ {"intent": "support", "issue": "defective_product",\n   "risk": "safety"}' }),
+      { k: 'guard', path: ['router', 'floor', 'router'], title: 'A floor under the model',
+        line: 'A narrow pattern checks the same message. It can only escalate, and “Fire TV Stick” doesn’t trip it.',
+        ref: 'router.py · SAFETY_PATTERN · ADR 0008', pay: 'caught fire | burned my | electric shock | sparks from …' },
+      { k: 'guard', path: ['router', 'safety'], title: 'Safety outranks everything',
+        line: 'Checked before intent and before sign-in, so even a guest reaches a person.', ref: 'router.py · route()' },
+      { k: 'db', path: ['safety', 'handoff', 'pg', 'handoff'], title: 'A critical ticket',
+        line: 'The same escalation subgraph opens the ticket, marked critical, with a safety alert.', ref: 'escalation.py · open_ticket' },
+      { k: 'http', path: ['handoff', 'discord'], title: 'A person is alerted',
+        line: 'On the live site the alert reached Discord before the reply did, and the reply came 1.7 s after sending.',
+        ref: 'escalation.py · notify', pay: '[CRITICAL] TKT-F6D5D292 | other\n[SAFETY_ALERT] my room heater caught fire…' },
+      back('handoff', 'A fixed, careful reply.', 'If you’re in immediate danger, please call\nemergency services. A team member will follow up.', 'router.py · SAFETY_RESPONSE'),
     ] },
   { id: 'signin', name: 'Ask while signed out', msg: 'track my order', who: 'not signed in', lane: ['signin'],
-    steps: m => [
-      ...head(m, 'track my order', { line: 'With no sign-in, the prompt says “not signed in” instead of listing orders.', pay: '→ {"intent": "order", "order_id": null}' }),
+    steps: [
+      ...head('track my order', { line: 'With no sign-in, the prompt says “not signed in” instead of listing orders.', pay: '→ {"intent": "order", "order_id": null}' }),
       { k: 'guard', path: ['router', 'signin'], title: 'Sign in first', line: 'A guest asking about orders stops here. No order data is touched.', ref: 'router.py · route()' },
-      { k: 'http', path: ['signin', 'api', 'browser'], title: 'Back to you', line: 'Product questions still work without signing in.', ref: 'router.py · respond_sign_in', pay: 'Please sign in and ask again.' },
+      back('signin', 'Product questions still work without signing in, and the demo shopper button signs you in with five orders of your own.',
+        'Please sign in first using the Sign In button\nat the top of the page.', 'router.py · respond_sign_in'),
     ] },
 ];
 
 /* ---------- state ---------- */
-let mode = 'now', story = 0, steps = [], lastI = -2, scene = null;
+let story = 0, steps = [], lastI = -2, scene = null;
 let stepsTop = 0, stepH = 1, introTop = 0;
-const pick = v => (v && typeof v === 'object') ? v[mode] : v;
 const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 
 STORIES.forEach((s, i) => {
@@ -362,13 +383,13 @@ function jump(id) { const el = $(id); if (el) el.scrollIntoView({ behavior: RM ?
 
 function buildStory() {
   const s = STORIES[story];
-  steps = s.steps(mode).map(x => ({ ...x }));
+  steps = s.steps.map(x => ({ ...x }));
   let prev = 'browser';
   steps.forEach(st => { if (st.path[0] !== prev) st.path = [prev, ...st.path]; prev = st.path[st.path.length - 1]; });
-  const tag = st => `<span class="tag" style="--k:${KC[st.k]}">${KN[st.k]}</span>` + (st.guard && st.k !== 'guard' ? `<span class="tag" style="--k:${KC.guard}">Guardrail</span>` : '') + (st.isNew ? '<span class="tag new">Proposed</span>' : '');
+  const tag = st => `<span class="tag" style="--k:${KC[st.k]}">${KN[st.k]}</span>` + (st.guard && st.k !== 'guard' ? `<span class="tag" style="--k:${KC.guard}">Guardrail</span>` : '');
   $('story').innerHTML =
     `<section class="screen intro" id="intro"><div class="intro-in">
-       <div class="eyebrow">Story ${String(story + 1).padStart(2, '0')} · ${s.name}${mode === 'next' ? ' · proposed design' : ''}</div>
+       <div class="eyebrow">Story ${String(story + 1).padStart(2, '0')} · ${s.name}</div>
        <p class="quote">“${esc(s.msg)}”</p>
        <div class="who">${esc(s.who)}</div>
        <div class="scrollcue">Scroll to send it</div>
@@ -381,25 +402,14 @@ function buildStory() {
        ${st.ref ? `<div class="ref">${esc(st.ref)}</div>` : ''}
      </div></section>`).join('');
   $('chapOf').textContent = '/ ' + String(steps.length).padStart(2, '0');
-  $('embCount').hidden = mode !== 'next';
   document.querySelectorAll('.pick').forEach((b, i) => b.setAttribute('aria-current', i === story));
   $('storySel').value = story;
-  $('flipMode').textContent = mode === 'now' ? 'Replay in the proposed design' : 'Replay with today’s code';
   lastI = -2;
   measure();
   if (scene) scene.layout();
 }
 function setStory(i) { story = i; try { history.replaceState(null, '', '#' + STORIES[i].id); } catch (e) {} buildStory(); }
-function setMode(m) {
-  const inStory = progress().phase !== 'hero';
-  mode = m; $('m-now').setAttribute('aria-pressed', m === 'now'); $('m-next').setAttribute('aria-pressed', m === 'next');
-  buildStory();
-  if (inStory) jump('intro');
-}
-$('m-now').onclick = () => setMode('now');
-$('m-next').onclick = () => setMode('next');
 $('nextStory').onclick = () => { setStory((story + 1) % STORIES.length); jump('intro'); };
-$('flipMode').onclick = () => { setMode(mode === 'now' ? 'next' : 'now'); jump('intro'); };
 $('toTop').onclick = () => jump('top');
 
 function measure() {
@@ -525,18 +535,17 @@ function build3d() {
   function layout() {
     const s = STORIES[story];
     used = new Set(['browser', 'api', 'router']); steps.forEach(st => st.path.forEach(id => used.add(id)));
-    const fixed = { browser: [-15, 0, 0], api: [-9, 0, 0], router: [-3, 0, 0], cancel: [-9, -3.4, 4.5], floor: [-3, -3.2, 3.6] };
+    const fixed = { browser: [-15, 0, 0], api: [-9, 0, 0], router: [-3, 0, 0], floor: [-3, -3.2, 3.6] };
     s.lane.forEach((id, i) => fixed[id] = [3 + i * 5.2, 0, 0]);
     const laneEnd = 3 + (s.lane.length - 1) * 5.2, gx = (laneEnd - 3) / 2 + 1;
     fixed.groq = [gx, 6.6, -4]; fixed.pg = [gx, -6.6, -4]; fixed.embed = [laneEnd - 2, 5.8, -8];
     centroid.set(0, 0, 0); let n = 0;
     for (const o of Object.values(N)) {
-      const vis = used.has(o.id) && (!o.d.modes || o.d.modes.includes(mode));
+      const vis = used.has(o.id);
       o.g.visible = vis; o.vis = vis;
       if (fixed[o.id]) o.g.position.set(...fixed[o.id]);
       if (vis) { centroid.add(o.g.position); n++; }
-      o.el.firstChild.textContent = pick(o.d.label); o.el.lastChild.textContent = pick(o.d.sub) || '';
-      if (o.vring) o.vring.visible = mode === 'next';
+      o.el.firstChild.textContent = o.d.label; o.el.lastChild.textContent = o.d.sub || '';
     }
     centroid.multiplyScalar(1 / Math.max(1, n)); centroid.y = 0;
     structural.children.slice().forEach(c => { c.geometry.dispose(); structural.remove(c); });

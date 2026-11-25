@@ -1,4 +1,19 @@
 {
+ "066bfdd479e3a71546249ce4c4301ef1": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: room heater under 2000\nAssistant: Here's what I found:\n\n1. **Nano Carbon 500W Room Heater** — Maharaja Whiteline\n   ₹1,235 · 4.1/5\n\n2. **2000W R",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1199,
+  "value": {
+   "about_shown": true,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "07d223605d00e9cf703ab88d46e9caf7": {
   "agent": "product",
   "message": "Listed products:\n1. Havells D'zire 1000W Dry Iron — ₹889\n2. Usha EI 3710 1000W Dry Iron with Golden Soleplate — ₹1110\n3. Philips GC181 1000W Dry Iron — ₹1321\n\nQuestion: how heavy is the first one?",
@@ -63,6 +78,36 @@
      "type": "tool_call"
     }
    ]
+  }
+ },
+ "1006766edf0e0111721a5152230ec51c": {
+  "agent": "router",
+  "message": "Their orders: ORD-2002 Mi 108cm Full HD Android LED TV (shipped); ORD-2004 Croma 500W Mixer Grinder (delivered); ORD-2005 Logitech M221 Wireless Mouse (processing); ORD-2001 boAt Rockerz 255 Pro+ (del",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1312,
+  "value": {
+   "about_shown": false,
+   "intent": "support",
+   "issue": "cancel",
+   "order_id": "ORD-2005",
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "188520a8e8fde9ca1cc0152b70a6de20": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: iron under 1500\nAssistant: Here's what I found:\n\n1. **Havells D'zire 1000W Dry Iron** — Havells\n   ₹889 · 4.3/5\n\n2. **Usha EI 3710 1000W Dry Iro",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1208,
+  "value": {
+   "about_shown": true,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
   }
  },
  "1c40af4675dd66e8e6d74b675e5e78d2": {
@@ -145,6 +190,17 @@
    "min_rating": null,
    "not_carried": null,
    "product": null
+  }
+ },
+ "2da6240e67befa346e50a8101d246d36": {
+  "agent": "product",
+  "message": "User request: \"does the first one come with a warranty?\"\n\nProducts:\n1. Tesora - Inspired by you Large Premium Electric Kettle 1.8L, | ₹1349 | 4.4★ | Tesora\n2. Havells Aqua Plus 1.2 litre Double Wall K",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 761,
+  "value": {
+   "exact": [],
+   "same_kind": []
   }
  },
  "30847269b41f85a3b76cbc0dcb79bd0b": {
@@ -288,6 +344,21 @@
    "product": "smartwatch"
   }
  },
+ "57d6a4604713eb7b5be08137954a743e": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: iron under 1500\nAssistant: Here's what I found:\n\n1. **Havells D'zire 1000W Dry Iron** — Havells\n   ₹889 · 4.3/5\n\n2. **Usha EI 3710 1000W Dry Iro",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1244,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "58043223010a218563ce4207870c1641": {
   "agent": "router",
   "message": "Their orders: not signed in.\nRecent conversation:\nUser: iron under 1500\nAssistant: These don't match everything you asked for, but they're the closest options we have:\n\n1. **Havells D'zire 1000W Dry I",
@@ -301,6 +372,25 @@
    "order_id": null,
    "reply": null,
    "risk": "none"
+  }
+ },
+ "6e1ac02e0f08fe3553b1fc82ae699910": {
+  "agent": "product",
+  "message": "So far: {\"product\": \"electric kettle\"} | Message: does the first one come with a warranty?",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1316,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [
+    "warranty"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": null
   }
  },
  "6f9d8eb3de4fc00f60ea3be1077d8d03": {
@@ -535,6 +625,21 @@
    "product": "electric kettle"
   }
  },
+ "ca5364b0bcbf48fd704fca7dead15f7b": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: bluetooth speaker under 3000\nAssistant: Here's what I found:\n\n1. **JBL Go 2 Portable Bluetooth Speaker** — JBL\n   ₹1,999 · 4.3/5\n\n2. **boAt Ston",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1182,
+  "value": {
+   "about_shown": true,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "d15218bad69d3079fda4d1b5afc766e1": {
   "agent": "product",
   "message": "So far: {} | Message: room heater under 2000",
@@ -550,6 +655,21 @@
    "min_rating": null,
    "not_carried": null,
    "product": "room heater"
+  }
+ },
+ "d4a3db575c7de658bf85a55e6a0bd1d0": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: wireless mouse\nAssistant: Here's what I found:\n\n1. **Amazon Basics Wireless Mouse 2.4 GHz** — Amazon\n   ₹499 · 5.0/5\n\n2. **Logitech Pebble M350 ",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1176,
+  "value": {
+   "about_shown": true,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
   }
  },
  "d71731dea8158ab8113cc83e0a6321a9": {
@@ -642,6 +762,21 @@
   "model": "openai/gpt-oss-20b",
   "node": "classify",
   "total_tokens": 1069,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "f726112361750a6b885ba526e0826253": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: electric kettle\nAssistant: Here's what I found:\n\n1. **Tesora 1.8L Stainless Steel Electric Kettle** — Tesora\n   ₹1,349 · 4.4/5\n\n2. **Philips 1.5",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1189,
   "value": {
    "about_shown": false,
    "intent": "product",

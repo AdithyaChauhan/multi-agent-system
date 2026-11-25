@@ -16,6 +16,21 @@
    "product": null
   }
  },
+ "00863c03a77012f8c57db3a48e8883eb": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: geyser under 5000\nAssistant: Here's what I found:\n\n1. **Havells Instanio 1L 3KW Instant Water Heater** — Havells\n   ₹2,599 · 4.4/5\n\n2. **Havells",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1342,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "016c87c5a164619841db2a1448f92726": {
   "agent": "product",
   "message": "Previous: {} | Message: calculator",
@@ -131,6 +146,21 @@
    "issue": null,
    "order_id": null,
    "reply": "Hi! I can help you find products, check an order, or sort out a problem with one. What do you need?",
+   "risk": "none"
+  }
+ },
+ "03fc072e6dd38d6d639344acaeecf995": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: show me a mouse\nAssistant: Here's what I found:\n\n1. **Amazon Basics Wireless Mouse 2.4 GHz** — Amazon\n   ₹499 · 5.0/5\n\n2. **Logitech Pebble M350",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1199,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
    "risk": "none"
   }
  },
@@ -420,6 +450,21 @@
     5,
     6
    ]
+  }
+ },
+ "12be72d3f063e68cd46330d531b5c2dd": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: I want to buy headphones under 2000\nAssistant: Here's what I found:\n\n1. **Redgear Cosmo 7.1 Wired Over Ear Gaming Headphones** — Redgear\n   ₹1,9",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1219,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
   }
  },
  "137bc7164d04babb59308dd382ce8be3": {
@@ -767,6 +812,21 @@
    "intent": "support",
    "issue": "damaged_delivery",
    "order_id": "ORD-2004",
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "23d1c1d3de7ca7a3fb09643f027d2bd8": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: I need a wireless mouse\nAssistant: Here's what I found:\n\n1. **Amazon Basics Wireless Mouse 2.4 GHz** — Amazon\n   ₹499 · 5.0/5\n\n2. **Logitech Peb",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1279,
+  "value": {
+   "about_shown": true,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
    "reply": null,
    "risk": "none"
   }
@@ -1792,6 +1852,21 @@
    "risk": "none"
   }
  },
+ "45a900b845e02d51b6edc4c2d641f4ba": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: show me headphones\nAssistant: Here's what I found:\n\n1. **Redgear Cosmo 7.1 Wired Over Ear Gaming Headphones** — Redgear\n   ₹1,990 · 4.3/5\n\n2. **",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1221,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "45b2e90e34a893824f4fb2eedf136ad8": {
   "agent": "product",
   "message": "So far: {} | Message: sonny headphones",
@@ -2211,6 +2286,36 @@
     5,
     6
    ]
+  }
+ },
+ "568aa85a28fab239fd803a348be906ea": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: I need an air purifier\nAssistant: Here's what I found:\n\n1. **Coway AirMega 150 Air Purifier** — Coway\n   ₹14,400 · 4.4/5\n\n2. **Mi Air Purifier 3",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1218,
+  "value": {
+   "about_shown": true,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "573575275221ce93cd3bb6ce0d5f6320": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: mixer grinder under 2000\nAssistant: Here's what I found:\n\n1. **Bajaj Rex 500W Mixer Grinder with 3 Jars** — Bajaj\n   ₹1,999 · 4.2/5\n\n2. **NutriP",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1214,
+  "value": {
+   "about_shown": true,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
   }
  },
  "573c82b561d628ef9568e57de9cde27b": {
@@ -3007,6 +3112,21 @@
    "risk": "none"
   }
  },
+ "77b4e895ef6172dfa511a4031a7182bc": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: sonny headphones\nAssistant: Here's what I found:\n\n1. **Sony WI-C100 Wireless Over-Ear Headphones with Mic** — Sony\n   ₹1,599 · 3.6/5\n\nUser: loji",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1252,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "786b046d2bc8e444f0bfb8d6a6b4be61": {
   "agent": "router",
   "message": "Their orders: not signed in.\nRecent conversation:\nUser: telly\nAssistant: These don't match everything you asked for, but they're the closest options we have:\n\n1. **Samsung 43\" Crystal 4K Smart LED TV*",
@@ -3014,6 +3134,21 @@
   "node": "classify",
   "total_tokens": 1206,
   "value": null
+ },
+ "78829bd80dcfa5f6c9b6584161779a43": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: hi\nAssistant: Hi! I can help you find products, check an order or sort out a problem with one. What do you need?\nUser: bose speakers\nAssistant: ",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1253,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
  },
  "78caca02a5a91e9de167face28a5c8e7": {
   "agent": "router",
@@ -3422,6 +3557,17 @@
    "order_id": null,
    "reply": null,
    "risk": "none"
+  }
+ },
+ "8378db72eea4b4d5f48bd97dfcffb053": {
+  "agent": "product",
+  "message": "[{\"position\": 1, \"title\": \"Logitech M235 Wireless Mouse\", \"brand\": \"Logitech\", \"price_rupees\": 699, \"rating\": 4.5, \"attributes\": {\"connectivity\": \"wireless\"}, \"description\": \"You can surf the Web with",
+  "model": "openai/gpt-oss-20b",
+  "node": "answer_question",
+  "total_tokens": 1053,
+  "value": {
+   "content": "**Logitech M235 Wireless Mouse** – ₹699, rating 4.5.  \n**Logitech M221 Wireless Mouse** – ₹799, rating 4.4, silent click.  \n**Lenovo Wireless Nano Mouse** – ₹629, rating 4.4.",
+   "tool_calls": []
   }
  },
  "83cee34c3aba5a47b1e53f36145f840b": {
@@ -3979,6 +4125,21 @@
    "risk": "none"
   }
  },
+ "9b7780b81b6e28e0d94115efa1628a88": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: show me headphones\nAssistant: Here's what I found:\n\n1. **Redgear Cosmo 7.1 Wired Over Ear Gaming Headphones** — Redgear\n   ₹1,990 · 4.3/5\n\n2. **",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1205,
+  "value": {
+   "about_shown": false,
+   "intent": "unclear",
+   "issue": null,
+   "order_id": null,
+   "reply": "Hi! I can help you find products, check an order or sort out a problem with one. What do you need?",
+   "risk": "none"
+  }
+ },
  "9b8552900bd57e770162c6677ffe9e72": {
   "agent": "product",
   "message": "User request: \"I need a wireless mouse\"\n\nProducts:\n1. Logitech Pebble M350 Wireless Mouse with Bluetooth or USB -  | ₹1490 | 4.6★ | Logitech\n2. Lenovo 400 Wireless Mouse, 1200DPI Optical Sensor, 2.4GH",
@@ -4213,6 +4374,21 @@
    "about_shown": false,
    "intent": "support",
    "issue": "account_data",
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "a238517f892c00668449159aad70c92f": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: something to keep me warm this winter\nAssistant: Here's what I found:\n\n1. **Melbon VM-905 2000W Room Heater** — Melbon\n   ₹998 · 4.6/5\n\n2. **100",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1182,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
    "order_id": null,
    "reply": null,
    "risk": "none"
@@ -4871,6 +5047,30 @@
    ]
   }
  },
+ "b94c704158306d53d50d1dd8a7deb0ad": {
+  "agent": "product",
+  "message": "Listed products:\n1. Logitech M235 Wireless Mouse — ₹699\n2. Logitech M221 Wireless Mouse — ₹799\n3. Lenovo Wireless Nano Mouse — ₹629\n\nQuestion: table",
+  "model": "openai/gpt-oss-20b",
+  "node": "answer_question",
+  "total_tokens": 427,
+  "value": {
+   "content": "",
+   "tool_calls": [
+    {
+     "args": {
+      "positions": [
+       1,
+       2,
+       3
+      ]
+     },
+     "id": "fc_1b3b52ec-b75e-4dfb-b7b1-612edb75b5ad",
+     "name": "compare_products",
+     "type": "tool_call"
+    }
+   ]
+  }
+ },
  "b9698e5d820e8270bce4fa01c985b281": {
   "agent": "product",
   "message": "User request: \"telly\"\n\nProducts:\n1. Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart  | ₹30990 | 4.3★ | Samsung\n2. Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED | ₹13490 | 4.",
@@ -5000,6 +5200,21 @@
    "risk": "none"
   }
  },
+ "c038beba05ca6e623b6139922ea896f3": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: geyser under 5000\nAssistant: Here's what I found:\n\n1. **Havells Instanio 1L 3KW Instant Water Heater** — Havells\n   ₹2,599 · 4.4/5\n\n2. **Havells",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1229,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "c04fdeb4ec2c14610f33ab32a912ea6e": {
   "agent": "product",
   "message": "Previous: {\"product\": \"headphones\", \"brand\": \"Sony\"} | Message: under 3000",
@@ -5051,6 +5266,21 @@
     9,
     10
    ]
+  }
+ },
+ "c2d2d222671232d9971c46178ff6e3bf": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: telly\nAssistant: Here's what I found:\n\n1. **Samsung 43\" Crystal 4K Smart LED TV** — Samsung\n   ₹30,990 · 4.3/5\n\n2. **Samsung 32\" Wondertainment ",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1186,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
   }
  },
  "c2d45720582a556259a2ef6de517f23a": {
@@ -5477,6 +5707,21 @@
    "risk": "none"
   }
  },
+ "d0214a96ade8d46f6e8015783d2f9f9c": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: sonny headphones\nAssistant: Here's what I found:\n\n1. **Sony WI-C100 Wireless Over-Ear Headphones with Mic** — Sony\n   ₹1,599 · 3.6/5\n\nMessage: l",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1172,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "d056b4a80190dfca8146b766287cf94a": {
   "agent": "product",
   "message": "So far: {} | Message: show me laptop bags",
@@ -5784,6 +6029,21 @@
    "risk": "none"
   }
  },
+ "da0a8f6eb7c841e6a165e1f7daa71c73": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: sony headphones\nAssistant: Here's what I found:\n\n1. **Sony WI-C100 Wireless Over-Ear Headphones with Mic** — Sony\n   ₹1,599 · 3.6/5\n\nMessage: un",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1123,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "dbf689c5211037c8e7f48d054096dc52": {
   "agent": "router",
   "message": "Their orders: not signed in.\nRecent conversation:\nUser: smartwatches under 3000\nAssistant: These don't match everything you asked for, but they're the closest options we have:\n\n1. **Fire-Boltt Tank 1.",
@@ -5845,6 +6105,21 @@
    "min_rating": null,
    "not_carried": null,
    "product": "headphones"
+  }
+ },
+ "e1c835edf0a1622a3fee80c4ce3d774f": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: show me some TVs\nAssistant: Here's what I found:\n\n1. **Samsung 43\" Crystal 4K Smart LED TV** — Samsung\n   ₹30,990 · 4.3/5\n\n2. **Samsung 32\" Wond",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1245,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
   }
  },
  "e27b07b4bd77a7ae1db479e806ecd671": {
@@ -5926,6 +6201,21 @@
    "intent": "support",
    "issue": "refund_request",
    "order_id": "ORD-2004",
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "e6e752568c089282997f295f79930d67": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: best rated air fryer\nAssistant: Here's what I found:\n\n1. **Instant Pot Vortex 2QT Air Fryer** — Instant Pot\n   ₹4,995 · 4.8/5\n\n2. **INALSA 4L Di",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1220,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
    "reply": null,
    "risk": "none"
   }
@@ -6240,6 +6530,36 @@
    "risk": "none"
   }
  },
+ "f276f43c9285afefefc52387b862e74d": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: smartwatch with calling feature\nAssistant: Here's what I found:\n\n1. **Fire-Boltt Visionary Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹3,999",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1219,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "f2d141359fe046593d250610306a8c1f": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: smartwatches under 3000\nAssistant: Here's what I found:\n\n1. **Boult Dive+ 1.85\" HD Smartwatch** — Boult\n   ₹1,999 · 4.3/5\n\n2. **Fire-Boltt Phoen",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1212,
+  "value": {
+   "about_shown": true,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "f35ae88aaade125097168105d749f8e3": {
   "agent": "router",
   "message": "Their orders: ORD-2002 Mi 108cm Full HD Android LED TV (shipped); ORD-2004 Croma 500W Mixer Grinder (delivered); ORD-2005 Logitech M221 Wireless Mouse (processing); ORD-2001 boAt Rockerz 255 Pro+ (del",
@@ -6437,6 +6757,21 @@
   "node": "classify",
   "total_tokens": 1141,
   "value": {
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "fd08f7f732e96329bbe87f51b6d2da66": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: I need a wireless mouse\nAssistant: Here's what I found:\n\n1. **Amazon Basics Wireless Mouse 2.4 GHz** — Amazon\n   ₹499 · 5.0/5\n\n2. **Logitech Peb",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1204,
+  "value": {
+   "about_shown": false,
    "intent": "product",
    "issue": null,
    "order_id": null,

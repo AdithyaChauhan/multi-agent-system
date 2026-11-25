@@ -100,7 +100,7 @@ python -m pytest -m integration                         # needs the local Postgr
 | Push image | GHCR (`ghcr.io/adithyachauhan/multi-agent-system`), on pushes to `main` only |
 | Kubernetes | on pushes to `main`: `helm lint` and `helm template` (Helm v3.16.4); a live `helm upgrade` only when a `KUBECONFIG` secret points at a reachable cluster |
 
-`keep-warm.yml` pings the live demo every 10 minutes, and `eval.yml` is the manual live DeepEval run.
+`keep-warm.yml` pings the live demo every 10 minutes. Live evals run from this machine (the commands above), not from GitHub: a runner has no app of its own to call, and the live site ignores `X-User-ID`.
 
 **To reproduce the replay job locally,** extract a clean copy with `git archive HEAD`, never the working folder (it holds `.env`). Run it in the CI images: `pgvector/pgvector:0.8.0-pg15` for the database, with the fixture restored by that container's own `pg_restore`, and `python:3.12` with `CI=true` for `bash eval/ci_replay.sh`.
 

@@ -416,6 +416,35 @@ def has_product_listing(text: str) -> bool:
     return "₹" in text and bool(re.search(r"(?m)^\s*1\.\s+\S", text))
 
 
+# A product reply's first line may say the results miss something ("don't match", "couldn't find",
+# "don't carry", "widened"). Final runs 1 and 2 passed 14 and 13 replies that said so over results that
+# matched; with this check, both would have scored 38/51 instead of 48/51.
+MISMATCH_CLAIM = re.compile(r"don't match|closest options|couldn't find|don't carry|widened")
+
+
+def false_mismatch_claim(text: str, prefs: dict, shown: list) -> bool:
+    """The reply says the results miss something, yet every shown product is the kind asked for and
+    meets the brand, price and rating asked for. Features can't be checked from here, so a request with
+    features is never flagged: the check only catches claims that are certainly false."""
+    if not shown or not prefs.get("product") or prefs.get("features"):
+        return False
+    if not MISMATCH_CLAIM.search(_norm((text or "").strip().split("\n", 1)[0])):
+        return False
+    brand = _alnum(prefs.get("brand"))
+    for p in shown:
+        got = _alnum(p.get("brand"))
+        price, rating = p.get("price") or 0, p.get("rating") or 0
+        if not shows_product(p, prefs["product"]) or (brand and not (got and (brand in got or got in brand))):
+            return False
+        if (prefs.get("max_price") and price > prefs["max_price"]) or (
+            prefs.get("min_price") and price < prefs["min_price"]
+        ):
+            return False
+        if prefs.get("min_rating") and rating < prefs["min_rating"]:
+            return False
+    return True
+
+
 def derive_route(state, user_id: str) -> str:
     if state is None:
         return "safety"  # main.py answered before invoking the graph
@@ -504,6 +533,8 @@ def check_turn(expect: dict, *, text, status_code, state, route, api_json, user_
         ]
         if bad:
             failures.append(f"shown brands {bad} != {expect['result_brand']!r}")
+    if has_product_listing(text) and false_mismatch_claim(text, prefs, shown):
+        failures.append("says the results don't match, but every shown product does")
 
     for phrase in expect.get("contains", []):
         options = _phrases(phrase, phrase_sets)
