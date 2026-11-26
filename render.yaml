@@ -2,7 +2,8 @@
 # - The database is Neon's free Postgres (pgvector, never expires): paste its URL as DATABASE_URL.
 #   Load it once from your machine with scripts/load_live_db.sh (see docs/SETUP.md).
 # - The mock carrier API runs inside the app at /carrier, so one service is enough (750 free hours a month).
-# - .github/workflows/keep-warm.yml pings /health every 10 minutes so the free service doesn't sleep.
+# - an outside monitor (UptimeRobot, every 5 minutes) pings /health so the free service doesn't sleep;
+#   .github/workflows/keep-warm.yml is a backup (GitHub runs its schedule only every few hours).
 # Secrets marked sync: false are entered in the Render dashboard, never committed.
 services:
   - type: web

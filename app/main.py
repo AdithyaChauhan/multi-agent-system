@@ -316,7 +316,7 @@ def root():
     return RedirectResponse(url="/static/chat.html")
 
 
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])  # uptime monitors ping with HEAD
 def health():
     return {"status": "ok"}
 

@@ -3,17 +3,18 @@
 **Goal:** take the assistant from about 5.8/10 to 9/10. That means short prompts, a clean LangGraph architecture that shows how agents are built (subgraphs, loops, a human-in-the-loop pause, ticket handoff), measured quality, and escalations that reach a real person. The work is split into phases, and each phase is worth keeping even if work stops after it.
 
 ## Now
-- **Current phase:** Phase 5, Ship and showcase: in progress. Phases 0–4 are done.
+- **Current phase:** none. All six phases (0–5) are done; Phase 5 finished on 2026-11-26. Every measured item in the definition of done is met (below). The scorecard's overall is about 8.0, not 9: state and scaling, cost and latency and maintainability are held back by the free tier and a single instance.
 - **Live:** https://multi-agent-chatbot-58ur.onrender.com (Render free, Neon free, Singapore). `main` is the live site: Render deploys every push to it, so change it only through a PR with green CI ([0019](docs/decisions/0019-main-is-live.md)).
 - **Branch:** `main` (`phase-5-ship` merged as PR #3, the Neon fix as PR #4, honest replies as PR #6); new work goes on short branches with a PR each.
-- **Phase 5 so far:**
+- **Phase 5 result:**
   - one-click demo shoppers;
   - product Q&A through a read-only ToolNode loop;
   - **live** on Render + Neon: the judge path (demo shopper → search → question → order → cancel) takes 10 s; safety alerts reach Discord;
   - CI green on GitHub's runners, publishing the image from `main`; replays depend on nothing machine-specific ([0018](docs/decisions/0018-machine-independent-replays.md));
   - showcase README, `docs/SETUP.md`, the case study draft, Grafana panels;
   - replies claim only what code checked ([0020](docs/decisions/0020-replies-claim-only-what-code-checked.md)): the false "don't match" header the user found live is gone, and the evals now fail such claims;
-  - final run 3, the first live run of the fixed code: **48/51**, 0 false claims (runs 1 and 2 of the old code: 48/51 then, 38/51 re-scored; not counted); Q&A 6/6; adversarial safety cases 14/14;
+  - three live runs of the fixed code (runs 3–5, 2026-11-25 and 26, two keys): **48/51** each, 0 false claims (runs 1 and 2 of the old code: 48/51 then, 38/51 re-scored; not counted); Q&A 6/6; adversarial safety cases 14/14;
+  - an outside uptime monitor keeps the free site awake (GitHub's scheduled ping ran only every few hours); `/health` answers its `HEAD` check;
   - 20-user load test: p95 **1.3 s**, 0 of 377 errors, 14% real answers;
   - the visual explainer rebuilt from the code (version 3);
   - five bugs found by the release checks, all fixed (`functions.` tool names, SDK retry sleeps, a rejected key's 500, an unreachable Groq scored as a run, Neon's closed connections);
@@ -32,13 +33,10 @@
   - app memory about 315 MB, search about 90 ms;
   - product replies show cards with photos.
 - **Roadmap reset (2026-11-23, [0013](docs/decisions/0013-judge-facing-priorities.md)):** the remaining phases are ordered by what a judge sees: a demo that never breaks (4), then a live link that stays up with a one-click demo and a showcase README (5).
-- **Next action:** new chat, `/resume`, then finish Phase 5 (see its plan):
-  - final runs 4 and 5 of the fixed code on 2026-11-26 after 05:30 IST (the quota's daily reset), one per key, about 196K tokens each;
-  - the 3-run average into the case study, the plan and the explainer's last screen;
-  - the final scorecard, then mark Phase 5 done.
-- **For the user:** merge this handoff's PR; can the local branch `backup/phase-5-ship-before-rewrite` be deleted?
+- **Next action:** none required. Optional work, by what it would move: the three failing conversations (p03, p10, s16); the weaker scorecard rows (follow-up turns, state and scaling, cost and latency, maintainability).
+- **For the user:** merge the `phase-5-final` PR. It also makes `/health` answer UptimeRobot's `HEAD` check, so the monitor turns green.
 - **Still open:** the user's review of the Phase 0 labels; the user skipped the 50-product spot check.
-- **Blocked on:** nothing (only quota timing).
+- **Blocked on:** nothing.
 
 ## Phases
 | # | Phase | Status | Plan | Exit criteria (short) |
@@ -48,12 +46,12 @@
 | 2 | LangGraph-native architecture | Done (2 size criteria missed) | [plan](docs/plans/phase-2-langgraph-architecture.md) | Checkpointer, `interrupt()` for cancel, search loop as graph edges, subgraph schemas, streaming, escalation subgraph, filter chips |
 | 3 | Hybrid search and product cards | Done | [plan](docs/plans/phase-3-hybrid-search.md) | Renamed-catalog drop < 5 points, no metric drops, refusals 1.0, cards with images |
 | 4 | Demo never breaks | Done | [plan](docs/plans/phase-4-reliability-and-safety.md) | Model fallback chain, busy message, search cache, 0 adversarial failures, replay evals in CI |
-| 5 | Ship and showcase | In progress | [plan](docs/plans/phase-5-ship-and-showcase.md) | Live link that stays up, one-click demo shopper, showcase README, case study, final scorecard |
+| 5 | Ship and showcase | Done | [plan](docs/plans/phase-5-ship-and-showcase.md) | Live link that stays up, one-click demo shopper, showcase README, case study, final scorecard |
 
 Statuses: Not started, In progress, Done, Dropped (say why in the plan). The order changed on 2026-11-18 to match the user's goals (see 0009 and 0010), and again on 2026-11-23 to put what a judge sees first (0013).
 
 ## Scorecard
-Judged on 2026-11-18; updated 2026-11-19 after Phase 1, 2026-11-21 after Phase 2 (`phase-2-architecture`) and 2026-11-23 after Phases 3 and 4 (hybrid search; renamed recall drop 0 points; adversarial 15/15; CI eval gate; fallback chain) and 2026-11-25 after going live (the live judge path; a Discord safety alert delivered; impersonation blocked on the live site; CI green on GitHub's runners, 5 runs in a row, with machine-independent replays) for the measured rows. Change the Today column only with measured evidence.
+Judged on 2026-11-18; updated 2026-11-19 after Phase 1, 2026-11-21 after Phase 2 (`phase-2-architecture`) and 2026-11-23 after Phases 3 and 4 (hybrid search; renamed recall drop 0 points; adversarial 15/15; CI eval gate; fallback chain) and 2026-11-25 after going live (the live judge path; a Discord safety alert delivered; impersonation blocked on the live site; CI green on GitHub's runners, 5 runs in a row, with machine-independent replays) and 2026-11-26 at the end of Phase 5 (three live runs of the fixed code, 48/51 each; no row moved) for the measured rows. Change the Today column only with measured evidence.
 
 | Aspect | Before (`e0bdf3c`) | Today | Target | Moved by phase |
 |---|---|---|---|---|

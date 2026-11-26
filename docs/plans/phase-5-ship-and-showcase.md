@@ -1,5 +1,5 @@
 # Phase 5: Ship and showcase
-- **Status:** In progress (started 2026-11-23)
+- **Status:** Done (2026-11-23 to 2026-11-26)
 - **Branch:** `phase-5-ship`, off `phase-4-reliability`, merged into `main` as PR #3 (2026-11-24). Since then `main` is what's live: each change is a short branch and a PR (the Neon fix was PR #4).
 - **Live:** https://multi-agent-chatbot-58ur.onrender.com (Render free, Neon free, both in Singapore)
 - **Decisions:** [0013](../decisions/0013-judge-facing-priorities.md), [0016](../decisions/0016-product-qa-and-demo-shoppers.md), [0017](../decisions/0017-free-tier-capacity.md), [0018](../decisions/0018-machine-independent-replays.md), [0019](../decisions/0019-main-is-live.md), [0020](../decisions/0020-replies-claim-only-what-code-checked.md)
@@ -26,20 +26,22 @@ Meet the definition of done in `ROADMAP.md`. A judge opens the README, clicks a 
 - [x] **Root cleanup:** 8 files removed, 11 cache folders deleted, history reports moved to `docs/history/`.
 - [x] **Final run 1** (51 conversations, gpt-oss-20b): 48/51. The Q&A set 6/6; adversarial 14/15 (a12 is routing, reported).
 - [x] **Final run 2** (2026-11-24, `.env.eval` key): 48/51. The first 2026-11-24 attempt was stopped and doesn't count (it found the `functions.` tool-name bug). Runs 1 and 2 measured the old header: **38/51** each under the false-claim check, so they don't count toward the release average (the user's choice, ADR 0020).
-- [ ] **Three live runs of the fixed code** (`--mode live`, about 196K tokens each, one per key per day; Groq's daily quota resets at about 05:30 IST). **Run 3: 48/51** (2026-11-25, main key, `807c3dc`). Runs 4 and 5: 2026-11-26 after 05:30 IST, one on the main key and one with `--env-file .env.eval`.
+- [x] **Three live runs of the fixed code** (`--mode live`, about 196K tokens each, one per key per day; Groq's daily quota resets at about 05:30 IST). **Run 3: 48/51** (2026-11-25, main key, `807c3dc`). **Run 4: 48/51** (2026-11-26, main key) and **run 5: 48/51** (2026-11-26, `.env.eval` key), both on `d836c6e` (the same app code). **Average 48/51.**
 - [x] **Load test:** built (`eval/loadtest/`: `locustfile.py`, `run.sh`, `summarize.py`, `SMOKE=1` for a 0-token run). First run 2026-11-24 failed the latency target and found the SDK retry wait (fixed). **Rerun 2026-11-25: p95 1.3 s, 0 of 377 requests failed, 14% of chat replies real answers** (see Results).
 - [x] **Honest product replies** (2026-11-25, found by the user on the live site: "hdmi cables" said "These don't match everything you asked for" over three HDMI cables). The header came from the ranker's `exact` list, which gpt-oss-20b leaves empty in 65% of its recorded answers. The header is now "Here's what I found:"; only the brand note and "I widened…" say something is missing. A new harness check fails any reply that claims a mismatch the shown products don't have. Re-recording found a second flake, fixed in code: `asks_about_shown` (see Results).
 - [x] **The CI simulation passes** with the new cassettes (2026-11-23, `python:3.12-slim`): retrieval 0.979/0.933, baseline 48/51, adversarial 14/15 (a12 routing), Q&A 6/6, gate passed. It found the replay wrapper bug fixed in `96b74bf`.
-- [ ] `docs/CASE_STUDY.md`: drafted 2026-11-24. The live link, the Discord timing, runs 1–3, the load-test rerun and the false-claim finding are filled in; runs 4 and 5 and their average are still pending.
-- [x] **Visual explainer** (2026-11-25, version 3 at the same URL): the Today / Proposed switch removed; stories rebuilt from the code on `main` (hybrid search and the search loop, the Q&A tool loop, the `interrupt()` pause, the escalation subgraph with the Discord alert, the safety floor); a last screen of six measured numbers. Run 3 and the load test can be added to it when measured.
+- [x] `docs/CASE_STUDY.md`: drafted 2026-11-24; finished 2026-11-26 with runs 4 and 5, the average and the keep-awake finding.
+- [x] **Visual explainer** (2026-11-25, version 3 at the same URL): the Today / Proposed switch removed; stories rebuilt from the code on `main` (hybrid search and the search loop, the Q&A tool loop, the `interrupt()` pause, the escalation subgraph with the Discord alert, the safety floor); a last screen of six measured numbers. Republished 2026-11-26: the last screen shows the 3-run result (48/51 each) and the median turn of runs 3–5 (1.8 s).
 - [x] **Grafana panels:** a "Demo never breaks" row: turn latency p50/p95 (new `chat_turn_seconds`, which times `/chat/stream` to the reply), turns by outcome (new `chat_turns_total`), fallbacks, cache hit rate, limited turns. Prometheus also scrapes the load-test container.
 - [x] **Go live with the user:** PR #3 merged (`1b26114`), CI green on GitHub; Neon loaded with `scripts/load_live_db.sh`; Render deploys `main`; the live link checked end to end; Discord alerts arrive. The first live check found a fifth bug (Neon closes idle connections), fixed in PR #4 (`42ce007`). See Results.
 - [x] **CI green on GitHub's runners**, for the first time: four problems the local simulation had hidden, fixed (see Results, ADR 0018). 5 green runs in a row since.
 - [x] **`LIVE_URL` repository variable** set by the user (2026-11-25): keep-warm now pings the live site every 10 minutes.
 - [x] **Removed the stale `KUBECONFIG` secret** (the user, 2026-11-25): it pointed at an EKS cluster that no longer exists, and stage 6 printed that address in a public log.
 - [x] `eval.yml` removed (2026-11-25): it named the dead self-hosted `minikube` runner, and on `ubuntu-latest` it would have had no app to call (the live site ignores its `X-User-ID`). Live evals run from this machine.
-- [ ] Delete the local branch `backup/phase-5-ship-before-rewrite` once the user is happy with the rewritten history (commit messages carry no Claude attribution, 2026-11-24).
-- [ ] Final scorecard in the ROADMAP; Results; `/handoff`.
+- [x] Deleted the local branch `backup/phase-5-ship-before-rewrite` (2026-11-26, the user's go-ahead) once the user was happy with the rewritten history (commit messages carry no Claude attribution, 2026-11-24).
+- [x] **A keep-awake that works** (2026-11-26): GitHub ran `keep-warm.yml`'s 10-minute schedule only every 6 to 10 hours, so the free service slept and a first visit took about a minute. The user added an UptimeRobot monitor (every 5 minutes, email alerts). Its free check sends `HEAD`, which `/health` rejected with a 405; `/health` now accepts `HEAD` too (with a test).
+- [x] `docs/PROJECT_PROMPT.md` (the user's briefing prompt for a new chat) brought up to date and committed.
+- [x] Final scorecard in the ROADMAP; Results; handoff (2026-11-26).
 
 ## Acceptance criteria
 - The live link works, and search, an order and a cancel can be tried within 2 minutes without an account.
@@ -49,16 +51,24 @@ Meet the definition of done in `ROADMAP.md`. A judge opens the README, clicks a 
 - Prompts under 40 lines (router 27, Q&A 6); the graph diagram shows the subgraphs, the loop, the pause and the tool loop.
 - The case study and the visual explainer show measured numbers.
 
-**Status (2026-11-25):**
+**Status (2026-11-26): all met.**
 - live link and judge path: **met** (10 s, see Results);
-- 3 live runs of the fixed code: 1 of 3 done, **48/51** (run 3). Runs 1 and 2 of the old code: 48/51 then, 38/51 under the false-claim check; they don't count (ADR 0020);
+- 3 live runs of the fixed code: **met**, 48/51 in each (runs 3, 4 and 5). Runs 1 and 2 of the old code: 48/51 then, 38/51 under the false-claim check; they don't count (ADR 0020);
 - adversarial safety cases and Q&A: met in replay (local, 2026-11-25, with the new check) and in CI on PR #6;
 - load test: **met** (p95 1.3 s, 0 errors; 14% real answers, the free-tier ceiling);
 - Discord within 1 minute: **met**;
 - prompts and diagram: met;
-- case study: partly (runs 4 and 5 pending); explainer: **met** (republished 2026-11-25).
+- case study and explainer: **met** (both updated 2026-11-26 with the 3-run result).
 
-## Results (so far)
+## Results
+### 2026-11-26: runs 4 and 5 of the fixed code, 48/51 each; Phase 5 done
+- **Final run 4** (`p5-final-r4`: gpt-oss-20b, `--mode live`, 1 run, local app on `multi_agent_baseline`, main key, 12:04–12:30 IST, `d836c6e`): **48/51** (p03, p10, s16), 87 of 90 turns, 0 false claims, 0 rate limits. 2.02 model calls and 2,190 tokens per turn, median 1.7 s per turn; about 197K tokens.
+- **Final run 5** (`p5-final-r5`: the same, with `--env-file .env.eval`, 12:31–12:58 IST): **48/51** (p03, p10, s16), 87 of 90 turns, 0 false claims, 0 rate limits. 2,191 tokens per turn, median 1.7 s; about 197K tokens.
+- **Release average, runs 3–5: 48/51** (target ≥ 47/51). The same three conversations failed in all three runs, so the misses are the known gaps, not chance.
+- A 0-token replay before the runs also gave 48/51, so the setup matched run 3's.
+- **Keep-awake:** the live site's first `/health` of the day timed out after 60 s and answered after 38 s (the service waking). GitHub's keep-warm schedule had run only 4 times in 2 days. UptimeRobot's first checks were "502" (waking) and then "405" (its `HEAD` check); fixed in `/health`.
+- **Tokens on 2026-11-26:** about 197K on each key.
+
 ### 2026-11-25 (later): the fix is live; run 3 of the fixed code 48/51
 - **PR #6** (`807c3dc`, merged as `1082d60`): CI green on GitHub (lint, unit tests, replay evals, Docker build; publish and deploy skipped on a PR).
 - **Live check after the deploy:** "hdmi cables" answers "Here's what I found:" over three HDMI cables. "electric kettle", then "does the first one come with a warranty?", goes to the Q&A loop: "The facts don't mention a warranty for the Tesora 1.8L Stainless Steel Electric Kettle."

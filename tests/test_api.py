@@ -11,6 +11,10 @@ class TestHealthEndpoint:
         assert response.status_code == 200
         assert response.json()["status"] == "ok"
 
+    def test_health_answers_head(self, client):
+        """Uptime monitors ping with HEAD; a 405 would read as the site being down"""
+        assert client.head("/health").status_code == 200
+
 
 class TestChatEndpoint:
 
