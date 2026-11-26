@@ -1,0 +1,3291 @@
+{
+ "label": "p5-final-r5",
+ "run": 1,
+ "model": "openai/gpt-oss-20b",
+ "mode": "live",
+ "git_sha": "d836c6e",
+ "started_at": "2026-11-26T07:01:09+00:00",
+ "finished_at": "2026-11-26T07:27:21+00:00",
+ "summary": {
+  "conversations": 51,
+  "conversations_passed": 48,
+  "turns": 90,
+  "turns_passed": 87,
+  "llm_calls": 182,
+  "llm_calls_per_turn": 2.02,
+  "tokens": 197174,
+  "tokens_per_turn": 2191,
+  "seconds_per_turn_mean": 1.73,
+  "seconds_per_turn_median": 1.71,
+  "rate_limited_calls": 0,
+  "unreachable_calls": 0,
+  "sdk_retries": 0,
+  "infra_error_conversations": [],
+  "failed_conversations": [
+   "p03",
+   "p10",
+   "s16"
+  ],
+  "by_route": {
+   "product": {
+    "turns": 49,
+    "llm_calls": 141,
+    "seconds": 108.3,
+    "tokens": 147730,
+    "llm_calls_per_turn": 2.88,
+    "seconds_per_turn": 2.21,
+    "tokens_per_turn": 3015
+   },
+   "clarify": {
+    "turns": 6,
+    "llm_calls": 6,
+    "seconds": 5.4,
+    "tokens": 6977,
+    "llm_calls_per_turn": 1.0,
+    "seconds_per_turn": 0.9,
+    "tokens_per_turn": 1163
+   },
+   "sign_in": {
+    "turns": 2,
+    "llm_calls": 2,
+    "seconds": 1.7,
+    "tokens": 2248,
+    "llm_calls_per_turn": 1.0,
+    "seconds_per_turn": 0.87,
+    "tokens_per_turn": 1124
+   },
+   "order": {
+    "turns": 10,
+    "llm_calls": 10,
+    "seconds": 10.4,
+    "tokens": 12144,
+    "llm_calls_per_turn": 1.0,
+    "seconds_per_turn": 1.04,
+    "tokens_per_turn": 1214
+   },
+   "support": {
+    "turns": 22,
+    "llm_calls": 22,
+    "seconds": 28.4,
+    "tokens": 26878,
+    "llm_calls_per_turn": 1.0,
+    "seconds_per_turn": 1.29,
+    "tokens_per_turn": 1222
+   },
+   "safety": {
+    "turns": 1,
+    "llm_calls": 1,
+    "seconds": 1.3,
+    "tokens": 1197,
+    "llm_calls_per_turn": 1.0,
+    "seconds_per_turn": 1.34,
+    "tokens_per_turn": 1197
+   }
+  }
+ },
+ "conversations": [
+  {
+   "id": "p01",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "I want to buy headphones under 2000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3089,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.464,
+     "paced_wait_seconds": 23.8,
+     "extracted": {
+      "product": "headphones",
+      "features": [],
+      "brand": null,
+      "max_price": 2000,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Redgear Cosmo 7,1 Usb Gaming Wired Over Ear Headphones With ",
+       "brand": "Redgear",
+       "type": "headphones",
+       "kind": "over-ear headphones"
+      },
+      {
+       "name": "Infinity (JBL Glide 510, 72 Hrs Playtime with Quick Charge, ",
+       "brand": "Infinity (JBL)",
+       "type": "headphones",
+       "kind": "on-ear headphones"
+      },
+      {
+       "name": "boAt Rockerz 400 Bluetooth On Ear Headphones With Mic With U",
+       "brand": "boAt",
+       "type": "headphones",
+       "kind": "on-ear headphones"
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Redgear Cosmo 7.1 Wired Over Ear Gaming Headphones** — Redgear\n   ₹1,990 · 4.3/5\n\n2. **Infinity JBL Glide 510 Wireless On‑Ear Headphones** — Infinity (JBL)\n   ₹1,499 · 4.2/5\n\n3. **boAt Rockerz 400 Bluetooth On-Ear Headphones** — boAt\n   ₹1,399 · 4.1/5\n"
+    },
+    {
+     "message": "show me something cheaper",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3176,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.21,
+     "paced_wait_seconds": 21.9,
+     "extracted": {
+      "product": "headphones",
+      "features": [],
+      "brand": null,
+      "max_price": 1500,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "boAt BassHeads 900 On-Ear Wired Headphones with Mic (White)",
+       "brand": "boAt",
+       "type": "headphones",
+       "kind": "on-ear headphones"
+      },
+      {
+       "name": "Infinity (JBL Glide 510, 72 Hrs Playtime with Quick Charge, ",
+       "brand": "Infinity (JBL)",
+       "type": "headphones",
+       "kind": "on-ear headphones"
+      },
+      {
+       "name": "boAt Rockerz 450 Bluetooth On Ear Headphones with Mic, Upto ",
+       "brand": "boAt",
+       "type": "headphones",
+       "kind": "on-ear headphones"
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **boAt BassHeads 900 On-Ear Wired Headphones with Mic** — boAt\n   ₹849 · 4.2/5\n\n2. **Infinity JBL Glide 510 Wireless On‑Ear Headphones** — Infinity (JBL)\n   ₹1,499 · 4.2/5\n\n3. **boAt Rockerz 450 Bluetooth On-Ear Headphones** — boAt\n   ₹1,220 · 4.1/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p02",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "show me some TVs",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3012,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.313,
+     "paced_wait_seconds": 22.9,
+     "extracted": {
+      "product": "tv",
+      "features": [],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart ",
+       "brand": "Samsung",
+       "type": "tv",
+       "kind": null
+      },
+      {
+       "name": "Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED",
+       "brand": "Samsung",
+       "type": "tv",
+       "kind": null
+      },
+      {
+       "name": "Samsung 108 cm (43 inches) Crystal 4K Neo Series Ultra HD Sm",
+       "brand": "Samsung",
+       "type": "tv",
+       "kind": null
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Samsung 43\" Crystal 4K Smart LED TV** — Samsung\n   ₹30,990 · 4.3/5\n\n2. **Samsung 32\" Wondertainment HD Ready Smart LED TV** — Samsung\n   ₹13,490 · 4.3/5\n\n3. **Samsung 43\" Crystal 4K Neo Smart LED TV** — Samsung\n   ₹32,990 · 4.3/5\n"
+    },
+    {
+     "message": "what about Samsung",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3220,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.338,
+     "paced_wait_seconds": 21.5,
+     "extracted": {
+      "product": "tv",
+      "features": [],
+      "brand": "Samsung",
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart ",
+       "brand": "Samsung",
+       "type": "tv",
+       "kind": null
+      },
+      {
+       "name": "Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED",
+       "brand": "Samsung",
+       "type": "tv",
+       "kind": null
+      },
+      {
+       "name": "Samsung 80 cm (32 inches) Wondertainment Series HD Ready LED",
+       "brand": "Samsung",
+       "type": "tv",
+       "kind": null
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Samsung 43\" Crystal 4K Smart LED TV** — Samsung\n   ₹30,990 · 4.3/5\n\n2. **Samsung 32\" Wondertainment HD Ready Smart LED TV** — Samsung\n   ₹13,490 · 4.3/5\n\n3. **Samsung 32\" Wondertainment Series HD Ready Smart TV** — Samsung\n   ₹15,490 · 4.3/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p03",
+   "tags": [
+    "product"
+   ],
+   "passed": false,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "I need a wireless mouse",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3005,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.174,
+     "paced_wait_seconds": 23.1,
+     "extracted": {
+      "product": "mouse",
+      "features": [
+       "wireless"
+      ],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Amazon Basics Wireless Mouse | 2.4 GHz Connection, 1600 DPI ",
+       "brand": "Amazon",
+       "type": "mouse",
+       "kind": null
+      },
+      {
+       "name": "Logitech Pebble M350 Wireless Mouse with Bluetooth or USB - ",
+       "brand": "Logitech",
+       "type": "mouse",
+       "kind": null
+      },
+      {
+       "name": "Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Na",
+       "brand": "Logitech",
+       "type": "mouse",
+       "kind": null
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Amazon Basics Wireless Mouse 2.4 GHz** — Amazon\n   ₹499 · 5.0/5\n\n2. **Logitech Pebble M350 Wireless Mouse** — Logitech\n   ₹1,490 · 4.6/5\n\n3. **Logitech M331 Silent Plus Wireless Mouse** — Logitech\n   ₹1,295 · 4.6/5\n"
+    },
+    {
+     "message": "under 1000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3164,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.422,
+     "paced_wait_seconds": 21.5,
+     "extracted": {
+      "product": "mouse",
+      "features": [
+       "wireless"
+      ],
+      "brand": null,
+      "max_price": 1000,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Logitech M235 Wireless Mouse, 1000 DPI Optical Tracking, 12 ",
+       "brand": "Logitech",
+       "type": "mouse",
+       "kind": null
+      },
+      {
+       "name": "Logitech M221 Wireless Mouse, Silent Buttons, 2.4 GHz with U",
+       "brand": "Logitech",
+       "type": "mouse",
+       "kind": null
+      },
+      {
+       "name": "Lenovo 400 Wireless Mouse, 1200DPI Optical Sensor, 2.4GHz Wi",
+       "brand": "Lenovo",
+       "type": "mouse",
+       "kind": null
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Logitech M235 Wireless Mouse** — Logitech\n   ₹699 · 4.5/5\n\n2. **Logitech M221 Wireless Mouse** — Logitech\n   ₹799 · 4.4/5\n\n3. **Lenovo Wireless Nano Mouse** — Lenovo\n   ₹629 · 4.4/5\n"
+    },
+    {
+     "message": "table",
+     "route": "clarify",
+     "rerouted_to_order": false,
+     "passed": false,
+     "failures": [
+      "route 'clarify' not in ['product']",
+      "none of [\"don't carry\", 'do not carry', \"don't have\", 'do not have', \"don't stock\", 'not available', \"doesn't carry\", 'not carry', 'unavailable', \"don't sell\", 'do not sell']"
+     ],
+     "llm_calls": 1,
+     "tokens": 1293,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.39,
+     "paced_wait_seconds": 22.6,
+     "extracted": {
+      "product": "mouse",
+      "features": [
+       "wireless"
+      ],
+      "brand": null,
+      "max_price": 1000,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [],
+     "response": "Hi! I can help you find products, check an order, or sort out a problem with one. What do you need?"
+    }
+   ]
+  },
+  {
+   "id": "p04",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "I need an air purifier",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3031,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.284,
+     "paced_wait_seconds": 8.8,
+     "extracted": {
+      "product": "air purifier",
+      "features": [],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Coway Professional Air Purifier for Home, Longest Filter Lif",
+       "brand": "Coway",
+       "type": "home appliance",
+       "kind": "air purifier"
+      },
+      {
+       "name": "Mi Air Purifier 3 with True HEPA Filter, removes air polluta",
+       "brand": "Xiaomi",
+       "type": "home appliance",
+       "kind": "air purifier"
+      },
+      {
+       "name": "Philips Air Purifier Ac2887/20,Vitashield Intelligent Purifi",
+       "brand": "Philips",
+       "type": "home appliance",
+       "kind": "air purifier"
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Coway AirMega 150 Air Purifier** — Coway\n   ₹14,400 · 4.4/5\n\n2. **Mi Air Purifier 3 with HEPA Filter** — Xiaomi\n   ₹9,970 · 4.3/5\n\n3. **Philips AC2887 Air Purifier** — Philips\n   ₹14,499 · 4.3/5\n"
+    },
+    {
+     "message": "philps air purifier",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3187,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.287,
+     "paced_wait_seconds": 21.6,
+     "extracted": {
+      "product": "air purifier",
+      "features": [],
+      "brand": "philps",
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Philips Air Purifier Ac2887/20,Vitashield Intelligent Purifi",
+       "brand": "Philips",
+       "type": "home appliance",
+       "kind": "air purifier"
+      },
+      {
+       "name": "Philips AC1215/20 Air purifier, removes 99.97% airborne poll",
+       "brand": "Philips",
+       "type": "home appliance",
+       "kind": "air purifier"
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Philips AC2887 Air Purifier** — Philips\n   ₹14,499 · 4.3/5\n\n2. **Philips AC1215 Air Purifier** — Philips\n   ₹8,799 · 4.1/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p05",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "show me laptop bags",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3025,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.404,
+     "paced_wait_seconds": 22.9,
+     "extracted": {
+      "product": "laptop bag",
+      "features": [],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "AirCase Protective Laptop Bag Sleeve fits Upto 13.3\" Laptop/",
+       "brand": "AirCase",
+       "type": "laptop bag",
+       "kind": "laptop sleeve"
+      },
+      {
+       "name": "AirCase Protective Laptop Bag Sleeve fits Upto 14.1\" Laptop/",
+       "brand": "AirCase",
+       "type": "laptop bag",
+       "kind": "laptop sleeve"
+      },
+      {
+       "name": "AirCase Protective Laptop Bag Sleeve fits Upto 15.6\" Laptop/",
+       "brand": "AirCase",
+       "type": "laptop bag",
+       "kind": "laptop sleeve"
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **AirCase Laptop Sleeve for 13.3\" Laptop** — AirCase\n   ₹449 · 4.4/5\n\n2. **AirCase Laptop Sleeve for 14.1\" Laptop** — AirCase\n   ₹449 · 4.3/5\n\n3. **AirCase Laptop Sleeve for 15.6\" Laptop** — AirCase\n   ₹449 · 4.3/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p06",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "show me all electronics",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3016,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.449,
+     "paced_wait_seconds": 21.5,
+     "extracted": {
+      "product": "electronics",
+      "features": [],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Zebronics Zeb-Transformer-M Optical USB Gaming Mouse with LE",
+       "brand": "Zebronics",
+       "type": "mouse",
+       "kind": null
+      },
+      {
+       "name": "Logitech B100 Wired USB Mouse, 3 yr Warranty, 800 DPI Optica",
+       "brand": "Logitech",
+       "type": "mouse",
+       "kind": null
+      },
+      {
+       "name": "Acer 100 cm (40 inches) P Series Full HD Android Smart LED T",
+       "brand": "Acer",
+       "type": "tv",
+       "kind": null
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Zebronics Zeb-Transformer-M Optical USB Gaming Mouse** — Zebronics\n   ₹399 · 4.4/5\n\n2. **Logitech B100 Wired USB Mouse** — Logitech\n   ₹279 · 4.3/5\n\n3. **Acer 40\" P Series Full HD Android Smart LED TV** — Acer\n   ₹18,999 · 4.3/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p07",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "sonny headphones",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2776,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.35,
+     "paced_wait_seconds": 21.4,
+     "extracted": {
+      "product": "headphones",
+      "features": [],
+      "brand": "sonny",
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Sony WI-C100 Wireless Headphones with Customizable Equalizer",
+       "brand": "Sony",
+       "type": "headphones",
+       "kind": "over-ear headphones"
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Sony WI-C100 Wireless Over-Ear Headphones with Mic** — Sony\n   ₹1,599 · 3.6/5\n"
+    },
+    {
+     "message": "lojitec mouse",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3140,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.341,
+     "paced_wait_seconds": 19.6,
+     "extracted": {
+      "product": "mouse",
+      "features": [],
+      "brand": "lojitec",
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Logitech G402 Hyperion Fury USB Wired Gaming Mouse, 4,000 DP",
+       "brand": "Logitech",
+       "type": "mouse",
+       "kind": null
+      },
+      {
+       "name": "Logitech Pebble M350 Wireless Mouse with Bluetooth or USB - ",
+       "brand": "Logitech",
+       "type": "mouse",
+       "kind": null
+      },
+      {
+       "name": "Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Na",
+       "brand": "Logitech",
+       "type": "mouse",
+       "kind": null
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Logitech G402 Hyperion Fury USB Gaming Mouse** — Logitech\n   ₹1,995 · 4.6/5\n\n2. **Logitech Pebble M350 Wireless Mouse** — Logitech\n   ₹1,490 · 4.6/5\n\n3. **Logitech M331 Silent Plus Wireless Mouse** — Logitech\n   ₹1,295 · 4.6/5\n"
+    },
+    {
+     "message": "samsng tv",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3261,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.446,
+     "paced_wait_seconds": 22.4,
+     "extracted": {
+      "product": "tv",
+      "features": [],
+      "brand": "Samsung",
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart ",
+       "brand": "Samsung",
+       "type": "tv",
+       "kind": null
+      },
+      {
+       "name": "Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED",
+       "brand": "Samsung",
+       "type": "tv",
+       "kind": null
+      },
+      {
+       "name": "Samsung 108 cm (43 inches) Crystal 4K Neo Series Ultra HD Sm",
+       "brand": "Samsung",
+       "type": "tv",
+       "kind": null
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Samsung 43\" Crystal 4K Smart LED TV** — Samsung\n   ₹30,990 · 4.3/5\n\n2. **Samsung 32\" Wondertainment HD Ready Smart LED TV** — Samsung\n   ₹13,490 · 4.3/5\n\n3. **Samsung 43\" Crystal 4K Neo Smart LED TV** — Samsung\n   ₹32,990 · 4.3/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p08",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "something to keep me warm this winter",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3025,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.394,
+     "paced_wait_seconds": 23.3,
+     "extracted": {
+      "product": "room heater",
+      "features": [],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Melbon VM-905 2000-Watt Room Heater (ISI Certified, White Co",
+       "brand": "Melbon",
+       "type": "room heater",
+       "kind": null
+      },
+      {
+       "name": "!!1000 Watt/2000-Watt Room Heater!! Fan Heater!!Pure White!!",
+       "brand": "!!1000",
+       "type": "room heater",
+       "kind": null
+      },
+      {
+       "name": "Room Heater Warmer Wall-Outlet 400 Watts Electric Handy Room",
+       "brand": "Room",
+       "type": "room heater",
+       "kind": null
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Melbon VM-905 2000W Room Heater** — Melbon\n   ₹998 · 4.6/5\n\n2. **1000W/2000W Room Heater Fan Heater** — !!1000\n   ₹784 · 4.5/5\n\n3. **Wall-Outlet 400W Electric Room Heater** — Room\n   ₹799 · 4.3/5\n"
+    },
+    {
+     "message": "something to make my chai",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3189,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.942,
+     "paced_wait_seconds": 21.5,
+     "extracted": {
+      "product": "electric kettle",
+      "features": [],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Tesora - Inspired by you Large Premium Electric Kettle 1.8L,",
+       "brand": "Tesora",
+       "type": "electric kettle",
+       "kind": null
+      },
+      {
+       "name": "Philips HD9306/06 1.5-Litre Electric Kettle (Multicolor)",
+       "brand": "Philips",
+       "type": "electric kettle",
+       "kind": null
+      },
+      {
+       "name": "Cello Quick Boil Popular Electric Kettle 1 Litre 1200 Watts ",
+       "brand": "Cello",
+       "type": "electric kettle",
+       "kind": null
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Tesora 1.8L Stainless Steel Electric Kettle** — Tesora\n   ₹1,349 · 4.4/5\n\n2. **Philips 1.5L Electric Kettle** — Philips\n   ₹2,695 · 4.4/5\n\n3. **Cello 1 L Stainless Steel Electric Kettle** — Cello\n   ₹1,199 · 4.2/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p09",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "chair",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 2397,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.455,
+     "paced_wait_seconds": 23.2,
+     "extracted": {
+      "product": null,
+      "features": [],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [],
+     "response": "Sorry, we don't carry chair. Here's what we do carry:\n\n• Home & Kitchen (441 products) — cooking appliance, blender, room heater\n• Electronics (402 products) — tv, headphones, smartwatch\n• Computers & Accessories (391 products) — cable, mouse, storage\n• Office Products (36 products) — stationery, art supplies"
+    },
+    {
+     "message": "book",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 2470,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.157,
+     "paced_wait_seconds": 17.5,
+     "extracted": {
+      "product": null,
+      "features": [],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [],
+     "response": "Sorry, we don't carry book. Here's what we do carry:\n\n• Home & Kitchen (441 products) — cooking appliance, blender, room heater\n• Electronics (402 products) — tv, headphones, smartwatch\n• Computers & Accessories (391 products) — cable, mouse, storage\n• Office Products (36 products) — stationery, art supplies"
+    },
+    {
+     "message": "shoes",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 2560,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.319,
+     "paced_wait_seconds": 18.3,
+     "extracted": {
+      "product": null,
+      "features": [],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [],
+     "response": "Sorry, we don't carry shoes. Here's what we do carry:\n\n• Home & Kitchen (441 products) — cooking appliance, blender, room heater\n• Electronics (402 products) — tv, headphones, smartwatch\n• Computers & Accessories (391 products) — cable, mouse, storage\n• Office Products (36 products) — stationery, art supplies"
+    }
+   ]
+  },
+  {
+   "id": "p10",
+   "tags": [
+    "product"
+   ],
+   "passed": false,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "4k monitor",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": false,
+     "failures": [
+      "shown products ['tv/None', 'tv/None', 'tv/None'] mostly not ['monitor']"
+     ],
+     "llm_calls": 3,
+     "tokens": 3114,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.361,
+     "paced_wait_seconds": 18.9,
+     "extracted": {
+      "product": "monitor",
+      "features": [
+       "4k"
+      ],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Samsung 108 cm (43 inches) Crystal 4K Neo Series Ultra HD Sm",
+       "brand": "Samsung",
+       "type": "tv",
+       "kind": null
+      },
+      {
+       "name": "Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart ",
+       "brand": "Samsung",
+       "type": "tv",
+       "kind": null
+      },
+      {
+       "name": "Samsung 138 cm (55 inches) Crystal 4K Neo Series Ultra HD Sm",
+       "brand": "Samsung",
+       "type": "tv",
+       "kind": null
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Samsung 43\" Crystal 4K Neo Smart LED TV** — Samsung\n   ₹32,990 · 4.3/5\n\n2. **Samsung 43\" Crystal 4K Smart LED TV** — Samsung\n   ₹30,990 · 4.3/5\n\n3. **Samsung 55\" Crystal 4K Neo Smart LED TV** — Samsung\n   ₹47,990 · 4.3/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p11",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "sony headphones",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2766,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.147,
+     "paced_wait_seconds": 22.2,
+     "extracted": {
+      "product": "headphones",
+      "features": [],
+      "brand": "Sony",
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Sony WI-C100 Wireless Headphones with Customizable Equalizer",
+       "brand": "Sony",
+       "type": "headphones",
+       "kind": "over-ear headphones"
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Sony WI-C100 Wireless Over-Ear Headphones with Mic** — Sony\n   ₹1,599 · 3.6/5\n"
+    },
+    {
+     "message": "under 3000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2916,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.378,
+     "paced_wait_seconds": 19.7,
+     "extracted": {
+      "product": "headphones",
+      "features": [],
+      "brand": "Sony",
+      "max_price": 3000,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Sony WI-C100 Wireless Headphones with Customizable Equalizer",
+       "brand": "Sony",
+       "type": "headphones",
+       "kind": "over-ear headphones"
+      },
+      {
+       "name": "Sony TV - Remote Compatible for Sony LED Remote Control Work",
+       "brand": "Sony",
+       "type": "tv remote",
+       "kind": null
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Sony WI-C100 Wireless Over-Ear Headphones with Mic** — Sony\n   ₹1,599 · 3.6/5\n\n2. **Sony TV Remote Compatible Replacement** — Sony\n   ₹205 · 3.8/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p12",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "show me a mouse",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2983,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.081,
+     "paced_wait_seconds": 20.6,
+     "extracted": {
+      "product": "mouse",
+      "features": [],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Amazon Basics Wireless Mouse | 2.4 GHz Connection, 1600 DPI ",
+       "brand": "Amazon",
+       "type": "mouse",
+       "kind": null
+      },
+      {
+       "name": "Logitech Pebble M350 Wireless Mouse with Bluetooth or USB - ",
+       "brand": "Logitech",
+       "type": "mouse",
+       "kind": null
+      },
+      {
+       "name": "Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Na",
+       "brand": "Logitech",
+       "type": "mouse",
+       "kind": null
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Amazon Basics Wireless Mouse 2.4 GHz** — Amazon\n   ₹499 · 5.0/5\n\n2. **Logitech Pebble M350 Wireless Mouse** — Logitech\n   ₹1,490 · 4.6/5\n\n3. **Logitech M331 Silent Plus Wireless Mouse** — Logitech\n   ₹1,295 · 4.6/5\n"
+    },
+    {
+     "message": "gaming ones under 2000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3143,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.187,
+     "paced_wait_seconds": 21.5,
+     "extracted": {
+      "product": "mouse",
+      "features": [
+       "gaming"
+      ],
+      "brand": null,
+      "max_price": 2000,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Logitech G402 Hyperion Fury USB Wired Gaming Mouse, 4,000 DP",
+       "brand": "Logitech",
+       "type": "mouse",
+       "kind": null
+      },
+      {
+       "name": "Logitech G102 USB Light Sync Gaming Mouse with Customizable ",
+       "brand": "Logitech",
+       "type": "mouse",
+       "kind": null
+      },
+      {
+       "name": "Zebronics Zeb-Transformer-M Optical USB Gaming Mouse with LE",
+       "brand": "Zebronics",
+       "type": "mouse",
+       "kind": null
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Logitech G402 Hyperion Fury USB Gaming Mouse** — Logitech\n   ₹1,995 · 4.6/5\n\n2. **Logitech G102 Gaming Mouse with RGB Lighting** — Logitech\n   ₹1,495 · 4.5/5\n\n3. **Zebronics Zeb-Transformer-M Optical USB Gaming Mouse** — Zebronics\n   ₹399 · 4.4/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p13",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "smartwatches under 3000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3072,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.296,
+     "paced_wait_seconds": 22.6,
+     "extracted": {
+      "product": "smartwatch",
+      "features": [],
+      "brand": null,
+      "max_price": 3000,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Newly Launched Boult Dive+ with 1.85\" HD Display, Bluetooth ",
+       "brand": "Boult",
+       "type": "smartwatch",
+       "kind": "smartwatch"
+      },
+      {
+       "name": "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",1",
+       "brand": "Fire-Boltt",
+       "type": "smartwatch",
+       "kind": "smartwatch"
+      },
+      {
+       "name": "boAt Xtend Smartwatch with Alexa Built-in, 1.69” HD Display,",
+       "brand": "boAt",
+       "type": "smartwatch",
+       "kind": "smartwatch"
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Boult Dive+ 1.85\" HD Smartwatch** — Boult\n   ₹1,999 · 4.3/5\n\n2. **Fire-Boltt Phoenix Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹1,998 · 4.3/5\n\n3. **boAt Xtend Smartwatch with Alexa** — boAt\n   ₹2,299 · 4.2/5\n"
+    },
+    {
+     "message": "what about Fire-Boltt",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3233,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.165,
+     "paced_wait_seconds": 22.0,
+     "extracted": {
+      "product": "smartwatch",
+      "features": [],
+      "brand": "Fire-Boltt",
+      "max_price": 3000,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Fire-Boltt Tank 1.85\" Bluetooth Calling Smart Watch, 123 Spo",
+       "brand": "Fire-Boltt",
+       "type": "smartwatch",
+       "kind": "smartwatch"
+      },
+      {
+       "name": "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",1",
+       "brand": "Fire-Boltt",
+       "type": "smartwatch",
+       "kind": "smartwatch"
+      },
+      {
+       "name": "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",1",
+       "brand": "Fire-Boltt",
+       "type": "smartwatch",
+       "kind": "smartwatch"
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Fire-Boltt Tank 1.85\" Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹2,999 · 4.4/5\n\n2. **Fire-Boltt Phoenix Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹1,998 · 4.3/5\n\n3. **Fire-Boltt Phoenix Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹1,999 · 4.3/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p14",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "telly",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3004,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.903,
+     "paced_wait_seconds": 23.4,
+     "extracted": {
+      "product": "tv",
+      "features": [],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart ",
+       "brand": "Samsung",
+       "type": "tv",
+       "kind": null
+      },
+      {
+       "name": "Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED",
+       "brand": "Samsung",
+       "type": "tv",
+       "kind": null
+      },
+      {
+       "name": "Samsung 108 cm (43 inches) Crystal 4K Neo Series Ultra HD Sm",
+       "brand": "Samsung",
+       "type": "tv",
+       "kind": null
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Samsung 43\" Crystal 4K Smart LED TV** — Samsung\n   ₹30,990 · 4.3/5\n\n2. **Samsung 32\" Wondertainment HD Ready Smart LED TV** — Samsung\n   ₹13,490 · 4.3/5\n\n3. **Samsung 43\" Crystal 4K Neo Smart LED TV** — Samsung\n   ₹32,990 · 4.3/5\n"
+    },
+    {
+     "message": "blutooth speaker",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3139,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.803,
+     "paced_wait_seconds": 20.8,
+     "extracted": {
+      "product": "bluetooth speaker",
+      "features": [],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL ",
+       "brand": "JBL",
+       "type": "speaker",
+       "kind": "bluetooth speaker"
+      },
+      {
+       "name": "boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playb",
+       "brand": "boAt",
+       "type": "speaker",
+       "kind": "bluetooth speaker"
+      },
+      {
+       "name": "boAt Stone 250 Portable Wireless Speaker with 5W RMS Immersi",
+       "brand": "boAt",
+       "type": "speaker",
+       "kind": "bluetooth speaker"
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **JBL Go 2 Portable Bluetooth Speaker** — JBL\n   ₹1,999 · 4.3/5\n\n2. **boAt Stone 650 Bluetooth Speaker** — boAt\n   ₹1,799 · 4.2/5\n\n3. **boAt Stone 250 Portable Wireless Bluetooth Speaker** — boAt\n   ₹1,199 · 4.2/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p15",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "laptop under 50000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 2414,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.525,
+     "paced_wait_seconds": 23.0,
+     "extracted": {
+      "product": "laptop",
+      "features": [],
+      "brand": null,
+      "max_price": 50000,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [],
+     "response": "Sorry, we don't carry laptop. Would you like to see our laptop bag range instead?"
+    },
+    {
+     "message": "redmi charger",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3111,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.198,
+     "paced_wait_seconds": 17.5,
+     "extracted": {
+      "product": "charger",
+      "features": [],
+      "brand": "redmi",
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "MI 33W SonicCharge 2.0 USB Charger for Cellular Phones - Whi",
+       "brand": "Xiaomi",
+       "type": "charger",
+       "kind": "wall charger"
+      },
+      {
+       "name": "MI Xiaomi 22.5W Fast USB Type C Charger Combo for Tablets - ",
+       "brand": "Xiaomi",
+       "type": "charger",
+       "kind": "wall charger"
+      },
+      {
+       "name": "Mi 10W Wall Charger for Mobile Phones with Micro USB Cable (",
+       "brand": "Xiaomi",
+       "type": "charger",
+       "kind": "wall charger"
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **MI 33W SonicCharge 2.0 USB Wall Charger** — Xiaomi\n   ₹999 · 4.3/5\n\n2. **MI Xiaomi 22.5W Fast USB Type-C Wall Charger** — Xiaomi\n   ₹649 · 4.2/5\n\n3. **Mi 10W Wall Charger with Micro USB Cable** — Xiaomi\n   ₹499 · 4.2/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p16",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "best rated air fryer",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3092,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.474,
+     "paced_wait_seconds": 22.4,
+     "extracted": {
+      "product": "air fryer",
+      "features": [],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": 4.0
+     },
+     "shown": [
+      {
+       "name": "Instant Pot Air Fryer, Vortex 2QT, Touch Control Panel, 360°",
+       "brand": "Instant Pot",
+       "type": "cooking appliance",
+       "kind": "air fryer"
+      },
+      {
+       "name": "INALSA Air Fryer Digital 4L Nutri Fry - 1400W with Smart Air",
+       "brand": "INALSA",
+       "type": "cooking appliance",
+       "kind": "air fryer"
+      },
+      {
+       "name": "PHILIPS Digital Air Fryer HD9252/90 with Touch Panel, uses u",
+       "brand": "Philips",
+       "type": "cooking appliance",
+       "kind": "air fryer"
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Instant Pot Vortex 2QT Air Fryer** — Instant Pot\n   ₹4,995 · 4.8/5\n\n2. **INALSA 4L Digital Air Fryer Nutri Fry 1400W** — INALSA\n   ₹6,790 · 4.5/5\n\n3. **Philips Digital Air Fryer HD9252/90** — Philips\n   ₹8,799 · 4.4/5\n"
+    },
+    {
+     "message": "under 6000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3234,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.261,
+     "paced_wait_seconds": 21.9,
+     "extracted": {
+      "product": "air fryer",
+      "features": [],
+      "brand": null,
+      "max_price": 6000,
+      "min_price": null,
+      "min_rating": 4.0
+     },
+     "shown": [
+      {
+       "name": "Instant Pot Air Fryer, Vortex 2QT, Touch Control Panel, 360°",
+       "brand": "Instant Pot",
+       "type": "cooking appliance",
+       "kind": "air fryer"
+      },
+      {
+       "name": "Pigeon Healthifry Digital Air Fryer, 360° High Speed Air Cir",
+       "brand": "Pigeon",
+       "type": "cooking appliance",
+       "kind": "air fryer"
+      },
+      {
+       "name": "KINGONE Wireless Charging Pencil (2nd Generation) for iPad w",
+       "brand": "KINGONE",
+       "type": "stylus",
+       "kind": null
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Instant Pot Vortex 2QT Air Fryer** — Instant Pot\n   ₹4,995 · 4.8/5\n\n2. **Pigeon Digital Air Fryer 4.2 L** — Pigeon\n   ₹3,599 · 4.2/5\n\n3. **KINGONE Wireless Charging Pencil for iPad** — KINGONE\n   ₹2,599 · 4.5/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p17",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "wireless mouse",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3017,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.245,
+     "paced_wait_seconds": 23.3,
+     "extracted": {
+      "product": "mouse",
+      "features": [
+       "wireless"
+      ],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Amazon Basics Wireless Mouse | 2.4 GHz Connection, 1600 DPI ",
+       "brand": "Amazon",
+       "type": "mouse",
+       "kind": null
+      },
+      {
+       "name": "Logitech Pebble M350 Wireless Mouse with Bluetooth or USB - ",
+       "brand": "Logitech",
+       "type": "mouse",
+       "kind": null
+      },
+      {
+       "name": "Logitech M331 Silent Plus Wireless Mouse, 2.4GHz with USB Na",
+       "brand": "Logitech",
+       "type": "mouse",
+       "kind": null
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Amazon Basics Wireless Mouse 2.4 GHz** — Amazon\n   ₹499 · 5.0/5\n\n2. **Logitech Pebble M350 Wireless Mouse** — Logitech\n   ₹1,490 · 4.6/5\n\n3. **Logitech M331 Silent Plus Wireless Mouse** — Logitech\n   ₹1,295 · 4.6/5\n"
+    },
+    {
+     "message": "under 500",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 2376,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.517,
+     "paced_wait_seconds": 21.6,
+     "extracted": {
+      "product": null,
+      "features": [],
+      "brand": null,
+      "max_price": 500,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [],
+     "response": "What are you looking for? Here's what we carry:\n\n• Home & Kitchen (441 products) — cooking appliance, blender, room heater\n• Electronics (402 products) — tv, headphones, smartwatch\n• Computers & Accessories (391 products) — cable, mouse, storage\n• Office Products (36 products) — stationery, art supplies"
+    }
+   ]
+  },
+  {
+   "id": "p18",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "mixer grinder under 2000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3099,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.236,
+     "paced_wait_seconds": 17.2,
+     "extracted": {
+      "product": "mixer grinder",
+      "features": [],
+      "brand": null,
+      "max_price": 2000,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Bajaj Rex 500W Mixer Grinder with Nutri-Pro Feature, 3 Jars,",
+       "brand": "Bajaj",
+       "type": "mixer grinder",
+       "kind": null
+      },
+      {
+       "name": "NutriPro Juicer Mixer Grinder - Smoothie Maker - 500 Watts (",
+       "brand": "NutriPro",
+       "type": "blender",
+       "kind": "juicer"
+      },
+      {
+       "name": "Croma 500W Mixer Grinder with 3 Stainless Steel Leak-proof J",
+       "brand": "Croma",
+       "type": "mixer grinder",
+       "kind": null
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Bajaj Rex 500W Mixer Grinder with 3 Jars** — Bajaj\n   ₹1,999 · 4.2/5\n\n2. **NutriPro Juicer Mixer Grinder 500W** — NutriPro\n   ₹1,969 · 4.1/5\n\n3. **Croma 500W Mixer Grinder with 3 Stainless Steel Jars** — Croma\n   ₹1,290 · 4.0/5\n"
+    },
+    {
+     "message": "what about Bajaj",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3195,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.279,
+     "paced_wait_seconds": 22.2,
+     "extracted": {
+      "product": "mixer grinder",
+      "features": [],
+      "brand": "Bajaj",
+      "max_price": 2000,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Bajaj HM-01 Powerful 250W Hand Mixer, Black",
+       "brand": "Bajaj",
+       "type": "blender",
+       "kind": "hand mixer"
+      },
+      {
+       "name": "Bajaj ATX 4 750-Watt Pop-up Toaster (White)",
+       "brand": "Bajaj",
+       "type": "cooking appliance",
+       "kind": "toaster"
+      },
+      {
+       "name": "Bajaj Rex 500W Mixer Grinder with Nutri-Pro Feature, 3 Jars,",
+       "brand": "Bajaj",
+       "type": "mixer grinder",
+       "kind": null
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Bajaj HM-01 Hand Mixer** — Bajaj\n   ₹1,499 · 4.4/5\n\n2. **Bajaj ATX 4 750W Pop-up Toaster** — Bajaj\n   ₹1,499 · 4.3/5\n\n3. **Bajaj Rex 500W Mixer Grinder with 3 Jars** — Bajaj\n   ₹1,999 · 4.2/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p19",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "usb hub with ethernet",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3054,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.211,
+     "paced_wait_seconds": 22.9,
+     "extracted": {
+      "product": "usb hub",
+      "features": [
+       "ethernet"
+      ],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Portronics MPORT 31 4 Ports USB Hub (USB A to 4 USB-A Ports ",
+       "brand": "Portronics",
+       "type": "adapter",
+       "kind": "usb hub"
+      },
+      {
+       "name": "Portronics MPORT 31C 4-in-1 USB Hub (Type C to 4 USB-A Ports",
+       "brand": "Portronics",
+       "type": "adapter",
+       "kind": "usb hub"
+      },
+      {
+       "name": "Verilux® USB C Hub Multiport Adapter- 6 in 1 Portable Alumin",
+       "brand": "Verilux®",
+       "type": "adapter",
+       "kind": "usb hub"
+      }
+     ],
+     "response": "I couldn't find an exact match, so I widened some features:\n\n1. **Portronics MPORT 31 USB-A to 4-Port USB Hub** — Portronics\n   ₹499 · 4.3/5\n\n2. **Portronics MPORT 31C USB-C to 4-Port USB Hub** — Portronics\n   ₹570 · 4.2/5\n\n3. **Verilux USB‑C 6‑in‑1 Multiport Hub** — Verilux®\n   ₹1,187 · 4.1/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p20",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "products list",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 2,
+     "tokens": 2422,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.56,
+     "paced_wait_seconds": 21.9,
+     "extracted": {
+      "product": null,
+      "features": [],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [],
+     "response": "What are you looking for? Here's what we carry:\n\n• Home & Kitchen (441 products) — cooking appliance, blender, room heater\n• Electronics (402 products) — tv, headphones, smartwatch\n• Computers & Accessories (391 products) — cable, mouse, storage\n• Office Products (36 products) — stationery, art supplies"
+    },
+    {
+     "message": "calculator",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3122,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.346,
+     "paced_wait_seconds": 17.6,
+     "extracted": {
+      "product": "calculator",
+      "features": [],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Casio FX-991ES Plus-2nd Edition Scientific Calculator, Black",
+       "brand": "Casio",
+       "type": "stationery",
+       "kind": "calculator"
+      },
+      {
+       "name": "Casio MJ-12D 150 Steps Check and Correct Desktop Calculator",
+       "brand": "Casio",
+       "type": "stationery",
+       "kind": "calculator"
+      },
+      {
+       "name": "Casio MJ-120D 150 Steps Check and Correct Desktop Calculator",
+       "brand": "Casio",
+       "type": "stationery",
+       "kind": "calculator"
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Casio FX-991ES Plus Scientific Calculator** — Casio\n   ₹1,295 · 4.5/5\n\n2. **Casio MJ-12D Desktop Calculator** — Casio\n   ₹440 · 4.5/5\n\n3. **Casio MJ-120D Desktop Calculator** — Casio\n   ₹535 · 4.4/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p21",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "smartwatch with calling feature",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3066,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.378,
+     "paced_wait_seconds": 22.3,
+     "extracted": {
+      "product": "smartwatch",
+      "features": [
+       "calling"
+      ],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwat",
+       "brand": "Fire-Boltt",
+       "type": "smartwatch",
+       "kind": "smartwatch"
+      },
+      {
+       "name": "Fire-Boltt Visionary 1.78\" AMOLED Bluetooth Calling Smartwat",
+       "brand": "Fire-Boltt",
+       "type": "smartwatch",
+       "kind": "smartwatch"
+      },
+      {
+       "name": "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",1",
+       "brand": "Fire-Boltt",
+       "type": "smartwatch",
+       "kind": "smartwatch"
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Fire-Boltt Visionary Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹3,999 · 4.3/5\n\n2. **Fire-Boltt Visionary AMOLED Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹3,999 · 4.3/5\n\n3. **Fire-Boltt Phoenix Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹1,998 · 4.3/5\n"
+    },
+    {
+     "message": "under 2000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3205,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.081,
+     "paced_wait_seconds": 21.8,
+     "extracted": {
+      "product": "smartwatch",
+      "features": [
+       "calling"
+      ],
+      "brand": null,
+      "max_price": 2000,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",1",
+       "brand": "Fire-Boltt",
+       "type": "smartwatch",
+       "kind": "smartwatch"
+      },
+      {
+       "name": "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",1",
+       "brand": "Fire-Boltt",
+       "type": "smartwatch",
+       "kind": "smartwatch"
+      },
+      {
+       "name": "Fire-Boltt Phoenix Smart Watch with Bluetooth Calling 1.3\",1",
+       "brand": "Fire-Boltt",
+       "type": "smartwatch",
+       "kind": "smartwatch"
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Fire-Boltt Phoenix Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹1,998 · 4.3/5\n\n2. **Fire-Boltt Phoenix Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹1,999 · 4.3/5\n\n3. **Fire-Boltt Phoenix Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹1,999 · 4.3/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p22",
+   "tags": [
+    "product",
+    "router"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "show me headphones",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 2991,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.886,
+     "paced_wait_seconds": 23.2,
+     "extracted": {
+      "product": "headphones",
+      "features": [],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Redgear Cosmo 7,1 Usb Gaming Wired Over Ear Headphones With ",
+       "brand": "Redgear",
+       "type": "headphones",
+       "kind": "over-ear headphones"
+      },
+      {
+       "name": "boAt BassHeads 900 On-Ear Wired Headphones with Mic (White)",
+       "brand": "boAt",
+       "type": "headphones",
+       "kind": "on-ear headphones"
+      },
+      {
+       "name": "Infinity (JBL Glide 510, 72 Hrs Playtime with Quick Charge, ",
+       "brand": "Infinity (JBL)",
+       "type": "headphones",
+       "kind": "on-ear headphones"
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Redgear Cosmo 7.1 Wired Over Ear Gaming Headphones** — Redgear\n   ₹1,990 · 4.3/5\n\n2. **boAt BassHeads 900 On-Ear Wired Headphones with Mic** — boAt\n   ₹849 · 4.2/5\n\n3. **Infinity JBL Glide 510 Wireless On‑Ear Headphones** — Infinity (JBL)\n   ₹1,499 · 4.2/5\n"
+    },
+    {
+     "message": "hi",
+     "route": "clarify",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1205,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 0.778,
+     "paced_wait_seconds": 21.7,
+     "extracted": {
+      "product": "headphones",
+      "features": [],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [],
+     "response": "Hi! I can help you find products, check an order or sort out a problem with one. What do you need?"
+    },
+    {
+     "message": "bose speakers",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3188,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.677,
+     "paced_wait_seconds": 8.7,
+     "extracted": {
+      "product": "speaker",
+      "features": [],
+      "brand": "bose",
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "JBL Go 2, Wireless Portable Bluetooth Speaker with Mic, JBL ",
+       "brand": "JBL",
+       "type": "speaker",
+       "kind": "bluetooth speaker"
+      },
+      {
+       "name": "boAt Stone 650 10W Bluetooth Speaker with Upto 7 Hours Playb",
+       "brand": "boAt",
+       "type": "speaker",
+       "kind": "bluetooth speaker"
+      },
+      {
+       "name": "boAt Stone 250 Portable Wireless Speaker with 5W RMS Immersi",
+       "brand": "boAt",
+       "type": "speaker",
+       "kind": "bluetooth speaker"
+      }
+     ],
+     "response": "We don't carry bose speaker, so here are the closest options from other brands:\n\n1. **JBL Go 2 Portable Bluetooth Speaker** — JBL\n   ₹1,999 · 4.3/5\n\n2. **boAt Stone 650 Bluetooth Speaker** — boAt\n   ₹1,799 · 4.2/5\n\n3. **boAt Stone 250 Portable Wireless Bluetooth Speaker** — boAt\n   ₹1,199 · 4.2/5\n"
+    },
+    {
+     "message": "bajaj smartwatches",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3251,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.673,
+     "paced_wait_seconds": 22.5,
+     "extracted": {
+      "product": "smartwatch",
+      "features": [],
+      "brand": "bajaj",
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Fire-Boltt India's No 1 Smartwatch Brand Talk 2 Bluetooth Ca",
+       "brand": "Fire-Boltt",
+       "type": "smartwatch",
+       "kind": "smartwatch"
+      },
+      {
+       "name": "Fire-Boltt India's No 1 Smartwatch Brand Talk 2 Bluetooth Ca",
+       "brand": "Fire-Boltt",
+       "type": "smartwatch",
+       "kind": "smartwatch"
+      },
+      {
+       "name": "Fire-Boltt Ninja 3 Smartwatch Full Touch 1.69 \" & 60 Sports ",
+       "brand": "Fire-Boltt",
+       "type": "smartwatch",
+       "kind": "smartwatch"
+      }
+     ],
+     "response": "We don't carry bajaj smartwatch, so here are the closest options from other brands:\n\n1. **Fire-Boltt Talk 2 Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹2,199 · 4.2/5\n\n2. **Fire-Boltt Talk 2 Bluetooth Calling Smartwatch** — Fire-Boltt\n   ₹2,199 · 4.2/5\n\n3. **Fire-Boltt Ninja 3 Smartwatch 1.69\" Silver** — Fire-Boltt\n   ₹1,499 · 4.2/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p23",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "sony headphones under 500",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3121,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.745,
+     "paced_wait_seconds": 23.0,
+     "extracted": {
+      "product": "headphones",
+      "features": [],
+      "brand": "Sony",
+      "max_price": 500,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "boAt Bassheads 102 Wired in Ear Earphones with Mic (Mint Gre",
+       "brand": "boAt",
+       "type": "headphones",
+       "kind": "wired earphones"
+      },
+      {
+       "name": "boAt BassHeads 100 in-Ear Wired Headphones with Mic (Black)",
+       "brand": "boAt",
+       "type": "headphones",
+       "kind": "wired earphones"
+      },
+      {
+       "name": "boAt Bassheads 100 in Ear Wired Earphones with Mic(Taffy Pin",
+       "brand": "boAt",
+       "type": "headphones",
+       "kind": "wired earphones"
+      }
+     ],
+     "response": "I couldn't find Sony headphones within your filters, so here are the closest options from other brands:\n\n1. **boAt Bassheads 102 Wired In-Ear Earphones with Mic** — boAt\n   ₹399 · 4.2/5\n\n2. **boAt BassHeads 100 In-Ear Wired Headphones with Mic** — boAt\n   ₹365 · 4.1/5\n\n3. **boAt Bassheads 100 Wired In‑Ear Earphones with Mic** — boAt\n   ₹349 · 4.1/5\n"
+    },
+    {
+     "message": "under 3000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3032,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.29,
+     "paced_wait_seconds": 21.9,
+     "extracted": {
+      "product": "headphones",
+      "features": [],
+      "brand": "Sony",
+      "max_price": 3000,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Sony WI-C100 Wireless Headphones with Customizable Equalizer",
+       "brand": "Sony",
+       "type": "headphones",
+       "kind": "over-ear headphones"
+      },
+      {
+       "name": "Sony TV - Remote Compatible for Sony LED Remote Control Work",
+       "brand": "Sony",
+       "type": "tv remote",
+       "kind": null
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Sony WI-C100 Wireless Over-Ear Headphones with Mic** — Sony\n   ₹1,599 · 3.6/5\n\n2. **Sony TV Remote Compatible Replacement** — Sony\n   ₹205 · 3.8/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p24",
+   "tags": [
+    "product"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "geyser under 5000",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3073,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.009,
+     "paced_wait_seconds": 21.6,
+     "extracted": {
+      "product": "water heater",
+      "features": [],
+      "brand": null,
+      "max_price": 5000,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Havells Instanio 1-Litre 3KW Instant Water Heater (Geyser), ",
+       "brand": "Havells",
+       "type": "water heater",
+       "kind": null
+      },
+      {
+       "name": "Havells Instanio 3-Litre 4.5KW Instant Water Heater (Geyser)",
+       "brand": "Havells",
+       "type": "water heater",
+       "kind": null
+      },
+      {
+       "name": "Bajaj New Shakti Neo 10L Vertical Storage Water Heater (Geys",
+       "brand": "Bajaj",
+       "type": "water heater",
+       "kind": null
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Havells Instanio 1L 3KW Instant Water Heater** — Havells\n   ₹2,599 · 4.4/5\n\n2. **Havells Instanio 3L 4.5KW Instant Water Heater** — Havells\n   ₹3,645 · 4.2/5\n\n3. **Bajaj New Shakti Neo 10L Vertical Storage Water Heater** — Bajaj\n   ₹4,999 · 4.2/5\n"
+    },
+    {
+     "message": "noise cancelling headphones",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3170,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.356,
+     "paced_wait_seconds": 22.3,
+     "extracted": {
+      "product": "headphones",
+      "features": [
+       "noise cancelling"
+      ],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Boult Audio Omega with 30dB ANC+ ENC, 32H Playtime, 45ms Lat",
+       "brand": "Boult Audio",
+       "type": "headphones",
+       "kind": "tws earbuds"
+      },
+      {
+       "name": "PTron Boom Ultima 4D Dual Driver, in-Ear Gaming Wired Headph",
+       "brand": "pTron",
+       "type": "headphones",
+       "kind": "wired earphones"
+      },
+      {
+       "name": "Hp Wired On Ear Headphones With Mic With 3.5 Mm Drivers, In-",
+       "brand": "HP",
+       "type": "headphones",
+       "kind": "on-ear headphones"
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Boult Audio Omega ANC True Wireless Earbuds** — Boult Audio\n   ₹1,999 · 3.7/5\n\n2. **PTron Boom Ultima 4D Dual Driver In-Ear Gaming Headphones** — pTron\n   ₹299 · 3.6/5\n\n3. **Hp wired on-ear headphones with mic** — HP\n   ₹649 · 3.5/5\n"
+    },
+    {
+     "message": "smart tv",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3305,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.346,
+     "paced_wait_seconds": 22.7,
+     "extracted": {
+      "product": "tv",
+      "features": [],
+      "brand": null,
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Sony Bravia 164 cm (65 inches) 4K Ultra HD Smart LED Google ",
+       "brand": "Sony",
+       "type": "tv",
+       "kind": null
+      },
+      {
+       "name": "Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED",
+       "brand": "Samsung",
+       "type": "tv",
+       "kind": null
+      },
+      {
+       "name": "Samsung 108 cm (43 inches) Crystal 4K Series Ultra HD Smart ",
+       "brand": "Samsung",
+       "type": "tv",
+       "kind": null
+      }
+     ],
+     "response": "Here's what I found:\n\n1. **Sony Bravia 65\" 4K Smart LED TV** — Sony\n   ₹77,990 · 4.7/5\n\n2. **Samsung 32\" Wondertainment HD Ready Smart LED TV** — Samsung\n   ₹13,490 · 4.3/5\n\n3. **Samsung 43\" Crystal 4K Smart LED TV** — Samsung\n   ₹30,990 · 4.3/5\n"
+    }
+   ]
+  },
+  {
+   "id": "p25",
+   "tags": [
+    "product",
+    "safety"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "amazon fire tv stick",
+     "route": "product",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 3,
+     "tokens": 3079,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.89,
+     "paced_wait_seconds": 23.7,
+     "extracted": {
+      "product": "tv accessory",
+      "features": [
+       "fire tv stick"
+      ],
+      "brand": "amazon",
+      "max_price": null,
+      "min_price": null,
+      "min_rating": null
+     },
+     "shown": [
+      {
+       "name": "Realme Smart TV Stick 4K",
+       "brand": "realme",
+       "type": "tv accessory",
+       "kind": "streaming device"
+      }
+     ],
+     "response": "We don't carry amazon tv accessory, so here are the closest options from other brands:\n\n1. **Realme Smart TV Stick 4K** — realme\n   ₹4,699 · 4.5/5\n"
+    }
+   ]
+  },
+  {
+   "id": "r01",
+   "tags": [
+    "router"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "hi",
+     "route": "clarify",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1101,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.11,
+     "paced_wait_seconds": 21.4,
+     "extracted": {},
+     "shown": [],
+     "response": "Hi! I can help you find products, check an order or sort out a problem with one. What do you need?"
+    },
+    {
+     "message": "help me",
+     "route": "clarify",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1123,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 0.595,
+     "paced_wait_seconds": 7.6,
+     "extracted": {},
+     "shown": [],
+     "response": "Hi! I can help you find products, check an order, or sort out a problem with one. What do you need?"
+    },
+    {
+     "message": "",
+     "route": "clarify",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1159,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 0.737,
+     "paced_wait_seconds": 8.3,
+     "extracted": {},
+     "shown": [],
+     "response": "Hi! I can help you find products, check an order, or sort out a problem with one. What do you need?"
+    }
+   ]
+  },
+  {
+   "id": "r02",
+   "tags": [
+    "router"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "what is the capital of France",
+     "route": "clarify",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1096,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 0.767,
+     "paced_wait_seconds": 8.4,
+     "extracted": {},
+     "shown": [],
+     "response": "Hi! I can help you find products, check an order or sort out a problem with one. What do you need?"
+    }
+   ]
+  },
+  {
+   "id": "r03",
+   "tags": [
+    "router",
+    "auth"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "track my order",
+     "route": "sign_in",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1073,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.009,
+     "paced_wait_seconds": 7.9,
+     "extracted": {},
+     "shown": [],
+     "response": "I'd love to help you with your order!\n\nPlease sign in first using the **Sign In** button at the top of the page.\n\nIt only takes a moment with Google, and your conversation will be saved so you can continue right where you left off."
+    },
+    {
+     "message": "I want to return my order",
+     "route": "sign_in",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1175,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 0.722,
+     "paced_wait_seconds": 7.5,
+     "extracted": {},
+     "shown": [],
+     "response": "I'd love to help resolve this for you! To raise a support ticket we need to verify your account and find your order.\n\nPlease sign in first using the **Sign In** button at the top of the page.\n\nIt only takes a moment with Google, and your conversation will be saved so you can continue right where you left off."
+    }
+   ]
+  },
+  {
+   "id": "o01",
+   "tags": [
+    "order"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "show my orders",
+     "route": "order",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1163,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 0.929,
+     "paced_wait_seconds": 8.5,
+     "extracted": {},
+     "shown": [],
+     "response": "You have multiple orders. Which one would you like to check?\n\n• **ORD-2002** - Mi 108cm Full HD Android LED TV (shipped)\n• **ORD-2004** - Croma 500W Mixer Grinder (delivered)\n• **ORD-2005** - Logitech M221 Wireless Mouse (processing)\n• **ORD-2001** - boAt Rockerz 255 Pro+ (delivered)\n• **ORD-2003** - Fire-Boltt Phoenix Smartwatch (shipped)\n_(showing 5 most recent of 7 orders)_\n\nPlease provide the order ID."
+    },
+    {
+     "message": "2002 status",
+     "route": "order",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1317,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.121,
+     "paced_wait_seconds": 8.2,
+     "extracted": {},
+     "shown": [],
+     "response": "**Mi 108cm Full HD Android LED TV** (order ORD-2002) has shipped with FakeExpress. Tracking ID: TRK-2002."
+    }
+   ]
+  },
+  {
+   "id": "o02",
+   "tags": [
+    "order"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "where is my order ORD-2004",
+     "route": "order",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1178,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.189,
+     "paced_wait_seconds": 9.2,
+     "extracted": {},
+     "shown": [],
+     "response": "Good news! **Croma 500W Mixer Grinder** (order ORD-2004) has been delivered. Tracking ID: TRK-2004."
+    },
+    {
+     "message": "where is my order ORD-2003",
+     "route": "order",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1240,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 0.919,
+     "paced_wait_seconds": 8.1,
+     "extracted": {},
+     "shown": [],
+     "response": "**Fire-Boltt Phoenix Smartwatch** (order ORD-2003) has shipped with DTDC. Tracking ID: TRK-2003."
+    }
+   ]
+  },
+  {
+   "id": "o03",
+   "tags": [
+    "order"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "what is the status of my order",
+     "route": "order",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1176,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 0.902,
+     "paced_wait_seconds": 8.8,
+     "extracted": {},
+     "shown": [],
+     "response": "You have multiple orders. Which one would you like to check?\n\n• **ORD-2002** - Mi 108cm Full HD Android LED TV (shipped)\n• **ORD-2004** - Croma 500W Mixer Grinder (delivered)\n• **ORD-2005** - Logitech M221 Wireless Mouse (processing)\n• **ORD-2001** - boAt Rockerz 255 Pro+ (delivered)\n• **ORD-2003** - Fire-Boltt Phoenix Smartwatch (shipped)\n_(showing 5 most recent of 7 orders)_\n\nPlease provide the order ID."
+    }
+   ]
+  },
+  {
+   "id": "o04",
+   "tags": [
+    "order"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "where is my order ORD-9901",
+     "route": "order",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1201,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.164,
+     "paced_wait_seconds": 8.3,
+     "extracted": {},
+     "shown": [],
+     "response": "**iPhone 15 Pro Max** (order ORD-9901) has shipped with FakeExpress. Tracking ID: TRK-9901."
+    }
+   ]
+  },
+  {
+   "id": "o05",
+   "tags": [
+    "order",
+    "ownership"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "where is ORD-7777",
+     "route": "order",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1175,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 0.793,
+     "paced_wait_seconds": 8.3,
+     "extracted": {},
+     "shown": [],
+     "response": "I couldn't find order **ORD-7777** on your account. Here are your recent orders:\n\n1. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)\n2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)\n3. **ORD-2005** — Logitech M221 Wireless Mouse (Processing)\n4. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)\n5. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)\n_(showing 5 most recent of 7 orders)_\n\nPlease reply with the order number you need help with."
+    },
+    {
+     "message": "where is my order ORD-9901",
+     "route": "order",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1344,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 0.874,
+     "paced_wait_seconds": 8.5,
+     "extracted": {},
+     "shown": [],
+     "response": "I couldn't find order **ORD-9901** on your account. Here are your recent orders:\n\n1. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)\n2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)\n3. **ORD-2005** — Logitech M221 Wireless Mouse (Processing)\n4. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)\n5. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)\n_(showing 5 most recent of 7 orders)_\n\nPlease reply with the order number you need help with."
+    }
+   ]
+  },
+  {
+   "id": "s01",
+   "tags": [
+    "support"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "I want to cancel my order",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1177,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 0.795,
+     "paced_wait_seconds": 9.7,
+     "extracted": {},
+     "shown": [],
+     "response": "To raise a support ticket, I need to know which order this is about.\n\nHere are your recent orders:\n\n1. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)\n2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)\n3. **ORD-2005** — Logitech M221 Wireless Mouse (Processing)\n4. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)\n5. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)\n_(showing 5 most recent of 7 orders)_\n\nPlease reply with the order number to open a support ticket."
+    },
+    {
+     "message": "the tv one",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1337,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 0.947,
+     "paced_wait_seconds": 8.5,
+     "extracted": {},
+     "shown": [],
+     "response": "Order **ORD-2002** has already shipped — cancellation isn't possible. Once it arrives, I can help you initiate a return."
+    }
+   ]
+  },
+  {
+   "id": "s02",
+   "tags": [
+    "support"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "cancel ORD-2003",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1182,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.608,
+     "paced_wait_seconds": 9.6,
+     "extracted": {},
+     "shown": [],
+     "response": "Order **ORD-2003** has already shipped — cancellation isn't possible. Once it arrives, I can help you initiate a return."
+    },
+    {
+     "message": "cancel ORD-2004",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1259,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.197,
+     "paced_wait_seconds": 7.7,
+     "extracted": {},
+     "shown": [],
+     "response": "Order **ORD-2004** has been delivered and can't be cancelled. You can return it within our 30-day policy window."
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "tags": [
+    "support"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "I received the wrong item in order ORD-2001",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1190,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.464,
+     "paced_wait_seconds": 8.7,
+     "extracted": {},
+     "shown": [],
+     "response": "I've created a support ticket: **TKT-C41C3667**\n\n**Issue:** I received the wrong item in order ORD-2001\n**Category:** Wrong Item\n**Priority:** P2\n**Response Time:** 24 hours\n\nOur support team will review this and contact you. You'll receive email updates at your registered address."
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "tags": [
+    "support"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "cancel my boAt headphones order",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1226,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.162,
+     "paced_wait_seconds": 7.9,
+     "extracted": {},
+     "shown": [],
+     "response": "Order **ORD-2001** has been delivered and can't be cancelled. You can return it within our 30-day policy window."
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "tags": [
+    "support"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "I want to return my order ORD-2004",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1206,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.355,
+     "paced_wait_seconds": 8.5,
+     "extracted": {},
+     "shown": [],
+     "response": "I've created a support ticket: **TKT-02866C64**\n\n**Issue:** I want to return my order ORD-2004\n**Category:** Refund Request\n**Priority:** P2\n**Response Time:** 2-3 days\n\nOur support team will review this and contact you. You'll receive email updates at your registered address."
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "tags": [
+    "support"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "my product is defective and I want a refund",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1185,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 0.827,
+     "paced_wait_seconds": 8.1,
+     "extracted": {},
+     "shown": [],
+     "response": "To raise a support ticket, I need to know which order this is about.\n\nHere are your recent orders:\n\n1. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)\n2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)\n3. **ORD-2005** — Logitech M221 Wireless Mouse (Processing)\n4. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)\n5. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)\n_(showing 5 most recent of 7 orders)_\n\nPlease reply with the order number to open a support ticket."
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "tags": [
+    "support"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "I want to return my order",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1189,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.182,
+     "paced_wait_seconds": 8.5,
+     "extracted": {},
+     "shown": [],
+     "response": "To raise a support ticket, I need to know which order this is about.\n\nHere are your recent orders:\n\n1. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)\n2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)\n3. **ORD-2005** — Logitech M221 Wireless Mouse (Processing)\n4. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)\n5. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)\n_(showing 5 most recent of 7 orders)_\n\nPlease reply with the order number to open a support ticket."
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "tags": [
+    "support",
+    "cancel"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "cancel ORD-2005",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1182,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 0.86,
+     "paced_wait_seconds": 8.2,
+     "extracted": {},
+     "shown": [],
+     "response": "Your order **ORD-2005** (Logitech M221 Wireless Mouse) is in processing and can still be cancelled. Do you want to cancel it?"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "tags": [
+    "support",
+    "cancel"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "where is ORD-2002",
+     "route": "order",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1175,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.412,
+     "paced_wait_seconds": 8.0,
+     "extracted": {},
+     "shown": [],
+     "response": "**Mi 108cm Full HD Android LED TV** (order ORD-2002) has shipped with FakeExpress. Tracking ID: TRK-2002."
+    },
+    {
+     "message": "cancel the logitech mouse",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1261,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.135,
+     "paced_wait_seconds": 7.9,
+     "extracted": {},
+     "shown": [],
+     "response": "Your order **ORD-2005** (Logitech M221 Wireless Mouse) is in processing and can still be cancelled. Do you want to cancel it?"
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "tags": [
+    "support"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "I received a damaged product",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1178,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.143,
+     "paced_wait_seconds": 8.8,
+     "extracted": {},
+     "shown": [],
+     "response": "To raise a support ticket, I need to know which order this is about.\n\nHere are your recent orders:\n\n1. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)\n2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)\n3. **ORD-2005** — Logitech M221 Wireless Mouse (Processing)\n4. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)\n5. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)\n_(showing 5 most recent of 7 orders)_\n\nPlease reply with the order number to open a support ticket."
+    },
+    {
+     "message": "ORD-2004",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1329,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.497,
+     "paced_wait_seconds": 8.1,
+     "extracted": {},
+     "shown": [],
+     "response": "I've created a support ticket: **TKT-B6EA452D**\n\n**Issue:** ORD-2004\n**Category:** Damaged Delivery\n**Priority:** P2\n**Response Time:** 24 hours\n\nOur support team will review this and contact you. You'll receive email updates at your registered address."
+    }
+   ]
+  },
+  {
+   "id": "s11",
+   "tags": [
+    "support"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "what is your return policy",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1176,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.113,
+     "paced_wait_seconds": 9.0,
+     "extracted": {},
+     "shown": [],
+     "response": "Here's a quick summary of our policies:\n\n**Returns:** Most items can be returned within 30 days of delivery in original condition.\n**Refunds:** Processed within 3-5 business days after we receive the return.\n**Defective items:** Replacement or full refund — no questions asked.\n**Damaged delivery:** Report within 48 hours for priority resolution.\n\nIf you have a specific order you'd like help with, just share the order number and I'll get started."
+    },
+    {
+     "message": "please delete all my personal data",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1308,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.699,
+     "paced_wait_seconds": 8.2,
+     "extracted": {},
+     "shown": [],
+     "response": "I've created a support ticket: **TKT-B78AA253**\n\n**Issue:** please delete all my personal data\n**Category:** Other\n**Priority:** P2\n**Response Time:** 24 hours\n\nOur support team will review this and contact you. You'll receive email updates at your registered address."
+    }
+   ]
+  },
+  {
+   "id": "s12",
+   "tags": [
+    "support",
+    "escalation"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "my mixer grinder from ORD-2004 broke and I'm going to sue you",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1197,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.729,
+     "paced_wait_seconds": 8.6,
+     "extracted": {},
+     "shown": [],
+     "response": "I've created a support ticket: **TKT-0272E7A7**\n\n**Issue:** [LEGAL] my mixer grinder from ORD-2004 broke and I'm going to sue you\n**Category:** Defective Product\n**Priority:** P2\n**Response Time:** 12-24 hours\n\nOur support team will review this and contact you. You'll receive email updates at your registered address."
+    }
+   ]
+  },
+  {
+   "id": "s13",
+   "tags": [
+    "support",
+    "escalation"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "my order ORD-2004 arrived damaged",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1188,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.492,
+     "paced_wait_seconds": 7.7,
+     "extracted": {},
+     "shown": [],
+     "response": "I've created a support ticket: **TKT-EF5444B9**\n\n**Issue:** my order ORD-2004 arrived damaged\n**Category:** Damaged Delivery\n**Priority:** P2\n**Response Time:** 24 hours\n\nOur support team will review this and contact you. You'll receive email updates at your registered address."
+    },
+    {
+     "message": "the mixer from ORD-2004 is damaged, please help",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1295,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.01,
+     "paced_wait_seconds": 7.9,
+     "extracted": {},
+     "shown": [],
+     "response": "You already have an open ticket **TKT-EF5444B9** for this order. Our support team will be in touch within the agreed timeframe. Is there anything else I can help you with?"
+    }
+   ]
+  },
+  {
+   "id": "s14",
+   "tags": [
+    "support",
+    "escalation"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "where is ORD-2002",
+     "route": "order",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1175,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.088,
+     "paced_wait_seconds": 9.2,
+     "extracted": {},
+     "shown": [],
+     "response": "**Mi 108cm Full HD Android LED TV** (order ORD-2002) has shipped with FakeExpress. Tracking ID: TRK-2002."
+    },
+    {
+     "message": "my mixer grinder arrived damaged",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1242,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.451,
+     "paced_wait_seconds": 8.2,
+     "extracted": {},
+     "shown": [],
+     "response": "I've created a support ticket: **TKT-3CFB72C7**\n\n**Issue:** my mixer grinder arrived damaged\n**Category:** Damaged Delivery\n**Priority:** P2\n**Response Time:** 24 hours\n\nOur support team will review this and contact you. You'll receive email updates at your registered address."
+    }
+   ]
+  },
+  {
+   "id": "s15",
+   "tags": [
+    "support",
+    "escalation",
+    "safety"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "my room heater caught fire and burned my hand",
+     "route": "safety",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1197,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.342,
+     "paced_wait_seconds": 8.3,
+     "extracted": {},
+     "shown": [],
+     "response": "We take safety seriously. If you're in immediate danger, please call emergency services. We've flagged your message and a human team member will follow up with you."
+    }
+   ]
+  },
+  {
+   "id": "s16",
+   "tags": [
+    "support",
+    "router"
+   ],
+   "passed": false,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "resolve support issues",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": false,
+     "failures": [
+      "route 'support' not in ['clarify']"
+     ],
+     "llm_calls": 1,
+     "tokens": 1174,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 2.744,
+     "paced_wait_seconds": 8.1,
+     "extracted": {},
+     "shown": [],
+     "response": "To raise a support ticket, I need to know which order this is about.\n\nHere are your recent orders:\n\n1. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)\n2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)\n3. **ORD-2005** — Logitech M221 Wireless Mouse (Processing)\n4. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)\n5. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)\n_(showing 5 most recent of 7 orders)_\n\nPlease reply with the order number to open a support ticket."
+    }
+   ]
+  },
+  {
+   "id": "s18",
+   "tags": [
+    "support"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "I have an issue with my order",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1178,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 0.895,
+     "paced_wait_seconds": 6.5,
+     "extracted": {},
+     "shown": [],
+     "response": "To raise a support ticket, I need to know which order this is about.\n\nHere are your recent orders:\n\n1. **ORD-2002** — Mi 108cm Full HD Android LED TV (Shipped)\n2. **ORD-2004** — Croma 500W Mixer Grinder (Delivered)\n3. **ORD-2005** — Logitech M221 Wireless Mouse (Processing)\n4. **ORD-2001** — boAt Rockerz 255 Pro+ (Delivered)\n5. **ORD-2003** — Fire-Boltt Phoenix Smartwatch (Shipped)\n_(showing 5 most recent of 7 orders)_\n\nPlease reply with the order number to open a support ticket."
+    }
+   ]
+  },
+  {
+   "id": "s17",
+   "tags": [
+    "support",
+    "cancel",
+    "ownership"
+   ],
+   "passed": true,
+   "infra_error": false,
+   "turns": [
+    {
+     "message": "cancel ORD-2005",
+     "route": "support",
+     "rerouted_to_order": false,
+     "passed": true,
+     "failures": [],
+     "llm_calls": 1,
+     "tokens": 1219,
+     "rate_limited": 0,
+     "unreachable": 0,
+     "sdk_retries": 0,
+     "seconds": 1.115,
+     "paced_wait_seconds": 8.4,
+     "extracted": {},
+     "shown": [],
+     "response": "I couldn't find order **ORD-2005** on your account. Here are your recent orders:\n\n1. **ORD-T902** — boAt Rockerz 450 Bluetooth Headphones (Delivered)\n2. **ORD-T903** — Philips Air Purifier AC1215 (Delivered)\n3. **ORD-T904** — Samsung 43 inch 4K Smart TV (Out_For_Delivery)\n4. **ORD-T905** — Bajaj Rex 500W Mixer Grinder (Processing)\n5. **ORD-T901** — iPhone 15 Pro Max (Shipped)\n_(showing 5 most recent of 10 orders)_\n\nPlease reply with the order number to open a support ticket."
+    }
+   ]
+  }
+ ]
+}

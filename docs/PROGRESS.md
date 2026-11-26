@@ -12,6 +12,14 @@ Newest first. `/handoff` adds an entry at the end of every session. Keep entries
 - **Commits:**
 -->
 
+## 2026-11-26 · Phase 5 · Done: three live runs of the fixed code, 48/51 each; a keep-awake that works
+- **Done:** final runs 4 and 5; the 3-run result into the README, case study, plan, roadmap, explainer and `docs/PROJECT_PROMPT.md` (refreshed from its Phase 1 state and committed); Phase 5 marked done. The live site was asleep in the morning because GitHub ran the keep-warm schedule only every 6–10 hours; the user added an UptimeRobot monitor, and `/health` now accepts its `HEAD` check. Local branch `backup/phase-5-ship-before-rewrite` deleted.
+- **Measured:** gpt-oss-20b, `--mode live`, 1 run each, `multi_agent_baseline`, code `d836c6e`: run 4 (main key) **48/51**, run 5 (`.env.eval`) **48/51**; 0 false claims, 0 rate limits, about 2,190 tokens and a median 1.7 s per turn; about 197K tokens per key. Release average (runs 3–5) **48/51**. 370 tests, coverage 90%.
+- **Decisions:** none new.
+- **Open questions:** the Phase 0 labels review and the 50-product spot check are still the user's.
+- **Next:** nothing required; optional work is listed in the roadmap.
+- **Commits:** the `phase-5-final` PR.
+
 ## 2026-11-25 · Phase 5 · Honest product replies live; run 3 of the fixed code 48/51; load test meets its target
 - **Done:** the user found "These don't match everything you asked for" over three HDMI cables on the live site. Header now "Here's what I found:"; only code-checked notes say something is missing; a harness check fails false mismatch claims; `asks_about_shown` backs up the router's Q&A flag (PR #6, CI green, merged `1082d60`, checked live). Visual explainer rebuilt from the code (v3, v4). `eval.yml` removed.
 - **Measured:** final run 3, fixed code (gpt-oss-20b, live, 1 run, `multi_agent_baseline`, main key): **48/51**, 0 false claims, 196.5K tokens. Runs 1 and 2 re-scored: 38/51 each. Replay of the fix: 48/51, adversarial 14/15 (a12 routing), Q&A 6/6, retrieval unchanged. Load test, 20 users: p95 22 s → **1.3 s**, 0 of 377 errors, 14% real answers. 369 tests, coverage 90%.

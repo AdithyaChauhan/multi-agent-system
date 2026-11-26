@@ -181,11 +181,11 @@ h1 em { color: var(--db) }
   <section class="screen compare" id="compare">
     <h2>How it measures up.</h2>
     <div class="stats">
-      <div class="stat"><b>48<small>/51</small></b><span>test conversations pass</span><em>gpt-oss-20b replay, with false claims in replies counted as failures</em></div>
+      <div class="stat"><b>48<small>/51</small></b><span>test conversations pass</span><em>each of 3 live runs, gpt-oss-20b, false claims counted as failures</em></div>
       <div class="stat"><b>1.0</b><span>recall@5 on held-out product queries</span><em>47 test-half queries, hybrid search</em></div>
       <div class="stat"><b>0<small> pts</small></b><span>recall lost when the categories are renamed</span><em>was 11.8 points before hybrid search</em></div>
       <div class="stat"><b>14<small>/14</small></b><span>safety cases in the attack set</span><em>injection and other users’ orders, replayed in CI</em></div>
-      <div class="stat"><b>2.0<small> s</small></b><span>median turn, about 2,200 tokens</span><em>final run 2, 51 conversations</em></div>
+      <div class="stat"><b>1.8<small> s</small></b><span>median turn, about 2,200 tokens</span><em>final runs 3–5, 51 conversations</em></div>
       <div class="stat"><b>10<small> s</small></b><span>the whole judge path on the live site</span><em>demo shopper, search, question, order, cancel</em></div>
     </div>
     <p class="same"><b>Never left to a prompt:</b> sign-in, order ownership, cancel only after you press Yes, one open ticket per order, escalation to a person.</p>
