@@ -12,6 +12,14 @@ Newest first. `/handoff` adds an entry at the end of every session. Keep entries
 - **Commits:**
 -->
 
+## 2026-11-26 · Phase 6 · An AI judge scored the live site 6/10; plan approved
+- **Done:** a judge prompt (website only, its own questions) was run by the user; the report (33 messages, 14 problems, 6/10) traced to six causes in the code: replies claiming unperformed actions, saved state drifting from the screen, the page parsing reply text, one fixed reply per route, demo data frozen in time and duplicated, unchecked boundaries. Two problems the judge didn't hit were found on the way: Discord alerts allow `@everyone`, and session ids are resumed without an owner check. The Phase 5 session (against the code) and the judge (from the shopper's side) reviewed the plan; both are folded in. The judge's rule replaced mine for filters: they stay until a different kind of product is asked for. The user approved the plan.
+- **Measured:** 1,350 products but 1,309 distinct titles (41 exact duplicates), on `multi_agent_baseline`. Nothing else yet; the judge set is recorded first (step 1).
+- **Decisions:** two PRs (A: causes 6, 1, 3; B: causes 2, 4, 5); ADRs 0021–0023 at the end. "View product": a details view inside the chat plus a link labelled "View on Amazon (opens new site)" (the judge's recommendation). Tickets for reports open at once; cancelling, and requests the store can't meet as asked, ask first.
+- **Open questions:** none. The store is called Wattnest (the judge's pick; a web search found no shop or brand by that name). Ticket replies say only what happened, with no refund or response time (the judge's condition).
+- **Next:** after 05:30 IST, a new chat, `/resume`, Phase 6 step 1 (about 80K tokens).
+- **Commits:** none yet; the plan, roadmap and this entry go in as PR A's first commit.
+
 ## 2026-11-26 · Phase 5 · Done: three live runs of the fixed code, 48/51 each; a keep-awake that works
 - **Done:** final runs 4 and 5; the 3-run result into the README, case study, plan, roadmap, explainer and `docs/PROJECT_PROMPT.md` (refreshed from its Phase 1 state and committed); Phase 5 marked done. The live site was asleep in the morning because GitHub ran the keep-warm schedule only every 6–10 hours; the user added an UptimeRobot monitor, and `/health` now accepts its `HEAD` check. Local branch `backup/phase-5-ship-before-rewrite` deleted.
 - **Measured:** gpt-oss-20b, `--mode live`, 1 run each, `multi_agent_baseline`, code `d836c6e`: run 4 (main key) **48/51**, run 5 (`.env.eval`) **48/51**; 0 false claims, 0 rate limits, about 2,190 tokens and a median 1.7 s per turn; about 197K tokens per key. Release average (runs 3–5) **48/51**. 370 tests, coverage 90%.
