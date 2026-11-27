@@ -260,6 +260,28 @@ def get_or_create_user(db, user_id: str) -> User:
     return user
 
 
+def is_guest(user_id: str) -> bool:
+    return (user_id or "").startswith("anon-")
+
+
+def owner_refusal(session: Session, user_id: str) -> Optional[str]:
+    """A signed-in shopper's conversation answers only to them. A guest gets a new id on every request,
+    so a guest's conversation answers to whoever holds its session id (it holds no orders)."""
+    if is_guest(session.user_id) or session.user_id == user_id:
+        return None
+    logger.warning(f"request_id={get_request_id()} | session {session.session_id} refused to {user_id}")
+    return "This conversation belongs to another account."
+
+
+def claim_session(session: Session, user_id: str) -> None:
+    """Refuse another account's conversation; a guest who signs in keeps their conversation."""
+    refusal = owner_refusal(session, user_id)
+    if refusal:
+        raise HTTPException(status_code=403, detail=refusal)
+    if is_guest(session.user_id) and not is_guest(user_id):
+        session.user_id = user_id
+
+
 def get_or_create_session(db, session_id: Optional[str], user_id: str) -> Session:
     if session_id:
         session = db.query(Session).filter(Session.session_id == session_id).first()
@@ -286,6 +308,7 @@ def get_or_create_session(db, session_id: Optional[str], user_id: str) -> Sessio
                 detail=f"Session expired. Last activity was more than {SESSION_EXPIRY_MINUTES} minutes ago. Start a new session.",
             )
 
+        claim_session(session, user_id)
         session.last_active_at = datetime.now(timezone.utc)
         db.flush()
         logger.info(f"request_id={get_request_id()} | Session resumed | session_id={session_id}")
@@ -417,6 +440,7 @@ def finish_turn(db, turn: Turn, chat_request: ChatRequest, graph_result: dict, r
         run_id=run_id,
         active_filters=graph_result.get("active_filters"),
         products=product_cards(graph_result) if not action else None,
+        orders=graph_result.get("listed_orders") if not action else None,
     )
 
 
@@ -504,7 +528,6 @@ STEP_LABELS = {
     "rank_products": "Picking the best matches…",
     "find_order": "Checking your order…",
     "order_status": "Getting the latest tracking…",
-    "draft_resolution": "Writing a reply…",
     "open_ticket": "Creating a support ticket…",
     "notify": "Letting our support team know…",
     "cancel_order": "Cancelling your order…",
@@ -586,13 +609,16 @@ def submit_feedback(body: FeedbackRequest):
 
 
 @app.get("/messages/{session_id}", response_model=SessionMessagesResponse)
-def get_session_messages(session_id: str):
+def get_session_messages(session_id: str, request: Request):
     db = SessionLocal()
 
     try:
         session = db.query(Session).filter(Session.session_id == session_id).first()
         if not session:
             raise HTTPException(status_code=404, detail="Session not found")
+        refusal = owner_refusal(session, get_current_user_id(request))
+        if refusal:
+            raise HTTPException(status_code=403, detail=refusal)
 
         messages = db.query(Message).filter(Message.session_id == session_id).order_by(Message.created_at.asc()).all()
 

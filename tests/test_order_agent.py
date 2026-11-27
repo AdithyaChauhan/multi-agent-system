@@ -105,5 +105,5 @@ def test_graph_end_to_end():
     ), patch.object(oa, "fetch_tracking_info", return_value=None):
         out = oa.order_agent_graph.invoke({"user_id": "demo-user-1", "order_id": "ORD-2004"})
     assert out["final_response"].startswith(
-        "Good news! **Croma 500W Mixer Grinder** (order ORD-2004) has been delivered."
+        "**Croma 500W Mixer Grinder** (order ORD-2004) has been delivered."  # neutral: no "Good news!"
     )

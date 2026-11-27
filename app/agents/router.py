@@ -45,12 +45,29 @@ class RouteDecision(BaseModel):
     reply: Optional[str] = Field(None, description="unclear only: the reply to send")
 
 
-CLARIFY_FALLBACK = "Hi! I can help you find products, check an order, or sort out a problem with one. What do you need?"
-
-SAFETY_RESPONSE = (
-    "We take safety seriously. If you're in immediate danger, please call emergency services. "
-    "We've flagged your message and a human team member will follow up with you."
+STORE = "Wattnest"
+GREETING_REPLY = (
+    f"Hi! I'm the {STORE} assistant. I can help you find products, check an order, or sort out a problem "
+    "with one. What do you need?"
 )
+OUT_OF_SCOPE_REPLY = (
+    f"I can only help with {STORE}'s products, your orders and problems with them, so I can't help with "
+    "that. What are you looking for?"
+)
+# Kept for imports elsewhere: the reply when the router's call fails.
+CLARIFY_FALLBACK = GREETING_REPLY
+GREETING = re.compile(
+    r"^\s*(?:hi+|hello|hey+|hiya|namaste|good (?:morning|afternoon|evening)|thanks?|thank you|ok(?:ay)?)\b[\s!.,?]*"
+    r"(?:there|again|team)?[\s!.,?]*$",
+    re.IGNORECASE,
+)
+
+# Immediate steps that are right for any electrical hazard, then what code did: no promise of a call.
+SAFETY_STEPS = (
+    "If there's fire, smoke or an injury, call emergency services (112) now. Stop using the product: switch it "
+    "off, unplug it, don't charge it, and keep it away from anything that can burn."
+)
+SAFETY_RESPONSE = SAFETY_STEPS  # the reply when no ticket could be opened
 
 
 # The safety floor (ADR 0008): phrases that only describe something dangerous happening. It can only
@@ -151,20 +168,25 @@ def route(state: RouterState) -> str:
 
 
 def clarify(state: RouterState) -> dict:
-    return {"route": "clarify", "final_response": state.get("final_response") or CLARIFY_FALLBACK}
+    """A fixed reply, never the model's: a greeting gets a greeting, anything else outside the
+    assistant's job is told plainly what it does (the router's `reply` field is ignored)."""
+    message = state.get("user_message") or ""
+    reply = GREETING_REPLY if not message or GREETING.match(message) else OUT_OF_SCOPE_REPLY
+    return {"route": "clarify", "final_response": reply}
 
 
 def respond_sign_in(state: RouterState) -> dict:
     if state.get("intent") == "support":
-        context = "I'd love to help resolve this for you! To raise a support ticket we need to verify your account and find your order."
+        context = "To help with a problem with an order, I need to know whose orders to look at."
     else:
-        context = "I'd love to help you with your order!"
+        context = "To look up an order, I need to know whose orders to look at."
     return {
         "route": "sign_in",
         "final_response": (
             f"{context}\n\n"
-            "Please sign in first using the **Sign In** button at the top of the page.\n\n"
-            "It only takes a moment with Google, and your conversation will be saved so you can continue right where you left off."
+            "Please press **Sign In** at the top of the page. You can sign in with Google, or press "
+            "**Try as a demo shopper** for a demo account with five orders of its own. This conversation "
+            "carries on after you sign in."
         ),
     }
 
@@ -186,7 +208,13 @@ def safety_escalation(state: RouterState) -> dict:
 
 
 def safety_reply(state: RouterState) -> dict:
-    return {"final_response": SAFETY_RESPONSE}
+    """The immediate steps first, then exactly what code did: the ticket, and whether the alert went out."""
+    ticket = state.get("ticket") or {}
+    if not ticket.get("ticket_id"):
+        return {"final_response": SAFETY_RESPONSE}
+    done = f"I've opened safety ticket **{ticket['ticket_id']}**"
+    done += " and alerted our support team." if ticket.get("alerted") else "; it's in our support team's queue."
+    return {"final_response": f"{SAFETY_STEPS}\n\n{done}"}
 
 
 def new_turn(user_message: str, user_id: str, session_id: str, conversation_history: list, filter_edit=None) -> dict:
@@ -209,6 +237,7 @@ def new_turn(user_message: str, user_id: str, session_id: str, conversation_hist
         "relaxed_filters": None,
         "order_data": None,
         "support_order": None,
+        "listed_orders": None,
         "escalation": None,
         "ticket": None,
         "final_response": None,

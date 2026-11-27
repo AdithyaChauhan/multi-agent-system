@@ -114,8 +114,27 @@ class TestGetOrCreateSession:
         mock_db = MagicMock()
         mock_db.query.return_value.filter.return_value.first.return_value = existing
 
-        result = get_or_create_session(mock_db, "sess-active", "user-1")
+        result = get_or_create_session(mock_db, "sess-active", "u1")
         assert result.session_id == "sess-active"
+
+    def test_another_accounts_session_is_refused(self):
+        from fastapi import HTTPException
+
+        mock_db = MagicMock()
+        mock_db.query.return_value.filter.return_value.first.return_value = self._fresh_session("s", "demo-user-1")
+        with pytest.raises(HTTPException) as err:
+            get_or_create_session(mock_db, "s", "test-user-99")
+        assert err.value.status_code == 403
+
+    def test_a_guest_who_signs_in_keeps_the_conversation(self):
+        mock_db = MagicMock()
+        mock_db.query.return_value.filter.return_value.first.return_value = self._fresh_session("s", "anon-123")
+        assert get_or_create_session(mock_db, "s", "demo-user-1").user_id == "demo-user-1"
+
+    def test_a_guest_session_answers_to_its_id(self):
+        mock_db = MagicMock()
+        mock_db.query.return_value.filter.return_value.first.return_value = self._fresh_session("s", "anon-123")
+        assert get_or_create_session(mock_db, "s", "anon-456").user_id == "anon-123"
 
     def test_raises_410_for_expired_session(self):
         from fastapi import HTTPException
@@ -267,7 +286,9 @@ class TestMessagesEndpoint:
             )
         session_id = resp.json()["session_id"]
 
-        get_resp = client.get(f"/messages/{session_id}")
+        assert client.get(f"/messages/{session_id}", headers={"x-user-id": "someone-else"}).status_code == 403
+        assert client.get(f"/messages/{session_id}").status_code == 403  # nor can a guest
+        get_resp = client.get(f"/messages/{session_id}", headers={"x-user-id": "hist-user-1"})
         assert get_resp.status_code == 200
         data = get_resp.json()
         assert data["session_id"] == session_id

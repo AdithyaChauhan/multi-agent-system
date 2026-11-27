@@ -48,18 +48,26 @@ def alert_text(request: dict, ticket: dict) -> str:
     )
 
 
+def alert_payload(text: str) -> dict:
+    """Slack reads "text", Discord reads "content"; each ignores the other. The shopper's words are in
+    the text, so Discord must not turn "@everyone" or a role name in them into a ping."""
+    return {"text": text, "content": text, "allowed_mentions": {"parse": []}}
+
+
 def notify(state: EscalationState) -> dict:
-    text = alert_text(state["escalation"], state["ticket"])
+    """Alert the team. The ticket records whether the alert went out, so the reply can say so."""
+    ticket = state["ticket"]
+    text = alert_text(state["escalation"], ticket)
     if not ESCALATION_WEBHOOK_URL:
         logger.warning(f"request_id={get_request_id()} | ESCALATION | {text}")
-        return {}
+        return {"ticket": {**ticket, "alerted": False}}
     try:
-        # Slack reads "text", Discord reads "content"; each ignores the other.
-        httpx.post(ESCALATION_WEBHOOK_URL, json={"text": text, "content": text}, timeout=3).raise_for_status()
-        logger.info(f"request_id={get_request_id()} | escalation alert sent | {state['ticket']['ticket_id']}")
+        httpx.post(ESCALATION_WEBHOOK_URL, json=alert_payload(text), timeout=3).raise_for_status()
+        logger.info(f"request_id={get_request_id()} | escalation alert sent | {ticket['ticket_id']}")
+        return {"ticket": {**ticket, "alerted": True}}
     except Exception as exc:  # the ticket exists either way; a person will still find it
         logger.error(f"request_id={get_request_id()} | escalation alert failed | {type(exc).__name__} | {text}")
-    return {}
+        return {"ticket": {**ticket, "alerted": False}}
 
 
 def build_escalation_graph():

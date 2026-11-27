@@ -86,19 +86,30 @@ class TestRoute:
 
 
 class TestTerminalNodes:
-    def test_clarify_uses_reply_or_fallback(self):
-        assert router.clarify({"final_response": "Hello!"})["final_response"] == "Hello!"
-        assert router.clarify({})["final_response"] == router.CLARIFY_FALLBACK
+    def test_clarify_never_sends_the_models_text(self):
+        reply = router.clarify({"final_response": "Canberra!", "user_message": "capital of Australia?"})
+        assert reply["final_response"] == router.OUT_OF_SCOPE_REPLY
+        for greeting in ("hi", "Hello!", "hey there", "thanks", "good morning"):
+            assert router.clarify({"user_message": greeting})["final_response"] == router.GREETING_REPLY
+        assert "Wattnest" in router.GREETING_REPLY and "only help" in router.OUT_OF_SCOPE_REPLY
 
     def test_sign_in_mentions_sign_in(self):
-        assert "Sign In" in router.respond_sign_in({"intent": "order"})["final_response"]
-        assert "support ticket" in router.respond_sign_in({"intent": "support"})["final_response"]
+        for intent in ("order", "support"):
+            text = router.respond_sign_in({"intent": intent})["final_response"]
+            assert "Sign In" in text and "demo shopper" in text
 
     def test_safety_hands_a_critical_ticket_to_a_person(self):
         result = router.safety_escalation({"user_id": "u1", "user_message": "the heater caught fire"})
         request = result["escalation"]
         assert (request["severity"], request["safety_alert"], request["user_id"]) == ("critical", True, "u1")
         assert router.safety_reply({})["final_response"] == router.SAFETY_RESPONSE
+
+    def test_safety_reply_gives_steps_then_says_what_happened(self):
+        alerted = router.safety_reply({"ticket": {"ticket_id": "TKT-S", "alerted": True}})["final_response"]
+        assert alerted.startswith(router.SAFETY_STEPS) and "TKT-S" in alerted
+        assert "alerted our support team" in alerted and "unplug" in alerted and "don't charge" in alerted
+        quiet = router.safety_reply({"ticket": {"ticket_id": "TKT-S", "alerted": False}})["final_response"]
+        assert "alerted" not in quiet and "queue" in quiet
 
     def test_safety_end_to_end_opens_the_ticket_and_alerts(self):
         import app.agents.escalation as esc
@@ -110,7 +121,8 @@ class TestTerminalNodes:
             out = router.router_graph.invoke(
                 router.new_turn("the heater caught fire", "anon-1", "s-safety", []), _thread("safety")
             )
-        assert out["route"] == "safety" and out["final_response"] == router.SAFETY_RESPONSE
+        assert out["route"] == "safety" and "TKT-S" in out["final_response"]
+        assert "alerted" not in out["final_response"]  # no webhook: nothing reached a person yet
         assert create.call_args.kwargs["safety_alert"] is True
         assert "TKT-S" in alert.call_args.args[0]  # no webhook configured: the alert goes to the log
 
@@ -125,7 +137,7 @@ class TestGraph:
             out = router.router_graph.invoke(
                 {"user_message": "hi", "user_id": "anon-1", "conversation_history": []}, _thread("greeting")
             )
-        assert out["final_response"] == "Hi there!"
+        assert out["final_response"] == router.GREETING_REPLY
         assert out["route"] == "clarify"
 
     def test_anonymous_order_request_asks_to_sign_in(self):

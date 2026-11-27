@@ -508,25 +508,36 @@ def _brand_note(prefs: dict, shown: list) -> str:
     return f"We don't carry {brand} {label}, so here are the closest options from other brands:\n"
 
 
-RELAXED_WORDS = {
-    "price": "the price limit (+25%)",
-    "brand": "the brand",
-    "attributes": "some features",
-    "keywords": "some keywords",
-}
+def differences(prefs: dict, shown: list, relaxed: list) -> list:
+    """How the shown products differ from the request, read off the products themselves, so a note
+    is true by construction: a budget note only when a shown product is over it, and so on. Features
+    can't be read off a product reliably, so they're named only when the search had to drop them."""
+    notes = []
+    budget = prefs.get("max_price")
+    if budget and any((p.get("price") or 0) > budget for p in shown):
+        notes.append(f"Some of these are over your ₹{budget:,} budget.")
+    floor = prefs.get("min_price")
+    if floor and any((p.get("price") or 0) < floor for p in shown):
+        notes.append(f"Some of these cost less than ₹{floor:,}.")
+    stars = prefs.get("min_rating")
+    if stars and any((p.get("rating") or 0) < stars for p in shown):
+        notes.append(f"Some of these are rated below {stars:g}★.")
+    features = prefs.get("features") or []
+    if features and ({"attributes", "keywords"} & set(relaxed)):
+        notes.append(f"The details don't confirm {', '.join(features)} for these.")
+    return notes
 
 
 def format_recommendations(state: ProductState) -> dict:
     prefs = state.get("preferences") or {}
     top3 = (state.get("ranked_products") or [])[:3]
     relaxed = state.get("relaxed_filters") or []
-    # Say the results miss something only when code knows what: the brand isn't among them, or the
-    # search loop widened a filter. The ranker's `exact` list is no evidence either way (gpt-oss-20b
-    # leaves it empty in 65% of its recorded answers, matching results included), so it only orders.
-    header = _brand_note(prefs, top3)
-    if not header and relaxed:
-        header = f"I couldn't find an exact match, so I widened {', '.join(RELAXED_WORDS[r] for r in relaxed)}:\n"
-    lines = [header or "Here's what I found:\n"]
+    # Say the results miss something only when the shown products show it (ADR 0020): the brand isn't
+    # among them, one is over budget, a feature had to be dropped. The search loop's history alone is no
+    # evidence (it reported "widened the price" when the price was never the problem), and neither is the
+    # ranker's `exact` list (empty in 65% of gpt-oss-20b's answers, matching results included).
+    notes = [n for n in [_brand_note(prefs, top3).strip(), *differences(prefs, top3, relaxed)] if n]
+    lines = ["\n".join(notes) + "\n" if notes else "Here's what I found:\n"]
     for i, p in enumerate(top3, 1):
         rating = f"{p['rating']:.1f}/5" if p.get("rating") is not None else "Not rated"
         lines.append(f"{i}. **{p.get('title') or p['name']}** — {p.get('brand') or 'Unknown brand'}")

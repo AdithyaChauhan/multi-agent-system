@@ -1,32 +1,41 @@
 """Support: cancellations, returns, complaints, policy questions.
 
 The router has already decided the issue, the order and whether there is a legal threat.
-Everything here is deterministic except the drafted reply for low-severity issues.
+Everything here is deterministic, and a reply claims only what this turn's code did (ADR 0020):
+a ticket that was opened, an alert that went out, an order that was cancelled. Nothing promises a
+refund, a response time, an email or a call to the carrier, because no code does those.
 
 Cancelling pauses the graph (`interrupt`) until the shopper presses Yes or No in the UI; the order
 is cancelled only by plain Python after that, for its owner and only while it is still processing.
 """
 
-import json
+import re
 from typing import Literal
 
-from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import END, StateGraph
 from langgraph.types import interrupt
 
 from app.agents.escalation import escalation_graph
-from app.agents.order_agent import order_lines
+from app.agents.order_agent import as_data, order_lines
 from app.agents.state import SupportInput, SupportOutput, SupportState
-from app.core.llm import call_llm
 from app.core.logger import get_logger, get_request_id
-from app.core.prompt_loader import load_prompt
 from app.tools.order_tools import cancel_order_in_db, fetch_order_from_db, fetch_user_orders
-from app.tools.support_tools import get_open_ticket_for_order, lookup_support_policy
+from app.tools.support_tools import get_open_ticket_for_order
 
 logger = get_logger("app.agents.support_agent")
 
-# Issues a human should handle: they get a ticket (severity "medium", priority P2).
-TICKET_ISSUES = {"refund_request", "damaged_delivery", "defective_product", "wrong_item", "account_data"}
+# Problems the policy covers: a report opens a ticket for a person (severity "medium", priority P2).
+TICKET_ISSUES = {
+    "refund_request",
+    "damaged_delivery",
+    "defective_product",
+    "wrong_item",
+    "missing_parts",
+    "account_data",
+}
+# The shopper asks for a ticket in so many words ("open a ticket for ORD-2002").
+ASKS_FOR_TICKET = re.compile(r"\b(?:open|create|raise|file|log)\b.{0,25}\b(?:ticket|complaint)\b", re.IGNORECASE)
+NOT_ARRIVED = {"processing", "placed", "shipped", "in_transit", "out_for_delivery"}
 # Issues that don't need an order before anything can happen.
 NO_ORDER_NEEDED = {"policy_question", "account_data"}
 # Issue names that are also ticket categories in the database; the rest are stored as "other".
@@ -55,7 +64,9 @@ def find_order(state: SupportState) -> dict:
     return {"support_order": order, "user_orders": None if order else fetch_user_orders(user_id)}
 
 
-def route_support(state: SupportState) -> Literal["policy", "ticket", "ask_order", "cancel", "draft"]:
+def route_support(state: SupportState) -> Literal["policy", "ticket", "ask_order", "cancel", "explain"]:
+    """Act at once only when the shopper reported a problem the policy covers, or asked for a ticket;
+    a cancel always asks first (it can't be undone); anything else is explained, not acted on."""
     issue = _issue(state)
     if issue == "policy_question":
         return "policy"
@@ -65,7 +76,11 @@ def route_support(state: SupportState) -> Literal["policy", "ticket", "ask_order
         return "ask_order"
     if issue == "cancel":
         return "cancel"
-    return "ticket" if issue in TICKET_ISSUES else "draft"
+    if issue == "refund_request" and _status(state["support_order"]) in NOT_ARRIVED:
+        return "explain"  # a refund for an order still on its way: the policy can't do that yet
+    if issue in TICKET_ISSUES or ASKS_FOR_TICKET.search(state.get("user_message") or ""):
+        return "ticket"
+    return "explain"
 
 
 def answer_policy(state: SupportState) -> dict:
@@ -88,7 +103,8 @@ def ask_for_order(state: SupportState) -> dict:
         )
     return {
         "final_response": f"{intro}{order_lines(orders, numbered=True)}\n\n"
-        "Please reply with the order number to open a support ticket."
+        "Please reply with the order number to open a support ticket.",
+        "listed_orders": as_data(orders),
     }
 
 
@@ -163,9 +179,20 @@ def _category(state: SupportState) -> str:
     return issue if issue in DB_CATEGORIES else "other"
 
 
+def quoted(words: str, limit: int = 300) -> str:
+    """The shopper's own words, kept apart from what code decided: quoted, on one line, cut to length."""
+    text = " ".join(str(words or "").split())
+    return f'"{text[:limit]}{"…" if len(text) > limit else ""}"'
+
+
 def _description(state: SupportState) -> str:
-    description = (state.get("support_issue") or {}).get("description") or state.get("user_message", "")
-    return f"[LEGAL] {description}" if state.get("risk") == "legal" else description
+    """What the ticket says, built by code; the shopper's words are evidence, never instructions."""
+    order_id = (state.get("support_order") or {}).get("order_id")
+    label = _issue(state).replace("_", " ")
+    summary = f"{label}{f' | order {order_id}' if order_id else ''}"
+    if state.get("risk") == "legal":
+        summary = f"[LEGAL] {summary}"
+    return f"{summary} | shopper wrote: {quoted(state.get('user_message', ''))}"
 
 
 def create_ticket(state: SupportState) -> dict:
@@ -177,8 +204,8 @@ def create_ticket(state: SupportState) -> dict:
         if existing:
             return {
                 "escalation": None,
-                "final_response": f"You already have an open ticket **{existing['ticket_id']}** for this order. "
-                "Our support team will be in touch within the agreed timeframe. Is there anything else I can help you with?",
+                "final_response": f"You already have an open ticket **{existing['ticket_id']}** for order "
+                f"**{order_id}**, so I didn't open another one. Is there anything else I can help with?",
             }
     return {
         "escalation": {
@@ -196,36 +223,36 @@ def route_ticket(state: SupportState) -> Literal["escalate", "done"]:
 
 
 def ticket_reply(state: SupportState) -> dict:
-    category = _category(state)
-    policy = lookup_support_policy(category, "medium")
-    return {
-        "final_response": f"I've created a support ticket: **{state['ticket']['ticket_id']}**\n\n"
-        f"**Issue:** {_description(state)[:200]}\n"
-        f"**Category:** {category.replace('_', ' ').title()}\n"
-        "**Priority:** P2\n"
-        f"**Response Time:** {policy.get('response_time', '24 hours')}\n\n"
-        "Our support team will review this and contact you. You'll receive email updates at your registered address."
-    }
-
-
-def draft_resolution(state: SupportState) -> dict:
-    """LLM node, low-severity issues only: a short reply grounded in the policy table."""
-    order = state.get("support_order") or {}
-    issue = _issue(state)
-    policy = lookup_support_policy(issue if issue in DB_CATEGORIES else "other", "low")
-    context = (
-        f"Order: {order.get('order_id')} — {order.get('product_name')}\n"
-        f"Order status: {order.get('status')}\n"
-        f"Customer said: {state.get('user_message', '')}\n"
-        f"Issue: {issue.replace('_', ' ')}\n"
-        f"Policy: {json.dumps(policy)}"
-    )
-    reply = call_llm(
-        "support",
-        "draft_resolution",
-        [SystemMessage(content=load_prompt("support_resolution")), HumanMessage(content=context)],
+    """Exactly what happened: the ticket, its order and kind, and whether the team was alerted."""
+    ticket = state["ticket"]
+    order_id = (state.get("support_order") or {}).get("order_id")
+    kind = _issue(state).replace("_", " ")
+    reply = f"Ticket **{ticket['ticket_id']}** opened" + (f" for order **{order_id}**" if order_id else "")
+    reply += f" ({kind})."
+    reply += (
+        " Our support team has been alerted."
+        if ticket.get("alerted")
+        else " It's in our support team's queue; the alert to them didn't go through."
     )
     return {"final_response": reply}
+
+
+def explain(state: SupportState) -> dict:
+    """A request no code can carry out as asked: say what the order's status means and what we can do.
+    No model writes this, so it can't promise a refund, a call to the carrier or a date."""
+    order = state.get("support_order") or {}
+    order_id, product, status = order.get("order_id"), order.get("product_name"), _status(order)
+    if _issue(state) == "refund_request":
+        reply = (
+            f"**{product}** (order **{order_id}**) hasn't arrived yet, so it can't be refunded now. "
+            "Our return policy starts at delivery: returns within 30 days of delivery, refunded 3-5 business "
+            "days after the return reaches us."
+        )
+    else:
+        reply = f"**{product}** (order **{order_id}**) is {status.replace('_', ' ')}. I can't contact the carrier or change an order myself."
+    return {
+        "final_response": f"{reply}\n\nIf you'd like a person to look into it, say \"open a ticket for {order_id}\"."
+    }
 
 
 def build_support_agent_graph():
@@ -240,7 +267,7 @@ def build_support_agent_graph():
     graph.add_node("create_ticket", create_ticket)
     graph.add_node("ticket_handoff", escalation_graph)
     graph.add_node("ticket_reply", ticket_reply)
-    graph.add_node("draft_resolution", draft_resolution)
+    graph.add_node("explain", explain)
     graph.set_entry_point("find_order")
     graph.add_conditional_edges(
         "find_order",
@@ -250,14 +277,14 @@ def build_support_agent_graph():
             "ticket": "create_ticket",
             "ask_order": "ask_for_order",
             "cancel": "handle_cancellation",
-            "draft": "draft_resolution",
+            "explain": "explain",
         },
     )
     graph.add_conditional_edges("handle_cancellation", route_cancellation, {"confirm": "confirm_cancel", "done": END})
     graph.add_conditional_edges("confirm_cancel", route_answer, {"cancel": "cancel_order", "keep": "keep_order"})
     graph.add_conditional_edges("create_ticket", route_ticket, {"escalate": "ticket_handoff", "done": END})
     graph.add_edge("ticket_handoff", "ticket_reply")
-    for node in ("answer_policy", "ask_for_order", "cancel_order", "keep_order", "ticket_reply", "draft_resolution"):
+    for node in ("answer_policy", "ask_for_order", "cancel_order", "keep_order", "ticket_reply", "explain"):
         graph.add_edge(node, END)
     return graph.compile()
 

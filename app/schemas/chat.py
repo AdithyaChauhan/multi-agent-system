@@ -38,3 +38,4 @@ class ChatResponse(BaseModel):
     run_id: Optional[str] = None
     active_filters: Optional[List[dict]] = None  # the product search's filters, shown as chips
     products: Optional[List[dict]] = None  # the products in the reply, shown as cards
+    orders: Optional[List[dict]] = None  # the orders a reply lists, as data the page draws cards from

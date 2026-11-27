@@ -18,5 +18,7 @@ python eval/run_baseline.py --label ci-baseline --model openai/gpt-oss-20b --mod
 python eval/run_baseline.py --label ci-adversarial --model openai/gpt-oss-20b --mode replay \
   --conversations eval/adversarial_conversations.json --cassette eval/cassettes/adversarial_openai-gpt-oss-20b.json
 python eval/run_baseline.py --label ci-qa --model openai/gpt-oss-20b --mode replay   --conversations eval/qa_conversations.json --cassette eval/cassettes/qa_openai-gpt-oss-20b.json
+python eval/run_baseline.py --label ci-judge --model openai/gpt-oss-20b --mode replay \
+  --conversations eval/judge_conversations.json --cassette eval/cassettes/judge_openai-gpt-oss-20b.json
 
 python eval/ci_gate.py

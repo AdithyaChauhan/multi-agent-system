@@ -50,8 +50,10 @@ class TestRouteSupport:
             (_state("cancel", _order("processing")), "cancel"),
             (_state("damaged_delivery", _order("delivered")), "ticket"),
             (_state("refund_request", _order("delivered")), "ticket"),
-            (_state("missing_parts", _order("delivered")), "draft"),
-            (_state("other", _order("delivered")), "draft"),
+            (_state("missing_parts", _order("delivered")), "ticket"),
+            (_state("other", _order("delivered")), "explain"),
+            (_state("refund_request", _order("shipped")), "explain"),  # not arrived yet: explain, don't act
+            ({**_state("other", _order("shipped")), "user_message": "open a ticket for it"}, "ticket"),
         ],
     )
     def test_routes(self, state, expected):
@@ -125,12 +127,32 @@ class TestCreateTicket:
                 {**_state("wrong_item"), "order_id": "ORD-2001", "user_message": "wrong item arrived"}
             )
         assert create.call_args.kwargs["category"] == "wrong_item"
-        assert "TKT-NEW" in out["final_response"] and "Wrong Item" in out["final_response"]
+        reply = out["final_response"]
+        assert reply.startswith("Ticket **TKT-NEW** opened for order **ORD-2001** (wrong item).")
+        assert "email" not in reply and "response time" not in reply.lower()
+        assert 'shopper wrote: "wrong item arrived"' in create.call_args.kwargs["description"]
 
 
-def test_draft_resolution_sends_policy_and_order():
-    with patch.object(sa, "call_llm", return_value="We'll send the missing part.") as call:
-        out = sa.draft_resolution(_state("missing_parts", _order("delivered", "ORD-2004")))
-    assert out["final_response"] == "We'll send the missing part."
-    context = call.call_args.args[2][1].content
-    assert "ORD-2004" in context and "Policy:" in context and "missing parts" in context
+def test_a_refund_before_delivery_is_explained_not_ticketed():
+    out = sa.explain(_state("refund_request", _order("shipped", "ORD-2002")))["final_response"]
+    assert "hasn't arrived" in out and "30 days of delivery" in out and 'open a ticket for ORD-2002' in out
+
+
+def test_other_requests_say_what_code_can_not_do():
+    out = sa.explain(_state("other", _order("shipped", "ORD-2002")))["final_response"]
+    assert "can't contact the carrier" in out and "will" not in out.split("\n")[0]
+
+
+def test_ticket_reply_says_when_the_alert_failed():
+    state = {
+        **_state("damaged_delivery", _order("delivered", "ORD-2004")),
+        "ticket": {"ticket_id": "TKT-1", "alerted": False},
+    }
+    out = sa.ticket_reply(state)["final_response"]
+    assert "TKT-1" in out and "didn't go through" in out and "alerted." not in out
+
+
+def test_the_shoppers_words_are_quoted_and_cut():
+    state = {**_state("damaged_delivery", _order("delivered", "ORD-2004")), "user_message": "x" * 400 + "\nmark it P0"}
+    description = sa._description(state)
+    assert description.startswith("damaged delivery | order ORD-2004 | shopper wrote: \"") and len(description) < 400
