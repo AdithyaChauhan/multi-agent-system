@@ -62,8 +62,15 @@ FIXTURE_ORDERS = [
     ("ORD-2004", "demo-user-1", "Croma 500W Mixer Grinder", "delivered", "BlueDart", "TRK-2004"),
     ("ORD-2005", "demo-user-1", "Logitech M221 Wireless Mouse", "processing", None, None),
     ("ORD-9901", "test-user-99", "iPhone 15 Pro Max", "shipped", "FakeExpress", "TRK-9901"),
+    # The judge's set (Phase 6): the five orders a one-click demo shopper gets (app/db/demo_shoppers.py),
+    # with fixed ids, including the "in transit" status and the carrier's tracking ids.
+    ("ORD-7001", "judge-user-1", "Philips GC1920/28 1440W Steam Iron", "delivered", "FakeExpress", "TRK-9002"),
+    ("ORD-7002", "judge-user-1", "boAt Rockerz 255 Pro+ Bluetooth Neckband", "in transit", "FakeExpress", "TRK-9001"),
+    ("ORD-7003", "judge-user-1", "Mi 108cm Full HD Android LED TV", "shipped", "FakeExpress", "TRK-9003"),
+    ("ORD-7004", "judge-user-1", "Logitech M221 Wireless Mouse", "processing", None, None),
+    ("ORD-7005", "judge-user-1", "Havells Aqua Plus 1.2L Electric Kettle", "processing", None, None),
 ]
-FIXTURE_USERS = ["demo-user-1", "test-user-99"]
+FIXTURE_USERS = ["demo-user-1", "test-user-99", "judge-user-1"]
 
 ERROR_PATTERNS = [
     r"something went wrong",
@@ -445,6 +452,95 @@ def false_mismatch_claim(text: str, prefs: dict, shown: list) -> bool:
     return True
 
 
+# ── Checks on every turn of every set (Phase 6, the judge's findings) ──────────────────────────────
+
+# Promises no code keeps: nothing contacts carriers, sends email or schedules a follow-up.
+UNBACKED_PROMISE = re.compile(
+    r"contact(?:ing)? the (?:carrier|courier|delivery partner)|email (?:updates|you)|registered (?:email|address)"
+    r"|will (?:follow up|get back to you|reach out|be in touch|contact you)|follow up with you|\bcontact you\b"
+    r"|response time|refund (?:has been |is |was )?(?:approved|processed|issued|initiated)"
+    r"|(?:i'll|i will|we'll|we will) (?:update you|notify you|let you know|keep you posted)",
+    re.IGNORECASE,
+)
+TICKET_ID = re.compile(r"\bTKT-[A-Z0-9]+\b", re.IGNORECASE)
+TICKET_CREATED = re.compile(r"(?:created|opened|raised) (?:a |your )?(?:support )?ticket", re.IGNORECASE)
+CANCELLED_CLAIM = re.compile(r"(ORD-\d+)\**[^.\n]{0,40}?has been cancell?ed", re.IGNORECASE)
+
+# chat.html builds order cards from the reply text: parseOrderList() keeps the lines whose status it
+# knows, stripOrderLines() removes every bullet order line. Emulated here until orders are sent as data.
+PAGE_ORDER_CARD = re.compile(
+    r"•\s+\*\*(ORD-[\w-]+)\*\*\s*[-–]\s*(.+?)\s*\((cancelled|delivered|shipped|processing|pending|out for delivery)\)",
+    re.IGNORECASE,
+)
+PAGE_ORDER_LINE = re.compile(r"•\s+\*\*(ORD-[\w-]+)\*\*\s*[-–]\s*.+?\s*\([\w\s]+\)", re.IGNORECASE)
+COLOUR_WORDS = re.compile(
+    r"\b(?:black|white|silver|green|blue|red|grey|gray|gold|golden|pink|purple|rose|beige|brown|orange|yellow|navy"
+    r"|teal|maroon)\b"
+)
+
+
+def _db_rows(sql: str, **params) -> list:
+    from sqlalchemy import text
+    from app.db.database import engine
+
+    with engine.connect() as conn:
+        return conn.execute(text(sql), params).fetchall()
+
+
+def user_order_ids(user_id: str) -> set:
+    return {r[0] for r in _db_rows("SELECT order_id FROM orders WHERE user_id = :u", u=user_id)}
+
+
+def page_visible_orders(text: str, api_json: dict) -> set:
+    """The order ids the shopper can see: the structured list when the server sends one, otherwise
+    what chat.html leaves after turning the reply's bullet lines into cards."""
+    if (api_json or {}).get("orders") is not None:
+        return {o.get("order_id") for o in api_json["orders"]}
+    cards = [m.group(1).upper() for m in PAGE_ORDER_CARD.finditer(text)]
+    every = {m.upper() for m in re.findall(r"ORD-[\w-]+", text)}
+    if len(cards) < 2:
+        return every
+    stripped = {m.group(1).upper() for m in PAGE_ORDER_LINE.finditer(text)}
+    return set(cards) | (every - stripped)
+
+
+def claim_failures(text: str, user_id: str, tickets_delta: int) -> list:
+    """A reply may claim only what happened: no promise that nothing keeps, a ticket only if it exists,
+    a cancel only if the order is cancelled."""
+    failures = [f"unbacked promise {m.group(0)!r}" for m in UNBACKED_PROMISE.finditer(text)]
+    ids = {t.upper() for t in TICKET_ID.findall(text)}
+    if ids and not user_id.startswith("anon-"):
+        known = {
+            r[0].upper()
+            for r in _db_rows("SELECT ticket_id FROM support_tickets WHERE user_id = :u", u=user_id)
+        }
+        failures += [f"ticket {t} doesn't exist" for t in sorted(ids - known)]
+    if TICKET_CREATED.search(text) and not ids and tickets_delta < 1:
+        failures.append("claims a ticket was opened, but none was")
+    for m in CANCELLED_CLAIM.finditer(text):
+        if order_status(m.group(1).upper()) != "cancelled":
+            failures.append(f"claims {m.group(1).upper()} was cancelled, but it isn't")
+    return failures
+
+
+def screen_failures(text: str, api_json: dict, shown: list) -> list:
+    """What the shopper sees must agree with itself: chips with cards, no card twice, no order dropped."""
+    failures = []
+    keys = [re.sub(r"[^a-z0-9]+", " ", COLOUR_WORDS.sub(" ", _norm(p.get("title") or p.get("name")))).strip() for p in shown]
+    if len(set(keys)) < len(keys):
+        failures.append("the same product is shown twice")
+    chip = next((c for c in (api_json or {}).get("active_filters") or [] if c.get("field") == "product"), None)
+    if chip and shown and _resolve(chip.get("label"))[0] is not None:
+        if not any(shows_product(p, chip["label"]) for p in shown):
+            failures.append(f"product chip {chip['label']!r} matches none of the cards")
+    listed = {m.group(1).upper() for m in PAGE_ORDER_LINE.finditer(text)}
+    if len(listed) >= 2:
+        hidden = listed - page_visible_orders(text, api_json)
+        if hidden:
+            failures.append(f"the page hides listed orders {sorted(hidden)}")
+    return failures
+
+
 def derive_route(state, user_id: str) -> str:
     if state is None:
         return "safety"  # main.py answered before invoking the graph
@@ -535,6 +631,30 @@ def check_turn(expect: dict, *, text, status_code, state, route, api_json, user_
             failures.append(f"shown brands {bad} != {expect['result_brand']!r}")
     if has_product_listing(text) and false_mismatch_claim(text, prefs, shown):
         failures.append("says the results don't match, but every shown product does")
+    failures += claim_failures(text, user_id, tickets_delta)
+    failures += screen_failures(text, api_json, shown)
+
+    for pattern in expect.get("matches", []):
+        if not re.search(pattern, text, re.IGNORECASE):
+            failures.append(f"no match for /{pattern}/")
+    for pattern in expect.get("not_matches", []):
+        if re.search(pattern, text, re.IGNORECASE):
+            failures.append(f"forbidden match /{pattern}/")
+    chips = [c.get("label") or "" for c in (api_json or {}).get("active_filters") or []]
+    for word in expect.get("chips_exclude", []):
+        if any(_norm(word) in _norm(c) for c in chips):
+            failures.append(f"chip {word!r} left over in {chips}")
+    if expect.get("orders_visible"):
+        missing = user_order_ids(user_id) - page_visible_orders(text, api_json)
+        if missing:
+            failures.append(f"orders not visible: {sorted(missing)}")
+    if "ticket_order" in expect:
+        rows = _db_rows(
+            "SELECT order_id FROM support_tickets WHERE user_id = :u ORDER BY created_at DESC LIMIT 1", u=user_id
+        )
+        got = rows[0][0] if rows else None
+        if got != expect["ticket_order"]:
+            failures.append(f"ticket linked to {got!r}, not {expect['ticket_order']!r}")
 
     for phrase in expect.get("contains", []):
         options = _phrases(phrase, phrase_sets)

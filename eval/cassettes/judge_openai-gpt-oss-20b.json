@@ -1,0 +1,1077 @@
+{
+ "056d84d77891ceb2368d156f2bfaed59": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1275,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "09185f79794f7b4f557344f4da18e4d9": {
+  "agent": "product",
+  "message": "User request: \"smartwatch under 3000\"\n\nProducts:\n1. Fire-Boltt Ninja 3 Smartwatch Full Touch 1.69 & 60 Sports Mo | ₹1499 | 4.2★ | Fire-Boltt\n2. boAt Xtend Smartwatch with Alexa Built-in, 1.69” HD Disp",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 687,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "0ab8bac9854c3d72d629834605354e2d": {
+  "agent": "product",
+  "message": "Listed products:\n1. Redgear Cosmo 7.1 Wired Over Ear Gaming Headphones — ₹1990\n\nQuestion: tell me more about it",
+  "model": "openai/gpt-oss-20b",
+  "node": "answer_question",
+  "total_tokens": 411,
+  "value": {
+   "content": "",
+   "tool_calls": [
+    {
+     "args": {
+      "position": 1
+     },
+     "id": "fc_008a9fd5-1e36-4421-bacd-de408ddab073",
+     "name": "get_product_details",
+     "type": "tool_call"
+    }
+   ]
+  }
+ },
+ "127f921d5d5c45e4043c660fc5e27da3": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1250,
+  "value": {
+   "about_shown": false,
+   "intent": "support",
+   "issue": "refund_request",
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "15cb6bb5f23f02873cb28a9344913709": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1158,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "17a44abfa63dbae28049c88df318885b": {
+  "agent": "product",
+  "message": "So far: {} | Message: mujhe 1500 ke andar achhe earphones chahiye",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1355,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": 1500,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "headphones"
+  }
+ },
+ "182dcc019669f5b5a60eb3491ee07857": {
+  "agent": "product",
+  "message": "User request: \"I need noise cancelling headphones under 5000\"\n\nProducts:\n1. Hp Wired On Ear Headphones With Mic With 3.5 Mm Drivers, In- | ₹649 | 3.5★ | HP\n2. PTron Boom Ultima 4D Dual Driver, in-Ear ",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 645,
+  "value": {
+   "exact": [
+    9
+   ],
+   "same_kind": [
+    9
+   ]
+  }
+ },
+ "18fd3db3b1de16d83e1246990a218c32": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1196,
+  "value": {
+   "about_shown": false,
+   "intent": "support",
+   "issue": "defective_product",
+   "order_id": null,
+   "reply": null,
+   "risk": "safety"
+  }
+ },
+ "1ce257da8f105b1367d1875c15d11226": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1380,
+  "value": {
+   "about_shown": false,
+   "intent": "support",
+   "issue": "other",
+   "order_id": "ORD-7003",
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "1ecde205996d9475e716c746bcb2f49a": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1381,
+  "value": {
+   "about_shown": false,
+   "intent": "unclear",
+   "issue": null,
+   "order_id": null,
+   "reply": "Hi! I can help you find products, check an order, or sort out a problem with one. What do you need?",
+   "risk": "none"
+  }
+ },
+ "1f931fbeefeb5ee10a6aa9fd339c6e16": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1186,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "21bd081c07f8487473d11d1d1b93ca60": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1181,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "26b87bef91227b9a54bb19c5fc468887": {
+  "agent": "product",
+  "message": "So far: {\"product\": \"headphones\", \"features\": [\"noise cancelling\", \"over-ear\"], \"max_price\": 5000} | Message: does that one actually have active noise cancellation?",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1332,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [
+    "active noise cancellation"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": null
+  }
+ },
+ "2a38e5b931f1dfbdd1dc992566353d76": {
+  "agent": "product",
+  "message": "So far: {} | Message: smartwatch",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1291,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "smartwatch"
+  }
+ },
+ "3ac95b0940d35098234666332cb5a7af": {
+  "agent": "product",
+  "message": "User request: \"<b>hello</b><script>alert(1)</script> do you sell kettles\"\n\nProducts:\n1. Philips HD9306/06 1.5-Litre Electric Kettle (Multicolor) | ₹2695 | 4.4★ | Philips\n2. Tesora - Inspired by you La",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 669,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "3c931b573a66ea1a1e7ee570cc9339a3": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1176,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "446f2b5b7466e460e2d9e07adda5a953": {
+  "agent": "support",
+  "message": "Order: ORD-7003 — Mi 108cm Full HD Android LED TV\nOrder status: shipped\nCustomer said: did you actually contact the carrier?\nIssue: other\nPolicy: {\"response_time\": \"48 hours\", \"auto_resolve\": true}",
+  "model": "openai/gpt-oss-20b",
+  "node": "draft_resolution",
+  "total_tokens": 345,
+  "value": "I’m sorry you’re still waiting for an update. I’ll reach out to the carrier right away to confirm the delivery status of your TV. We’ll get back to you within 48 hours with the latest information. In the meantime, please keep an eye on your tracking number. If you don’t hear from us in that time, let me know and we’ll take the next steps."
+ },
+ "46943d0d956d0faf9f09bad1e9029ba8": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1181,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "47b86f408774bea88aeae917c36944e3": {
+  "agent": "product",
+  "message": "So far: {} | Message: show me a laptop for coding around 60k",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1379,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": 60000,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": "laptop",
+   "product": "laptop"
+  }
+ },
+ "49b516b1e44afcfbd922893dd276e702": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1358,
+  "value": {
+   "about_shown": false,
+   "intent": "support",
+   "issue": "policy_question",
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "4d6e955923335b7b69b5e2643cb7d6e2": {
+  "agent": "product",
+  "message": "So far: {} | Message: actually forget headphones, I need a laptop for coding around 60k",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1332,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "laptop"
+  }
+ },
+ "51b2304aac140c88159d5eb300612eda": {
+  "agent": "product",
+  "message": "So far: {\"product\": \"laptop\"} | Message: yes",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 0,
+  "value": null
+ },
+ "5311be983f2759f16350b55f8fa7bf5f": {
+  "agent": "product",
+  "message": "User request: \"any over-ear ones instead of earbuds?\"\n\nProducts:\n1. Redgear Cosmo 7,1 Usb Gaming Wired Over Ear Headphones With  | ₹1990 | 4.3★ | Redgear\n2. Silicone Rubber Earbuds Tips, Eartips, Earp",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 605,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1
+   ]
+  }
+ },
+ "54edb37b0426334b9e52cb2a56147ef9": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1282,
+  "value": {
+   "about_shown": false,
+   "intent": "support",
+   "issue": null,
+   "order_id": "ORD-7004",
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "578f14d6edc88bd0012c0e418695f605": {
+  "agent": "product",
+  "message": "So far: {} | Message: smartwatch under 3000",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1307,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": 3000,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "smartwatch"
+  }
+ },
+ "60450399c5edef50581d318057823ddd": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1200,
+  "value": {
+   "about_shown": false,
+   "intent": "order",
+   "issue": null,
+   "order_id": "ORD-7003",
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "6333bd3d0050ecc5810690870f953d3d": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1249,
+  "value": {
+   "about_shown": true,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "66fb48e02fc5e31310da553f1b4a3111": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1440,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "698d305438794183af2c5ff6d2c559e8": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1370,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "6d09b86b3001d4528962f235b20e6656": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1359,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "6f98ae3b0d6a3813f66ec3e454c6a7f7": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1416,
+  "value": {
+   "about_shown": true,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "73ac763f47df0d409e49335a38341e9b": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1298,
+  "value": {
+   "about_shown": false,
+   "intent": "support",
+   "issue": "policy_question",
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "7654c7ba10a019bee60819b2a5f59a19": {
+  "agent": "product",
+  "message": "{\"position\": 1, \"title\": \"Redgear Cosmo 7.1 Wired Over Ear Gaming Headphones\", \"brand\": \"Redgear\", \"price_rupees\": 1990, \"rating\": 4.3, \"attributes\": {\"anc\": true, \"kind\": \"over-ear headphones\", \"conn",
+  "model": "openai/gpt-oss-20b",
+  "node": "answer_question",
+  "total_tokens": 692,
+  "value": {
+   "content": "**Redgear Cosmo 7.1 Wired Over Ear Gaming Headphones**  \n- Price: ₹1,990  \n- Rating: 4.3 stars  \n- Features: 7.1 virtual surround sound, wired connectivity, built‑in noise‑cancelling microphone, passive noise cancellation, memory‑foam ear pads, adjustable split headband.  \n- Brand: Redgear.",
+   "tool_calls": []
+  }
+ },
+ "7839b45bd892287c5ff1df69e5d861b2": {
+  "agent": "product",
+  "message": "So far: {\"product\": \"laptop\", \"max_price\": 60000} | Message: <b>hello</b><script>alert(1)</script> do you sell kettles",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1328,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "electric kettle"
+  }
+ },
+ "78abc66e2a924696288ace44b7a2fab3": {
+  "agent": "product",
+  "message": "Listed products:\n1. Boult Dive+ 1.85\" HD Smartwatch — ₹1999\n2. boAt Xtend Smartwatch with Alexa — ₹2299\n3. Fire-Boltt Talk 2 Bluetooth Calling Smartwatch — ₹2199\n\nQuestion: compare the first and secon",
+  "model": "openai/gpt-oss-20b",
+  "node": "answer_question",
+  "total_tokens": 451,
+  "value": {
+   "content": "",
+   "tool_calls": [
+    {
+     "args": {
+      "positions": [
+       1,
+       2
+      ]
+     },
+     "id": "fc_04d2db4a-39dd-45a0-a012-9f199d199208",
+     "name": "compare_products",
+     "type": "tool_call"
+    }
+   ]
+  }
+ },
+ "7bfa6fcc44a998b95b7bedd84cdee5f1": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nMessage: where is my order ORD-68597",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1084,
+  "value": {
+   "about_shown": false,
+   "intent": "order",
+   "issue": null,
+   "order_id": "ORD-68597",
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "830f09ee0117452f2d463bddba5f44e2": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1167,
+  "value": {
+   "about_shown": false,
+   "intent": "support",
+   "issue": "cancel",
+   "order_id": "ORD-7004",
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "83e18e52fbd371a27a6095c5bfc2cf5c": {
+  "agent": "support",
+  "message": "Order: ORD-7004 — Logitech M221 Wireless Mouse\nOrder status: processing\nCustomer said: hmm actually no, keep it\nIssue: other\nPolicy: {\"response_time\": \"48 hours\", \"auto_resolve\": true}",
+  "model": "openai/gpt-oss-20b",
+  "node": "draft_resolution",
+  "total_tokens": 307,
+  "value": "Got it—your order ORD‑7004 will stay as is. No changes needed on our end. We’ll keep processing it and you’ll receive the usual shipping update. If anything else comes up, just let us know."
+ },
+ "86b96c99a63bed5fe38136b5785358ab": {
+  "agent": "product",
+  "message": "So far: {\"product\": \"smartwatch\"} | Message: these are all the same watch. show different brands, up to 3000",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1359,
+  "value": {
+   "brand": null,
+   "clear": [
+    "brand"
+   ],
+   "features": [],
+   "max_price": 3000,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "smartwatch"
+  }
+ },
+ "87fe7c46905e038021eac546e9c40cc3": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1383,
+  "value": {
+   "about_shown": false,
+   "intent": "order",
+   "issue": null,
+   "order_id": "ORD-7001",
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "8856caa95691c8b7f9bdfe1241c00f9d": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1165,
+  "value": {
+   "about_shown": false,
+   "intent": "order",
+   "issue": null,
+   "order_id": "ORD-12345",
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "8ea1066e8457889022a4a3fe181ec079": {
+  "agent": "product",
+  "message": "User request: \"yes\"\n\nProducts:\n1. STRIFF Laptop Tabletop Stand, Fold-Up, Adjustable, Ventilate | ₹449 | 4.0★ | STRIFF\n2. MemeHo® Smart Standard Multi-Purpose Laptop Table with Dock  | ₹656 | 4.3★ | Me",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 0,
+  "value": null
+ },
+ "a1b56f406370d4d6e79c6c5c789e3394": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1369,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "aafdb31b48024aee759fb1f72ecaf53e": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (cancelled); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rockerz",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1216,
+  "value": {
+   "about_shown": false,
+   "intent": "order",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "ae752e737fddb751b910c95b85081900": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: where is my order ORD-68597\nAssistant: I'd love to help you with your order!\n\nPlease sign in first using the **Sign In** button at the top of th",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1172,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "b0d1659ad3cc72005095217b581466e5": {
+  "agent": "product",
+  "message": "User request: \"these are all the same watch. show different brands, up to 3000\"\n\nProducts:\n1. Fire-Boltt Ninja 3 Smartwatch Full Touch 1.69 & 60 Sports Mo | ₹1499 | 4.2★ | Fire-Boltt\n2. Newly Launched",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 703,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "b42dc768c19ac7eece635f3ffa5d3c37": {
+  "agent": "product",
+  "message": "User request: \"mujhe 1500 ke andar achhe earphones chahiye\"\n\nProducts:\n1. boAt BassHeads 900 On-Ear Wired Headphones with Mic (White) | ₹849 | 4.2★ | boAt\n2. boAt BassHeads 122 Wired Earphones with He",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 648,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "b5959452929d0f87a789421b60d4309c": {
+  "agent": "product",
+  "message": "So far: {} | Message: show me something cheap",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1481,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": null
+  }
+ },
+ "b6b46d0196038ad3ab3397ff58a8d539": {
+  "agent": "product",
+  "message": "So far: {\"product\": \"headphones\", \"features\": [\"noise cancelling\"], \"max_price\": 5000} | Message: any over-ear ones instead of earbuds?",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1414,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [
+    "noise cancelling",
+    "over-ear"
+   ],
+   "max_price": null,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "headphones"
+  }
+ },
+ "b6cd3614a7df31f85e64f7a1d9d94b11": {
+  "agent": "product",
+  "message": "User request: \"show me something cheap\"\n\nProducts:\n1. Tesora - Inspired by you Large Premium Electric Kettle 1.8L, | ₹1349 | 4.4★ | Tesora\n2. Cello Quick Boil Popular Electric Kettle 1 Litre 1200 Watt",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 670,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "bc3b7fadee6beba725d9e479847186a6": {
+  "agent": "product",
+  "message": "User request: \"does that one actually have active noise cancellation?\"\n\nProducts:\n1. Redgear Cosmo 7,1 Usb Gaming Wired Over Ear Headphones With  | ₹1990 | 4.3★ | Redgear\n2. Noise Agile 2 Buzz Bluetoo",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 631,
+  "value": {
+   "exact": [],
+   "same_kind": []
+  }
+ },
+ "bff81bd370fe076eed1d69b186982fb4": {
+  "agent": "product",
+  "message": "So far: {} | Message: I need noise cancelling headphones under 5000",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1321,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [
+    "noise cancelling"
+   ],
+   "max_price": 5000,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "headphones"
+  }
+ },
+ "c5b728d62f10458d1896f599da3b9bc8": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1163,
+  "value": {
+   "about_shown": false,
+   "intent": "order",
+   "issue": null,
+   "order_id": "ORD-7003",
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "c6859fe5bb56cbd29fb4e51b6fba9fb3": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1343,
+  "value": {
+   "about_shown": false,
+   "intent": "support",
+   "issue": "refund_request",
+   "order_id": "ORD-7003",
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "cd4b46778e69345eeea71caa7185a2b1": {
+  "agent": "product",
+  "message": "So far: {\"product\": \"electric kettle\"} | Message: show me something cheap",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1362,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": 2000,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": "electric kettle"
+  }
+ },
+ "cedff5b84b13e94db61f75939e3bd2f2": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1188,
+  "value": {
+   "about_shown": false,
+   "intent": "unclear",
+   "issue": null,
+   "order_id": null,
+   "reply": "Hi! I can help you find products, check an order or sort out a problem with one. What do you need?",
+   "risk": "none"
+  }
+ },
+ "cfbb15a9c12b0d77d81dc63cdaf4c220": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1236,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "d3031c7a1e56385e1e45e8b27e91791e": {
+  "agent": "product",
+  "message": "So far: {\"product\": \"smartwatch\", \"max_price\": 3000} | Message: show cheaper ones",
+  "model": "openai/gpt-oss-20b",
+  "node": "extract_preferences",
+  "total_tokens": 1309,
+  "value": {
+   "brand": null,
+   "clear": [],
+   "features": [],
+   "max_price": 1500,
+   "min_price": null,
+   "min_rating": null,
+   "not_carried": null,
+   "product": null
+  }
+ },
+ "d56671d1290a76d1a49c71607b17997f": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1289,
+  "value": {
+   "about_shown": true,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "d63ce37687dee1f2ab5111cf3c7c4bc4": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1229,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "dc4cf78cebe4dadc4da48502ed062872": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1163,
+  "value": {
+   "about_shown": false,
+   "intent": "support",
+   "issue": "policy_question",
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "e2924b67120861ac1a80aa7d805a8235": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1251,
+  "value": {
+   "about_shown": false,
+   "intent": "order",
+   "issue": null,
+   "order_id": "ORD-7003",
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "e5a93a0c443f8acd0539f7774c77f8b5": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1280,
+  "value": {
+   "about_shown": false,
+   "intent": "order",
+   "issue": null,
+   "order_id": "ORD-7003",
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "ea24a74244f167215f6c79de32b16800": {
+  "agent": "product",
+  "message": "[{\"position\": 1, \"title\": \"Boult Dive+ 1.85\\\" HD Smartwatch\", \"brand\": \"Boult\", \"price_rupees\": 1999, \"rating\": 4.3, \"attributes\": {\"kind\": \"smartwatch\", \"display_inches\": 1.85, \"bluetooth_calling\": t",
+  "model": "openai/gpt-oss-20b",
+  "node": "answer_question",
+  "total_tokens": 911,
+  "value": {
+   "content": "Boult Dive+ 1.85\" HD Smartwatch offers about 7 days of standard usage on a full charge, while the boAt Xtend Smartwatch’s battery life isn’t specified in the details. Therefore, the Boult Dive+ has the better documented battery life.",
+   "tool_calls": []
+  }
+ },
+ "f52cc1436e49b187c665f0ee95411048": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1338,
+  "value": {
+   "about_shown": false,
+   "intent": "unclear",
+   "issue": null,
+   "order_id": null,
+   "reply": "Hi! I can help you find products, check an order, or sort out a problem with one. What do you need?",
+   "risk": "none"
+  }
+ },
+ "f6b57a64c45fd96460f95c310b883107": {
+  "agent": "product",
+  "message": "User request: \"show cheaper ones\"\n\nProducts:\n1. Fire-Boltt Ninja 3 Smartwatch Full Touch 1.69 \" & 60 Sports  | ₹1499 | 4.2★ | Fire-Boltt\n2. Fire-Boltt Ninja 3 Smartwatch Full Touch 1.69 & 60 Sports Mo",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 799,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "f99d51fd485843f81528d71f31fa5ee0": {
+  "agent": "product",
+  "message": "User request: \"smartwatch\"\n\nProducts:\n1. Fire-Boltt India's No 1 Smartwatch Brand Talk 2 Bluetooth Ca | ₹2199 | 4.2★ | Fire-Boltt\n2. Fire-Boltt India's No 1 Smartwatch Brand Talk 2 Bluetooth Ca | ₹219",
+  "model": "openai/gpt-oss-20b",
+  "node": "rank_products",
+  "total_tokens": 672,
+  "value": {
+   "exact": [],
+   "same_kind": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ },
+ "fc204dcd10de8af9f5f9c3a944777811": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1194,
+  "value": {
+   "about_shown": false,
+   "intent": "support",
+   "issue": "damaged_delivery",
+   "order_id": "ORD-7001",
+   "reply": null,
+   "risk": "none"
+  }
+ }
+}
