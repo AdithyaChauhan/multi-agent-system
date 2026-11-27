@@ -29,6 +29,7 @@ class RouterState(TypedDict, total=False):
     relaxed_filters: Optional[List[str]]
     order_data: Optional[dict]
     support_order: Optional[dict]
+    listed_orders: Optional[List[dict]]  # orders a reply lists: sent to the page as data, never parsed from text
 
     # Escalation subgraph (safety reports): what to hand to a person, and the ticket it opened
     escalation: Optional[dict]
@@ -87,6 +88,7 @@ class OrderInput(TypedDict, total=False):
 class OrderOutput(TypedDict, total=False):
     order_id: Optional[str]
     order_data: Optional[dict]
+    listed_orders: Optional[List[dict]]
     final_response: Optional[str]
 
 
@@ -108,6 +110,7 @@ class SupportInput(TypedDict, total=False):
 
 class SupportOutput(TypedDict, total=False):
     support_order: Optional[dict]
+    listed_orders: Optional[List[dict]]
     final_response: Optional[str]
 
 

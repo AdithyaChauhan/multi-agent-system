@@ -33,6 +33,11 @@ def route_after_find(state: OrderState) -> Literal["status", "not_found", "no_or
     return "list" if state.get("user_orders") else "no_orders"
 
 
+def as_data(orders: list) -> list:
+    """The orders a reply lists, for the page's order cards (it never parses them out of the text)."""
+    return [{k: o.get(k) for k in ("order_id", "product_name", "status")} for o in orders]
+
+
 def order_lines(orders: list, numbered: bool) -> str:
     shown = orders[:5]
     if numbered:
@@ -50,7 +55,8 @@ def list_orders(state: OrderState) -> dict:
     orders = state.get("user_orders") or []
     return {
         "final_response": "You have multiple orders. Which one would you like to check?\n\n"
-        f"{order_lines(orders, numbered=False)}\n\nPlease provide the order ID."
+        f"{order_lines(orders, numbered=False)}\n\nPlease provide the order ID.",
+        "listed_orders": as_data(orders),
     }
 
 
@@ -67,7 +73,8 @@ def respond_not_found(state: OrderState) -> dict:
         }
     return {
         "final_response": f"I couldn't find order **{order_id}** on your account. Here are your recent orders:\n\n"
-        f"{order_lines(orders, numbered=True)}\n\nPlease reply with the order number you need help with."
+        f"{order_lines(orders, numbered=True)}\n\nPlease reply with the order number you need help with.",
+        "listed_orders": as_data(orders),
     }
 
 
@@ -80,7 +87,7 @@ def order_status(state: OrderState) -> dict:
     live = fetch_tracking_info(tracking_id) if tracking_id else None
 
     if status == "delivered":
-        reply = f"Good news! {what} has been delivered."
+        reply = f"{what} has been delivered."
     elif status in ("shipped", "in_transit", "out_for_delivery"):
         reply = f"{what} is out for delivery" if status == "out_for_delivery" else f"{what} has shipped"
         if order.get("carrier"):

@@ -3,7 +3,7 @@
 **Goal:** take the assistant from about 5.8/10 to 9/10. That means short prompts, a clean LangGraph architecture that shows how agents are built (subgraphs, loops, a human-in-the-loop pause, ticket handoff), measured quality, and escalations that reach a real person. The work is split into phases, and each phase is worth keeping even if work stops after it.
 
 ## Now
-- **Current phase:** Phase 6, What the judge found: approved 2026-11-26, not started. An AI judge using only the live site scored it 6/10 and found 14 problems, which come from six causes in the code ([plan](docs/plans/phase-6-judge-findings.md)).
+- **Current phase:** Phase 6, What the judge found: in progress. PR A's code is done on `phase-6a-honest-replies` (judge set 1/14 → 8/14, baseline 45/51 under stricter checks); PR B next. An AI judge using only the live site scored it 6/10 and found 14 problems, which come from six causes in the code ([plan](docs/plans/phase-6-judge-findings.md)).
 - **Phases 0–5 are done** (Phase 5 on 2026-11-26). Every measured item in the definition of done is met (below). The scorecard's overall is about 8.0, not 9: state and scaling, cost and latency and maintainability are held back by the free tier and a single instance.
 - **Live:** https://multi-agent-chatbot-58ur.onrender.com (Render free, Neon free, Singapore). `main` is the live site: Render deploys every push to it, so change it only through a PR with green CI ([0019](docs/decisions/0019-main-is-live.md)).
 - **Branch:** `main` (`phase-5-ship` merged as PR #3, the Neon fix as PR #4, honest replies as PR #6); new work goes on short branches with a PR each.
@@ -34,7 +34,7 @@
   - app memory about 315 MB, search about 90 ms;
   - product replies show cards with photos.
 - **Roadmap reset (2026-11-23, [0013](docs/decisions/0013-judge-facing-priorities.md)):** the remaining phases are ordered by what a judge sees: a demo that never breaks (4), then a live link that stays up with a one-click demo and a showcase README (5).
-- **Next action:** a new chat after 05:30 IST (the quota's daily reset), `/resume`, then Phase 6 step 1: write `eval/judge_conversations.json`, the new checks and the retest probes, and record the set on `dda22a6` (about 80K tokens).
+- **Next action:** push PR A and open its PR (needs the user's go-ahead), CI green on GitHub, merge; then PR B (dates migration first).
 - **For the user:** nothing now. Before the judge's retest, reconnect the Chrome extension the judge runs in.
 - **Still open:** the user's review of the Phase 0 labels; the user skipped the 50-product spot check.
 - **Blocked on:** nothing.
@@ -48,7 +48,7 @@
 | 3 | Hybrid search and product cards | Done | [plan](docs/plans/phase-3-hybrid-search.md) | Renamed-catalog drop < 5 points, no metric drops, refusals 1.0, cards with images |
 | 4 | Demo never breaks | Done | [plan](docs/plans/phase-4-reliability-and-safety.md) | Model fallback chain, busy message, search cache, 0 adversarial failures, replay evals in CI |
 | 5 | Ship and showcase | Done | [plan](docs/plans/phase-5-ship-and-showcase.md) | Live link that stays up, one-click demo shopper, showcase README, case study, final scorecard |
-| 6 | What the judge found | Approved, not started | [plan](docs/plans/phase-6-judge-findings.md) | Replies claim only what code did; state matches the screen; orders sent as data; complete order answers; owner checks on every session id; the judge's probes pass |
+| 6 | What the judge found | In progress | [plan](docs/plans/phase-6-judge-findings.md) | Replies claim only what code did; state matches the screen; orders sent as data; complete order answers; owner checks on every session id; the judge's probes pass |
 
 Statuses: Not started, In progress, Done, Dropped (say why in the plan). The order changed on 2026-11-18 to match the user's goals (see 0009 and 0010), and again on 2026-11-23 to put what a judge sees first (0013).
 

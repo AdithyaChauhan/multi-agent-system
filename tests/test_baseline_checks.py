@@ -70,13 +70,16 @@ def test_promises_nothing_keeps_are_flagged():
 
 def test_policy_text_and_plain_facts_are_not_promises():
     assert rb.claim_failures(POLICY, "anon-x", 0) == []
+    assert rb.claim_failures("I can't contact the carrier or change an order myself.", "anon-x", 0) == []
     with patch.object(rb, "_db_rows", return_value=[("TKT-ABC123",)]):
         assert rb.claim_failures("Ticket **TKT-ABC123** opened for ORD-7001.", "judge-user-1", 1) == []
 
 
 def test_a_ticket_or_cancel_claim_needs_the_database_to_agree():
     with patch.object(rb, "_db_rows", return_value=[]):
-        assert rb.claim_failures("Ticket **TKT-NOPE1** opened.", "judge-user-1", 0) == ["ticket TKT-NOPE1 doesn't exist"]
+        assert rb.claim_failures("Ticket **TKT-NOPE1** opened.", "judge-user-1", 0) == [
+            "ticket TKT-NOPE1 doesn't exist"
+        ]
     assert rb.claim_failures("I've created a support ticket for you.", "judge-user-1", 0)
     with patch.object(rb, "order_status", return_value="processing"):
         assert rb.claim_failures("Order **ORD-7004** has been cancelled.", "judge-user-1", 0)

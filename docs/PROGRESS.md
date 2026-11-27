@@ -12,6 +12,22 @@ Newest first. `/handoff` adds an entry at the end of every session. Keep entries
 - **Commits:**
 -->
 
+## 2026-11-28 · Phase 6 · PR A's code: honest replies, orders as data, owner checks
+- **Done:**
+  - the judge's session as an eval set (14 conversations), with six new checks on every set, recorded before any fix;
+  - honest ticket, safety, support, out-of-scope and sign-in replies; the model-written support reply removed;
+  - notes from the shown products; orders sent to the page as data;
+  - owner checks on session ids; Discord mentions off; the Wattnest name;
+  - ADR 0021; the CI gate extended.
+- **Measured:** gpt-oss-20b, replay, `multi_agent_baseline`, with the new checks:
+  - before → after: baseline 37/51 → **45/51**, judge 1/14 → **8/14**, attack set 12/15 → 13/15, Q&A 5/6;
+  - about 88K tokens (75K for the judge set before, 13K for re-records);
+  - 390 unit tests.
+- **Decisions:** [0021](decisions/0021-replies-claim-only-what-code-did.md).
+- **Open questions:** none.
+- **Next:** push PR A (the user's go-ahead), CI on GitHub, merge; then PR B.
+- **Commits:** on `phase-6a-honest-replies`.
+
 ## 2026-11-26 · Phase 6 · An AI judge scored the live site 6/10; plan approved
 - **Done:** a judge prompt (website only, its own questions) was run by the user; the report (33 messages, 14 problems, 6/10) traced to six causes in the code: replies claiming unperformed actions, saved state drifting from the screen, the page parsing reply text, one fixed reply per route, demo data frozen in time and duplicated, unchecked boundaries. Two problems the judge didn't hit were found on the way: Discord alerts allow `@everyone`, and session ids are resumed without an owner check. The Phase 5 session (against the code) and the judge (from the shopper's side) reviewed the plan; both are folded in. The judge's rule replaced mine for filters: they stay until a different kind of product is asked for. The user approved the plan.
 - **Measured:** 1,350 products but 1,309 distinct titles (41 exact duplicates), on `multi_agent_baseline`. Nothing else yet; the judge set is recorded first (step 1).

@@ -24,6 +24,7 @@ One file per decision that would be costly to reverse, or easy to undo by accide
 | [0018](0018-machine-independent-replays.md) | Replays depend on nothing machine-specific | Accepted, implemented |
 | [0019](0019-main-is-live.md) | `main` is the live site: change it through a PR; every pool checks its connections | Accepted, implemented |
 | [0020](0020-replies-claim-only-what-code-checked.md) | A reply claims only what code checked, and the evals check the claims | Accepted, implemented |
+| [0021](0021-replies-claim-only-what-code-did.md) | A reply claims only what code did; the page draws from data; session ids answer to their owner | Accepted, implemented (Phase 6, PR A) |
 
 ## Template
 ```markdown

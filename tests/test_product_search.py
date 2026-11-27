@@ -134,9 +134,17 @@ class TestReplies:
         assert text.startswith("Here's what I found:")
         assert "**Logitech Wireless Mouse 1** — Logitech" in text and "₹900 · 4.4/5" in text
 
-    def test_says_which_filters_were_widened(self):
-        text = self._format({"product": "mouse"}, [{**_product(1), "llm_tier": 0}], relaxed=["price"])
-        assert "I widened the price limit (+25%)" in text
+    def test_a_note_comes_from_the_shown_products_not_the_search_loop(self):
+        within = {**_product(1), "price": 900, "llm_tier": 0}
+        over = {**_product(1), "price": 1200, "llm_tier": 0}
+        prefs = {"product": "mouse", "max_price": 1000}
+        assert self._format(prefs, [within], relaxed=["price"]).startswith("Here's what I found:")
+        assert "over your ₹1,000 budget" in self._format(prefs, [over], relaxed=["price"])
+
+    def test_dropped_features_are_named(self):
+        prefs = {"product": "headphones", "features": ["noise cancelling"]}
+        text = self._format(prefs, [{**_product(1), "llm_tier": 0}], relaxed=["attributes"])
+        assert "don't confirm noise cancelling" in text
 
     def test_brand_we_do_not_carry(self):
         text = self._format({"product": "speaker", "brand": "Bose"}, [{**_product(1, brand="JBL"), "llm_tier": 1}])

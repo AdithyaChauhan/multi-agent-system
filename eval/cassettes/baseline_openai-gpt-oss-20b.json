@@ -1922,6 +1922,21 @@
    "product": "smartwatch"
   }
  },
+ "476cd8c7d487e3615fa17ede9065eff9": {
+  "agent": "router",
+  "message": "Their orders: ORD-2002 Mi 108cm Full HD Android LED TV (shipped); ORD-2004 Croma 500W Mixer Grinder (delivered); ORD-2005 Logitech M221 Wireless Mouse (processing); ORD-2001 boAt Rockerz 255 Pro+ (del",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1249,
+  "value": {
+   "about_shown": false,
+   "intent": "support",
+   "issue": "damaged_delivery",
+   "order_id": "ORD-2004",
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "48a3a06f9a8d18da2776672200e4d63f": {
   "agent": "product",
   "message": "So far: {\"product\": \"headphones\"} | Message: bose speakers",
@@ -2659,6 +2674,21 @@
    "min_rating": null,
    "not_carried": null,
    "product": "headphones"
+  }
+ },
+ "64ccaa00ebbd315183c47d58a72319f6": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: hi\nAssistant: Hi! I'm the Wattnest assistant. I can help you find products, check an order, or sort out a problem with one. What do you need?\nUs",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1186,
+  "value": {
+   "about_shown": false,
+   "intent": "unclear",
+   "issue": null,
+   "order_id": null,
+   "reply": "Hi! I can help you find products, check an order, or sort out a problem with one. What do you need?",
+   "risk": "none"
   }
  },
  "64e6594b927627ed5aaf343d7ec960b3": {
@@ -3629,6 +3659,21 @@
    "min_rating": 4.0,
    "not_carried": null,
    "product": "cooking appliance"
+  }
+ },
+ "85f1dd39de805e9f22b4a139ba4a1bd2": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: hi\nAssistant: Hi! I'm the Wattnest assistant. I can help you find products, check an order, or sort out a problem with one. What do you need?\nUs",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1260,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
   }
  },
  "8645f5776fca828b5b4a198d628bbfd4": {
@@ -5341,6 +5386,21 @@
    "risk": "none"
   }
  },
+ "c402c2eb30ff0f6e50fc87d988111265": {
+  "agent": "router",
+  "message": "Their orders: ORD-2002 Mi 108cm Full HD Android LED TV (shipped); ORD-2004 Croma 500W Mixer Grinder (delivered); ORD-2005 Logitech M221 Wireless Mouse (processing); ORD-2001 boAt Rockerz 255 Pro+ (del",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1246,
+  "value": {
+   "about_shown": false,
+   "intent": "order",
+   "issue": null,
+   "order_id": "ORD-2003",
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "c427bd9167dc7312bd22d5aa22985873": {
   "agent": "router",
   "message": "Their orders: ORD-2002 Mi 108cm Full HD Android LED TV (shipped); ORD-2004 Croma 500W Mixer Grinder (delivered); ORD-2005 Logitech M221 Wireless Mouse (processing); ORD-2001 boAt Rockerz 255 Pro+ (del",
@@ -5707,6 +5767,21 @@
    "risk": "none"
   }
  },
+ "d01eb3b6056129c259e39de99e7a0288": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: hi\nAssistant: Hi! I'm the Wattnest assistant. I can help you find products, check an order, or sort out a problem with one. What do you need?\nMe",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1130,
+  "value": {
+   "about_shown": false,
+   "intent": "unclear",
+   "issue": null,
+   "order_id": null,
+   "reply": "Hi! I can help you find products, check an order, or sort out a problem with one. What do you need?",
+   "risk": "none"
+  }
+ },
  "d0214a96ade8d46f6e8015783d2f9f9c": {
   "agent": "router",
   "message": "Their orders: not signed in.\nRecent conversation:\nUser: sonny headphones\nAssistant: Here's what I found:\n\n1. **Sony WI-C100 Wireless Over-Ear Headphones with Mic** — Sony\n   ₹1,599 · 3.6/5\n\nMessage: l",
@@ -5878,6 +5953,21 @@
   "node": "classify",
   "total_tokens": 1030,
   "value": {
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "d80448da8bb55ec93b134c47bdf16235": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: show me headphones\nAssistant: Here's what I found:\n\n1. **Redgear Cosmo 7.1 Wired Over Ear Gaming Headphones** — Redgear\n   ₹1,990 · 4.3/5\n\n2. **",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1228,
+  "value": {
+   "about_shown": false,
    "intent": "product",
    "issue": null,
    "order_id": null,
@@ -6600,6 +6690,21 @@
    "about_shown": false,
    "intent": "product",
    "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
+  }
+ },
+ "f5298c2adc86556fae6bb99b661be07c": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: track my order\nAssistant: To look up an order, I need to know whose orders to look at.\n\nPlease press **Sign In** at the top of the page. You can",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1173,
+  "value": {
+   "about_shown": false,
+   "intent": "support",
+   "issue": "other",
    "order_id": null,
    "reply": null,
    "risk": "none"

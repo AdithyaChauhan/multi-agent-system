@@ -1,6 +1,6 @@
 # Phase 6: What the judge found
 
-- **Status:** Approved by the user (2026-11-26); not started.
+- **Status:** In progress. PR A's code is done (2026-11-28; see Results); PR B not started.
 - **Reviews (2026-11-26), folded in below:**
   - the Phase 5 session reviewed it against the code;
   - the judge reviewed it from the shopper's side. It expects the score to move from 6 to about 7.5 if causes 1, 2 and 4 hold in its retest.
@@ -199,11 +199,11 @@ These are written now, before the fixes, so the fixes aren't taught to the test.
 
 ## Order of work
 **PR A**
-1. [ ] The judge set, the new checks and the probes; record the set on `dda22a6`.
-2. [ ] Cause 6 (boundaries and owner checks).
-3. [ ] Cause 1 (honesty): the action record, fixed support replies, notes from differences.
-4. [ ] Cause 3 (orders as data, one status list).
-5. [ ] The smaller fixes.
+1. [x] The judge set, the new checks and the probes; record the set on `dda22a6`.
+2. [x] Cause 6 (boundaries and owner checks).
+3. [x] Cause 1 (honesty): the action record, fixed support replies, notes from differences. The safety, out-of-scope, greeting and sign-in replies moved here from cause 4: they are reply text, and batching reply text means one re-record.
+4. [x] Cause 3 (orders as data). The page normalises any status and never drops an order; a single status list in the database is PR B's (with the date migration).
+5. [x] The smaller fixes: the store name, scroll to a reply's start, tips that can't go stale, the sign-in message naming the demo, "View on Amazon (opens new site)". Still open: the blank returning chat (not reproduced) and the 400 px check, both with PR B's stored structured parts.
 6. [ ] Replay every set, fill once, the CI simulation from `git archive HEAD`, PR A.
 
 **PR B**
@@ -222,6 +222,29 @@ These are written now, before the fixes, so the fixes aren't taught to the test.
     - 0021: replies claim only what code checked or did (extends 0020);
     - 0022: state mirrors the screen, with one waiting question;
     - 0023: structured payloads between the server and the page, with owner checks on every session id.
+
+## Results
+### 2026-11-28: PR A's code
+- **Before any fix** (gpt-oss-20b, replay, `multi_agent_baseline`, with the new checks):
+  - baseline 37/51 (48/51 under the old checks);
+  - attack set 12/15;
+  - Q&A 5/6;
+  - the judge set, recorded live on `dda22a6`: **1/14**, 23/38 turns (about 75K tokens, 0 rate limits).
+- **Every new failure was real.**
+  - 30 promises in ticket and safety replies.
+  - Three replies with the same watch twice; in p21 all three cards were the same Fire-Boltt Phoenix.
+  - a13 showed smartwatches under a "tv accessory" chip.
+- **The kettle leak (j08) didn't reproduce**, so "the model copies the old filters" is unconfirmed. The laptop search survives through "yes" to the offer instead (j02): laptop chargers under a "laptop" chip.
+- **After PR A** (replay; 11 router calls re-recorded, about 13K tokens, far fewer than the 100–150K feared):
+  - baseline **45/51** (p03, p10, s16 as before; p13, p21, p22 duplicates);
+  - attack set **13/15** (a12 routing; a13 screen only);
+  - Q&A **5/6** (q05 duplicate);
+  - judge set **8/14**. Left for PR B: "Noise" as a brand (j01), "yes" to an offer (j02), a typed answer during Yes/No (j04), dates (j11), duplicates (j12, j14).
+- **Checks:**
+  - one false positive found in my own check: "I can't contact the carrier" matched; negated phrases are skipped now, with a test;
+  - 390 unit tests;
+  - the CI gate passes locally on these results.
+- **The gate:** the screen checks (duplicates, chip versus cards) are reported until PR B ([ADR 0021](../decisions/0021-replies-claim-only-what-code-did.md)); the promise checks gate now; `MIN_JUDGE = 10`.
 
 ## Acceptance criteria
 - Judge set: every check passes. Retest probes: all pass.

@@ -72,7 +72,7 @@ class TestPause:
         ask_to_cancel(graph)
         with patch.object(router, "call_llm", return_value=RouteDecision(intent="unclear", reply="Hi!")):
             out = graph.invoke(router.new_turn("hello", "demo-user-1", "s1", []), THREAD)
-        assert out["final_response"] == "Hi!"
+        assert out["final_response"] == router.GREETING_REPLY  # fixed, never the model's text
         assert not graph.get_state(THREAD).interrupts
 
 
@@ -95,7 +95,7 @@ class TestResumeEndpoint:
                 headers={"x-user-id": "test-user-99"},
             )
         invoke.assert_not_called()
-        assert "sign in to the account" in r.json()["response"]
+        assert r.status_code == 403 and "another account" in r.json()["detail"]
 
     def test_anonymous_confirm_is_refused(self, client):
         with patch("app.main.router_graph.invoke") as invoke:

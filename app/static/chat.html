@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Agent E-commerce Assistant</title>
+    <title>Wattnest Assistant</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -315,7 +315,7 @@
         <div class="header-left">
             <div class="header-logo">🤖</div>
             <div>
-                <div class="header-title">Multi-Agent E-commerce Assistant</div>
+                <div class="header-title">Wattnest Assistant</div>
                 <div class="header-subtitle" id="userInfo">Loading...</div>
             </div>
         </div>
@@ -371,6 +371,7 @@
             shipped:            { label: 'Shipped',     color: '#1d4ed8', bg: '#dbeafe', icon: '🚚' },
             'out for delivery': { label: 'Out for Delivery', color: '#1d4ed8', bg: '#dbeafe', icon: '🚚' },
             cancelled:          { label: 'Cancelled',  color: '#dc2626', bg: '#fee2e2', icon: '✕' },
+            'in transit':       { label: 'In Transit',  color: '#1d4ed8', bg: '#dbeafe', icon: '🚚' },
             processing:         { label: 'Processing',  color: '#92400e', bg: '#fef3c7', icon: '⏳' },
             pending:            { label: 'Pending',     color: '#6b7280', bg: '#f3f4f6', icon: '○' },
         };
@@ -379,40 +380,32 @@
             return new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
         }
 
-        function parseOrderList(text) {
-            const re = /•\s+\*\*(ORD-[\w-]+)\*\*\s*[-–]\s*(.+?)\s*\((cancelled|delivered|shipped|processing|pending|out for delivery)\)/gi;
-            const orders = [];
-            let m;
-            while ((m = re.exec(text)) !== null) {
-                orders.push({ id: m[1], name: m[2].trim(), status: m[3].toLowerCase() });
-            }
-            return orders.length >= 2 ? orders : null;
-        }
-
-        function stripOrderLines(text) {
-            return text
-                .replace(/•\s+\*\*ORD-[\w-]+\*\*\s*[-–]\s*.+?\s*\([\w\s]+\)\s*\n?/gi, '')
-                .trim();
-        }
-
         function buildOrderCards(orders) {
             const INITIAL_SHOWN = 5;
             const wrap = document.createElement('div');
             wrap.className = 'order-cards';
 
+            // Cards come from the orders the server sends as data. A status the page doesn't know gets
+            // a plain badge with its own name: an order is never dropped for its status.
             function makeCard(o) {
-                const cfg = STATUS_CONFIG[o.status] || STATUS_CONFIG.pending;
+                const key = String(o.status || '').toLowerCase().replace(/_/g, ' ');
+                const cfg = STATUS_CONFIG[key] || { label: key || 'unknown', color: '#374151', bg: '#f3f4f6', icon: '•' };
                 const card = document.createElement('div');
                 card.className = 'order-card';
-                card.onclick = () => { messageInput.value = `status of ${o.id}`; sendMessage(); };
-                card.innerHTML = `
-                    <div class="order-icon" style="background:${cfg.bg};color:${cfg.color}">${cfg.icon}</div>
-                    <div class="order-info">
-                        <div class="order-id">${o.id}</div>
-                        <div class="order-name">${o.name}</div>
-                    </div>
-                    <span class="status-badge" style="background:${cfg.bg};color:${cfg.color}">${cfg.label}</span>
-                    <span class="order-chevron">›</span>`;
+                card.onclick = () => { messageInput.value = `status of ${o.order_id}`; sendMessage(); };
+                const icon = document.createElement('div');
+                icon.className = 'order-icon';
+                icon.style.background = cfg.bg; icon.style.color = cfg.color; icon.textContent = cfg.icon;
+                const info = document.createElement('div');
+                info.className = 'order-info';
+                const id = document.createElement('div'); id.className = 'order-id'; id.textContent = o.order_id;
+                const name = document.createElement('div'); name.className = 'order-name'; name.textContent = o.product_name || '';
+                info.append(id, name);
+                const badge = document.createElement('span');
+                badge.className = 'status-badge';
+                badge.style.background = cfg.bg; badge.style.color = cfg.color; badge.textContent = cfg.label;
+                const chevron = document.createElement('span'); chevron.className = 'order-chevron'; chevron.textContent = '›';
+                card.append(icon, info, badge, chevron);
                 return card;
             }
 
@@ -435,7 +428,7 @@
             return wrap;
         }
 
-        function addMessage(text, className, runId) {
+        function addMessage(text, className, runId, orders) {
             const row = document.createElement('div');
             row.className = `msg-row ${className}`;
 
@@ -449,13 +442,15 @@
             const col = document.createElement('div');
             col.className = 'msg-col';
 
-            const orders = className === 'assistant' ? parseOrderList(text) : null;
-
             const bubble = document.createElement('div');
             bubble.className = `message ${className}`;
 
-            if (orders) {
-                const remainder = stripOrderLines(text);
+            if (className === 'assistant' && orders && orders.length) {
+                // The cards replace the text lines that name these exact orders; nothing is parsed.
+                const ids = orders.map(o => o.order_id);
+                const remainder = text.split('
+').filter(line => !ids.some(id => line.includes(id))).join('
+').trim();
                 if (remainder) bubble.innerHTML = marked.parse(remainder);
                 bubble.appendChild(buildOrderCards(orders));
             } else if (className === 'assistant') {
@@ -491,7 +486,9 @@
 
             row.appendChild(col);
             chatContainer.appendChild(row);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            // Show the start of a new reply, so its cards don't push it out of view.
+            if (className === 'assistant' && row.offsetHeight > chatContainer.clientHeight) row.scrollIntoView({ block: 'start' });
+            else chatContainer.scrollTop = chatContainer.scrollHeight;
             return row;
         }
 
@@ -546,14 +543,14 @@
         const sendButton = document.getElementById('sendButton');
 
         function showWelcome() {
-            addMessage("Hi! I'm your AI shopping assistant. Ask me about your orders, products, or support issues.", 'assistant');
+            addMessage("Hi! I'm the Wattnest assistant. Ask me about products, your orders, or a problem with one.", 'assistant');
             let demoOrders = [];
             try { demoOrders = JSON.parse(localStorage.getItem('demo_orders') || '[]'); } catch (e) { demoOrders = []; }
             if (demoOrders.length) {
                 addMessage(
                     `You're a demo shopper with your own orders: ${demoOrders.join(', ')}.\n\n` +
                     'Things to try:\n• "something to keep my room warm under 2000"\n• "tell me more about the second one"\n' +
-                    '• "where is my TV order?"\n• "cancel my mouse order"\n• "my steam iron arrived damaged"',
+                    '• "where is my TV order?"\n• "cancel an order that hasn\'t shipped yet"\n• "my steam iron arrived damaged"',
                     'assistant'
                 );
             }
@@ -747,7 +744,7 @@
                     a.href = p.link;
                     a.target = '_blank';
                     a.rel = 'noopener noreferrer';
-                    a.textContent = 'View product →';
+                    a.textContent = 'View on Amazon (opens new site) →';
                     body.appendChild(a);
                 }
                 card.append(imgBox, body);
@@ -789,13 +786,14 @@
                 if (response.ok) {
                     sessionId = data.session_id;
                     localStorage.setItem('chat_session_id', sessionId);
-                    const msgRow = addMessage(data.response, 'assistant', data.run_id || null);
+                    const msgRow = addMessage(data.response, 'assistant', data.run_id || null, data.orders || null);
                     if (data.action && data.action.type === 'confirm_cancel') {
                         addConfirmButtons(msgRow);
                     } else {
                         if (data.products && data.products.length) addProductCards(msgRow, data.products);
                         if (data.active_filters && data.active_filters.length) addFilterChips(msgRow, data.active_filters);
                     }
+                    if (msgRow.offsetHeight > chatContainer.clientHeight) msgRow.scrollIntoView({ block: 'start' });
                 } else if (response.status === 401) {
                     localStorage.removeItem('access_token');
             localStorage.removeItem('demo_orders');
@@ -820,7 +818,7 @@
 
         async function restoreHistory(sid) {
             try {
-                const resp = await fetch(`/messages/${sid}`);
+                const resp = await fetch(`/messages/${sid}`, token && !isGuest ? { headers: { 'Authorization': `Bearer ${token}` } } : {});
                 if (!resp.ok) { localStorage.removeItem('chat_session_id'); showWelcome(); return; }
                 const data = await resp.json();
                 if (data.messages && data.messages.length > 0) {

@@ -462,6 +462,7 @@ UNBACKED_PROMISE = re.compile(
     r"|(?:i'll|i will|we'll|we will) (?:update you|notify you|let you know|keep you posted)",
     re.IGNORECASE,
 )
+NEGATED = re.compile(r"\b(?:can't|cannot|can not|won't|didn't|don't|do not|not|never|no)\b[^.\n]*$", re.IGNORECASE)
 TICKET_ID = re.compile(r"\bTKT-[A-Z0-9]+\b", re.IGNORECASE)
 TICKET_CREATED = re.compile(r"(?:created|opened|raised) (?:a |your )?(?:support )?ticket", re.IGNORECASE)
 CANCELLED_CLAIM = re.compile(r"(ORD-\d+)\**[^.\n]{0,40}?has been cancell?ed", re.IGNORECASE)
@@ -507,13 +508,14 @@ def page_visible_orders(text: str, api_json: dict) -> set:
 def claim_failures(text: str, user_id: str, tickets_delta: int) -> list:
     """A reply may claim only what happened: no promise that nothing keeps, a ticket only if it exists,
     a cancel only if the order is cancelled."""
-    failures = [f"unbacked promise {m.group(0)!r}" for m in UNBACKED_PROMISE.finditer(text)]
+    failures = [
+        f"unbacked promise {m.group(0)!r}"
+        for m in UNBACKED_PROMISE.finditer(text)
+        if not NEGATED.search(text[max(0, m.start() - 25) : m.start()])  # "I can't contact the carrier"
+    ]
     ids = {t.upper() for t in TICKET_ID.findall(text)}
     if ids and not user_id.startswith("anon-"):
-        known = {
-            r[0].upper()
-            for r in _db_rows("SELECT ticket_id FROM support_tickets WHERE user_id = :u", u=user_id)
-        }
+        known = {r[0].upper() for r in _db_rows("SELECT ticket_id FROM support_tickets WHERE user_id = :u", u=user_id)}
         failures += [f"ticket {t} doesn't exist" for t in sorted(ids - known)]
     if TICKET_CREATED.search(text) and not ids and tickets_delta < 1:
         failures.append("claims a ticket was opened, but none was")
@@ -526,7 +528,9 @@ def claim_failures(text: str, user_id: str, tickets_delta: int) -> list:
 def screen_failures(text: str, api_json: dict, shown: list) -> list:
     """What the shopper sees must agree with itself: chips with cards, no card twice, no order dropped."""
     failures = []
-    keys = [re.sub(r"[^a-z0-9]+", " ", COLOUR_WORDS.sub(" ", _norm(p.get("title") or p.get("name")))).strip() for p in shown]
+    keys = [
+        re.sub(r"[^a-z0-9]+", " ", COLOUR_WORDS.sub(" ", _norm(p.get("title") or p.get("name")))).strip() for p in shown
+    ]
     if len(set(keys)) < len(keys):
         failures.append("the same product is shown twice")
     chip = next((c for c in (api_json or {}).get("active_filters") or [] if c.get("field") == "product"), None)

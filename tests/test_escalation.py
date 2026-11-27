@@ -14,7 +14,7 @@ def test_opens_the_ticket_then_notifies():
     ), patch.object(esc.logger, "warning") as warn:
         out = esc.escalation_graph.invoke({"escalation": REQUEST})
     create.assert_called_once_with(**REQUEST)
-    assert out == {"ticket": TICKET}
+    assert out == {"ticket": {**TICKET, "alerted": False}}  # no webhook: the reply must not say it alerted
     assert "TKT-1" in warn.call_args.args[0] and "[CRITICAL]" in warn.call_args.args[0]
 
 
@@ -23,16 +23,18 @@ def test_webhook_gets_the_alert():
     with patch.object(esc, "ESCALATION_WEBHOOK_URL", "https://hooks.example/abc"), patch.object(
         esc.httpx, "post", return_value=ok
     ) as post:
-        esc.notify({"escalation": {**REQUEST, "order_id": "ORD-1"}, "ticket": TICKET})
+        out = esc.notify({"escalation": {**REQUEST, "order_id": "ORD-1"}, "ticket": TICKET})
+    assert out == {"ticket": {**TICKET, "alerted": True}}
     url, body = post.call_args.args[0], post.call_args.kwargs["json"]
     assert url == "https://hooks.example/abc"
     assert body["text"] == body["content"] and "TKT-1" in body["text"] and "order ORD-1" in body["text"]
     ok.raise_for_status.assert_called_once()
+    assert body["allowed_mentions"] == {"parse": []}  # "@everyone" in a shopper's words pings no one
 
 
 def test_a_failed_alert_does_not_break_the_reply():
     with patch.object(esc, "ESCALATION_WEBHOOK_URL", "https://hooks.example/abc"), patch.object(
         esc.httpx, "post", side_effect=esc.httpx.ConnectError("down")
     ), patch.object(esc.logger, "error") as error:
-        assert esc.notify({"escalation": REQUEST, "ticket": TICKET}) == {}
+        assert esc.notify({"escalation": REQUEST, "ticket": TICKET}) == {"ticket": {**TICKET, "alerted": False}}
     assert "alert failed" in error.call_args.args[0]

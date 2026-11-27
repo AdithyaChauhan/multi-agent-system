@@ -359,6 +359,21 @@
    ]
   }
  },
+ "5336dbc3462d97b42d093c33b66c1e81": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1418,
+  "value": {
+   "about_shown": false,
+   "intent": "unclear",
+   "issue": null,
+   "order_id": null,
+   "reply": "Hi! I can help you find products, check an order, or sort out a problem with one. What do you need?",
+   "risk": "none"
+  }
+ },
  "54edb37b0426334b9e52cb2a56147ef9": {
   "agent": "router",
   "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
@@ -545,6 +560,21 @@
      "type": "tool_call"
     }
    ]
+  }
+ },
+ "7b50e96999566ecfd4112413cc2c5143": {
+  "agent": "router",
+  "message": "Their orders: not signed in.\nRecent conversation:\nUser: where is my order ORD-68597\nAssistant: To look up an order, I need to know whose orders to look at.\n\nPlease press **Sign In** at the top of the ",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1161,
+  "value": {
+   "about_shown": false,
+   "intent": "product",
+   "issue": null,
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
   }
  },
  "7bfa6fcc44a998b95b7bedd84cdee5f1": {
@@ -801,6 +831,21 @@
    "same_kind": []
   }
  },
+ "bf769ee680e231d7be5f169846b094db": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1316,
+  "value": {
+   "about_shown": false,
+   "intent": "support",
+   "issue": "refund_request",
+   "order_id": "ORD-7003",
+   "reply": null,
+   "risk": "none"
+  }
+ },
  "bff81bd370fe076eed1d69b186982fb4": {
   "agent": "product",
   "message": "So far: {} | Message: I need noise cancelling headphones under 5000",
@@ -998,6 +1043,21 @@
   "value": {
    "content": "Boult Dive+ 1.85\" HD Smartwatch offers about 7 days of standard usage on a full charge, while the boAt Xtend Smartwatch’s battery life isn’t specified in the details. Therefore, the Boult Dive+ has the better documented battery life.",
    "tool_calls": []
+  }
+ },
+ "f0e344addd4807dd2ddbbb7dcbff8db7": {
+  "agent": "router",
+  "message": "Their orders: ORD-7005 Havells Aqua Plus 1.2L Electric Kettle (processing); ORD-7004 Logitech M221 Wireless Mouse (processing); ORD-7003 Mi 108cm Full HD Android LED TV (shipped); ORD-7002 boAt Rocker",
+  "model": "openai/gpt-oss-20b",
+  "node": "classify",
+  "total_tokens": 1253,
+  "value": {
+   "about_shown": false,
+   "intent": "support",
+   "issue": "refund_request",
+   "order_id": null,
+   "reply": null,
+   "risk": "none"
   }
  },
  "f52cc1436e49b187c665f0ee95411048": {
